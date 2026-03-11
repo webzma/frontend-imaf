@@ -1,3 +1,10 @@
+import { Button } from "@/components/ui/button";
+
 export default function AdminPage() {
-  return <>Admin</>;
+  return (
+    <div>
+      <p>Vista Admin</p>
+      <Button>Click me!</Button>
+    </div>
+  );
 }

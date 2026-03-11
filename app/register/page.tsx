@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Eye, EyeOff, Mail, Lock, RotateCcw, User } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,14 +20,13 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -47,10 +51,10 @@ export default function RegisterPage() {
         return;
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
       const role = data.user.role;
+      // Cookie readable by middleware (Edge runtime can't access localStorage)
+      document.cookie = `role=${role}; path=/; SameSite=Lax`;
+
       if (role === "admin") router.push("/admin");
       else if (role === "profesor") router.push("/profesor");
       else router.push("/estudiante");
@@ -62,112 +66,205 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Crear cuenta
-        </h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,oklch(0.25_0.08_316/0.3)_0%,transparent_70%)] pointer-events-none" />
 
-        {error && (
-          <div className="bg-red-100 text-red-700 text-sm px-4 py-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre completo
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Juan García"
+      {/* Logo */}
+      <div className="mb-6 flex flex-col items-center gap-3 z-10">
+        <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-[0_0_24px_oklch(0.64_0.29_316/0.5)]">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14M4 19h16M8 7h8M8 11h5"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Correo electrónico
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="correo@ejemplo.com"
+            <path
+              d="M15 15l2 2 4-4"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              minLength={8}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirmar contraseña
-            </label>
-            <input
-              type="password"
-              name="password_confirmation"
-              value={form.password_confirmation}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Rol
-            </label>
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="estudiante">Estudiante</option>
-              <option value="profesor">Profesor</option>
-              <option value="admin">Administrador</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition disabled:opacity-50"
-          >
-            {loading ? "Registrando..." : "Registrarse"}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-gray-500 mt-6">
-          ¿Ya tienes cuenta?{" "}
-          <Link href="/login" className="text-blue-600 hover:underline">
-            Inicia sesión
-          </Link>
-        </p>
+          </svg>
+        </div>
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-foreground">
+            Crea tu <span className="text-primary">cuenta</span>
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Únete a EduFlow y comienza a aprender
+          </p>
+        </div>
       </div>
+
+      {/* Card */}
+      <Card className="w-full max-w-md border-border/50 shadow-2xl z-10">
+        <CardHeader className="pb-2">
+          <p className="text-center text-xs font-semibold text-muted-foreground tracking-widest uppercase">
+            Soy un...
+          </p>
+          {/* Role toggle */}
+          <div className="flex rounded-lg overflow-hidden border border-border/50 mt-2">
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, role: "profesor" })}
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+                form.role === "profesor"
+                  ? "bg-primary text-primary-foreground shadow-[inset_0_0_12px_oklch(0.64_0.29_316/0.3)]"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Profesor
+            </button>
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, role: "estudiante" })}
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+                form.role === "estudiante"
+                  ? "bg-primary text-primary-foreground shadow-[inset_0_0_12px_oklch(0.64_0.29_316/0.3)]"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Estudiante
+            </button>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {error && (
+            <div className="bg-destructive/15 border border-destructive/30 text-destructive text-sm px-4 py-3 rounded-md mb-4">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="name">Nombre completo</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Juan Pérez"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  className="pl-9 bg-input border-border/50"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Correo electrónico</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="tu@correo.com"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  className="pl-9 bg-input border-border/50"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Contraseña</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  minLength={8}
+                  className="pl-9 pr-10 bg-input border-border/50"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="password_confirmation">
+                Confirmar contraseña
+              </Label>
+              <div className="relative">
+                <RotateCcw className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="password_confirmation"
+                  name="password_confirmation"
+                  type="password"
+                  placeholder="••••••••"
+                  value={form.password_confirmation}
+                  onChange={handleChange}
+                  required
+                  className="pl-9 bg-input border-border/50"
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-[0_0_20px_oklch(0.64_0.29_316/0.4)] hover:shadow-[0_0_28px_oklch(0.64_0.29_316/0.6)] transition-shadow"
+              disabled={loading}
+            >
+              {loading ? "Registrando..." : "Registrarse"}
+              {!loading && (
+                <svg className="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-muted-foreground mt-5">
+            ¿Ya tienes una cuenta?{" "}
+            <Link
+              href="/login"
+              className="text-primary hover:text-primary/80 font-medium transition-colors"
+            >
+              Iniciar sesión
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Footer */}
+      <footer className="mt-8 flex gap-6 text-xs text-muted-foreground z-10">
+        <span className="hover:text-foreground cursor-pointer transition-colors">
+          Soporte
+        </span>
+        <span className="hover:text-foreground cursor-pointer transition-colors">
+          Privacidad
+        </span>
+        <span className="hover:text-foreground cursor-pointer transition-colors">
+          Términos
+        </span>
+      </footer>
     </div>
   );
 }
