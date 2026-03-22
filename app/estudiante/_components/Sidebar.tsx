@@ -5,11 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
-  Users,
-  GraduationCap,
+  User,
   BookOpen,
+  GraduationCap,
   LogOut,
-  BarChart2,
   Moon,
   Sun,
 } from "lucide-react";
@@ -32,21 +31,20 @@ const navItems = [
   {
     section: "General",
     items: [
-      { label: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
+      { label: "Dashboard", href: "/estudiante", icon: LayoutDashboard, exact: true },
     ],
   },
   {
-    section: "Gestión",
+    section: "Mi Cuenta",
     items: [
-      { label: "Estudiantes", href: "/admin/estudiantes", icon: Users, exact: false },
-      { label: "Profesores", href: "/admin/profesores", icon: GraduationCap, exact: false },
-      { label: "Cursos", href: "/admin/cursos", icon: BookOpen, exact: false },
+      { label: "Mi Perfil", href: "/estudiante/perfil", icon: User, exact: false },
+      { label: "Mi Curso", href: "/estudiante/curso", icon: BookOpen, exact: false },
     ],
   },
   {
-    section: "Analítica",
+    section: "Plataforma",
     items: [
-      { label: "Reportes", href: "/admin/reportes", icon: BarChart2, exact: false },
+      { label: "Cursos", href: "/estudiante/cursos", icon: GraduationCap, exact: false },
     ],
   },
 ];
@@ -57,18 +55,36 @@ function getCookie(name: string): string {
   return match ? match[2] : "";
 }
 
-export default function AppSidebar() {
+export default function EstudianteSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [dark, setDark] = useState(false);
+  const [nombre, setNombre] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
-    const isDark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const isDark =
+      stored === "dark" ||
+      (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
     setDark(isDark);
     document.documentElement.classList.toggle("dark", isDark);
+
+    // Fetch student name for footer
+    fetch(`${process.env.API_URL}api/estudiante/perfil`, {
+      headers: {
+        Authorization: `Bearer ${getCookie("token")}`,
+        Accept: "application/json",
+      },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        setNombre(data?.nombre ?? null);
+        setEmail(data?.user?.email ?? null);
+      })
+      .catch(() => {});
   }, []);
 
   const toggleDark = () => {
@@ -80,6 +96,14 @@ export default function AppSidebar() {
 
   const isActive = (href: string, exact: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
+
+  const getInitials = (name: string) =>
+    name
+      .split(" ")
+      .slice(0, 2)
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
 
   const handleLogout = async () => {
     try {
@@ -125,7 +149,7 @@ export default function AppSidebar() {
                 IMAF
               </span>
               <p className="font-sans text-[10px] text-sidebar-foreground/60 -mt-0.5 tracking-[0.2em] uppercase">
-                Admin
+                Estudiante
               </p>
             </div>
           )}
@@ -161,19 +185,21 @@ export default function AppSidebar() {
         ))}
       </SidebarContent>
 
-      {/* Bottom - user + logout */}
+      {/* Footer */}
       <SidebarFooter className="border-t border-sidebar-border">
-        {!collapsed && (
+        {!collapsed && nombre && (
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-sm bg-sidebar-accent/40">
             <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-              <span className="text-xs font-bold text-primary">A</span>
+              <span className="text-xs font-bold text-primary">
+                {getInitials(nombre)}
+              </span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-sans text-xs font-semibold text-sidebar-foreground truncate">
-                Administrador
+                {nombre}
               </p>
               <p className="font-sans text-[10px] text-sidebar-foreground/40 truncate">
-                admin
+                {email ?? "estudiante"}
               </p>
             </div>
           </div>

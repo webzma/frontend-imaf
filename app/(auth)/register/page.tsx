@@ -6,7 +6,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -14,17 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  RotateCcw,
-  User,
-  Phone,
-  Calendar,
-  CreditCard,
-} from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -52,7 +41,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/register", {
+      const res = await fetch(`${process.env.API_URL}api/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,265 +74,196 @@ export default function RegisterPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden py-10">
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,oklch(0.25_0.08_316/0.3)_0%,transparent_70%)] pointer-events-none" />
+  const fieldLabel = (text: string) => (
+    <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+      {text}
+    </span>
+  );
 
-      {/* Logo */}
-      <div className="mb-6 flex flex-col items-center gap-3 z-10">
-        <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-[0_0_24px_oklch(0.64_0.29_316/0.5)]">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14M4 19h16M8 7h8M8 11h5"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <path
-              d="M15 15l2 2 4-4"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground">
-            Crea tu <span className="text-primary">cuenta</span>
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Únete a EduFlow y comienza a aprender
+  return (
+    <div className="min-h-screen bg-surface">
+
+      {/* ── Banda superior editorial ── */}
+      <div className="bg-surface-container-low px-8 py-6 relative overflow-hidden">
+        <div className="absolute -top-10 right-0 w-[360px] h-[180px] rounded-full bg-primary/8 blur-[60px] pointer-events-none" />
+        <div className="max-w-2xl mx-auto flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center ambient-shadow shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14M4 19h16M8 7h8M8 11h5" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                <path d="M15 15l2 2 4-4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <span className="font-sans font-semibold text-on-surface tracking-tight">
+              IMAF
+            </span>
+          </div>
+          <p className="font-sans text-xs text-muted-foreground hidden sm:block">
+            ¿Ya tienes cuenta?{" "}
+            <Link href="/login" className="text-primary font-medium hover:text-primary/70 transition-colors">
+              Iniciar sesión
+            </Link>
           </p>
         </div>
       </div>
 
-      {/* Card */}
-      <Card className="w-full max-w-md border-border/50 shadow-2xl z-10">
-        <CardHeader className="pb-2">
-          <p className="text-center text-xs font-semibold text-muted-foreground tracking-widest uppercase">
+      {/* ── Contenido principal ── */}
+      <div className="px-8 py-10 max-w-2xl mx-auto">
+
+        {/* Encabezado */}
+        <div className="mb-10">
+          <span className="font-sans text-[10px] tracking-[0.25em] uppercase text-primary/60 font-medium mb-3 block">
             Registro de Estudiante
+          </span>
+          <h1 className="font-serif font-light text-5xl tight-tracking text-on-surface mb-2">
+            Crea tu <em className="text-primary">cuenta</em>
+          </h1>
+          <p className="font-sans text-sm text-muted-foreground">
+            Únete a IMAF y comienza a aprender hoy mismo
           </p>
-        </CardHeader>
+        </div>
 
-        <CardContent>
-          {error && (
-            <div className="bg-destructive/15 border border-destructive/30 text-destructive text-sm px-4 py-3 rounded-md mb-4">
-              {error}
+        {error && (
+          <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-sm mb-8 font-sans">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* Fila 1 */}
+          <div className="space-y-2">
+            <Label htmlFor="name">{fieldLabel("Nombre completo")}</Label>
+            <Input
+              id="name" name="name" type="text"
+              placeholder="Juan Pérez"
+              value={form.name} onChange={handleChange} required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">{fieldLabel("Correo electrónico")}</Label>
+            <Input
+              id="email" name="email" type="email"
+              placeholder="tu@correo.com"
+              value={form.email} onChange={handleChange} required
+            />
+          </div>
+
+          {/* Fila 2 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="cedula">{fieldLabel("Cédula")}</Label>
+              <Input
+                id="cedula" name="cedula" type="text"
+                placeholder="0000000000"
+                value={form.cedula} onChange={handleChange} required
+              />
             </div>
-          )}
+            <div className="space-y-2">
+              <Label htmlFor="telefono">{fieldLabel("Teléfono")}</Label>
+              <Input
+                id="telefono" name="telefono" type="tel"
+                placeholder="0999999999"
+                value={form.telefono} onChange={handleChange}
+                required maxLength={20}
+              />
+            </div>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Nombre */}
-            <div className="space-y-1.5">
-              <Label htmlFor="name">Nombre completo</Label>
+          {/* Fila 3 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="fecha_nacimiento">{fieldLabel("Fecha de nacimiento")}</Label>
+              <Input
+                id="fecha_nacimiento" name="fecha_nacimiento" type="date"
+                value={form.fecha_nacimiento} onChange={handleChange} required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="genero">{fieldLabel("Género")}</Label>
+              <Select
+                value={form.genero}
+                onValueChange={(value) => setForm({ ...form, genero: value })}
+                required
+              >
+                <SelectTrigger id="genero">
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="masculino">Masculino</SelectItem>
+                  <SelectItem value="femenino">Femenino</SelectItem>
+                  <SelectItem value="otro">Otro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Contraseñas */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">{fieldLabel("Contraseña")}</Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  id="name"
-                  name="name"
-                  type="text"
-                  placeholder="Juan Pérez"
-                  value={form.name}
-                  onChange={handleChange}
-                  required
-                  className="pl-9 bg-input border-border/50"
-                />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Correo electrónico</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="tu@correo.com"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                  className="pl-9 bg-input border-border/50"
-                />
-              </div>
-            </div>
-
-            {/* Cédula + Teléfono */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="cedula">Cédula</Label>
-                <div className="relative">
-                  <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="cedula"
-                    name="cedula"
-                    type="text"
-                    placeholder="0000000000"
-                    value={form.cedula}
-                    onChange={handleChange}
-                    required
-                    className="pl-9 bg-input border-border/50"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="telefono">Teléfono</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="telefono"
-                    name="telefono"
-                    type="tel"
-                    placeholder="0999999999"
-                    value={form.telefono}
-                    onChange={handleChange}
-                    required
-                    maxLength={20}
-                    className="pl-9 bg-input border-border/50"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Fecha de nacimiento + Género */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="fecha_nacimiento">Fecha de nacimiento</Label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                  <Input
-                    id="fecha_nacimiento"
-                    name="fecha_nacimiento"
-                    type="date"
-                    value={form.fecha_nacimiento}
-                    onChange={handleChange}
-                    required
-                    className="pl-9 bg-input border-border/50"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="genero">Género</Label>
-                <Select
-                  value={form.genero}
-                  onValueChange={(value) =>
-                    setForm({ ...form, genero: value })
-                  }
-                  required
-                >
-                  <SelectTrigger
-                    id="genero"
-                    className="bg-input border-border/50"
-                  >
-                    <SelectValue placeholder="Seleccionar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="masculino">Masculino</SelectItem>
-                    <SelectItem value="femenino">Femenino</SelectItem>
-                    <SelectItem value="otro">Otro</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Contraseña */}
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Contraseña</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  name="password"
+                  id="password" name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  value={form.password}
-                  onChange={handleChange}
-                  required
-                  minLength={8}
-                  className="pl-9 pr-10 bg-input border-border/50"
+                  value={form.password} onChange={handleChange}
+                  required minLength={8} className="pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-
-            {/* Confirmar contraseña */}
-            <div className="space-y-1.5">
-              <Label htmlFor="password_confirmation">
-                Confirmar contraseña
-              </Label>
-              <div className="relative">
-                <RotateCcw className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="password_confirmation"
-                  name="password_confirmation"
-                  type="password"
-                  placeholder="••••••••"
-                  value={form.password_confirmation}
-                  onChange={handleChange}
-                  required
-                  className="pl-9 bg-input border-border/50"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="password_confirmation">{fieldLabel("Confirmar contraseña")}</Label>
+              <Input
+                id="password_confirmation" name="password_confirmation"
+                type="password" placeholder="••••••••"
+                value={form.password_confirmation} onChange={handleChange} required
+              />
             </div>
+          </div>
 
+          {/* Submit */}
+          <div className="pt-2">
             <Button
               type="submit"
-              className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-[0_0_20px_oklch(0.64_0.29_316/0.4)] hover:shadow-[0_0_28px_oklch(0.64_0.29_316/0.6)] transition-shadow"
+              className="w-full h-11 font-sans font-semibold tracking-wide"
               disabled={loading}
             >
-              {loading ? "Registrando..." : "Registrarse"}
-              {!loading && (
-                <svg className="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
+              {loading ? "Registrando..." : (
+                <span className="flex items-center gap-2">
+                  Crear cuenta
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </span>
               )}
             </Button>
-          </form>
+          </div>
+        </form>
 
-          <p className="text-center text-sm text-muted-foreground mt-5">
-            ¿Ya tienes una cuenta?{" "}
-            <Link
-              href="/login"
-              className="text-primary hover:text-primary/80 font-medium transition-colors"
-            >
+        <div className="mt-10 pt-8 flex items-center justify-between">
+          <p className="font-sans text-sm text-muted-foreground sm:hidden">
+            ¿Ya tienes cuenta?{" "}
+            <Link href="/login" className="text-primary font-medium hover:text-primary/70 transition-colors">
               Iniciar sesión
             </Link>
           </p>
-        </CardContent>
-      </Card>
+          <div className="ml-auto flex gap-5 text-xs text-muted-foreground/50">
+            <span className="hover:text-muted-foreground cursor-pointer transition-colors">Soporte</span>
+            <span className="hover:text-muted-foreground cursor-pointer transition-colors">Privacidad</span>
+            <span className="hover:text-muted-foreground cursor-pointer transition-colors">Términos</span>
+          </div>
+        </div>
 
-      {/* Footer */}
-      <footer className="mt-8 flex gap-6 text-xs text-muted-foreground z-10">
-        <span className="hover:text-foreground cursor-pointer transition-colors">
-          Soporte
-        </span>
-        <span className="hover:text-foreground cursor-pointer transition-colors">
-          Privacidad
-        </span>
-        <span className="hover:text-foreground cursor-pointer transition-colors">
-          Términos
-        </span>
-      </footer>
+      </div>
     </div>
   );
 }

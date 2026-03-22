@@ -15,11 +15,20 @@ export function middleware(request: NextRequest) {
   const role = request.cookies.get("role")?.value ?? null;
   const isAuthenticated = !!role;
 
+  // --- Root route: redirect authenticated users to their dashboard ---
+  if (pathname === "/") {
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL(getDashboard(role!), request.url));
+    }
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
   // --- Auth routes: redirect to dashboard if already logged in ---
   if (AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
     if (isAuthenticated) {
       return NextResponse.redirect(new URL(getDashboard(role!), request.url));
     }
+
     return NextResponse.next();
   }
 
