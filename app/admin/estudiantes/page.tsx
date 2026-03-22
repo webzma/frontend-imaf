@@ -518,7 +518,9 @@ export default function EstudiantesPage() {
                     <Label>Curso</Label>
                     <Select
                       value={form.watch("curso_id") || "none"}
-                      onValueChange={(v) => form.setValue("curso_id", v === "none" ? "" : v)}
+                      onValueChange={(v) =>
+                        form.setValue("curso_id", v === "none" ? "" : v)
+                      }
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Sin curso" />
@@ -937,7 +939,9 @@ export default function EstudiantesPage() {
                 <Label>Curso</Label>
                 <Select
                   value={editForm.watch("curso_id") || "none"}
-                  onValueChange={(v) => editForm.setValue("curso_id", v === "none" ? "" : v)}
+                  onValueChange={(v) =>
+                    editForm.setValue("curso_id", v === "none" ? "" : v)
+                  }
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Sin curso" />
