@@ -357,7 +357,7 @@ export default function ReportesPage() {
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(value: number, name: string) => [value, name]}
+                        formatter={(value, name) => [value ?? 0, name]}
                         contentStyle={{
                           fontFamily: "var(--font-sans)",
                           fontSize: 12,
@@ -433,7 +433,7 @@ export default function ReportesPage() {
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(value: number, name: string) => [value, name]}
+                        formatter={(value, name) => [value ?? 0, name]}
                         contentStyle={{
                           fontFamily: "var(--font-sans)",
                           fontSize: 12,

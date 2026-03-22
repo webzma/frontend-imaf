@@ -85,7 +85,7 @@ const cursoSchema = z.object({
   codigo:      z.string().min(1, "El código es obligatorio").max(50),
   descripcion: z.string().max(1000).optional().or(z.literal("")),
   profesor_id: z.string().min(1, "Debes seleccionar un profesor"),
-  creditos:    z.coerce.number().int().min(1, "Mínimo 1 crédito").max(10, "Máximo 10 créditos"),
+  creditos:    z.number().int().min(1, "Mínimo 1 crédito").max(10, "Máximo 10 créditos"),
   estado:      z.enum(["activo", "inactivo"]),
 });
 
@@ -329,7 +329,7 @@ export default function CursosPage() {
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="creditos">Créditos *</Label>
-                    <Input id="creditos" type="number" min={1} max={10} {...form.register("creditos")} />
+                    <Input id="creditos" type="number" min={1} max={10} {...form.register("creditos", { valueAsNumber: true })} />
                     {form.formState.errors.creditos && <p className="text-sm text-destructive">{form.formState.errors.creditos.message}</p>}
                   </div>
                 </div>
