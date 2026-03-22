@@ -132,8 +132,7 @@ const estadoBadge: Record<string, string> = {
 };
 
 const tituloBadge: Record<string, string> = {
-  licenciatura:
-    "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-400",
+  licenciatura: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-400",
   maestria:
     "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
   doctorado: "bg-primary-container text-on-primary-container",
@@ -189,7 +188,9 @@ export default function CursoDetailPage({
   const [addError, setAddError] = useState("");
 
   // Dialog quitar estudiante
-  const [removeTarget, setRemoveTarget] = useState<EstudianteEnCurso | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<EstudianteEnCurso | null>(
+    null,
+  );
   const [removeSubmitting, setRemoveSubmitting] = useState(false);
   const [removeError, setRemoveError] = useState("");
 
@@ -201,17 +202,23 @@ export default function CursoDetailPage({
     const headers = getAuthHeaders();
 
     Promise.all([
-      fetch(`${process.env.API_URL}api/admin/cursos/${id}`, { headers }).then((r) => r.json()),
-      fetch(`${process.env.API_URL}api/admin/estudiantes`, { headers }).then((r) => r.json()),
-      fetch(`${process.env.API_URL}api/admin/profesores`, { headers }).then((r) => r.json()),
+      fetch(`${process.env.API_URL}api/admin/cursos/${id}`, { headers }).then(
+        (r) => r.json(),
+      ),
+      fetch(`${process.env.API_URL}api/admin/estudiantes`, { headers }).then(
+        (r) => r.json(),
+      ),
+      fetch(`${process.env.API_URL}api/admin/profesores`, { headers }).then(
+        (r) => r.json(),
+      ),
     ])
       .then(([cursoData, estudiantesData, profesoresData]) => {
         setCurso(cursoData);
         setSinCurso(
           estudiantesData.filter(
             (e: EstudianteSinCurso) =>
-              e.curso === null || e.curso.id !== cursoData.id
-          )
+              e.curso === null || e.curso.id !== cursoData.id,
+          ),
         );
         setProfesores(profesoresData);
       })
@@ -229,8 +236,11 @@ export default function CursoDetailPage({
   const stats = useMemo(() => {
     if (!curso) return { activo: 0, inactivo: 0, graduado: 0 };
     return curso.estudiantes.reduce(
-      (acc, e) => { acc[e.estado]++; return acc; },
-      { activo: 0, inactivo: 0, graduado: 0 }
+      (acc, e) => {
+        acc[e.estado]++;
+        return acc;
+      },
+      { activo: 0, inactivo: 0, graduado: 0 },
     );
   }, [curso]);
 
@@ -241,7 +251,7 @@ export default function CursoDetailPage({
       (e) =>
         e.nombre.toLowerCase().includes(q) ||
         e.cedula.includes(q) ||
-        e.user.email.toLowerCase().includes(q)
+        e.user.email.toLowerCase().includes(q),
     );
   }, [curso, search]);
 
@@ -313,18 +323,23 @@ export default function CursoDetailPage({
     setEditSubmitting(true);
     setEditError("");
     try {
-      const res = await fetch(`${process.env.API_URL}api/admin/cursos/${curso.id}`, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          nombre: editForm.nombre,
-          codigo: editForm.codigo,
-          descripcion: editForm.descripcion || null,
-          creditos: Number(editForm.creditos),
-          estado: editForm.estado,
-          profesor_id: editForm.profesor_id ? Number(editForm.profesor_id) : null,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.API_URL}api/admin/cursos/${curso.id}`,
+        {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({
+            nombre: editForm.nombre,
+            codigo: editForm.codigo,
+            descripcion: editForm.descripcion || null,
+            creditos: Number(editForm.creditos),
+            estado: editForm.estado,
+            profesor_id: editForm.profesor_id
+              ? Number(editForm.profesor_id)
+              : null,
+          }),
+        },
+      );
       if (!res.ok) {
         const err = await res.json();
         setEditError(err.message || "Error al actualizar el curso.");
@@ -346,16 +361,21 @@ export default function CursoDetailPage({
     setToggleSubmitting(true);
     try {
       const newEstado = curso.estado === "activo" ? "inactivo" : "activo";
-      const res = await fetch(`${process.env.API_URL}api/admin/cursos/${curso.id}`, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ estado: newEstado }),
-      });
+      const res = await fetch(
+        `${process.env.API_URL}api/admin/cursos/${curso.id}`,
+        {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ estado: newEstado }),
+        },
+      );
       if (!res.ok) return;
       const updated = await res.json();
       setCurso((prev) => (prev ? { ...prev, ...updated } : prev));
       setToggleOpen(false);
-      toast.success(`Curso ${newEstado === "activo" ? "activado" : "desactivado"} correctamente`);
+      toast.success(
+        `Curso ${newEstado === "activo" ? "activado" : "desactivado"} correctamente`,
+      );
     } finally {
       setToggleSubmitting(false);
     }
@@ -363,7 +383,7 @@ export default function CursoDetailPage({
 
   const handleStudentStatus = async (
     estudiante: EstudianteEnCurso,
-    newEstado: "activo" | "inactivo" | "graduado"
+    newEstado: "activo" | "inactivo" | "graduado",
   ) => {
     setStatusChanging(estudiante.id);
     try {
@@ -373,7 +393,7 @@ export default function CursoDetailPage({
           method: "PUT",
           headers: getAuthHeaders(),
           body: JSON.stringify({ estado: newEstado }),
-        }
+        },
       );
       if (!res.ok) return;
       setCurso((prev) =>
@@ -381,10 +401,10 @@ export default function CursoDetailPage({
           ? {
               ...prev,
               estudiantes: prev.estudiantes.map((e) =>
-                e.id === estudiante.id ? { ...e, estado: newEstado } : e
+                e.id === estudiante.id ? { ...e, estado: newEstado } : e,
               ),
             }
-          : prev
+          : prev,
       );
     } finally {
       setStatusChanging(null);
@@ -402,7 +422,7 @@ export default function CursoDetailPage({
           method: "PUT",
           headers: getAuthHeaders(),
           body: JSON.stringify({ curso_id: curso.id }),
-        }
+        },
       );
       if (!res.ok) {
         const err = await res.json();
@@ -411,7 +431,7 @@ export default function CursoDetailPage({
       }
       const updated: EstudianteEnCurso = await res.json();
       setCurso((prev) =>
-        prev ? { ...prev, estudiantes: [...prev.estudiantes, updated] } : prev
+        prev ? { ...prev, estudiantes: [...prev.estudiantes, updated] } : prev,
       );
       setSinCurso((prev) => prev.filter((e) => e.id !== updated.id));
       setSelectedId("");
@@ -435,7 +455,7 @@ export default function CursoDetailPage({
           method: "PUT",
           headers: getAuthHeaders(),
           body: JSON.stringify({ curso_id: null }),
-        }
+        },
       );
       if (!res.ok) {
         const err = await res.json();
@@ -447,9 +467,11 @@ export default function CursoDetailPage({
         prev
           ? {
               ...prev,
-              estudiantes: prev.estudiantes.filter((e) => e.id !== removeTarget.id),
+              estudiantes: prev.estudiantes.filter(
+                (e) => e.id !== removeTarget.id,
+              ),
             }
-          : prev
+          : prev,
       );
       setSinCurso((prev) => [...prev, updated]);
       setRemoveTarget(null);
@@ -476,7 +498,11 @@ export default function CursoDetailPage({
         <p className="text-destructive font-sans text-sm">
           {error || "Curso no encontrado."}
         </p>
-        <Button variant="outline" className="mt-4" onClick={() => router.back()}>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => router.back()}
+        >
           Volver
         </Button>
       </div>
@@ -489,7 +515,6 @@ export default function CursoDetailPage({
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 px-10 py-10 max-w-8xl">
-
         {/* Back */}
         <button
           onClick={() => router.back()}
@@ -574,7 +599,11 @@ export default function CursoDetailPage({
               </span>
               <button
                 onClick={() => setToggleOpen(true)}
-                title={curso.estado === "activo" ? "Desactivar curso" : "Activar curso"}
+                title={
+                  curso.estado === "activo"
+                    ? "Desactivar curso"
+                    : "Activar curso"
+                }
                 className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
               >
                 {curso.estado === "activo" ? (
@@ -597,16 +626,22 @@ export default function CursoDetailPage({
           <div className="flex items-center gap-6 pt-5 border-t border-outline-variant/40">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Hash className="w-4 h-4" />
-              <span className="font-mono text-sm font-bold">{curso.codigo}</span>
+              <span className="font-mono text-sm font-bold">
+                {curso.codigo}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Star className="w-4 h-4" />
-              <span className="font-sans text-sm">{curso.creditos} créditos</span>
+              <span className="font-sans text-sm">
+                {curso.creditos} créditos
+              </span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Users className="w-4 h-4" />
               <span className="font-sans text-sm">
-                <strong className="text-on-surface">{curso.estudiantes.length}</strong>{" "}
+                <strong className="text-on-surface">
+                  {curso.estudiantes.length}
+                </strong>{" "}
                 {curso.estudiantes.length === 1
                   ? "estudiante inscrito"
                   : "estudiantes inscritos"}
@@ -661,7 +696,9 @@ export default function CursoDetailPage({
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <p className="font-sans text-xs text-muted-foreground mt-1">{pct}%</p>
+                  <p className="font-sans text-xs text-muted-foreground mt-1">
+                    {pct}%
+                  </p>
                 </div>
               );
             })}
@@ -798,11 +835,14 @@ export default function CursoDetailPage({
                           {e.cedula}
                         </td>
                         <td className="px-6 py-3.5 font-sans text-sm text-muted-foreground whitespace-nowrap">
-                          {new Date(e.fecha_inscripcion).toLocaleDateString("es-VE", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })}
+                          {new Date(e.fecha_inscripcion).toLocaleDateString(
+                            "es-VE",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )}
                         </td>
                         <td className="px-6 py-3.5">
                           {statusChanging === e.id ? (
@@ -813,7 +853,7 @@ export default function CursoDetailPage({
                               onValueChange={(v) =>
                                 handleStudentStatus(
                                   e,
-                                  v as "activo" | "inactivo" | "graduado"
+                                  v as "activo" | "inactivo" | "graduado",
                                 )
                               }
                             >
@@ -824,8 +864,12 @@ export default function CursoDetailPage({
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="activo">Activo</SelectItem>
-                                <SelectItem value="inactivo">Inactivo</SelectItem>
-                                <SelectItem value="graduado">Graduado</SelectItem>
+                                <SelectItem value="inactivo">
+                                  Inactivo
+                                </SelectItem>
+                                <SelectItem value="graduado">
+                                  Graduado
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                           )}
@@ -852,7 +896,8 @@ export default function CursoDetailPage({
                   <div className="flex items-center justify-between px-6 py-3 border-t border-outline-variant/40">
                     <p className="font-sans text-xs text-muted-foreground">
                       {(page - 1) * PAGE_SIZE + 1}–
-                      {Math.min(page * PAGE_SIZE, sorted.length)} de {sorted.length}
+                      {Math.min(page * PAGE_SIZE, sorted.length)} de{" "}
+                      {sorted.length}
                     </p>
                     <div className="flex items-center gap-1">
                       <button
@@ -862,21 +907,25 @@ export default function CursoDetailPage({
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-                        <button
-                          key={n}
-                          onClick={() => setPage(n)}
-                          className={`w-7 h-7 rounded-md font-sans text-xs transition-colors ${
-                            n === page
-                              ? "bg-primary text-on-primary font-semibold"
-                              : "text-muted-foreground hover:text-on-surface hover:bg-surface-container"
-                          }`}
-                        >
-                          {n}
-                        </button>
-                      ))}
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (n) => (
+                          <button
+                            key={n}
+                            onClick={() => setPage(n)}
+                            className={`w-7 h-7 rounded-md font-sans text-xs transition-colors ${
+                              n === page
+                                ? "bg-primary text-on-primary font-semibold"
+                                : "text-muted-foreground hover:text-on-surface hover:bg-surface-container"
+                            }`}
+                          >
+                            {n}
+                          </button>
+                        ),
+                      )}
                       <button
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        onClick={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
                         disabled={page === totalPages}
                         className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container disabled:opacity-40 transition-colors"
                       >
@@ -892,7 +941,12 @@ export default function CursoDetailPage({
       </div>
 
       {/* ── Dialog: Editar curso ── */}
-      <Dialog open={editOpen} onOpenChange={(v) => { if (!v) setEditOpen(false); }}>
+      <Dialog
+        open={editOpen}
+        onOpenChange={(v) => {
+          if (!v) setEditOpen(false);
+        }}
+      >
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif font-semibold text-xl text-on-surface">
@@ -942,7 +996,10 @@ export default function CursoDetailPage({
                   max={10}
                   value={editForm.creditos}
                   onChange={(e) =>
-                    setEditForm((f) => ({ ...f, creditos: Number(e.target.value) }))
+                    setEditForm((f) => ({
+                      ...f,
+                      creditos: Number(e.target.value),
+                    }))
                   }
                   className="font-sans text-sm"
                 />
@@ -1038,15 +1095,20 @@ export default function CursoDetailPage({
       </Dialog>
 
       {/* ── Dialog: Toggle estado ── */}
-      <Dialog open={toggleOpen} onOpenChange={(v) => { if (!v) setToggleOpen(false); }}>
+      <Dialog
+        open={toggleOpen}
+        onOpenChange={(v) => {
+          if (!v) setToggleOpen(false);
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="font-serif font-semibold text-xl text-on-surface">
               {curso.estado === "activo" ? "Desactivar curso" : "Activar curso"}
             </DialogTitle>
             <DialogDescription className="font-sans text-sm text-muted-foreground">
-              ¿Deseas {curso.estado === "activo" ? "desactivar" : "activar"} el curso{" "}
-              <strong>{curso.nombre}</strong>?
+              ¿Deseas {curso.estado === "activo" ? "desactivar" : "activar"} el
+              curso <strong>{curso.nombre}</strong>?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -1068,7 +1130,12 @@ export default function CursoDetailPage({
       </Dialog>
 
       {/* ── Dialog: Añadir estudiante ── */}
-      <Dialog open={addOpen} onOpenChange={(v) => { if (!v) setAddOpen(false); }}>
+      <Dialog
+        open={addOpen}
+        onOpenChange={(v) => {
+          if (!v) setAddOpen(false);
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="font-serif font-semibold text-xl text-on-surface">
@@ -1110,10 +1177,7 @@ export default function CursoDetailPage({
             <Button variant="outline" onClick={() => setAddOpen(false)}>
               Cancelar
             </Button>
-            <Button
-              onClick={handleAdd}
-              disabled={!selectedId || addSubmitting}
-            >
+            <Button onClick={handleAdd} disabled={!selectedId || addSubmitting}>
               {addSubmitting && (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               )}
@@ -1126,7 +1190,9 @@ export default function CursoDetailPage({
       {/* ── Dialog: Confirmar quitar ── */}
       <Dialog
         open={!!removeTarget}
-        onOpenChange={(v) => { if (!v) setRemoveTarget(null); }}
+        onOpenChange={(v) => {
+          if (!v) setRemoveTarget(null);
+        }}
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
@@ -1134,8 +1200,8 @@ export default function CursoDetailPage({
               Quitar del curso
             </DialogTitle>
             <DialogDescription className="font-sans text-sm text-muted-foreground">
-              ¿Deseas desinscribir a{" "}
-              <strong>{removeTarget?.nombre}</strong> de este curso?
+              ¿Deseas desinscribir a <strong>{removeTarget?.nombre}</strong> de
+              este curso?
             </DialogDescription>
           </DialogHeader>
 

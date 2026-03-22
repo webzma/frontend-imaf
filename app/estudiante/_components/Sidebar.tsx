@@ -31,20 +31,40 @@ const navItems = [
   {
     section: "General",
     items: [
-      { label: "Dashboard", href: "/estudiante", icon: LayoutDashboard, exact: true },
+      {
+        label: "Dashboard",
+        href: "/estudiante",
+        icon: LayoutDashboard,
+        exact: true,
+      },
     ],
   },
   {
     section: "Mi Cuenta",
     items: [
-      { label: "Mi Perfil", href: "/estudiante/perfil", icon: User, exact: false },
-      { label: "Mi Curso", href: "/estudiante/curso", icon: BookOpen, exact: false },
+      {
+        label: "Mi Perfil",
+        href: "/estudiante/perfil",
+        icon: User,
+        exact: false,
+      },
+      {
+        label: "Mi Curso",
+        href: "/estudiante/curso",
+        icon: BookOpen,
+        exact: false,
+      },
     ],
   },
   {
     section: "Plataforma",
     items: [
-      { label: "Cursos", href: "/estudiante/cursos", icon: GraduationCap, exact: false },
+      {
+        label: "Cursos",
+        href: "/estudiante/cursos",
+        icon: GraduationCap,
+        exact: false,
+      },
     ],
   },
 ];

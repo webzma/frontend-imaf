@@ -121,7 +121,6 @@ export default function PerfilPage() {
       <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-8 py-10 max-w-4xl mx-auto">
-
         {/* Page header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
@@ -136,7 +135,6 @@ export default function PerfilPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
           {/* Profile card */}
           <div className="lg:col-span-1">
             <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
@@ -163,21 +161,27 @@ export default function PerfilPage() {
                   </div>
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full font-sans text-xs font-semibold ${
-                      estadoStyle[perfil.estado] ?? "bg-muted text-muted-foreground"
+                      estadoStyle[perfil.estado] ??
+                      "bg-muted text-muted-foreground"
                     }`}
                   >
-                    {perfil.estado.charAt(0).toUpperCase() + perfil.estado.slice(1)}
+                    {perfil.estado.charAt(0).toUpperCase() +
+                      perfil.estado.slice(1)}
                   </span>
 
                   <div className="w-full pt-4 border-t border-outline-variant/30 space-y-2.5 text-left">
                     <div className="flex items-center gap-2 text-sm">
                       <Hash className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                      <span className="font-mono text-muted-foreground">{perfil.cedula}</span>
+                      <span className="font-mono text-muted-foreground">
+                        {perfil.cedula}
+                      </span>
                     </div>
                     {perfil.telefono && (
                       <div className="flex items-center gap-2 text-sm">
                         <Phone className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                        <span className="font-sans text-muted-foreground">{perfil.telefono}</span>
+                        <span className="font-sans text-muted-foreground">
+                          {perfil.telefono}
+                        </span>
                       </div>
                     )}
                     <div className="flex items-center gap-2 text-sm">
@@ -204,7 +208,6 @@ export default function PerfilPage() {
 
           {/* Right column */}
           <div className="lg:col-span-2 space-y-6">
-
             {/* Edit form */}
             {editing && (
               <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
@@ -225,13 +228,18 @@ export default function PerfilPage() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="fecha_nacimiento">Fecha de nacimiento</Label>
+                      <Label htmlFor="fecha_nacimiento">
+                        Fecha de nacimiento
+                      </Label>
                       <Input
                         id="fecha_nacimiento"
                         type="date"
                         value={form.fecha_nacimiento}
                         onChange={(e) =>
-                          setForm((f) => ({ ...f, fecha_nacimiento: e.target.value }))
+                          setForm((f) => ({
+                            ...f,
+                            fecha_nacimiento: e.target.value,
+                          }))
                         }
                       />
                     </div>
@@ -294,11 +302,14 @@ export default function PerfilPage() {
                       Fecha de inscripción
                     </p>
                     <p className="font-sans text-sm text-on-surface font-medium">
-                      {new Date(perfil.fecha_inscripcion).toLocaleDateString("es-VE", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      })}
+                      {new Date(perfil.fecha_inscripcion).toLocaleDateString(
+                        "es-VE",
+                        {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        },
+                      )}
                     </p>
                   </div>
                   {perfil.fecha_nacimiento && (
@@ -307,24 +318,31 @@ export default function PerfilPage() {
                         Fecha de nacimiento
                       </p>
                       <p className="font-sans text-sm text-on-surface font-medium">
-                        {new Date(perfil.fecha_nacimiento).toLocaleDateString("es-VE", {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                        {new Date(perfil.fecha_nacimiento).toLocaleDateString(
+                          "es-VE",
+                          {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                          },
+                        )}
                       </p>
                     </div>
                   )}
                   {perfil.genero && (
                     <div>
-                      <p className="font-sans text-xs text-muted-foreground mb-1">Género</p>
+                      <p className="font-sans text-xs text-muted-foreground mb-1">
+                        Género
+                      </p>
                       <p className="font-sans text-sm text-on-surface font-medium capitalize">
                         {perfil.genero}
                       </p>
                     </div>
                   )}
                   <div>
-                    <p className="font-sans text-xs text-muted-foreground mb-1">Cédula</p>
+                    <p className="font-sans text-xs text-muted-foreground mb-1">
+                      Cédula
+                    </p>
                     <p className="font-mono text-sm text-on-surface font-medium">
                       {perfil.cedula}
                     </p>
@@ -347,13 +365,17 @@ export default function PerfilPage() {
                     <p className="font-sans text-xs text-muted-foreground mb-1">
                       Nombre de usuario
                     </p>
-                    <p className="font-sans text-sm text-on-surface">{perfil.user.name}</p>
+                    <p className="font-sans text-sm text-on-surface">
+                      {perfil.user.name}
+                    </p>
                   </div>
                   <div>
                     <p className="font-sans text-xs text-muted-foreground mb-1">
                       Correo electrónico
                     </p>
-                    <p className="font-sans text-sm text-on-surface">{perfil.user.email}</p>
+                    <p className="font-sans text-sm text-on-surface">
+                      {perfil.user.email}
+                    </p>
                   </div>
                 </div>
               </div>

@@ -71,34 +71,42 @@ function getAuthHeaders() {
 }
 
 function getInitials(name: string): string {
-  return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 }
 
 /* ── Styles ── */
 
 const tituloStyle: Record<string, string> = {
   licenciatura: "bg-sky-100 text-sky-800 border border-sky-200",
-  maestria:     "bg-emerald-100 text-emerald-800 border border-emerald-200",
-  doctorado:    "bg-primary-container text-on-primary-container border border-primary-container",
+  maestria: "bg-emerald-100 text-emerald-800 border border-emerald-200",
+  doctorado:
+    "bg-primary-container text-on-primary-container border border-primary-container",
 };
 
 const tituloLabel: Record<string, string> = {
-  licenciatura: "Licenciatura", maestria: "Maestría", doctorado: "Doctorado",
+  licenciatura: "Licenciatura",
+  maestria: "Maestría",
+  doctorado: "Doctorado",
 };
 
 /* ── Zod Schema ── */
 
 const profesorSchema = z.object({
-  name:             z.string().min(1, "El nombre es obligatorio").max(255),
-  email:            z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  password:         z.string().min(8, "Mínimo 8 caracteres"),
-  cedula:           z.string().min(1, "La cédula es obligatoria"),
-  telefono:         z.string().max(20).optional().or(z.literal("")),
+  name: z.string().min(1, "El nombre es obligatorio").max(255),
+  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
+  password: z.string().min(8, "Mínimo 8 caracteres"),
+  cedula: z.string().min(1, "La cédula es obligatoria"),
+  telefono: z.string().max(20).optional().or(z.literal("")),
   fecha_nacimiento: z.string().optional().or(z.literal("")),
-  genero:           z.enum(["masculino", "femenino", "otro"]).optional(),
-  especialidad:     z.string().max(255).optional().or(z.literal("")),
-  titulo:           z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
-  departamento:     z.string().max(255).optional().or(z.literal("")),
+  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
+  especialidad: z.string().max(255).optional().or(z.literal("")),
+  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
+  departamento: z.string().max(255).optional().or(z.literal("")),
 });
 
 type ProfesorForm = z.infer<typeof profesorSchema>;
@@ -147,16 +155,28 @@ export default function ProfesoresPage() {
   const form = useForm<ProfesorForm>({
     resolver: zodResolver(profesorSchema),
     defaultValues: {
-      name: "", email: "", password: "", cedula: "", telefono: "",
-      fecha_nacimiento: "", genero: undefined, especialidad: "",
-      titulo: undefined, departamento: "",
+      name: "",
+      email: "",
+      password: "",
+      cedula: "",
+      telefono: "",
+      fecha_nacimiento: "",
+      genero: undefined,
+      especialidad: "",
+      titulo: undefined,
+      departamento: "",
     },
   });
 
   const fetchProfesores = async () => {
     try {
-      const res = await fetch(`${process.env.API_URL}api/admin/profesores`, { headers: getAuthHeaders() });
-      if (!res.ok) { setError("No se pudo cargar la lista de profesores."); return; }
+      const res = await fetch(`${process.env.API_URL}api/admin/profesores`, {
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        setError("No se pudo cargar la lista de profesores.");
+        return;
+      }
       setProfesores(await res.json());
     } catch {
       setError("Error al conectar con el servidor.");
@@ -165,7 +185,9 @@ export default function ProfesoresPage() {
     }
   };
 
-  useEffect(() => { fetchProfesores(); }, []);
+  useEffect(() => {
+    fetchProfesores();
+  }, []);
 
   const onSubmit = async (data: ProfesorForm) => {
     setSubmitting(true);
@@ -207,7 +229,9 @@ export default function ProfesoresPage() {
 
   // Unique departments from data
   const departamentos = useMemo(() => {
-    const set = new Set(profesores.map((p) => p.departamento).filter(Boolean) as string[]);
+    const set = new Set(
+      profesores.map((p) => p.departamento).filter(Boolean) as string[],
+    );
     return Array.from(set).sort();
   }, [profesores]);
 
@@ -223,25 +247,29 @@ export default function ProfesoresPage() {
       const matchTitulo = filterTitulo === "todos" || p.titulo === filterTitulo;
       const matchDept =
         filterDepartamento === "todos" ||
-        (filterDepartamento === "sin_departamento" ? !p.departamento : p.departamento === filterDepartamento);
+        (filterDepartamento === "sin_departamento"
+          ? !p.departamento
+          : p.departamento === filterDepartamento);
       return matchSearch && matchTitulo && matchDept;
     });
   }, [profesores, search, filterTitulo, filterDepartamento]);
 
   const counts = {
-    total:        profesores.length,
-    conTitulo:    profesores.filter((p) => p.titulo).length,
-    departamentos: new Set(profesores.map((p) => p.departamento).filter(Boolean)).size,
+    total: profesores.length,
+    conTitulo: profesores.filter((p) => p.titulo).length,
+    departamentos: new Set(
+      profesores.map((p) => p.departamento).filter(Boolean),
+    ).size,
   };
 
-  const hasFilters = filterTitulo !== "todos" || filterDepartamento !== "todos" || search !== "";
+  const hasFilters =
+    filterTitulo !== "todos" || filterDepartamento !== "todos" || search !== "";
 
   return (
     <div className="relative min-h-full bg-surface">
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 px-10 py-10 max-w-8xl">
-
         {/* Header */}
         <div className="mb-10 flex items-end justify-between">
           <div>
@@ -259,59 +287,127 @@ export default function ProfesoresPage() {
             </p>
           </div>
 
-          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { form.reset(); setSubmitError(""); } }}>
+          <Dialog
+            open={open}
+            onOpenChange={(v) => {
+              setOpen(v);
+              if (!v) {
+                form.reset();
+                setSubmitError("");
+              }
+            }}
+          >
             <DialogTrigger asChild>
-              <Button className="gap-2"><Plus className="w-4 h-4" />Nuevo profesor</Button>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Nuevo profesor
+              </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="font-serif font-semibold text-2xl text-on-surface">Registrar profesor</DialogTitle>
+                <DialogTitle className="font-serif font-semibold text-2xl text-on-surface">
+                  Registrar profesor
+                </DialogTitle>
                 <DialogDescription className="font-sans text-sm text-muted-foreground">
                   Completa los datos para crear un nuevo profesor.
                 </DialogDescription>
               </DialogHeader>
 
-              <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="grid gap-4"
+              >
                 <div className="grid gap-2">
                   <Label htmlFor="name">Nombre completo *</Label>
-                  <Input id="name" placeholder="Ej: María López" {...form.register("name")} />
-                  {form.formState.errors.name && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}
+                  <Input
+                    id="name"
+                    placeholder="Ej: María López"
+                    {...form.register("name")}
+                  />
+                  {form.formState.errors.name && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.name.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="email">Correo *</Label>
-                    <Input id="email" type="email" placeholder="correo@ejemplo.com" {...form.register("email")} />
-                    {form.formState.errors.email && <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>}
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="correo@ejemplo.com"
+                      {...form.register("email")}
+                    />
+                    {form.formState.errors.email && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.email.message}
+                      </p>
+                    )}
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="password">Contraseña *</Label>
-                    <Input id="password" type="password" placeholder="Mínimo 8 caracteres" {...form.register("password")} />
-                    {form.formState.errors.password && <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>}
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Mínimo 8 caracteres"
+                      {...form.register("password")}
+                    />
+                    {form.formState.errors.password && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.password.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="cedula">Cédula *</Label>
-                    <Input id="cedula" placeholder="V-12345678" {...form.register("cedula")} />
-                    {form.formState.errors.cedula && <p className="text-sm text-destructive">{form.formState.errors.cedula.message}</p>}
+                    <Input
+                      id="cedula"
+                      placeholder="V-12345678"
+                      {...form.register("cedula")}
+                    />
+                    {form.formState.errors.cedula && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.cedula.message}
+                      </p>
+                    )}
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="telefono">Teléfono</Label>
-                    <Input id="telefono" placeholder="0412-1234567" {...form.register("telefono")} />
+                    <Input
+                      id="telefono"
+                      placeholder="0412-1234567"
+                      {...form.register("telefono")}
+                    />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="fecha_nacimiento">Fecha de nacimiento</Label>
-                    <Input id="fecha_nacimiento" type="date" {...form.register("fecha_nacimiento")} />
+                    <Label htmlFor="fecha_nacimiento">
+                      Fecha de nacimiento
+                    </Label>
+                    <Input
+                      id="fecha_nacimiento"
+                      type="date"
+                      {...form.register("fecha_nacimiento")}
+                    />
                   </div>
                   <div className="grid gap-2">
                     <Label>Género</Label>
-                    <Select value={form.watch("genero") ?? ""} onValueChange={(v) => form.setValue("genero", v as ProfesorForm["genero"])}>
-                      <SelectTrigger className="w-full"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                    <Select
+                      value={form.watch("genero") ?? ""}
+                      onValueChange={(v) =>
+                        form.setValue("genero", v as ProfesorForm["genero"])
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar" />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="masculino">Masculino</SelectItem>
                         <SelectItem value="femenino">Femenino</SelectItem>
@@ -324,18 +420,33 @@ export default function ProfesoresPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="especialidad">Especialidad</Label>
-                    <Input id="especialidad" placeholder="Ej: Matemáticas" {...form.register("especialidad")} />
+                    <Input
+                      id="especialidad"
+                      placeholder="Ej: Matemáticas"
+                      {...form.register("especialidad")}
+                    />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="departamento">Departamento</Label>
-                    <Input id="departamento" placeholder="Ej: Ciencias" {...form.register("departamento")} />
+                    <Input
+                      id="departamento"
+                      placeholder="Ej: Ciencias"
+                      {...form.register("departamento")}
+                    />
                   </div>
                 </div>
 
                 <div className="grid gap-2">
                   <Label>Título académico</Label>
-                  <Select value={form.watch("titulo") ?? ""} onValueChange={(v) => form.setValue("titulo", v as ProfesorForm["titulo"])}>
-                    <SelectTrigger className="w-full"><SelectValue placeholder="Seleccionar título" /></SelectTrigger>
+                  <Select
+                    value={form.watch("titulo") ?? ""}
+                    onValueChange={(v) =>
+                      form.setValue("titulo", v as ProfesorForm["titulo"])
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar título" />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="licenciatura">Licenciatura</SelectItem>
                       <SelectItem value="maestria">Maestría</SelectItem>
@@ -351,9 +462,17 @@ export default function ProfesoresPage() {
                 )}
 
                 <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen(false)}
+                  >
+                    Cancelar
+                  </Button>
                   <Button type="submit" disabled={submitting}>
-                    {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                    {submitting && (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    )}
                     Crear profesor
                   </Button>
                 </DialogFooter>
@@ -365,19 +484,47 @@ export default function ProfesoresPage() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-5 mb-10 max-w-3xl">
           {[
-            { label: "Total",         value: counts.total,         icon: GraduationCap, color: "text-on-primary-container",   glow: "bg-primary-container" },
-            { label: "Con título",    value: counts.conTitulo,    icon: Award,         color: "text-on-primary-container",   glow: "bg-primary-container/70" },
-            { label: "Departamentos", value: counts.departamentos, icon: BookOpen,      color: "text-on-secondary-container", glow: "bg-secondary-container" },
+            {
+              label: "Total",
+              value: counts.total,
+              icon: GraduationCap,
+              color: "text-on-primary-container",
+              glow: "bg-primary-container",
+            },
+            {
+              label: "Con título",
+              value: counts.conTitulo,
+              icon: Award,
+              color: "text-on-primary-container",
+              glow: "bg-primary-container/70",
+            },
+            {
+              label: "Departamentos",
+              value: counts.departamentos,
+              icon: BookOpen,
+              color: "text-on-secondary-container",
+              glow: "bg-secondary-container",
+            },
           ].map((s) => (
-            <div key={s.label} className="bg-surface-container-low rounded-sm p-5 ambient-shadow">
-              <div className={`w-10 h-10 rounded-md flex items-center justify-center ${s.glow} mb-4`}>
+            <div
+              key={s.label}
+              className="bg-surface-container-low rounded-sm p-5 ambient-shadow"
+            >
+              <div
+                className={`w-10 h-10 rounded-md flex items-center justify-center ${s.glow} mb-4`}
+              >
                 <s.icon className={`w-5 h-5 ${s.color}`} />
               </div>
-              {loading
-                ? <Skeleton className="h-9 w-16 mb-1" />
-                : <p className="font-sans text-4xl font-light tight-tracking text-on-surface tabular-nums mb-1">{s.value}</p>
-              }
-              <p className="font-sans text-xs tracking-[0.15em] uppercase text-on-surface/55 font-semibold">{s.label}</p>
+              {loading ? (
+                <Skeleton className="h-9 w-16 mb-1" />
+              ) : (
+                <p className="font-sans text-4xl font-light tight-tracking text-on-surface tabular-nums mb-1">
+                  {s.value}
+                </p>
+              )}
+              <p className="font-sans text-xs tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                {s.label}
+              </p>
             </div>
           ))}
         </div>
@@ -408,22 +555,33 @@ export default function ProfesoresPage() {
               </SelectContent>
             </Select>
 
-            <Select value={filterDepartamento} onValueChange={setFilterDepartamento}>
+            <Select
+              value={filterDepartamento}
+              onValueChange={setFilterDepartamento}
+            >
               <SelectTrigger className="h-10 w-56 font-sans text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos los departamentos</SelectItem>
-                <SelectItem value="sin_departamento">Sin departamento</SelectItem>
+                <SelectItem value="sin_departamento">
+                  Sin departamento
+                </SelectItem>
                 {departamentos.map((d) => (
-                  <SelectItem key={d} value={d}>{d}</SelectItem>
+                  <SelectItem key={d} value={d}>
+                    {d}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
             {hasFilters && (
               <button
-                onClick={() => { setSearch(""); setFilterTitulo("todos"); setFilterDepartamento("todos"); }}
+                onClick={() => {
+                  setSearch("");
+                  setFilterTitulo("todos");
+                  setFilterDepartamento("todos");
+                }}
                 className="font-sans text-xs text-muted-foreground hover:text-on-surface transition-colors underline underline-offset-2"
               >
                 Limpiar
@@ -436,26 +594,41 @@ export default function ProfesoresPage() {
         {loading ? (
           <TableSkeleton />
         ) : error ? (
-          <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-sm font-sans">{error}</div>
+          <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-sm font-sans">
+            {error}
+          </div>
         ) : (
           <div className="bg-surface-container-low rounded-sm overflow-hidden ambient-shadow">
             <div className="px-6 py-3.5 border-b border-outline-variant/50">
               <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-on-surface/55 font-medium">
                 {filtered.length} profesor{filtered.length !== 1 ? "es" : ""}
-                {hasFilters ? " encontrado" + (filtered.length !== 1 ? "s" : "") : ""}
+                {hasFilters
+                  ? " encontrado" + (filtered.length !== 1 ? "s" : "")
+                  : ""}
               </p>
             </div>
             {filtered.length === 0 ? (
               <div className="flex items-center justify-center py-16 font-sans text-sm text-muted-foreground">
-                {hasFilters ? "No hay profesores con esos filtros." : "No hay profesores registrados."}
+                {hasFilters
+                  ? "No hay profesores con esos filtros."
+                  : "No hay profesores registrados."}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-outline-variant/40">
-                      {["Profesor", "Cédula", "Especialidad", "Departamento", "Título"].map((h) => (
-                        <th key={h} className="text-left px-6 py-3.5 font-sans text-xs tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      {[
+                        "Profesor",
+                        "Cédula",
+                        "Especialidad",
+                        "Departamento",
+                        "Título",
+                      ].map((h) => (
+                        <th
+                          key={h}
+                          className="text-left px-6 py-3.5 font-sans text-xs tracking-[0.15em] uppercase text-on-surface/55 font-semibold"
+                        >
                           {h}
                         </th>
                       ))}
@@ -470,32 +643,57 @@ export default function ProfesoresPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                              <span className="font-sans text-sm font-bold text-on-primary-container">{getInitials(p.user.name)}</span>
+                              <span className="font-sans text-sm font-bold text-on-primary-container">
+                                {getInitials(p.user.name)}
+                              </span>
                             </div>
                             <div>
-                              <p className="font-sans font-semibold text-on-surface text-sm">{p.user.name}</p>
-                              <p className="font-sans text-xs text-muted-foreground">{p.user.email}</p>
+                              <p className="font-sans font-semibold text-on-surface text-sm">
+                                {p.user.name}
+                              </p>
+                              <p className="font-sans text-xs text-muted-foreground">
+                                {p.user.email}
+                              </p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 font-mono text-sm text-muted-foreground tracking-wide">{p.cedula}</td>
-                        <td className="px-6 py-4 font-sans text-sm">
-                          {p.especialidad
-                            ? <span className="text-on-surface">{p.especialidad}</span>
-                            : <span className="text-on-surface/40 italic text-xs">Sin especialidad</span>
-                          }
+                        <td className="px-6 py-4 font-mono text-sm text-muted-foreground tracking-wide">
+                          {p.cedula}
                         </td>
                         <td className="px-6 py-4 font-sans text-sm">
-                          {p.departamento
-                            ? <span className="text-on-surface">{p.departamento}</span>
-                            : <span className="text-on-surface/40 italic text-xs">Sin departamento</span>
-                          }
+                          {p.especialidad ? (
+                            <span className="text-on-surface">
+                              {p.especialidad}
+                            </span>
+                          ) : (
+                            <span className="text-on-surface/40 italic text-xs">
+                              Sin especialidad
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 font-sans text-sm">
+                          {p.departamento ? (
+                            <span className="text-on-surface">
+                              {p.departamento}
+                            </span>
+                          ) : (
+                            <span className="text-on-surface/40 italic text-xs">
+                              Sin departamento
+                            </span>
+                          )}
                         </td>
                         <td className="px-6 py-4">
-                          {p.titulo
-                            ? <span className={`inline-flex items-center px-3 py-1 rounded-full font-sans text-xs font-semibold ${tituloStyle[p.titulo]}`}>{tituloLabel[p.titulo]}</span>
-                            : <span className="text-muted-foreground/50 font-sans text-sm">—</span>
-                          }
+                          {p.titulo ? (
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full font-sans text-xs font-semibold ${tituloStyle[p.titulo]}`}
+                            >
+                              {tituloLabel[p.titulo]}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground/50 font-sans text-sm">
+                              —
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))}

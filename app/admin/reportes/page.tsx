@@ -86,7 +86,9 @@ function StatCard({
 }) {
   return (
     <div className="bg-surface-container-low rounded-sm p-5 ambient-shadow">
-      <div className={`w-10 h-10 rounded-md flex items-center justify-center ${containerClass} mb-4`}>
+      <div
+        className={`w-10 h-10 rounded-md flex items-center justify-center ${containerClass} mb-4`}
+      >
         <Icon className={`w-5 h-5 ${iconClass}`} />
       </div>
       <p className="font-sans text-4xl font-light tight-tracking text-on-surface tabular-nums mb-1">
@@ -104,13 +106,25 @@ function StatCard({
 
 /* ── Chart Section Wrapper ── */
 
-function ChartCard({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+function ChartCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
       <div className="mb-5">
-        <h2 className="font-serif font-light text-xl tight-tracking text-on-surface">{title}</h2>
+        <h2 className="font-serif font-light text-xl tight-tracking text-on-surface">
+          {title}
+        </h2>
         {description && (
-          <p className="font-sans text-xs text-muted-foreground mt-0.5">{description}</p>
+          <p className="font-sans text-xs text-muted-foreground mt-0.5">
+            {description}
+          </p>
         )}
       </div>
       {children}
@@ -121,17 +135,34 @@ function ChartCard({ title, description, children }: { title: string; descriptio
 /* ── Custom Pie Label ── */
 
 const RADIAN = Math.PI / 180;
-function PieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }: {
-  cx: number; cy: number; midAngle: number;
-  innerRadius: number; outerRadius: number; percent: number;
+function PieLabel({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+}: {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
 }) {
   if (percent < 0.05) return null;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
   return (
-    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central"
-      className="font-sans text-xs font-semibold">
+    <text
+      x={x}
+      y={y}
+      fill="white"
+      textAnchor="middle"
+      dominantBaseline="central"
+      className="font-sans text-xs font-semibold"
+    >
       {`${(percent * 100).toFixed(0)}%`}
     </text>
   );
@@ -148,9 +179,15 @@ export default function ReportesPage() {
   useEffect(() => {
     const headers = getAuthHeaders();
     Promise.all([
-      fetch(`${process.env.API_URL}api/admin/cursos`, { headers }).then((r) => r.json()),
-      fetch(`${process.env.API_URL}api/admin/estudiantes`, { headers }).then((r) => r.json()),
-      fetch(`${process.env.API_URL}api/admin/profesores`, { headers }).then((r) => r.json()),
+      fetch(`${process.env.API_URL}api/admin/cursos`, { headers }).then((r) =>
+        r.json(),
+      ),
+      fetch(`${process.env.API_URL}api/admin/estudiantes`, { headers }).then(
+        (r) => r.json(),
+      ),
+      fetch(`${process.env.API_URL}api/admin/profesores`, { headers }).then(
+        (r) => r.json(),
+      ),
     ])
       .then(([c, e, p]) => {
         setCursos(Array.isArray(c) ? c : []);
@@ -233,7 +270,6 @@ export default function ReportesPage() {
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 px-10 py-10 max-w-8xl">
-
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-4">
@@ -289,18 +325,26 @@ export default function ReportesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
             {/* Bar: Students per course */}
             <ChartCard
               title="Estudiantes por curso"
               description="Distribución de alumnos matriculados en cada curso"
             >
               {estudiantesPorCurso.length === 0 ? (
-                <p className="font-sans text-sm text-muted-foreground text-center py-10">Sin datos</p>
+                <p className="font-sans text-sm text-muted-foreground text-center py-10">
+                  Sin datos
+                </p>
               ) : (
                 <ChartContainer config={barConfig} className="h-[260px] w-full">
-                  <BarChart data={estudiantesPorCurso} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="oklch(0.45 0.10 8 / 0.12)" />
+                  <BarChart
+                    data={estudiantesPorCurso}
+                    margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      vertical={false}
+                      strokeDasharray="3 3"
+                      stroke="oklch(0.45 0.10 8 / 0.12)"
+                    />
                     <XAxis
                       dataKey="nombre"
                       tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
@@ -318,14 +362,23 @@ export default function ReportesPage() {
                         <ChartTooltipContent
                           formatter={(value, name, props) => (
                             <div className="flex flex-col gap-0.5">
-                              <span className="font-medium text-on-surface">{props.payload.fullName}</span>
-                              <span className="text-muted-foreground">{value} estudiante{Number(value) !== 1 ? "s" : ""}</span>
+                              <span className="font-medium text-on-surface">
+                                {props.payload?.fullName as string}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {value} estudiante
+                                {Number(value) !== 1 ? "s" : ""}
+                              </span>
                             </div>
                           )}
                         />
                       }
                     />
-                    <Bar dataKey="estudiantes" fill="var(--color-chart-1)" radius={[3, 3, 0, 0]} />
+                    <Bar
+                      dataKey="estudiantes"
+                      fill="var(--color-chart-1)"
+                      radius={[3, 3, 0, 0]}
+                    />
                   </BarChart>
                 </ChartContainer>
               )}
@@ -337,7 +390,9 @@ export default function ReportesPage() {
               description="Proporción de cursos activos e inactivos"
             >
               {estadoCursos.length === 0 ? (
-                <p className="font-sans text-sm text-muted-foreground text-center py-10">Sin datos</p>
+                <p className="font-sans text-sm text-muted-foreground text-center py-10">
+                  Sin datos
+                </p>
               ) : (
                 <div className="h-[260px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -353,7 +408,12 @@ export default function ReportesPage() {
                         label={PieLabel as never}
                       >
                         {estadoCursos.map((_, i) => (
-                          <Cell key={i} fill={PIE_COLORS_STATUS[i % PIE_COLORS_STATUS.length]} />
+                          <Cell
+                            key={i}
+                            fill={
+                              PIE_COLORS_STATUS[i % PIE_COLORS_STATUS.length]
+                            }
+                          />
                         ))}
                       </Pie>
                       <Tooltip
@@ -369,7 +429,10 @@ export default function ReportesPage() {
                       <Legend
                         iconType="circle"
                         iconSize={8}
-                        wrapperStyle={{ fontFamily: "var(--font-sans)", fontSize: 12 }}
+                        wrapperStyle={{
+                          fontFamily: "var(--font-sans)",
+                          fontSize: 12,
+                        }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -383,11 +446,23 @@ export default function ReportesPage() {
               description="Cantidad de cursos según sus créditos asignados"
             >
               {creditosDistribucion.length === 0 ? (
-                <p className="font-sans text-sm text-muted-foreground text-center py-10">Sin datos</p>
+                <p className="font-sans text-sm text-muted-foreground text-center py-10">
+                  Sin datos
+                </p>
               ) : (
-                <ChartContainer config={creditosConfig} className="h-[260px] w-full">
-                  <BarChart data={creditosDistribucion} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="oklch(0.45 0.10 8 / 0.12)" />
+                <ChartContainer
+                  config={creditosConfig}
+                  className="h-[260px] w-full"
+                >
+                  <BarChart
+                    data={creditosDistribucion}
+                    margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      vertical={false}
+                      strokeDasharray="3 3"
+                      stroke="oklch(0.45 0.10 8 / 0.12)"
+                    />
                     <XAxis
                       dataKey="creditos"
                       tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
@@ -401,7 +476,11 @@ export default function ReportesPage() {
                       axisLine={false}
                     />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="cursos" fill="var(--color-chart-2)" radius={[3, 3, 0, 0]} />
+                    <Bar
+                      dataKey="cursos"
+                      fill="var(--color-chart-2)"
+                      radius={[3, 3, 0, 0]}
+                    />
                   </BarChart>
                 </ChartContainer>
               )}
@@ -413,7 +492,9 @@ export default function ReportesPage() {
               description="Distribución de estudiantes por su estado actual"
             >
               {estadoEstudiantes.length === 0 ? (
-                <p className="font-sans text-sm text-muted-foreground text-center py-10">Sin datos</p>
+                <p className="font-sans text-sm text-muted-foreground text-center py-10">
+                  Sin datos
+                </p>
               ) : (
                 <div className="h-[260px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -429,7 +510,12 @@ export default function ReportesPage() {
                         label={PieLabel as never}
                       >
                         {estadoEstudiantes.map((_, i) => (
-                          <Cell key={i} fill={PIE_COLORS_ESTADO[i % PIE_COLORS_ESTADO.length]} />
+                          <Cell
+                            key={i}
+                            fill={
+                              PIE_COLORS_ESTADO[i % PIE_COLORS_ESTADO.length]
+                            }
+                          />
                         ))}
                       </Pie>
                       <Tooltip
@@ -445,14 +531,16 @@ export default function ReportesPage() {
                       <Legend
                         iconType="circle"
                         iconSize={8}
-                        wrapperStyle={{ fontFamily: "var(--font-sans)", fontSize: 12 }}
+                        wrapperStyle={{
+                          fontFamily: "var(--font-sans)",
+                          fontSize: 12,
+                        }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
               )}
             </ChartCard>
-
           </div>
         )}
 
@@ -465,7 +553,6 @@ export default function ReportesPage() {
             </span>
           </div>
         )}
-
       </div>
     </div>
   );

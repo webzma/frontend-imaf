@@ -90,11 +90,15 @@ export default function CursoDetallePage({
     };
 
     Promise.all([
-      fetch(`${process.env.API_URL}api/estudiante/cursos/${id}`, { headers }).then((r) => {
+      fetch(`${process.env.API_URL}api/estudiante/cursos/${id}`, {
+        headers,
+      }).then((r) => {
         if (!r.ok) throw new Error("No encontrado");
         return r.json();
       }),
-      fetch(`${process.env.API_URL}api/estudiante/perfil`, { headers }).then((r) => r.json()),
+      fetch(`${process.env.API_URL}api/estudiante/perfil`, { headers }).then(
+        (r) => r.json(),
+      ),
     ])
       .then(([cursoData, perfil]) => {
         setCurso(cursoData);
@@ -111,7 +115,6 @@ export default function CursoDetallePage({
       <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-8 py-10 max-w-5xl mx-auto">
-
         {/* Back */}
         <Link
           href="/estudiante/cursos"
@@ -129,7 +132,6 @@ export default function CursoDetallePage({
           </div>
         ) : curso ? (
           <div className="space-y-6">
-
             {/* Header card */}
             <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
               <div className="h-1 gradient-primary" />
@@ -138,7 +140,8 @@ export default function CursoDetallePage({
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <span className="inline-flex items-center gap-1.5 font-mono text-sm font-bold text-on-primary-container bg-primary-container px-3 py-1 rounded-sm">
-                        <Hash className="w-3 h-3" />{curso.codigo}
+                        <Hash className="w-3 h-3" />
+                        {curso.codigo}
                       </span>
                       {esMiCurso && (
                         <span className="inline-flex items-center gap-1 font-sans text-xs font-bold text-white bg-primary px-2.5 py-1 rounded-full uppercase tracking-wide">
@@ -150,14 +153,22 @@ export default function CursoDetallePage({
                       {curso.nombre}
                     </h1>
                   </div>
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-sans text-sm font-semibold shrink-0 ${
-                    curso.estado === "activo"
-                      ? "bg-emerald-100 text-emerald-800"
-                      : "bg-amber-100 text-amber-800"
-                  }`}>
-                    {curso.estado === "activo"
-                      ? <><CheckCircle2 className="w-3.5 h-3.5" /> Activo</>
-                      : <><XCircle className="w-3.5 h-3.5" /> Inactivo</>}
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-sans text-sm font-semibold shrink-0 ${
+                      curso.estado === "activo"
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-amber-100 text-amber-800"
+                    }`}
+                  >
+                    {curso.estado === "activo" ? (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Activo
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="w-3.5 h-3.5" /> Inactivo
+                      </>
+                    )}
                   </span>
                 </div>
 
@@ -171,15 +182,23 @@ export default function CursoDetallePage({
                   <div className="flex items-center gap-2">
                     <Star className="w-4 h-4 text-muted-foreground/60" />
                     <div>
-                      <p className="font-sans text-xs text-muted-foreground">Créditos</p>
-                      <p className="font-sans text-sm font-semibold text-on-surface">{curso.creditos}</p>
+                      <p className="font-sans text-xs text-muted-foreground">
+                        Créditos
+                      </p>
+                      <p className="font-sans text-sm font-semibold text-on-surface">
+                        {curso.creditos}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-muted-foreground/60" />
                     <div>
-                      <p className="font-sans text-xs text-muted-foreground">Estudiantes</p>
-                      <p className="font-sans text-sm font-semibold text-on-surface">{curso.estudiantes.length}</p>
+                      <p className="font-sans text-xs text-muted-foreground">
+                        Estudiantes
+                      </p>
+                      <p className="font-sans text-sm font-semibold text-on-surface">
+                        {curso.estudiantes.length}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -187,7 +206,6 @@ export default function CursoDetallePage({
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
               {/* Profesor */}
               <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
                 <div className="flex items-center gap-2 mb-5">
@@ -235,7 +253,9 @@ export default function CursoDetallePage({
                     <div className="w-10 h-10 rounded-full bg-primary-container/60 flex items-center justify-center">
                       <GraduationCap className="w-4 h-4 text-on-primary-container" />
                     </div>
-                    <p className="font-sans text-sm text-muted-foreground">Sin profesor asignado</p>
+                    <p className="font-sans text-sm text-muted-foreground">
+                      Sin profesor asignado
+                    </p>
                   </div>
                 )}
               </div>
@@ -259,7 +279,9 @@ export default function CursoDetallePage({
                     <div className="w-10 h-10 rounded-full bg-primary-container/60 flex items-center justify-center">
                       <Users className="w-4 h-4 text-on-primary-container" />
                     </div>
-                    <p className="font-sans text-sm text-muted-foreground">Sin estudiantes matriculados</p>
+                    <p className="font-sans text-sm text-muted-foreground">
+                      Sin estudiantes matriculados
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -274,10 +296,15 @@ export default function CursoDetallePage({
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-sans text-sm text-on-surface truncate">{est.nombre}</p>
+                          <p className="font-sans text-sm text-on-surface truncate">
+                            {est.nombre}
+                          </p>
                         </div>
-                        <span className={`inline-flex px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold shrink-0 ${estadoStyle[est.estado] ?? "bg-muted text-muted-foreground"}`}>
-                          {est.estado.charAt(0).toUpperCase() + est.estado.slice(1)}
+                        <span
+                          className={`inline-flex px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold shrink-0 ${estadoStyle[est.estado] ?? "bg-muted text-muted-foreground"}`}
+                        >
+                          {est.estado.charAt(0).toUpperCase() +
+                            est.estado.slice(1)}
                         </span>
                       </div>
                     ))}
@@ -290,10 +317,10 @@ export default function CursoDetallePage({
             <div className="flex items-start gap-3 bg-secondary-container/40 rounded-sm px-4 py-3 border border-outline-variant/20">
               <Info className="w-4 h-4 text-on-surface/50 shrink-0 mt-0.5" />
               <p className="font-sans text-sm text-muted-foreground">
-                Para inscribirte en un curso o solicitar cambios, comunícate con la administración.
+                Para inscribirte en un curso o solicitar cambios, comunícate con
+                la administración.
               </p>
             </div>
-
           </div>
         ) : (
           <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-12">

@@ -45,10 +45,18 @@ function getCookie(name: string): string {
 
 /* ── Card ── */
 
-function CursoCard({ curso, miCursoId }: { curso: Curso; miCursoId: number | null }) {
+function CursoCard({
+  curso,
+  miCursoId,
+}: {
+  curso: Curso;
+  miCursoId: number | null;
+}) {
   const esMiCurso = miCursoId === curso.id;
   return (
-    <div className={`group relative bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 flex flex-col ${esMiCurso ? "ring-2 ring-primary/40" : ""}`}>
+    <div
+      className={`group relative bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 flex flex-col ${esMiCurso ? "ring-2 ring-primary/40" : ""}`}
+    >
       <div className="h-1 gradient-primary" />
       {esMiCurso && (
         <div className="absolute top-3 right-3 bg-primary text-white font-sans text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide uppercase">
@@ -58,13 +66,16 @@ function CursoCard({ curso, miCursoId }: { curso: Curso; miCursoId: number | nul
       <div className="p-6 flex flex-col flex-1">
         <div className="flex items-center justify-between mb-4">
           <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-on-primary-container bg-primary-container px-2.5 py-1 rounded-sm">
-            <Hash className="w-3 h-3" />{curso.codigo}
+            <Hash className="w-3 h-3" />
+            {curso.codigo}
           </span>
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-sans text-xs font-semibold ${
-            curso.estado === "activo"
-              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
-              : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
-          }`}>
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-full font-sans text-xs font-semibold ${
+              curso.estado === "activo"
+                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
+                : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
+            }`}
+          >
             {curso.estado === "activo" ? "Activo" : "Inactivo"}
           </span>
         </div>
@@ -75,13 +86,16 @@ function CursoCard({ curso, miCursoId }: { curso: Curso; miCursoId: number | nul
 
         {curso.profesor && (
           <p className="font-sans text-xs text-primary/70 font-medium mb-2 flex items-center gap-1">
-            <GraduationCap className="w-3 h-3" />{curso.profesor.name}
+            <GraduationCap className="w-3 h-3" />
+            {curso.profesor.name}
           </p>
         )}
 
         <p className="font-sans text-sm text-muted-foreground line-clamp-2 flex-1 mb-5">
           {curso.descripcion || (
-            <span className="italic text-muted-foreground/50">Sin descripción</span>
+            <span className="italic text-muted-foreground/50">
+              Sin descripción
+            </span>
           )}
         </p>
 
@@ -90,7 +104,9 @@ function CursoCard({ curso, miCursoId }: { curso: Curso; miCursoId: number | nul
             <Users className="w-3.5 h-3.5" />
             <span className="font-sans text-xs">
               {curso.estudiantes?.length ?? 0}{" "}
-              {(curso.estudiantes?.length ?? 0) === 1 ? "estudiante" : "estudiantes"}
+              {(curso.estudiantes?.length ?? 0) === 1
+                ? "estudiante"
+                : "estudiantes"}
             </span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground/60">
@@ -145,8 +161,12 @@ export default function EstudianteCursosPage() {
     };
 
     Promise.all([
-      fetch(`${process.env.API_URL}api/estudiante/cursos`, { headers }).then((r) => r.json()),
-      fetch(`${process.env.API_URL}api/estudiante/perfil`, { headers }).then((r) => r.json()),
+      fetch(`${process.env.API_URL}api/estudiante/cursos`, { headers }).then(
+        (r) => r.json(),
+      ),
+      fetch(`${process.env.API_URL}api/estudiante/perfil`, { headers }).then(
+        (r) => r.json(),
+      ),
     ])
       .then(([cursosData, perfil]) => {
         setCursos(Array.isArray(cursosData) ? cursosData : []);
@@ -176,7 +196,6 @@ export default function EstudianteCursosPage() {
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 px-8 py-10 max-w-6xl mx-auto">
-
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-3">
@@ -197,10 +216,21 @@ export default function EstudianteCursosPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-10 max-w-2xl">
           {[
             { label: "Total", value: cursos.length, icon: BookOpen },
-            { label: "Activos", value: cursos.filter((c) => c.estado === "activo").length, icon: Star },
-            { label: "Mi curso", value: miCursoId ? 1 : 0, icon: GraduationCap },
+            {
+              label: "Activos",
+              value: cursos.filter((c) => c.estado === "activo").length,
+              icon: Star,
+            },
+            {
+              label: "Mi curso",
+              value: miCursoId ? 1 : 0,
+              icon: GraduationCap,
+            },
           ].map((s) => (
-            <div key={s.label} className="bg-surface-container-low rounded-sm p-4 ambient-shadow">
+            <div
+              key={s.label}
+              className="bg-surface-container-low rounded-sm p-4 ambient-shadow"
+            >
               <div className="w-8 h-8 rounded-md flex items-center justify-center bg-primary-container mb-3">
                 <s.icon className="w-4 h-4 text-on-primary-container" />
               </div>
@@ -243,7 +273,10 @@ export default function EstudianteCursosPage() {
             </Select>
             {hasFilters && (
               <button
-                onClick={() => { setSearch(""); setFilterEstado("todos"); }}
+                onClick={() => {
+                  setSearch("");
+                  setFilterEstado("todos");
+                }}
                 className="font-sans text-xs text-muted-foreground hover:text-on-surface transition-colors underline underline-offset-2"
               >
                 Limpiar
@@ -255,14 +288,18 @@ export default function EstudianteCursosPage() {
         {/* Grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <>
             {filtered.length > 0 && (
               <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-on-surface/55 font-medium mb-5">
                 {filtered.length} curso{filtered.length !== 1 ? "s" : ""}
-                {hasFilters ? ` encontrado${filtered.length !== 1 ? "s" : ""}` : ""}
+                {hasFilters
+                  ? ` encontrado${filtered.length !== 1 ? "s" : ""}`
+                  : ""}
               </p>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -273,7 +310,9 @@ export default function EstudianteCursosPage() {
                   </div>
                   <div className="text-center">
                     <p className="font-serif font-light text-2xl text-on-surface mb-1">
-                      {hasFilters ? "Sin resultados" : "No hay cursos disponibles"}
+                      {hasFilters
+                        ? "Sin resultados"
+                        : "No hay cursos disponibles"}
                     </p>
                     <p className="font-sans text-sm text-muted-foreground">
                       {hasFilters

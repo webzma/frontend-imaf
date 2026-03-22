@@ -32,21 +32,41 @@ const navItems = [
   {
     section: "General",
     items: [
-      { label: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
+      {
+        label: "Dashboard",
+        href: "/admin",
+        icon: LayoutDashboard,
+        exact: true,
+      },
     ],
   },
   {
     section: "Gestión",
     items: [
-      { label: "Estudiantes", href: "/admin/estudiantes", icon: Users, exact: false },
-      { label: "Profesores", href: "/admin/profesores", icon: GraduationCap, exact: false },
+      {
+        label: "Estudiantes",
+        href: "/admin/estudiantes",
+        icon: Users,
+        exact: false,
+      },
+      {
+        label: "Profesores",
+        href: "/admin/profesores",
+        icon: GraduationCap,
+        exact: false,
+      },
       { label: "Cursos", href: "/admin/cursos", icon: BookOpen, exact: false },
     ],
   },
   {
     section: "Analítica",
     items: [
-      { label: "Reportes", href: "/admin/reportes", icon: BarChart2, exact: false },
+      {
+        label: "Reportes",
+        href: "/admin/reportes",
+        icon: BarChart2,
+        exact: false,
+      },
     ],
   },
 ];
@@ -66,7 +86,9 @@ export default function AppSidebar() {
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
-    const isDark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const isDark =
+      stored === "dark" ||
+      (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
     setDark(isDark);
     document.documentElement.classList.toggle("dark", isDark);
   }, []);

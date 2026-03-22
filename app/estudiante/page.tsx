@@ -82,7 +82,6 @@ export default function EstudianteDashboard() {
       <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-8 py-10 max-w-5xl mx-auto">
-
         {/* Page header */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-3">
@@ -112,11 +111,13 @@ export default function EstudianteDashboard() {
             ) : (
               <span
                 className={`inline-flex items-center px-3 py-1 rounded-full font-sans text-sm font-semibold ${
-                  estadoStyle[perfil?.estado ?? ""] ?? "bg-muted text-muted-foreground"
+                  estadoStyle[perfil?.estado ?? ""] ??
+                  "bg-muted text-muted-foreground"
                 }`}
               >
                 {perfil
-                  ? perfil.estado.charAt(0).toUpperCase() + perfil.estado.slice(1)
+                  ? perfil.estado.charAt(0).toUpperCase() +
+                    perfil.estado.slice(1)
                   : "—"}
               </span>
             )}
@@ -151,11 +152,14 @@ export default function EstudianteDashboard() {
                 <CalendarDays className="w-4 h-4 text-muted-foreground/60" />
                 <span className="font-sans text-sm text-on-surface">
                   {perfil
-                    ? new Date(perfil.fecha_inscripcion).toLocaleDateString("es-VE", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })
+                    ? new Date(perfil.fecha_inscripcion).toLocaleDateString(
+                        "es-VE",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )
                     : "—"}
                 </span>
               </div>
@@ -165,7 +169,6 @@ export default function EstudianteDashboard() {
 
         {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
           {/* Mi Curso */}
           <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
             <div className="h-1 gradient-primary" />
@@ -208,12 +211,16 @@ export default function EstudianteDashboard() {
                   <div className="flex items-center gap-5 pt-4 mt-4 border-t border-outline-variant/30">
                     <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
                       <Star className="w-3.5 h-3.5" />
-                      <span className="font-sans">{perfil.curso.creditos} créditos</span>
+                      <span className="font-sans">
+                        {perfil.curso.creditos} créditos
+                      </span>
                     </div>
                     {perfil.curso.profesor && (
                       <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
                         <GraduationCap className="w-3.5 h-3.5" />
-                        <span className="font-sans">{perfil.curso.profesor.name}</span>
+                        <span className="font-sans">
+                          {perfil.curso.profesor.name}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -272,25 +279,38 @@ export default function EstudianteDashboard() {
                 <div className="w-full pt-3 border-t border-outline-variant/30 space-y-2 text-left">
                   {perfil.telefono && (
                     <div className="flex justify-between">
-                      <span className="font-sans text-xs text-muted-foreground">Teléfono</span>
-                      <span className="font-sans text-xs text-on-surface">{perfil.telefono}</span>
+                      <span className="font-sans text-xs text-muted-foreground">
+                        Teléfono
+                      </span>
+                      <span className="font-sans text-xs text-on-surface">
+                        {perfil.telefono}
+                      </span>
                     </div>
                   )}
                   {perfil.genero && (
                     <div className="flex justify-between">
-                      <span className="font-sans text-xs text-muted-foreground">Género</span>
-                      <span className="font-sans text-xs text-on-surface capitalize">{perfil.genero}</span>
+                      <span className="font-sans text-xs text-muted-foreground">
+                        Género
+                      </span>
+                      <span className="font-sans text-xs text-on-surface capitalize">
+                        {perfil.genero}
+                      </span>
                     </div>
                   )}
                   {perfil.fecha_nacimiento && (
                     <div className="flex justify-between">
-                      <span className="font-sans text-xs text-muted-foreground">Nacimiento</span>
+                      <span className="font-sans text-xs text-muted-foreground">
+                        Nacimiento
+                      </span>
                       <span className="font-sans text-xs text-on-surface">
-                        {new Date(perfil.fecha_nacimiento).toLocaleDateString("es-VE", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {new Date(perfil.fecha_nacimiento).toLocaleDateString(
+                          "es-VE",
+                          {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          },
+                        )}
                       </span>
                     </div>
                   )}

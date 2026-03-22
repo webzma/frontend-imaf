@@ -51,7 +51,6 @@ export default function CursoPage() {
       <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-8 py-10 max-w-4xl mx-auto">
-
         {/* Page header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
@@ -76,7 +75,6 @@ export default function CursoPage() {
           </div>
         ) : curso ? (
           <div className="space-y-6">
-
             {/* Main course card */}
             <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
               <div className="h-1 gradient-primary" />
@@ -117,7 +115,9 @@ export default function CursoPage() {
                   <div className="flex items-center gap-2">
                     <Star className="w-4 h-4 text-muted-foreground/60" />
                     <div>
-                      <p className="font-sans text-xs text-muted-foreground">Créditos</p>
+                      <p className="font-sans text-xs text-muted-foreground">
+                        Créditos
+                      </p>
                       <p className="font-sans text-sm font-semibold text-on-surface">
                         {curso.creditos}
                       </p>
@@ -127,7 +127,9 @@ export default function CursoPage() {
                     <div className="flex items-center gap-2">
                       <GraduationCap className="w-4 h-4 text-muted-foreground/60" />
                       <div>
-                        <p className="font-sans text-xs text-muted-foreground">Profesor</p>
+                        <p className="font-sans text-xs text-muted-foreground">
+                          Profesor
+                        </p>
                         <p className="font-sans text-sm font-semibold text-on-surface">
                           {curso.profesor.name}
                         </p>
@@ -142,8 +144,8 @@ export default function CursoPage() {
             <div className="flex items-start gap-3 bg-secondary-container/40 rounded-sm px-4 py-3 border border-outline-variant/20">
               <Info className="w-4 h-4 text-on-surface/50 shrink-0 mt-0.5" />
               <p className="font-sans text-sm text-muted-foreground">
-                Si necesitas cambiar de curso o tienes alguna consulta sobre tu inscripción,
-                comunícate con la administración.
+                Si necesitas cambiar de curso o tienes alguna consulta sobre tu
+                inscripción, comunícate con la administración.
               </p>
             </div>
           </div>
@@ -158,8 +160,8 @@ export default function CursoPage() {
                   Sin curso asignado
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground">
-                  No estás inscrito en ningún curso actualmente.
-                  Comunícate con la administración para más información.
+                  No estás inscrito en ningún curso actualmente. Comunícate con
+                  la administración para más información.
                 </p>
               </div>
             </div>

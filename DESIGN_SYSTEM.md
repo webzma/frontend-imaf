@@ -15,35 +15,42 @@ Logramos un aspecto "característico" al romper la plantilla a través de **Asim
 La paleta es una transición de tonos pesados de terracota a un espectro refinado de cuarzo rosa empolvado y crema cálido.
 
 #### Primary (Principal)
+
 - **HEX**: `#7d5050`
 - **OKLCH**: `oklch(0.48 0.05 15)`
 - **Uso**: Rosa sofisticado y apagado. Úsalo para momentos clave de marca y llamadas a la acción.
 
 #### Primary Container
+
 - **OKLCH**: `oklch(0.55 0.06 15)`
 - **Uso**: Variante para gradientes y estados hover
 
 #### Surface & Background
+
 - **HEX**: `#fcf9f4`
 - **OKLCH**: `oklch(0.98 0.008 35)`
 - **Uso**: Crema cálido y lechoso que proporciona una sensación más suave y "costosa" que el blanco puro.
 
 #### Secondary
+
 - **HEX**: `#685b5b`
 - **OKLCH**: `oklch(0.42 0.02 15)`
 - **Uso**: Ancla "empolvada" que asegura que el sistema se sienta fundamentado y maduro.
 
 #### Secondary Container
+
 - **HEX**: `#f0dede`
 - **OKLCH**: `oklch(0.90 0.02 15)`
 - **Uso**: Fondos secundarios, elementos de soporte
 
 #### Tertiary
+
 - **HEX**: `#785253`
 - **OKLCH**: `oklch(0.50 0.04 15)`
 - **Uso**: Proporciona el ancla "empolvada" adicional
 
 #### On Surface (Texto)
+
 - **HEX**: `#1c1c19`
 - **OKLCH**: `oklch(0.15 0.005 35)`
 - **Uso**: **Nunca uses negro puro**. Usa este color para todo el texto para mantener la atmósfera "rosa empolvado" cohesiva.
@@ -146,31 +153,37 @@ Si se requiere un borde para accesibilidad, usa el token `outline-variant` al **
 ### Botones
 
 #### Primary Button
+
 ```tsx
 <button className="bg-primary text-primary-foreground rounded-md px-6 py-3 ambient-shadow">
   Acción Principal
 </button>
 ```
+
 - Fondo: `bg-primary` (#7d5050)
 - Texto: `text-primary-foreground` (blanco)
 - Forma: `rounded-md` (0.375rem)
 - Sombra: `ambient-shadow`
 
 #### Secondary Button
+
 ```tsx
 <button className="bg-secondary-container text-on-secondary-container rounded-md px-6 py-3">
   Acción Secundaria
 </button>
 ```
+
 - Fondo: `bg-secondary-container` (#f0dede)
 - Sin borde
 
 #### Tertiary Button (Solo Texto)
+
 ```tsx
 <button className="text-primary underline-offset-4 hover:underline">
   Acción Terciaria
 </button>
 ```
+
 - Solo texto usando color `primary`
 - Subrayado sutil que aparece solo en hover
 
@@ -179,7 +192,7 @@ Si se requiere un borde para accesibilidad, usa el token `outline-variant` al **
 **Estilo**: Abandona el aspecto de "caja". Usa un fondo `surface-variant` con un borde redondeado `sm` (0.125rem) en el borde inferior.
 
 ```tsx
-<input 
+<input
   className="bg-surface-variant rounded-b-sm px-4 py-3 w-full focus:bg-surface-container-high focus:text-primary outline-none transition-colors"
   placeholder="Texto de ejemplo"
 />
@@ -218,7 +231,9 @@ Si se requiere un borde para accesibilidad, usa el token `outline-variant` al **
 ```tsx
 <ul className="space-y-3.5">
   <li>
-    <span className="font-sans text-sm text-muted-foreground uppercase">Metadata</span>
+    <span className="font-sans text-sm text-muted-foreground uppercase">
+      Metadata
+    </span>
     <h4 className="font-sans text-lg font-medium">Nombre del Item</h4>
   </li>
 </ul>
@@ -263,16 +278,20 @@ Alinea un encabezado a la izquierda, pero desplaza el texto del cuerpo a la dere
 ## Clases de Utilidad Personalizadas
 
 ### Sombras
+
 - `ambient-shadow`: Sombra ambient bloom (12px offset, 32px blur, 5% opacity)
 
 ### Efectos
+
 - `glass`: Glassmorphism con backdrop-blur de 20px
 - `gradient-primary`: Gradiente lineal de primary a primary-container
 
 ### Espaciado
+
 - `editorial-spacing-asymmetric`: Padding asimétrico (1.4rem izq, 5.5rem der)
 
 ### Tipografía
+
 - `tight-tracking`: Letter-spacing de -0.02em para headlines grandes
 
 ---
