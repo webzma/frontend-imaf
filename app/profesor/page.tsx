@@ -23,6 +23,8 @@ import {
   BadgeCheck,
   Building2,
 } from "lucide-react";
+import Image from "next/image";
+import logoImaf from "@/public/logo-imaf.webp";
 
 /* ── Types ── */
 
@@ -205,22 +207,8 @@ export default function ProfesorPage() {
       {/* Header */}
       <header className="relative z-10 px-8 py-5 flex items-center justify-between border-b border-outline-variant/30">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center ambient-shadow">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14M4 19h16M8 7h8M8 11h5"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M15 15l2 2 4-4"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+          <div className="w-8 h-8 flex items-center justify-center ambient-shadow">
+            <Image src={logoImaf} alt="IMAF" width={28} height={28} />
           </div>
           <span className="font-sans font-semibold text-on-surface tracking-tight">
             IMAF
