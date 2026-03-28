@@ -27,6 +27,8 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import logoImaf from "@/public/logo-imaf.webp";
+import Image from "next/image";
 
 const navItems = [
   {
@@ -124,22 +126,9 @@ export default function AppSidebar() {
       {/* Logo */}
       <SidebarHeader className="border-b border-sidebar-border px-5 py-5">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center ambient-shadow shrink-0">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14M4 19h16M8 7h8M8 11h5"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M15 15l2 2 4-4"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+          <div
+            className={`w-8 h-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}>
+            <Image src={logoImaf} alt="IMAF" width={28} height={28} />
           </div>
           {!collapsed && (
             <div>
@@ -168,8 +157,7 @@ export default function AppSidebar() {
                     <SidebarMenuButton
                       asChild
                       isActive={isActive(item.href, item.exact)}
-                      tooltip={item.label}
-                    >
+                      tooltip={item.label}>
                       <Link href={item.href}>
                         <item.icon />
                         <span>{item.label}</span>
@@ -205,8 +193,7 @@ export default function AppSidebar() {
             <SidebarMenuButton
               onClick={toggleDark}
               tooltip={dark ? "Modo claro" : "Modo oscuro"}
-              className="text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-            >
+              className="text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent">
               {dark ? <Sun /> : <Moon />}
               <span>{dark ? "Modo claro" : "Modo oscuro"}</span>
             </SidebarMenuButton>
@@ -215,8 +202,7 @@ export default function AppSidebar() {
             <SidebarMenuButton
               onClick={handleLogout}
               tooltip="Cerrar sesión"
-              className="text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10"
-            >
+              className="text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10">
               <LogOut />
               <span>Cerrar sesión</span>
             </SidebarMenuButton>
