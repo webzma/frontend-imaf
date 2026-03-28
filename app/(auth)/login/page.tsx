@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import logoImaf from "@/public/logo-imaf.webp";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -59,27 +61,10 @@ export default function LoginPage() {
         <div className="absolute -bottom-16 -left-12 w-[320px] h-[320px] rounded-full bg-secondary-container/50 blur-[70px] pointer-events-none" />
 
         {/* Logotipo */}
-        <div className="flex items-center gap-3 relative z-10">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center ambient-shadow shrink-0">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14M4 19h16M8 7h8M8 11h5"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M15 15l2 2 4-4"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+        <div className="flex items-center relative z-10">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center ambient-shadow shrink-0">
+            <Image src={logoImaf} alt="IMAF" width={40} height={40} />
           </div>
-          <span className="font-sans font-semibold text-on-surface tracking-tight text-lg">
-            IMAF
-          </span>
         </div>
 
         {/* Headline editorial */}
@@ -108,27 +93,10 @@ export default function LoginPage() {
       {/* ── Panel derecho: formulario ── */}
       <div className="flex flex-col items-center justify-center px-8 py-14 bg-surface relative min-h-screen">
         {/* Logo mobile */}
-        <div className="lg:hidden flex items-center gap-3 mb-12">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center ambient-shadow">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14M4 19h16M8 7h8M8 11h5"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M15 15l2 2 4-4"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+        <div className="lg:hidden flex items-center gap-3 mb-14">
+          <div className="w-9 h-9 flex items-center justify-center ambient-shadow">
+            <Image src={logoImaf} alt="IMAF" width={62} height={62} />
           </div>
-          <span className="font-sans font-semibold text-on-surface tracking-tight text-lg">
-            IMAF
-          </span>
         </div>
 
         <div className="w-full max-w-sm">
@@ -152,8 +120,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground"
-              >
+                className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
                 Correo electrónico
               </Label>
               <Input
@@ -170,8 +137,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label
                 htmlFor="password"
-                className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground"
-              >
+                className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
                 Contraseña
               </Label>
               <div className="relative">
@@ -188,8 +154,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors"
-                >
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors">
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
                   ) : (
@@ -202,8 +167,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full h-11 mt-1 font-sans font-semibold tracking-wide"
-              disabled={loading}
-            >
+              disabled={loading}>
               {loading ? (
                 "Ingresando..."
               ) : (
@@ -218,8 +182,7 @@ export default function LoginPage() {
             ¿No tienes una cuenta?{" "}
             <Link
               href="/register"
-              className="text-primary hover:text-primary/70 font-medium transition-colors"
-            >
+              className="text-primary hover:text-primary/70 font-medium transition-colors">
               Regístrate
             </Link>
           </p>

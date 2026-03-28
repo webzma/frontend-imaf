@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
+import logoImaf from "@/public/logo-imaf.webp";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -87,33 +89,15 @@ export default function RegisterPage() {
         <div className="absolute -top-10 right-0 w-[360px] h-[180px] rounded-full bg-primary/8 blur-[60px] pointer-events-none" />
         <div className="max-w-2xl mx-auto flex items-center justify-between relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center ambient-shadow shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14M4 19h16M8 7h8M8 11h5"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M15 15l2 2 4-4"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+            <div className="w-8 h-8 flex items-center justify-center ambient-shadow shrink-0">
+              <Image src={logoImaf} alt="IMAF" width={32} height={32} />
             </div>
-            <span className="font-sans font-semibold text-on-surface tracking-tight">
-              IMAF
-            </span>
           </div>
           <p className="font-sans text-xs text-muted-foreground hidden sm:block">
             ¿Ya tienes cuenta?{" "}
             <Link
               href="/login"
-              className="text-primary font-medium hover:text-primary/70 transition-colors"
-            >
+              className="text-primary font-medium hover:text-primary/70 transition-colors">
               Iniciar sesión
             </Link>
           </p>
@@ -218,8 +202,7 @@ export default function RegisterPage() {
               <Select
                 value={form.genero}
                 onValueChange={(value) => setForm({ ...form, genero: value })}
-                required
-              >
+                required>
                 <SelectTrigger id="genero">
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
@@ -251,8 +234,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors"
-                >
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors">
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
                   ) : (
@@ -282,8 +264,7 @@ export default function RegisterPage() {
             <Button
               type="submit"
               className="w-full h-11 font-sans font-semibold tracking-wide"
-              disabled={loading}
-            >
+              disabled={loading}>
               {loading ? (
                 "Registrando..."
               ) : (
@@ -308,8 +289,7 @@ export default function RegisterPage() {
             ¿Ya tienes cuenta?{" "}
             <Link
               href="/login"
-              className="text-primary font-medium hover:text-primary/70 transition-colors"
-            >
+              className="text-primary font-medium hover:text-primary/70 transition-colors">
               Iniciar sesión
             </Link>
           </p>
