@@ -101,12 +101,12 @@ const profesorSchema = z.object({
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
   cedula: z.string().min(1, "La cédula es obligatoria"),
-  telefono: z.string().max(20).optional().or(z.literal("")),
-  fecha_nacimiento: z.string().optional().or(z.literal("")),
+  telefono: z.string().max(20).optional(),
+  fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
-  especialidad: z.string().max(255).optional().or(z.literal("")),
+  especialidad: z.string().max(255).optional(),
   titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
-  departamento: z.string().max(255).optional().or(z.literal("")),
+  departamento: z.string().max(255).optional(),
 });
 
 type ProfesorForm = z.infer<typeof profesorSchema>;
