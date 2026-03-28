@@ -108,8 +108,8 @@ const editEstudianteSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio").max(255),
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   cedula: z.string().min(1, "La cédula es obligatoria"),
-  telefono: z.string().max(20).optional().or(z.literal("")),
-  fecha_nacimiento: z.string().optional().or(z.literal("")),
+  telefono: z.string().max(20).optional(),
+  fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
   curso_id: z.string().optional(),
   fecha_inscripcion: z
@@ -125,8 +125,8 @@ const estudianteSchema = z.object({
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
   cedula: z.string().min(1, "La cédula es obligatoria"),
-  telefono: z.string().max(20).optional().or(z.literal("")),
-  fecha_nacimiento: z.string().optional().or(z.literal("")),
+  telefono: z.string().max(20).optional(),
+  fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
   curso_id: z.string().optional(),
   fecha_inscripcion: z

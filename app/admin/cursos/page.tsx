@@ -83,7 +83,7 @@ function getAuthHeaders() {
 const cursoSchema = z.object({
   nombre: z.string().min(1, "El nombre es obligatorio").max(255),
   codigo: z.string().min(1, "El código es obligatorio").max(50),
-  descripcion: z.string().max(1000).optional().or(z.literal("")),
+  descripcion: z.string().max(1000).optional(),
   profesor_id: z.string().min(1, "Debes seleccionar un profesor"),
   creditos: z
     .number()
