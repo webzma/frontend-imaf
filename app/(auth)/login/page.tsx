@@ -84,7 +84,7 @@ export default function LoginPage() {
         </div>
 
         {/* Cita al pie */}
-        <p className="font-serif italic text-2xl text-white leading-relaxed relative z-10 max-w-120">
+        <p className="font-serif italic text-2xl text-primary/80 leading-relaxed relative z-10 max-w-120">
           &ldquo;La educación es el arma más poderosa que puedes usar para
           cambiar el mundo.&rdquo;
         </p>
