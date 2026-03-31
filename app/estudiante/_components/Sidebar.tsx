@@ -148,7 +148,9 @@ export default function EstudianteSidebar() {
       {/* Logo */}
       <SidebarHeader className="border-b border-sidebar-border px-5 py-5">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}>
+          <div
+            className={`w-8 h-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}
+          >
             <Image src={logoImaf} alt="IMAF" width={28} height={28} />
           </div>
           {!collapsed && (
@@ -178,7 +180,8 @@ export default function EstudianteSidebar() {
                     <SidebarMenuButton
                       asChild
                       isActive={isActive(item.href, item.exact)}
-                      tooltip={item.label}>
+                      tooltip={item.label}
+                    >
                       <Link href={item.href}>
                         <item.icon />
                         <span>{item.label}</span>
@@ -216,7 +219,8 @@ export default function EstudianteSidebar() {
             <SidebarMenuButton
               onClick={toggleDark}
               tooltip={dark ? "Modo claro" : "Modo oscuro"}
-              className="text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent">
+              className="text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+            >
               {dark ? <Sun /> : <Moon />}
               <span>{dark ? "Modo claro" : "Modo oscuro"}</span>
             </SidebarMenuButton>
@@ -225,7 +229,8 @@ export default function EstudianteSidebar() {
             <SidebarMenuButton
               onClick={handleLogout}
               tooltip="Cerrar sesión"
-              className="text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10">
+              className="text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10"
+            >
               <LogOut />
               <span>Cerrar sesión</span>
             </SidebarMenuButton>

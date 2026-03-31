@@ -28,13 +28,22 @@ export default function LandingPage() {
               </span>
             </Link>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#beneficios" className="text-sm text-muted-foreground hover:text-on-surface transition-colors">
+              <a
+                href="#beneficios"
+                className="text-sm text-muted-foreground hover:text-on-surface transition-colors"
+              >
                 Beneficios
               </a>
-              <a href="#como-funciona" className="text-sm text-muted-foreground hover:text-on-surface transition-colors">
+              <a
+                href="#como-funciona"
+                className="text-sm text-muted-foreground hover:text-on-surface transition-colors"
+              >
                 Cómo Funciona
               </a>
-              <a href="#faq" className="text-sm text-muted-foreground hover:text-on-surface transition-colors">
+              <a
+                href="#faq"
+                className="text-sm text-muted-foreground hover:text-on-surface transition-colors"
+              >
                 FAQ
               </a>
             </div>
@@ -80,8 +89,9 @@ export default function LandingPage() {
                   <span className="text-primary italic">a tu ritmo</span>
                 </h1>
                 <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-lg lg:pl-1">
-                  Accede a cursos de calidad, sigue tu progreso en tiempo real y 
-                  obtén certificados que validen tus conocimientos. Todo en un solo lugar.
+                  Accede a cursos de calidad, sigue tu progreso en tiempo real y
+                  obtén certificados que validen tus conocimientos. Todo en un
+                  solo lugar.
                 </p>
               </div>
 
@@ -122,8 +132,12 @@ export default function LandingPage() {
                   <GraduationCap className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="font-sans font-semibold text-on-surface text-lg">500+</p>
-                  <p className="text-sm text-muted-foreground">Estudiantes activos</p>
+                  <p className="font-sans font-semibold text-on-surface text-lg">
+                    500+
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Estudiantes activos
+                  </p>
                 </div>
               </div>
             </div>
@@ -279,7 +293,8 @@ export default function LandingPage() {
                 title: "Regístrate gratis",
                 description:
                   "Crea tu cuenta en segundos. Solo necesitas un correo electrónico para comenzar.",
-                image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&q=80",
+                image:
+                  "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&q=80",
                 imageAlt: "Persona registrándose en su laptop",
               },
               {
@@ -288,7 +303,8 @@ export default function LandingPage() {
                 title: "Elige tus cursos",
                 description:
                   "Explora nuestro catálogo y selecciona los cursos que te interesen. Puedes inscribirte en varios a la vez.",
-                image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=500&q=80",
+                image:
+                  "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=500&q=80",
                 imageAlt: "Estudiante explorando cursos",
               },
               {
@@ -297,7 +313,8 @@ export default function LandingPage() {
                 title: "Aprende y certifícate",
                 description:
                   "Completa las lecciones a tu ritmo, realiza las evaluaciones y obtén tu certificado.",
-                image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500&q=80",
+                image:
+                  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500&q=80",
                 imageAlt: "Estudiantes celebrando su graduación",
               },
             ].map((item, i) => {

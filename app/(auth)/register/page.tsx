@@ -97,7 +97,8 @@ export default function RegisterPage() {
             ¿Ya tienes cuenta?{" "}
             <Link
               href="/login"
-              className="text-primary font-medium hover:text-primary/70 transition-colors">
+              className="text-primary font-medium hover:text-primary/70 transition-colors"
+            >
               Iniciar sesión
             </Link>
           </p>
@@ -202,7 +203,8 @@ export default function RegisterPage() {
               <Select
                 value={form.genero}
                 onValueChange={(value) => setForm({ ...form, genero: value })}
-                required>
+                required
+              >
                 <SelectTrigger id="genero">
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
@@ -234,7 +236,8 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors"
+                >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
                   ) : (
@@ -264,7 +267,8 @@ export default function RegisterPage() {
             <Button
               type="submit"
               className="w-full h-11 font-sans font-semibold tracking-wide"
-              disabled={loading}>
+              disabled={loading}
+            >
               {loading ? (
                 "Registrando..."
               ) : (
@@ -289,7 +293,8 @@ export default function RegisterPage() {
             ¿Ya tienes cuenta?{" "}
             <Link
               href="/login"
-              className="text-primary font-medium hover:text-primary/70 transition-colors">
+              className="text-primary font-medium hover:text-primary/70 transition-colors"
+            >
               Iniciar sesión
             </Link>
           </p>

@@ -120,7 +120,8 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+                className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground"
+              >
                 Correo electrónico
               </Label>
               <Input
@@ -137,7 +138,8 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label
                 htmlFor="password"
-                className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+                className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground"
+              >
                 Contraseña
               </Label>
               <div className="relative">
@@ -154,7 +156,8 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors"
+                >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
                   ) : (
@@ -167,7 +170,8 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full h-11 mt-1 font-sans font-semibold tracking-wide"
-              disabled={loading}>
+              disabled={loading}
+            >
               {loading ? (
                 "Ingresando..."
               ) : (
@@ -182,7 +186,8 @@ export default function LoginPage() {
             ¿No tienes una cuenta?{" "}
             <Link
               href="/register"
-              className="text-primary hover:text-primary/70 font-medium transition-colors">
+              className="text-primary hover:text-primary/70 font-medium transition-colors"
+            >
               Regístrate
             </Link>
           </p>

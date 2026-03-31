@@ -11,6 +11,7 @@ El sistema permite gestionar de manera integral la inscripción, seguimiento y a
 El sistema cuenta con tres roles principales:
 
 ### 🔧 Administrador
+
 - Gestión completa de cursos y usuarios
 - Creación y administración de cuentas de instructores
 - Creación y configuración de cursos
@@ -18,12 +19,14 @@ El sistema cuenta con tres roles principales:
 - Supervisión general del sistema
 
 ### 👨‍🏫 Instructor (Profesor)
+
 - Gestión de los alumnos inscritos en sus cursos
 - Evaluación y seguimiento del progreso estudiantil
 - Definición de aprobaciones o reprobaciones
 - Administración del contenido y actividades del curso
 
 ### 👩‍🎓 Estudiante
+
 - Registro en la plataforma
 - Inscripción en cursos disponibles
 - Acceso al contenido de los cursos (solo después de validar el pago)
@@ -32,28 +35,33 @@ El sistema cuenta con tres roles principales:
 ## Tecnologías Utilizadas
 
 ### Framework y Librerías Principales
+
 - **Next.js 16.1.6** - Framework de React para aplicaciones web full-stack
 - **React 19.2.3** - Librería principal para la construcción de interfaces de usuario
 - **TypeScript 5** - Superset de JavaScript para tipado estático
 
 ### Estilos y UI
+
 - **Tailwind CSS 4** - Framework de CSS para diseño rápido y personalizable
 - **shadcn/ui 4.0.5** - Sistema de componentes UI reutilizables
 - **Lucide React** - Biblioteca de iconos
 - **Radix UI** - Componentes accesibles y sin estilo
 
 ### Formularios y Validación
+
 - **React Hook Form 7.71.2** - Manejo de formularios con validación eficiente
 - **Zod 3.22.4** - Validación de esquemas de TypeScript
 - **@hookform/resolvers** - Integración entre React Hook Form y Zod
 
 ### Utilidades y Herramientas
+
 - **Recharts 3.8.0** - Biblioteca para gráficos y visualizaciones
 - **Sonner 2.0.7** - Sistema de notificaciones toast
 - **nextjs-toploader 3.9.17** - Barra de progreso para navegación
 - **clsx y tailwind-merge** - Utilidades para manejo de clases CSS
 
 ### Desarrollo y Calidad
+
 - **ESLint 9** - Linter para JavaScript/TypeScript
 - **Prettier 3.8.1** - Formateador de código
 - **Husky 9.1.7** - Git hooks para automatización
@@ -62,6 +70,7 @@ El sistema cuenta con tres roles principales:
 ## Instalación y Ejecución en Local
 
 ### Prerrequisitos
+
 - Node.js (versión 18 o superior)
 - npm, yarn, pnpm o bun
 
