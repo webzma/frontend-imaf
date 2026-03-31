@@ -20,7 +20,7 @@ export function middleware(request: NextRequest) {
     if (isAuthenticated) {
       return NextResponse.redirect(new URL(getDashboard(role!), request.url));
     }
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.next();
   }
 
   // --- Auth routes: redirect to dashboard if already logged in ---
