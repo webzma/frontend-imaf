@@ -12,6 +12,7 @@ import {
   BarChart2,
   Moon,
   Sun,
+  CreditCard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -58,6 +59,7 @@ const navItems = [
         exact: false,
       },
       { label: "Cursos", href: "/admin/cursos", icon: BookOpen, exact: false },
+      { label: "Pagos", href: "/admin/pagos", icon: CreditCard, exact: false },
     ],
   },
   {
