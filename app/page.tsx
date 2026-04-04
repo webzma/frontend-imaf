@@ -11,6 +11,7 @@ import {
   Target,
 } from "lucide-react";
 import { FAQSection } from "./_components/faq-section";
+import LogoImaf from "@/public/logo-imaf.webp";
 
 export default function LandingPage() {
   return (
@@ -20,10 +21,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-16 py-5">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-md bg-primary flex items-center justify-center">
-                <GraduationCap className="w-5 h-5 text-primary-foreground" />
+              <div className="w-9 h-9 flex items-center justify-center">
+                <Image src={LogoImaf} alt="IMAF" width={30} height={30} />
               </div>
-              <span className="font-serif text-2xl font-semibold text-on-surface">
+              <span className="font-serif text-2xl font-semibold text-on-surface ml-1">
                 IMAF
               </span>
             </Link>
@@ -430,8 +431,8 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-12 gap-12 mb-12">
             <div className="md:col-span-4 space-y-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                  <GraduationCap className="w-4 h-4 text-primary-foreground" />
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <Image src={LogoImaf} alt="IMAF" width={24} height={24} />
                 </div>
                 <span className="font-serif text-xl font-semibold text-on-surface">
                   IMAF
