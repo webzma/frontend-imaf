@@ -514,21 +514,21 @@ export default function CursoDetallePage({
                     Profesor
                   </h3>
                 </div>
-                {curso.profesor ? (
+                {curso.profesor?.user ? (
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
                       <span className="font-sans text-base font-bold text-on-primary-container">
-                        {getInitials(curso.profesor.user.name)}
+                        {getInitials(curso.profesor.user.name ?? "")}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-serif font-light text-xl text-on-surface">
-                        {curso.profesor.user.name}
+                        {curso.profesor.user.name ?? "Sin nombre"}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1">
                         <Mail className="w-3 h-3 text-muted-foreground/60" />
                         <p className="font-sans text-sm text-muted-foreground truncate">
-                          {curso.profesor.user.email}
+                          {curso.profesor.user.email ?? ""}
                         </p>
                       </div>
                       {curso.profesor.especialidad && (
