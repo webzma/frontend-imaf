@@ -10,7 +10,7 @@ const PROTECTED_ROUTES: Record<string, string[]> = {
   "/estudiante": ["admin", "estudiante"],
 };
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const role = request.cookies.get("role")?.value ?? null;
   const isAuthenticated = !!role;
