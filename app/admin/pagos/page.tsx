@@ -32,6 +32,7 @@ import {
   ImageIcon,
   BookOpen,
   Users,
+  AlertTriangle,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -129,21 +130,38 @@ function PagoDetailModal({
 }) {
   const [nota, setNota] = useState("");
   const [saving, setSaving] = useState<"aprobado" | "rechazado" | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    action: "aprobado" | "rechazado";
+    open: boolean;
+  }>({ action: "aprobado", open: false });
 
   useEffect(() => {
     if (pago) setNota(pago.nota_admin ?? "");
   }, [pago]);
 
   const handleDecision = async (estado: "aprobado" | "rechazado") => {
+    // Validar que se ingrese motivo para rechazo
+    if (estado === "rechazado" && !nota.trim()) {
+      toast.error("Debes ingresar un motivo para el rechazo del pago.");
+      return;
+    }
+
+    setConfirmDialog({ action: estado, open: true });
+  };
+
+  const confirmDecision = async () => {
     if (!pago) return;
-    setSaving(estado);
+    setSaving(confirmDialog.action);
     try {
       const res = await fetch(
         `${process.env.API_URL}api/admin/pagos/${pago.id}`,
         {
           method: "PUT",
           headers: getAuthHeaders(),
-          body: JSON.stringify({ estado, nota_admin: nota || null }),
+          body: JSON.stringify({ 
+            estado: confirmDialog.action, 
+            nota_admin: confirmDialog.action === "rechazado" ? nota.trim() : null 
+          }),
         },
       );
       const body = await res.json();
@@ -155,23 +173,32 @@ function PagoDetailModal({
         headers: getAuthHeaders(),
         body: JSON.stringify({
           user_id: pago.estudiante.user.email, // Send to student's user
-          titulo: estado === "aprobado" 
+          titulo: confirmDialog.action === "aprobado" 
             ? "¡Pago Aprobado!" 
             : "Pago Rechazado",
-          mensaje: estado === "aprobado"
+          mensaje: confirmDialog.action === "aprobado"
             ? `Tu pago para el curso ${pago.curso.nombre} ha sido aprobado. Ya estás inscrito en el curso.`
-            : `Tu pago para el curso ${pago.curso.nombre} ha sido rechazado. ${nota ? 'Motivo: ' + nota : 'Por favor, contacta a la administración para más información.'}`,
+            : `Tu pago para el curso ${pago.curso.nombre} ha sido rechazado. Motivo: ${nota.trim()}`,
           url: `/estudiante/curso`,
         }),
       });
 
       toast.success(
-        estado === "aprobado"
+        confirmDialog.action === "aprobado"
           ? "Pago aprobado. Estudiante inscrito y notificado."
           : "Pago rechazado. Estudiante notificado.",
       );
-      onUpdate(body);
+      
+      // Emit event to update pagos list
+      const updatedPayment = body.pago || body;
+      
+      window.dispatchEvent(new CustomEvent('paymentUpdated', { 
+        detail: { updatedPayment }
+      }));
+      
+      onUpdate(updatedPayment);
       onClose();
+      setConfirmDialog({ action: "aprobado", open: false });
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Error al actualizar.");
     } finally {
@@ -337,6 +364,65 @@ function PagoDetailModal({
             </Button>
           </div>
         )}
+
+        {/* Modal de confirmación */}
+        <Dialog open={confirmDialog.open} onOpenChange={(v) => !v && setConfirmDialog({ ...confirmDialog, open: false })}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-serif font-light text-xl tight-tracking flex items-center gap-2">
+                <AlertTriangle className={`w-5 h-5 ${
+                  confirmDialog.action === "aprobado" ? "text-emerald-600" : "text-red-600"
+                }`} />
+                {confirmDialog.action === "aprobado" ? "¿Aprobar pago?" : "¿Rechazar pago?"}
+              </DialogTitle>
+              <DialogDescription className="font-sans text-sm text-muted-foreground">
+                {confirmDialog.action === "aprobado" 
+                  ? `¿Estás seguro que deseas aprobar el pago de ${pago.estudiante.nombre} para el curso ${pago.curso.nombre}? Esta acción inscribirá al estudiante en el curso.`
+                  : `¿Estás seguro que deseas rechazar el pago de ${pago.estudiante.nombre} para el curso ${pago.curso.nombre}? El estudiante recibirá una notificación con el motivo del rechazo.`
+                }
+              </DialogDescription>
+            </DialogHeader>
+            
+            {confirmDialog.action === "rechazado" && (
+              <div className="mb-4">
+                <Label className="font-sans text-sm font-medium text-on-surface mb-2">
+                  Motivo del rechazo <span className="text-red-600">*</span>
+                </Label>
+                <Input
+                  value={nota}
+                  onChange={(e) => setNota(e.target.value)}
+                  placeholder="Escribe el motivo por el cual se rechaza el pago..."
+                  className="font-sans text-sm"
+                />
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmDialog({ ...confirmDialog, open: false })}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmDecision}
+                disabled={saving !== null || (confirmDialog.action === "rechazado" && !nota.trim())}
+                className={`flex-1 ${
+                  confirmDialog.action === "aprobado" 
+                    ? "gradient-primary text-white" 
+                    : "bg-red-600 hover:bg-red-700 text-white"
+                }`}
+              >
+                {saving ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  confirmDialog.action === "aprobado" ? "Aprobar" : "Rechazar"
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
@@ -360,20 +446,45 @@ export default function AdminPagosPage() {
       .then((data) => setPagos(Array.isArray(data) ? data : []))
       .catch(() => toast.error("Error al cargar los pagos"))
       .finally(() => setLoading(false));
+
+    // Listen for payment update events
+    const handlePaymentUpdate = (event: CustomEvent) => {
+      const { updatedPayment } = event.detail;
+      setPagos((prev) => 
+        prev.map((p) => p.id === updatedPayment.id ? updatedPayment : p)
+      );
+    };
+
+    window.addEventListener('paymentUpdated', handlePaymentUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('paymentUpdated', handlePaymentUpdate as EventListener);
+    };
   }, []);
 
   const filtered = useMemo(() => {
-    return pagos.filter((p) => {
-      const q = search.toLowerCase();
-      const matchSearch =
-        p.estudiante.nombre.toLowerCase().includes(q) ||
-        p.estudiante.cedula.includes(q) ||
-        p.referencia.toLowerCase().includes(q) ||
-        p.curso.nombre.toLowerCase().includes(q) ||
-        p.curso.codigo.toLowerCase().includes(q);
-      const matchEstado = filterEstado === "todos" || p.estado === filterEstado;
-      return matchSearch && matchEstado;
-    });
+    return pagos
+      .filter((p) => {
+        const q = search.toLowerCase();
+        const matchSearch =
+          p.estudiante.nombre.toLowerCase().includes(q) ||
+          p.estudiante.cedula.includes(q) ||
+          p.referencia.toLowerCase().includes(q) ||
+          p.curso.nombre.toLowerCase().includes(q) ||
+          p.curso.codigo.toLowerCase().includes(q);
+        const matchEstado = filterEstado === "todos" || p.estado === filterEstado;
+        return matchSearch && matchEstado;
+      })
+      .sort((a, b) => {
+        // Prioridad: pendientes > aprobados > rechazados
+        const priority = { pendiente: 3, aprobado: 2, rechazado: 1 };
+        const priorityDiff = priority[b.estado] - priority[a.estado];
+        
+        if (priorityDiff !== 0) return priorityDiff;
+        
+        // Si mismo estado, ordenar por fecha (más reciente primero)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
   }, [pagos, search, filterEstado]);
 
   const handleUpdate = (updated: Pago) => {
