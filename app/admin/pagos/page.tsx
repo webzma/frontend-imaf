@@ -148,10 +148,27 @@ function PagoDetailModal({
       );
       const body = await res.json();
       if (!res.ok) throw new Error(body.message || "Error al actualizar.");
+      
+      // Send notification to student
+      await fetch(`${process.env.API_URL}api/admin/notificaciones/send`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          user_id: pago.estudiante.user.email, // Send to student's user
+          titulo: estado === "aprobado" 
+            ? "¡Pago Aprobado!" 
+            : "Pago Rechazado",
+          mensaje: estado === "aprobado"
+            ? `Tu pago para el curso ${pago.curso.nombre} ha sido aprobado. Ya estás inscrito en el curso.`
+            : `Tu pago para el curso ${pago.curso.nombre} ha sido rechazado. ${nota ? 'Motivo: ' + nota : 'Por favor, contacta a la administración para más información.'}`,
+          url: `/estudiante/curso`,
+        }),
+      });
+
       toast.success(
         estado === "aprobado"
-          ? "Pago aprobado. Estudiante inscrito."
-          : "Pago rechazado.",
+          ? "Pago aprobado. Estudiante inscrito y notificado."
+          : "Pago rechazado. Estudiante notificado.",
       );
       onUpdate(body);
       onClose();

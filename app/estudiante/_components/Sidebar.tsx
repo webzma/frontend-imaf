@@ -11,6 +11,7 @@ import {
   LogOut,
   Moon,
   Sun,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -56,6 +57,12 @@ const navItems = [
         icon: BookOpen,
         exact: false,
       },
+      {
+        label: "Notificaciones",
+        href: "/estudiante/notificaciones",
+        icon: Bell,
+        exact: false,
+      },
     ],
   },
   {
@@ -85,6 +92,7 @@ export default function EstudianteSidebar() {
   const [dark, setDark] = useState(false);
   const [nombre, setNombre] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
@@ -107,6 +115,36 @@ export default function EstudianteSidebar() {
         setEmail(data?.user?.email ?? null);
       })
       .catch(() => {});
+
+    // Fetch notifications count
+    const fetchNotifications = () => {
+      fetch(`${process.env.API_URL}api/estudiante/notificaciones/count`, {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+          Accept: "application/json",
+        },
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          setUnreadCount(data.unread_count || 0);
+        })
+        .catch(() => {});
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+
+    // Listen for notification read events
+    const handleNotificationRead = (event: CustomEvent) => {
+      setUnreadCount(event.detail.count);
+    };
+
+    window.addEventListener('notificationRead', handleNotificationRead as EventListener);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('notificationRead', handleNotificationRead as EventListener);
+    };
   }, []);
 
   const toggleDark = () => {
@@ -146,7 +184,7 @@ export default function EstudianteSidebar() {
   return (
     <Sidebar collapsible="icon">
       {/* Logo */}
-      <SidebarHeader className="border-b border-sidebar-border px-5 py-5">
+      <SidebarHeader className="border-b border-sidebar-border px-5 py-5 shrink-0">
         <div className="flex items-center gap-3">
           <div
             className={`w-8 h-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}
@@ -167,36 +205,41 @@ export default function EstudianteSidebar() {
       </SidebarHeader>
 
       {/* Navigation */}
-      <SidebarContent>
-        {navItems.map((group) => (
-          <SidebarGroup key={group.section}>
-            <SidebarGroupLabel className="font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-sidebar-foreground/55">
-              {group.section}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive(item.href, item.exact)}
-                      tooltip={item.label}
-                    >
-                      <Link href={item.href}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+      <SidebarContent className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto">
+          {navItems.map((group) => (
+            <SidebarGroup key={group.section}>
+              <SidebarGroupLabel className="font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-sidebar-foreground/55">
+                {group.section}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {group.items.map((item) => (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive(item.href, item.exact)}
+                        tooltip={item.label}
+                      >
+                        <Link href={item.href}>
+                          <item.icon />
+                          <span>{item.label}</span>
+                          {item.label === "Notificaciones" && unreadCount > 0 && (
+                            <span className="w-2 h-2 bg-pink-500 rounded-full ml-auto" />
+                          )}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
+        </div>
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter className="border-t border-sidebar-border shrink-0">
         {!collapsed && nombre && (
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-sm bg-sidebar-accent/40">
             <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
