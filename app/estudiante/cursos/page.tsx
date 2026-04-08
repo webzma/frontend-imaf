@@ -29,7 +29,6 @@ interface Curso {
   nombre: string;
   codigo: string;
   descripcion: string | null;
-  creditos: number;
   estado: "activo" | "inactivo";
   profesor?: { id: number; name: string } | null;
   estudiantes?: { id: number }[];
@@ -110,9 +109,9 @@ function CursoCard({
             </span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground/60">
-            <Star className="w-3 h-3" />
+            <BookOpen className="w-3 h-3" />
             <span className="font-sans text-xs">
-              {curso.creditos} {curso.creditos === 1 ? "crédito" : "créditos"}
+              {curso.estado === "activo" ? "Disponible" : "Inactivo"}
             </span>
           </div>
         </div>

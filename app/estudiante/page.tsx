@@ -19,7 +19,6 @@ interface Curso {
   nombre: string;
   codigo: string;
   descripcion: string | null;
-  creditos: number;
   estado: string;
   profesor?: { id: number; name: string } | null;
 }
@@ -79,7 +78,7 @@ export default function EstudianteDashboard() {
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-125 h-75 rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-8 py-10 max-w-5xl mx-auto">
         {/* Page header */}
@@ -210,19 +209,11 @@ export default function EstudianteDashboard() {
                   )}
                   <div className="flex items-center gap-5 pt-4 mt-4 border-t border-outline-variant/30">
                     <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                      <Star className="w-3.5 h-3.5" />
+                      <GraduationCap className="w-3.5 h-3.5" />
                       <span className="font-sans">
-                        {perfil.curso.creditos} créditos
+                        {perfil.curso.profesor?.name || "Sin asignar"}
                       </span>
                     </div>
-                    {perfil.curso.profesor && (
-                      <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                        <GraduationCap className="w-3.5 h-3.5" />
-                        <span className="font-sans">
-                          {perfil.curso.profesor.name}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               ) : (
