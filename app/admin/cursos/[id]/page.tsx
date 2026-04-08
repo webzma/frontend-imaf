@@ -24,7 +24,6 @@ import {
   ArrowLeft,
   GraduationCap,
   Hash,
-  Star,
   Users,
   Search,
   UserPlus,
@@ -43,6 +42,11 @@ import {
   Mail,
   BadgeCheck,
   Building2,
+  CalendarDays,
+  DollarSign,
+  MessageCircle,
+  UsersRound,
+  ClipboardList,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -84,7 +88,13 @@ interface Curso {
   nombre: string;
   codigo: string;
   descripcion: string | null;
-  creditos: number;
+  limite_cupo: number;
+  cupos_restantes: number;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  requisitos: string | null;
+  precio: number;
+  whatsapp_url: string | null;
   estado: "activo" | "inactivo";
   profesor: ProfesorUser | null;
   estudiantes: EstudianteEnCurso[];
@@ -168,9 +178,13 @@ export default function CursoDetailPage({
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     nombre: "",
-    codigo: "",
     descripcion: "",
-    creditos: 1,
+    limite_cupo: 30,
+    fecha_inicio: "",
+    fecha_fin: "",
+    requisitos: "",
+    precio: 0,
+    whatsapp_url: "",
     estado: "activo" as "activo" | "inactivo",
     profesor_id: "",
   });
@@ -299,7 +313,7 @@ export default function CursoDetailPage({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${curso.codigo}-estudiantes.csv`;
+    a.download = `${curso.nombre.replace(/\s+/g, "-").toLowerCase()}-estudiantes.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -308,9 +322,13 @@ export default function CursoDetailPage({
     if (!curso) return;
     setEditForm({
       nombre: curso.nombre,
-      codigo: curso.codigo,
       descripcion: curso.descripcion ?? "",
-      creditos: curso.creditos,
+      limite_cupo: curso.limite_cupo,
+      fecha_inicio: curso.fecha_inicio ?? "",
+      fecha_fin: curso.fecha_fin ?? "",
+      requisitos: curso.requisitos ?? "",
+      precio: curso.precio,
+      whatsapp_url: curso.whatsapp_url ?? "",
       estado: curso.estado,
       profesor_id: curso.profesor ? String(curso.profesor.id) : "",
     });
@@ -330,9 +348,13 @@ export default function CursoDetailPage({
           headers: getAuthHeaders(),
           body: JSON.stringify({
             nombre: editForm.nombre,
-            codigo: editForm.codigo,
             descripcion: editForm.descripcion || null,
-            creditos: Number(editForm.creditos),
+            limite_cupo: Number(editForm.limite_cupo),
+            fecha_inicio: editForm.fecha_inicio || null,
+            fecha_fin: editForm.fecha_fin || null,
+            requisitos: editForm.requisitos || null,
+            precio: Number(editForm.precio),
+            whatsapp_url: editForm.whatsapp_url || null,
             estado: editForm.estado,
             profesor_id: editForm.profesor_id
               ? Number(editForm.profesor_id)
@@ -623,36 +645,93 @@ export default function CursoDetailPage({
           </div>
 
           {/* Meta row */}
-          <div className="flex items-center gap-6 pt-5 border-t border-outline-variant/40">
+          <div className="flex items-center flex-wrap gap-x-6 gap-y-2 pt-5 border-t border-outline-variant/40">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Hash className="w-4 h-4" />
-              <span className="font-mono text-sm font-bold">
-                {curso.codigo}
-              </span>
+              <span className="font-mono text-sm font-bold">{curso.codigo}</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Star className="w-4 h-4" />
+              <UsersRound className="w-4 h-4" />
               <span className="font-sans text-sm">
-                {curso.creditos} créditos
+                <strong className="text-on-surface">{curso.estudiantes.length}</strong>
+                {" / "}
+                {curso.limite_cupo} participantes
+                {" · "}
+                <span
+                  className={
+                    curso.cupos_restantes <= 0
+                      ? "text-destructive font-semibold"
+                      : curso.cupos_restantes <= 5
+                      ? "text-amber-600 dark:text-amber-400 font-semibold"
+                      : "text-emerald-600 dark:text-emerald-400 font-semibold"
+                  }
+                >
+                  {curso.cupos_restantes <= 0
+                    ? "Sin cupo"
+                    : `${curso.cupos_restantes} disponibles`}
+                </span>
               </span>
             </div>
+            {(curso.fecha_inicio || curso.fecha_fin) && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <CalendarDays className="w-4 h-4" />
+                <span className="font-sans text-sm">
+                  {curso.fecha_inicio
+                    ? new Date(curso.fecha_inicio + "T00:00:00").toLocaleDateString("es-ES", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "—"}
+                  {curso.fecha_fin &&
+                    " → " +
+                      new Date(curso.fecha_fin + "T00:00:00").toLocaleDateString("es-ES", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                </span>
+              </div>
+            )}
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Users className="w-4 h-4" />
-              <span className="font-sans text-sm">
-                <strong className="text-on-surface">
-                  {curso.estudiantes.length}
-                </strong>{" "}
-                {curso.estudiantes.length === 1
-                  ? "estudiante inscrito"
-                  : "estudiantes inscritos"}
+              <DollarSign className="w-4 h-4" />
+              <span className="font-sans text-sm font-semibold text-on-surface">
+                {curso.precio === 0
+                  ? "Gratuito"
+                  : new Intl.NumberFormat("es-CR", {
+                      style: "currency",
+                      currency: "CRC",
+                      maximumFractionDigits: 0,
+                    }).format(curso.precio)}
               </span>
             </div>
+            {curso.whatsapp_url && (
+              <a
+                href={curso.whatsapp_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 font-sans text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Grupo WhatsApp
+              </a>
+            )}
           </div>
 
           {curso.descripcion && (
             <p className="font-sans text-sm text-muted-foreground mt-4 pt-4 border-t border-outline-variant/40">
               {curso.descripcion}
             </p>
+          )}
+
+          {curso.requisitos && (
+            <div className="mt-4 pt-4 border-t border-outline-variant/40">
+              <p className="flex items-center gap-1.5 font-sans text-xs font-semibold tracking-[0.15em] uppercase text-on-surface/55 mb-1">
+                <ClipboardList className="w-3.5 h-3.5" />
+                Requisitos / Materiales
+              </p>
+              <p className="font-sans text-sm text-muted-foreground whitespace-pre-line">{curso.requisitos}</p>
+            </div>
           )}
         </div>
 
@@ -958,51 +1037,50 @@ export default function CursoDetailPage({
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <label className="font-sans text-xs font-medium text-on-surface">
-                  Nombre
-                </label>
-                <Input
-                  value={editForm.nombre}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, nombre: e.target.value }))
-                  }
-                  className="font-sans text-sm"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="font-sans text-xs font-medium text-on-surface">
-                  Código
-                </label>
-                <Input
-                  value={editForm.codigo}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, codigo: e.target.value }))
-                  }
-                  className="font-mono text-sm"
-                />
-              </div>
+            {/* Nombre */}
+            <div className="flex flex-col gap-1.5">
+              <label className="font-sans text-xs font-medium text-on-surface">
+                Nombre
+              </label>
+              <Input
+                value={editForm.nombre}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, nombre: e.target.value }))
+                }
+                className="font-sans text-sm"
+              />
             </div>
 
+            {/* Profesor + Estado */}
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <label className="font-sans text-xs font-medium text-on-surface">
-                  Créditos
+                  Profesor
                 </label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={editForm.creditos}
-                  onChange={(e) =>
-                    setEditForm((f) => ({
-                      ...f,
-                      creditos: Number(e.target.value),
-                    }))
+                <Select
+                  value={editForm.profesor_id}
+                  onValueChange={(v) =>
+                    setEditForm((f) => ({ ...f, profesor_id: v }))
                   }
-                  className="font-sans text-sm"
-                />
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sin profesor asignado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {profesores.map((p) => (
+                      <SelectItem key={p.user_id} value={String(p.user_id)}>
+                        <span className="font-sans">
+                          {p.user.name}
+                          {p.especialidad && (
+                            <span className="text-muted-foreground text-xs ml-2">
+                              {p.especialidad}
+                            </span>
+                          )}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="font-sans text-xs font-medium text-on-surface">
@@ -1028,39 +1106,96 @@ export default function CursoDetailPage({
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="font-sans text-xs font-medium text-on-surface">
-                Profesor
-              </label>
-              <Select
-                value={editForm.profesor_id}
-                onValueChange={(v) =>
-                  setEditForm((f) => ({ ...f, profesor_id: v }))
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Sin profesor asignado" />
-                </SelectTrigger>
-                <SelectContent>
-                  {profesores.map((p) => (
-                    <SelectItem key={p.user_id} value={String(p.user_id)}>
-                      <span className="font-sans">
-                        {p.user.name}
-                        {p.especialidad && (
-                          <span className="text-muted-foreground text-xs ml-2">
-                            {p.especialidad}
-                          </span>
-                        )}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Límite de cupo + Precio */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="font-sans text-xs font-medium text-on-surface">
+                  Límite de cupo
+                </label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={editForm.limite_cupo}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      limite_cupo: Number(e.target.value),
+                    }))
+                  }
+                  className="font-sans text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-sans text-xs font-medium text-on-surface">
+                  Precio
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={editForm.precio}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      precio: Number(e.target.value),
+                    }))
+                  }
+                  className="font-sans text-sm"
+                />
+              </div>
             </div>
 
+            {/* Fecha inicio + Fecha fin */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="font-sans text-xs font-medium text-on-surface">
+                  Fecha de inicio
+                </label>
+                <Input
+                  type="date"
+                  value={editForm.fecha_inicio}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, fecha_inicio: e.target.value }))
+                  }
+                  className="font-sans text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-sans text-xs font-medium text-on-surface">
+                  Fecha de fin
+                </label>
+                <Input
+                  type="date"
+                  value={editForm.fecha_fin}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, fecha_fin: e.target.value }))
+                  }
+                  className="font-sans text-sm"
+                />
+              </div>
+            </div>
+
+            {/* WhatsApp */}
             <div className="flex flex-col gap-1.5">
               <label className="font-sans text-xs font-medium text-on-surface">
-                Descripción
+                Enlace grupo WhatsApp{" "}
+                <span className="text-muted-foreground font-normal">(opcional)</span>
+              </label>
+              <Input
+                type="url"
+                placeholder="https://chat.whatsapp.com/..."
+                value={editForm.whatsapp_url}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, whatsapp_url: e.target.value }))
+                }
+                className="font-sans text-sm"
+              />
+            </div>
+
+            {/* Descripción */}
+            <div className="flex flex-col gap-1.5">
+              <label className="font-sans text-xs font-medium text-on-surface">
+                Descripción <span className="text-muted-foreground font-normal">(opcional)</span>
               </label>
               <textarea
                 value={editForm.descripcion}
@@ -1068,7 +1203,24 @@ export default function CursoDetailPage({
                   setEditForm((f) => ({ ...f, descripcion: e.target.value }))
                 }
                 rows={3}
-                placeholder="Descripción del curso (opcional)"
+                placeholder="Descripción del curso..."
+                className="w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+
+            {/* Requisitos */}
+            <div className="flex flex-col gap-1.5">
+              <label className="font-sans text-xs font-medium text-on-surface">
+                Requisitos / Materiales{" "}
+                <span className="text-muted-foreground font-normal">(opcional)</span>
+              </label>
+              <textarea
+                value={editForm.requisitos}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, requisitos: e.target.value }))
+                }
+                rows={3}
+                placeholder="Ej: Cuaderno, lápices de colores..."
                 className="w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>

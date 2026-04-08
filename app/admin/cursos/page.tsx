@@ -32,11 +32,13 @@ import {
   Loader2,
   Search,
   Users,
-  Hash,
   FileText,
   GraduationCap,
-  Star,
   Filter,
+  CalendarDays,
+  DollarSign,
+  MessageCircle,
+  UsersRound,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -56,7 +58,13 @@ interface Curso {
   nombre: string;
   codigo: string;
   descripcion?: string | null;
-  creditos: number;
+  limite_cupo: number;
+  cupos_restantes: number;
+  fecha_inicio?: string | null;
+  fecha_fin?: string | null;
+  requisitos?: string | null;
+  precio: number;
+  whatsapp_url?: string | null;
   estado: "activo" | "inactivo";
   profesor?: { id: number; name: string } | null;
   estudiantes?: Estudiante[];
@@ -78,18 +86,43 @@ function getAuthHeaders() {
   };
 }
 
+function formatDate(dateStr?: string | null): string {
+  if (!dateStr) return "—";
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatPrice(precio: number): string {
+  if (precio === 0) return "Gratuito";
+  return new Intl.NumberFormat("es-CR", {
+    style: "currency",
+    currency: "CRC",
+    maximumFractionDigits: 0,
+  }).format(precio);
+}
+
 /* ── Zod Schema ── */
 
 const cursoSchema = z.object({
   nombre: z.string().min(1, "El nombre es obligatorio").max(255),
-  codigo: z.string().min(1, "El código es obligatorio").max(50),
   descripcion: z.string().max(1000).optional(),
   profesor_id: z.string().min(1, "Debes seleccionar un profesor"),
-  creditos: z
+  limite_cupo: z
     .number()
     .int()
-    .min(1, "Mínimo 1 crédito")
-    .max(10, "Máximo 10 créditos"),
+    .min(1, "Mínimo 1 participante"),
+  fecha_inicio: z.string().optional(),
+  fecha_fin: z.string().optional(),
+  requisitos: z.string().max(2000).optional(),
+  precio: z.number().min(0, "El precio no puede ser negativo"),
+  whatsapp_url: z
+    .string()
+    .url("URL inválida")
+    .optional()
+    .or(z.literal("")),
   estado: z.enum(["activo", "inactivo"]),
 });
 
@@ -122,14 +155,18 @@ function CardSkeleton() {
 /* ── Course Card ── */
 
 function CursoCard({ curso }: { curso: Curso }) {
-  const count = curso.estudiantes?.length ?? 0;
+  const participantes = curso.estudiantes?.length ?? 0;
+  const cuposRestantes = curso.cupos_restantes ?? curso.limite_cupo - participantes;
+  const cuposPct = Math.round((participantes / curso.limite_cupo) * 100);
+  const sinCupo = cuposRestantes <= 0;
+
   return (
     <div className="group bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 flex flex-col">
       <div className="h-1 gradient-primary" />
       <div className="p-6 flex flex-col flex-1">
+        {/* Header row */}
         <div className="flex items-center justify-between mb-4">
-          <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-on-primary-container bg-primary-container px-2.5 py-1 rounded-sm">
-            <Hash className="w-3 h-3" />
+          <span className="font-mono text-xs font-bold text-on-primary-container bg-primary-container px-2.5 py-1 rounded-sm">
             {curso.codigo}
           </span>
           <span
@@ -142,36 +179,87 @@ function CursoCard({ curso }: { curso: Curso }) {
             {curso.estado === "activo" ? "Activo" : "Inactivo"}
           </span>
         </div>
+
+        {/* Name */}
         <h3 className="font-serif font-light text-2xl tight-tracking text-on-surface mb-1 leading-tight">
           {curso.nombre}
         </h3>
+
+        {/* Profesor */}
         {curso.profesor && (
           <p className="font-sans text-xs text-primary/70 font-medium mb-2 flex items-center gap-1">
             <GraduationCap className="w-3 h-3" />
             {curso.profesor.name}
           </p>
         )}
-        <p className="font-sans text-sm text-muted-foreground line-clamp-2 flex-1 mb-5">
+
+        {/* Descripción */}
+        <p className="font-sans text-sm text-muted-foreground line-clamp-2 flex-1 mb-4">
           {curso.descripcion || (
-            <span className="italic text-muted-foreground/50">
-              Sin descripción
-            </span>
+            <span className="italic text-muted-foreground/50">Sin descripción</span>
           )}
         </p>
+
+        {/* Fechas */}
+        {(curso.fecha_inicio || curso.fecha_fin) && (
+          <div className="flex items-center gap-1.5 font-sans text-xs text-muted-foreground mb-3">
+            <CalendarDays className="w-3 h-3 shrink-0" />
+            <span>
+              {formatDate(curso.fecha_inicio)}
+              {curso.fecha_fin && ` → ${formatDate(curso.fecha_fin)}`}
+            </span>
+          </div>
+        )}
+
+        {/* Cupos bar */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-1.5 font-sans text-xs text-muted-foreground">
+              <UsersRound className="w-3 h-3" />
+              <span>
+                <span className="font-semibold text-on-surface">{participantes}</span>
+                {" / "}
+                {curso.limite_cupo} participantes
+              </span>
+            </div>
+            <span
+              className={`font-sans text-xs font-semibold ${
+                sinCupo
+                  ? "text-destructive"
+                  : cuposRestantes <= 5
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-emerald-600 dark:text-emerald-400"
+              }`}
+            >
+              {sinCupo ? "Sin cupo" : `${cuposRestantes} disponibles`}
+            </span>
+          </div>
+          <div className="h-1.5 bg-outline-variant/30 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all ${
+                sinCupo
+                  ? "bg-destructive"
+                  : cuposPct >= 80
+                  ? "bg-amber-500"
+                  : "bg-emerald-500"
+              }`}
+              style={{ width: `${Math.min(100, cuposPct)}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-outline-variant/40">
-          <div className="flex items-center gap-2">
-            <Users className="w-3.5 h-3.5 text-muted-foreground/60" />
-            <span className="font-sans text-sm text-muted-foreground">
-              <span className="font-semibold text-on-surface">{count}</span>{" "}
-              {count === 1 ? "estudiante" : "estudiantes"}
-            </span>
+          <div className="flex items-center gap-1 font-sans text-sm font-semibold text-on-surface">
+            <DollarSign className="w-3.5 h-3.5 text-muted-foreground/60" />
+            {formatPrice(curso.precio)}
           </div>
-          <div className="flex items-center gap-1 text-muted-foreground/60">
-            <Star className="w-3 h-3" />
-            <span className="font-sans text-xs">
-              {curso.creditos} {curso.creditos === 1 ? "crédito" : "créditos"}
-            </span>
-          </div>
+          {curso.whatsapp_url && (
+            <div className="flex items-center gap-1 font-sans text-xs text-emerald-600 dark:text-emerald-400">
+              <MessageCircle className="w-3 h-3" />
+              WhatsApp
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -218,10 +306,14 @@ export default function CursosPage() {
     resolver: zodResolver(cursoSchema),
     defaultValues: {
       nombre: "",
-      codigo: "",
       descripcion: "",
       profesor_id: "",
-      creditos: 3,
+      limite_cupo: 30,
+      fecha_inicio: "",
+      fecha_fin: "",
+      requisitos: "",
+      precio: 0,
+      whatsapp_url: "",
       estado: "activo",
     },
   });
@@ -266,6 +358,10 @@ export default function CursosPage() {
       const body = {
         ...data,
         descripcion: data.descripcion || null,
+        requisitos: data.requisitos || null,
+        fecha_inicio: data.fecha_inicio || null,
+        fecha_fin: data.fecha_fin || null,
+        whatsapp_url: data.whatsapp_url || null,
         profesor_id: Number(data.profesor_id),
       };
       const res = await fetch(`${process.env.API_URL}api/admin/cursos`, {
@@ -365,7 +461,7 @@ export default function CursosPage() {
                   Crear curso
                 </DialogTitle>
                 <DialogDescription className="font-sans text-sm text-muted-foreground">
-                  Ingresa los datos del nuevo curso.
+                  El código se genera automáticamente. Completa los datos del curso.
                 </DialogDescription>
               </DialogHeader>
 
@@ -373,11 +469,12 @@ export default function CursosPage() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="grid gap-4 pt-1"
               >
+                {/* Nombre */}
                 <div className="grid gap-2">
                   <Label htmlFor="nombre">Nombre del curso *</Label>
                   <Input
                     id="nombre"
-                    placeholder="Ej: Matemáticas Avanzadas"
+                    placeholder="Ej: Fotografía Básica"
                     {...form.register("nombre")}
                   />
                   {form.formState.errors.nombre && (
@@ -387,47 +484,14 @@ export default function CursosPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="codigo">Código *</Label>
-                    <Input
-                      id="codigo"
-                      placeholder="Ej: MAT-301"
-                      className="font-mono"
-                      {...form.register("codigo")}
-                    />
-                    {form.formState.errors.codigo && (
-                      <p className="text-sm text-destructive">
-                        {form.formState.errors.codigo.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="creditos">Créditos *</Label>
-                    <Input
-                      id="creditos"
-                      type="number"
-                      min={1}
-                      max={10}
-                      {...form.register("creditos", { valueAsNumber: true })}
-                    />
-                    {form.formState.errors.creditos && (
-                      <p className="text-sm text-destructive">
-                        {form.formState.errors.creditos.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
+                {/* Profesor + Estado */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label>Profesor *</Label>
                     <Select
                       value={form.watch("profesor_id")}
                       onValueChange={(v) =>
-                        form.setValue("profesor_id", v, {
-                          shouldValidate: true,
-                        })
+                        form.setValue("profesor_id", v, { shouldValidate: true })
                       }
                     >
                       <SelectTrigger className="w-full">
@@ -472,12 +536,90 @@ export default function CursosPage() {
                   </div>
                 </div>
 
+                {/* Límite de cupo + Precio */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="limite_cupo">Límite de cupo *</Label>
+                    <Input
+                      id="limite_cupo"
+                      type="number"
+                      min={1}
+                      placeholder="Ej: 20"
+                      {...form.register("limite_cupo", { valueAsNumber: true })}
+                    />
+                    {form.formState.errors.limite_cupo && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.limite_cupo.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="precio">Precio *</Label>
+                    <Input
+                      id="precio"
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      placeholder="0 = gratuito"
+                      {...form.register("precio", { valueAsNumber: true })}
+                    />
+                    {form.formState.errors.precio && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.precio.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Fecha inicio + Fecha fin */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="fecha_inicio">Fecha de inicio</Label>
+                    <Input
+                      id="fecha_inicio"
+                      type="date"
+                      {...form.register("fecha_inicio")}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="fecha_fin">Fecha de fin</Label>
+                    <Input
+                      id="fecha_fin"
+                      type="date"
+                      {...form.register("fecha_fin")}
+                    />
+                    {form.formState.errors.fecha_fin && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.fecha_fin.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* WhatsApp */}
+                <div className="grid gap-2">
+                  <Label htmlFor="whatsapp_url">
+                    Enlace grupo WhatsApp{" "}
+                    <span className="text-muted-foreground/60 font-normal ml-1">(opcional)</span>
+                  </Label>
+                  <Input
+                    id="whatsapp_url"
+                    type="url"
+                    placeholder="https://chat.whatsapp.com/..."
+                    {...form.register("whatsapp_url")}
+                  />
+                  {form.formState.errors.whatsapp_url && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.whatsapp_url.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Descripción */}
                 <div className="grid gap-2">
                   <Label htmlFor="descripcion">
                     Descripción{" "}
-                    <span className="text-muted-foreground/60 font-normal ml-1">
-                      (opcional)
-                    </span>
+                    <span className="text-muted-foreground/60 font-normal ml-1">(opcional)</span>
                   </Label>
                   <textarea
                     id="descripcion"
@@ -485,6 +627,21 @@ export default function CursosPage() {
                     placeholder="Breve descripción del contenido del curso..."
                     className="w-full rounded-sm border-0 border-b border-b-outline-variant bg-surface-variant px-3 py-2 font-sans text-sm text-on-surface shadow-none transition-[background-color,border-color] outline-none placeholder:text-muted-foreground/50 focus-visible:bg-surface-container-high focus-visible:border-b-primary resize-none"
                     {...form.register("descripcion")}
+                  />
+                </div>
+
+                {/* Requisitos */}
+                <div className="grid gap-2">
+                  <Label htmlFor="requisitos">
+                    Requisitos / Materiales{" "}
+                    <span className="text-muted-foreground/60 font-normal ml-1">(opcional)</span>
+                  </Label>
+                  <textarea
+                    id="requisitos"
+                    rows={3}
+                    placeholder="Ej: Cuaderno, lápices de colores, cámara..."
+                    className="w-full rounded-sm border-0 border-b border-b-outline-variant bg-surface-variant px-3 py-2 font-sans text-sm text-on-surface shadow-none transition-[background-color,border-color] outline-none placeholder:text-muted-foreground/50 focus-visible:bg-surface-container-high focus-visible:border-b-primary resize-none"
+                    {...form.register("requisitos")}
                   />
                 </div>
 
