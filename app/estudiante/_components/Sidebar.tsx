@@ -139,11 +139,17 @@ export default function EstudianteSidebar() {
       setUnreadCount(event.detail.count);
     };
 
-    window.addEventListener('notificationRead', handleNotificationRead as EventListener);
+    window.addEventListener(
+      "notificationRead",
+      handleNotificationRead as EventListener,
+    );
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('notificationRead', handleNotificationRead as EventListener);
+      window.removeEventListener(
+        "notificationRead",
+        handleNotificationRead as EventListener,
+      );
     };
   }, []);
 
@@ -224,9 +230,10 @@ export default function EstudianteSidebar() {
                         <Link href={item.href}>
                           <item.icon />
                           <span>{item.label}</span>
-                          {item.label === "Notificaciones" && unreadCount > 0 && (
-                            <span className="w-2 h-2 bg-pink-500 rounded-full ml-auto" />
-                          )}
+                          {item.label === "Notificaciones" &&
+                            unreadCount > 0 && (
+                              <span className="w-2 h-2 bg-pink-500 rounded-full ml-auto" />
+                            )}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

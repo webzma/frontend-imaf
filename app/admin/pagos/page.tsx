@@ -158,27 +158,30 @@ function PagoDetailModal({
         {
           method: "PUT",
           headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            estado: confirmDialog.action, 
-            nota_admin: confirmDialog.action === "rechazado" ? nota.trim() : null 
+          body: JSON.stringify({
+            estado: confirmDialog.action,
+            nota_admin:
+              confirmDialog.action === "rechazado" ? nota.trim() : null,
           }),
         },
       );
       const body = await res.json();
       if (!res.ok) throw new Error(body.message || "Error al actualizar.");
-      
+
       // Send notification to student
       await fetch(`${process.env.API_URL}api/admin/notificaciones/send`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({
           user_id: pago.estudiante.user.email, // Send to student's user
-          titulo: confirmDialog.action === "aprobado" 
-            ? "¡Pago Aprobado!" 
-            : "Pago Rechazado",
-          mensaje: confirmDialog.action === "aprobado"
-            ? `Tu pago para el curso ${pago.curso.nombre} ha sido aprobado. Ya estás inscrito en el curso.`
-            : `Tu pago para el curso ${pago.curso.nombre} ha sido rechazado. Motivo: ${nota.trim()}`,
+          titulo:
+            confirmDialog.action === "aprobado"
+              ? "¡Pago Aprobado!"
+              : "Pago Rechazado",
+          mensaje:
+            confirmDialog.action === "aprobado"
+              ? `Tu pago para el curso ${pago.curso.nombre} ha sido aprobado. Ya estás inscrito en el curso.`
+              : `Tu pago para el curso ${pago.curso.nombre} ha sido rechazado. Motivo: ${nota.trim()}`,
           url: `/estudiante/curso`,
         }),
       });
@@ -188,14 +191,16 @@ function PagoDetailModal({
           ? "Pago aprobado. Estudiante inscrito y notificado."
           : "Pago rechazado. Estudiante notificado.",
       );
-      
+
       // Emit event to update pagos list
       const updatedPayment = body.pago || body;
-      
-      window.dispatchEvent(new CustomEvent('paymentUpdated', { 
-        detail: { updatedPayment }
-      }));
-      
+
+      window.dispatchEvent(
+        new CustomEvent("paymentUpdated", {
+          detail: { updatedPayment },
+        }),
+      );
+
       onUpdate(updatedPayment);
       onClose();
       setConfirmDialog({ action: "aprobado", open: false });
@@ -366,23 +371,33 @@ function PagoDetailModal({
         )}
 
         {/* Modal de confirmación */}
-        <Dialog open={confirmDialog.open} onOpenChange={(v) => !v && setConfirmDialog({ ...confirmDialog, open: false })}>
+        <Dialog
+          open={confirmDialog.open}
+          onOpenChange={(v) =>
+            !v && setConfirmDialog({ ...confirmDialog, open: false })
+          }
+        >
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="font-serif font-light text-xl tight-tracking flex items-center gap-2">
-                <AlertTriangle className={`w-5 h-5 ${
-                  confirmDialog.action === "aprobado" ? "text-emerald-600" : "text-red-600"
-                }`} />
-                {confirmDialog.action === "aprobado" ? "¿Aprobar pago?" : "¿Rechazar pago?"}
+                <AlertTriangle
+                  className={`w-5 h-5 ${
+                    confirmDialog.action === "aprobado"
+                      ? "text-emerald-600"
+                      : "text-red-600"
+                  }`}
+                />
+                {confirmDialog.action === "aprobado"
+                  ? "¿Aprobar pago?"
+                  : "¿Rechazar pago?"}
               </DialogTitle>
               <DialogDescription className="font-sans text-sm text-muted-foreground">
-                {confirmDialog.action === "aprobado" 
+                {confirmDialog.action === "aprobado"
                   ? `¿Estás seguro que deseas aprobar el pago de ${pago.estudiante.nombre} para el curso ${pago.curso.nombre}? Esta acción inscribirá al estudiante en el curso.`
-                  : `¿Estás seguro que deseas rechazar el pago de ${pago.estudiante.nombre} para el curso ${pago.curso.nombre}? El estudiante recibirá una notificación con el motivo del rechazo.`
-                }
+                  : `¿Estás seguro que deseas rechazar el pago de ${pago.estudiante.nombre} para el curso ${pago.curso.nombre}? El estudiante recibirá una notificación con el motivo del rechazo.`}
               </DialogDescription>
             </DialogHeader>
-            
+
             {confirmDialog.action === "rechazado" && (
               <div className="mb-4">
                 <Label className="font-sans text-sm font-medium text-on-surface mb-2">
@@ -400,24 +415,31 @@ function PagoDetailModal({
             <div className="flex gap-3 pt-2">
               <Button
                 variant="outline"
-                onClick={() => setConfirmDialog({ ...confirmDialog, open: false })}
+                onClick={() =>
+                  setConfirmDialog({ ...confirmDialog, open: false })
+                }
                 className="flex-1"
               >
                 Cancelar
               </Button>
               <Button
                 onClick={confirmDecision}
-                disabled={saving !== null || (confirmDialog.action === "rechazado" && !nota.trim())}
+                disabled={
+                  saving !== null ||
+                  (confirmDialog.action === "rechazado" && !nota.trim())
+                }
                 className={`flex-1 ${
-                  confirmDialog.action === "aprobado" 
-                    ? "gradient-primary text-white" 
+                  confirmDialog.action === "aprobado"
+                    ? "gradient-primary text-white"
                     : "bg-red-600 hover:bg-red-700 text-white"
                 }`}
               >
                 {saving ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : confirmDialog.action === "aprobado" ? (
+                  "Aprobar"
                 ) : (
-                  confirmDialog.action === "aprobado" ? "Aprobar" : "Rechazar"
+                  "Rechazar"
                 )}
               </Button>
             </div>
@@ -450,15 +472,21 @@ export default function AdminPagosPage() {
     // Listen for payment update events
     const handlePaymentUpdate = (event: CustomEvent) => {
       const { updatedPayment } = event.detail;
-      setPagos((prev) => 
-        prev.map((p) => p.id === updatedPayment.id ? updatedPayment : p)
+      setPagos((prev) =>
+        prev.map((p) => (p.id === updatedPayment.id ? updatedPayment : p)),
       );
     };
 
-    window.addEventListener('paymentUpdated', handlePaymentUpdate as EventListener);
+    window.addEventListener(
+      "paymentUpdated",
+      handlePaymentUpdate as EventListener,
+    );
 
     return () => {
-      window.removeEventListener('paymentUpdated', handlePaymentUpdate as EventListener);
+      window.removeEventListener(
+        "paymentUpdated",
+        handlePaymentUpdate as EventListener,
+      );
     };
   }, []);
 
@@ -472,18 +500,21 @@ export default function AdminPagosPage() {
           p.referencia.toLowerCase().includes(q) ||
           p.curso.nombre.toLowerCase().includes(q) ||
           p.curso.codigo.toLowerCase().includes(q);
-        const matchEstado = filterEstado === "todos" || p.estado === filterEstado;
+        const matchEstado =
+          filterEstado === "todos" || p.estado === filterEstado;
         return matchSearch && matchEstado;
       })
       .sort((a, b) => {
         // Prioridad: pendientes > aprobados > rechazados
         const priority = { pendiente: 3, aprobado: 2, rechazado: 1 };
         const priorityDiff = priority[b.estado] - priority[a.estado];
-        
+
         if (priorityDiff !== 0) return priorityDiff;
-        
+
         // Si mismo estado, ordenar por fecha (más reciente primero)
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
       });
   }, [pagos, search, filterEstado]);
 

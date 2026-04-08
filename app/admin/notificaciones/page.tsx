@@ -71,12 +71,19 @@ export default function AdminNotificacionesPage() {
               : n,
           ),
         );
-        
+
         // Emit event to update sidebar
-        window.dispatchEvent(new CustomEvent('notificationRead', { 
-          detail: { type: 'single', count: notifications.filter(n => !n.read_at && n.id !== notificationId).length }
-        }));
-        
+        window.dispatchEvent(
+          new CustomEvent("notificationRead", {
+            detail: {
+              type: "single",
+              count: notifications.filter(
+                (n) => !n.read_at && n.id !== notificationId,
+              ).length,
+            },
+          }),
+        );
+
         // Redirect to notification URL
         router.push(url);
       })
@@ -98,11 +105,13 @@ export default function AdminNotificacionesPage() {
         setNotifications((prev) =>
           prev.map((n) => ({ ...n, read_at: new Date().toISOString() })),
         );
-        
+
         // Emit event to update sidebar
-        window.dispatchEvent(new CustomEvent('notificationRead', { 
-          detail: { type: 'all', count: 0 }
-        }));
+        window.dispatchEvent(
+          new CustomEvent("notificationRead", {
+            detail: { type: "all", count: 0 },
+          }),
+        );
       })
       .catch(() => {});
   };
@@ -188,7 +197,8 @@ export default function AdminNotificacionesPage() {
                   Sin notificaciones
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground">
-                  No tienes notificaciones pendientes. Las notificaciones aparecerán aquí cuando las recibas.
+                  No tienes notificaciones pendientes. Las notificaciones
+                  aparecerán aquí cuando las recibas.
                 </p>
               </div>
             </div>

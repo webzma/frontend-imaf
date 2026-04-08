@@ -131,11 +131,17 @@ export default function AppSidebar() {
       setUnreadCount(event.detail.count);
     };
 
-    window.addEventListener('notificationRead', handleNotificationRead as EventListener);
+    window.addEventListener(
+      "notificationRead",
+      handleNotificationRead as EventListener,
+    );
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('notificationRead', handleNotificationRead as EventListener);
+      window.removeEventListener(
+        "notificationRead",
+        handleNotificationRead as EventListener,
+      );
     };
   }, []);
 
