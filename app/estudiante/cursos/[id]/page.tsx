@@ -348,7 +348,7 @@ function PagoModal({
             </Button>
             <Button
               type="submit"
-              className="flex-1 gradient-primary font-sans text-sm h-10 text-white"
+              className="flex-1 font-sans text-sm h-10 text-white"
               disabled={submitting}
             >
               {submitting ? (
@@ -697,7 +697,7 @@ export default function CursoDetallePage({
                 <Button
                   onClick={() => setModalOpen(true)}
                   disabled={curso.estado !== "activo"}
-                  className="gradient-primary font-sans text-sm h-10 text-white"
+                  className="font-sans text-sm h-10 text-white"
                 >
                   <ImageIcon className="w-4 h-4 mr-2" />
                   Enviar pago móvil
