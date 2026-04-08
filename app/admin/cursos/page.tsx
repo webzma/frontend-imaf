@@ -110,19 +110,12 @@ const cursoSchema = z.object({
   nombre: z.string().min(1, "El nombre es obligatorio").max(255),
   descripcion: z.string().max(1000).optional(),
   profesor_id: z.string().min(1, "Debes seleccionar un profesor"),
-  limite_cupo: z
-    .number()
-    .int()
-    .min(1, "Mínimo 1 participante"),
+  limite_cupo: z.number().int().min(1, "Mínimo 1 participante"),
   fecha_inicio: z.string().optional(),
   fecha_fin: z.string().optional(),
   requisitos: z.string().max(2000).optional(),
   precio: z.number().min(0, "El precio no puede ser negativo"),
-  whatsapp_url: z
-    .string()
-    .url("URL inválida")
-    .optional()
-    .or(z.literal("")),
+  whatsapp_url: z.string().url("URL inválida").optional().or(z.literal("")),
   estado: z.enum(["activo", "inactivo"]),
 });
 
@@ -156,7 +149,8 @@ function CardSkeleton() {
 
 function CursoCard({ curso }: { curso: Curso }) {
   const participantes = curso.estudiantes?.length ?? 0;
-  const cuposRestantes = curso.cupos_restantes ?? curso.limite_cupo - participantes;
+  const cuposRestantes =
+    curso.cupos_restantes ?? curso.limite_cupo - participantes;
   const cuposPct = Math.round((participantes / curso.limite_cupo) * 100);
   const sinCupo = cuposRestantes <= 0;
 
@@ -196,7 +190,9 @@ function CursoCard({ curso }: { curso: Curso }) {
         {/* Descripción */}
         <p className="font-sans text-sm text-muted-foreground line-clamp-2 flex-1 mb-4">
           {curso.descripcion || (
-            <span className="italic text-muted-foreground/50">Sin descripción</span>
+            <span className="italic text-muted-foreground/50">
+              Sin descripción
+            </span>
           )}
         </p>
 
@@ -217,7 +213,9 @@ function CursoCard({ curso }: { curso: Curso }) {
             <div className="flex items-center gap-1.5 font-sans text-xs text-muted-foreground">
               <UsersRound className="w-3 h-3" />
               <span>
-                <span className="font-semibold text-on-surface">{participantes}</span>
+                <span className="font-semibold text-on-surface">
+                  {participantes}
+                </span>
                 {" / "}
                 {curso.limite_cupo} participantes
               </span>
@@ -227,8 +225,8 @@ function CursoCard({ curso }: { curso: Curso }) {
                 sinCupo
                   ? "text-destructive"
                   : cuposRestantes <= 5
-                  ? "text-amber-600 dark:text-amber-400"
-                  : "text-emerald-600 dark:text-emerald-400"
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-emerald-600 dark:text-emerald-400"
               }`}
             >
               {sinCupo ? "Sin cupo" : `${cuposRestantes} disponibles`}
@@ -240,8 +238,8 @@ function CursoCard({ curso }: { curso: Curso }) {
                 sinCupo
                   ? "bg-destructive"
                   : cuposPct >= 80
-                  ? "bg-amber-500"
-                  : "bg-emerald-500"
+                    ? "bg-amber-500"
+                    : "bg-emerald-500"
               }`}
               style={{ width: `${Math.min(100, cuposPct)}%` }}
             />
@@ -461,7 +459,8 @@ export default function CursosPage() {
                   Crear curso
                 </DialogTitle>
                 <DialogDescription className="font-sans text-sm text-muted-foreground">
-                  El código se genera automáticamente. Completa los datos del curso.
+                  El código se genera automáticamente. Completa los datos del
+                  curso.
                 </DialogDescription>
               </DialogHeader>
 
@@ -491,7 +490,9 @@ export default function CursosPage() {
                     <Select
                       value={form.watch("profesor_id")}
                       onValueChange={(v) =>
-                        form.setValue("profesor_id", v, { shouldValidate: true })
+                        form.setValue("profesor_id", v, {
+                          shouldValidate: true,
+                        })
                       }
                     >
                       <SelectTrigger className="w-full">
@@ -600,7 +601,9 @@ export default function CursosPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="whatsapp_url">
                     Enlace grupo WhatsApp{" "}
-                    <span className="text-muted-foreground/60 font-normal ml-1">(opcional)</span>
+                    <span className="text-muted-foreground/60 font-normal ml-1">
+                      (opcional)
+                    </span>
                   </Label>
                   <Input
                     id="whatsapp_url"
@@ -619,7 +622,9 @@ export default function CursosPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="descripcion">
                     Descripción{" "}
-                    <span className="text-muted-foreground/60 font-normal ml-1">(opcional)</span>
+                    <span className="text-muted-foreground/60 font-normal ml-1">
+                      (opcional)
+                    </span>
                   </Label>
                   <textarea
                     id="descripcion"
@@ -634,7 +639,9 @@ export default function CursosPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="requisitos">
                     Requisitos / Materiales{" "}
-                    <span className="text-muted-foreground/60 font-normal ml-1">(opcional)</span>
+                    <span className="text-muted-foreground/60 font-normal ml-1">
+                      (opcional)
+                    </span>
                   </Label>
                   <textarea
                     id="requisitos"

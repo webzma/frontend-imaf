@@ -648,12 +648,16 @@ export default function CursoDetailPage({
           <div className="flex items-center flex-wrap gap-x-6 gap-y-2 pt-5 border-t border-outline-variant/40">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Hash className="w-4 h-4" />
-              <span className="font-mono text-sm font-bold">{curso.codigo}</span>
+              <span className="font-mono text-sm font-bold">
+                {curso.codigo}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <UsersRound className="w-4 h-4" />
               <span className="font-sans text-sm">
-                <strong className="text-on-surface">{curso.estudiantes.length}</strong>
+                <strong className="text-on-surface">
+                  {curso.estudiantes.length}
+                </strong>
                 {" / "}
                 {curso.limite_cupo} participantes
                 {" · "}
@@ -662,8 +666,8 @@ export default function CursoDetailPage({
                     curso.cupos_restantes <= 0
                       ? "text-destructive font-semibold"
                       : curso.cupos_restantes <= 5
-                      ? "text-amber-600 dark:text-amber-400 font-semibold"
-                      : "text-emerald-600 dark:text-emerald-400 font-semibold"
+                        ? "text-amber-600 dark:text-amber-400 font-semibold"
+                        : "text-emerald-600 dark:text-emerald-400 font-semibold"
                   }
                 >
                   {curso.cupos_restantes <= 0
@@ -677,7 +681,9 @@ export default function CursoDetailPage({
                 <CalendarDays className="w-4 h-4" />
                 <span className="font-sans text-sm">
                   {curso.fecha_inicio
-                    ? new Date(curso.fecha_inicio + "T00:00:00").toLocaleDateString("es-ES", {
+                    ? new Date(
+                        curso.fecha_inicio + "T00:00:00",
+                      ).toLocaleDateString("es-ES", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
@@ -685,7 +691,9 @@ export default function CursoDetailPage({
                     : "—"}
                   {curso.fecha_fin &&
                     " → " +
-                      new Date(curso.fecha_fin + "T00:00:00").toLocaleDateString("es-ES", {
+                      new Date(
+                        curso.fecha_fin + "T00:00:00",
+                      ).toLocaleDateString("es-ES", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
@@ -730,7 +738,9 @@ export default function CursoDetailPage({
                 <ClipboardList className="w-3.5 h-3.5" />
                 Requisitos / Materiales
               </p>
-              <p className="font-sans text-sm text-muted-foreground whitespace-pre-line">{curso.requisitos}</p>
+              <p className="font-sans text-sm text-muted-foreground whitespace-pre-line">
+                {curso.requisitos}
+              </p>
             </div>
           )}
         </div>
@@ -1179,7 +1189,9 @@ export default function CursoDetailPage({
             <div className="flex flex-col gap-1.5">
               <label className="font-sans text-xs font-medium text-on-surface">
                 Enlace grupo WhatsApp{" "}
-                <span className="text-muted-foreground font-normal">(opcional)</span>
+                <span className="text-muted-foreground font-normal">
+                  (opcional)
+                </span>
               </label>
               <Input
                 type="url"
@@ -1195,7 +1207,10 @@ export default function CursoDetailPage({
             {/* Descripción */}
             <div className="flex flex-col gap-1.5">
               <label className="font-sans text-xs font-medium text-on-surface">
-                Descripción <span className="text-muted-foreground font-normal">(opcional)</span>
+                Descripción{" "}
+                <span className="text-muted-foreground font-normal">
+                  (opcional)
+                </span>
               </label>
               <textarea
                 value={editForm.descripcion}
@@ -1212,7 +1227,9 @@ export default function CursoDetailPage({
             <div className="flex flex-col gap-1.5">
               <label className="font-sans text-xs font-medium text-on-surface">
                 Requisitos / Materiales{" "}
-                <span className="text-muted-foreground font-normal">(opcional)</span>
+                <span className="text-muted-foreground font-normal">
+                  (opcional)
+                </span>
               </label>
               <textarea
                 value={editForm.requisitos}
