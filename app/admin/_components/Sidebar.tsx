@@ -13,6 +13,7 @@ import {
   Moon,
   Sun,
   CreditCard,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -60,6 +61,12 @@ const navItems = [
       },
       { label: "Cursos", href: "/admin/cursos", icon: BookOpen, exact: false },
       { label: "Pagos", href: "/admin/pagos", icon: CreditCard, exact: false },
+      {
+        label: "Notificaciones",
+        href: "/admin/notificaciones",
+        icon: Bell,
+        exact: false,
+      },
     ],
   },
   {
@@ -72,6 +79,10 @@ const navItems = [
         exact: false,
       },
     ],
+  },
+  {
+    section: "Mi Cuenta",
+    items: [],
   },
 ];
 
@@ -87,6 +98,7 @@ export default function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [dark, setDark] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
@@ -95,6 +107,36 @@ export default function AppSidebar() {
       (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
     setDark(isDark);
     document.documentElement.classList.toggle("dark", isDark);
+
+    // Fetch notifications count
+    const fetchNotifications = () => {
+      fetch(`${process.env.API_URL}api/admin/notificaciones/count`, {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+          Accept: "application/json",
+        },
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          setUnreadCount(data.unread_count || 0);
+        })
+        .catch(() => {});
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+
+    // Listen for notification read events
+    const handleNotificationRead = (event: CustomEvent) => {
+      setUnreadCount(event.detail.count);
+    };
+
+    window.addEventListener('notificationRead', handleNotificationRead as EventListener);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('notificationRead', handleNotificationRead as EventListener);
+    };
   }, []);
 
   const toggleDark = () => {
@@ -165,6 +207,9 @@ export default function AppSidebar() {
                       <Link href={item.href}>
                         <item.icon />
                         <span>{item.label}</span>
+                        {item.label === "Notificaciones" && unreadCount > 0 && (
+                          <span className="w-2 h-2 bg-pink-500 rounded-full ml-auto" />
+                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
