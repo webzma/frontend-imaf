@@ -18,7 +18,6 @@ interface Curso {
   nombre: string;
   codigo: string;
   descripcion: string | null;
-  creditos: number;
   estado: string;
   profesor?: { id: number; name: string } | null;
 }
@@ -112,17 +111,6 @@ export default function CursoPage() {
                 )}
 
                 <div className="flex items-center gap-8 pt-6 border-t border-outline-variant/30">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-muted-foreground/60" />
-                    <div>
-                      <p className="font-sans text-xs text-muted-foreground">
-                        Créditos
-                      </p>
-                      <p className="font-sans text-sm font-semibold text-on-surface">
-                        {curso.creditos}
-                      </p>
-                    </div>
-                  </div>
                   {curso.profesor && (
                     <div className="flex items-center gap-2">
                       <GraduationCap className="w-4 h-4 text-muted-foreground/60" />

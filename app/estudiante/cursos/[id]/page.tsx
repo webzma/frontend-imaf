@@ -36,6 +36,7 @@ import {
 
 interface Profesor {
   id: number;
+  nombre: string;
   cedula: string | null;
   telefono: string | null;
   especialidad: string | null;
@@ -57,7 +58,16 @@ interface CursoDetalle {
   nombre: string;
   codigo: string;
   descripcion: string | null;
-  creditos: number;
+  estado: "activo" | "inactivo";
+  profesor: Profesor | null;
+  estudiantes: Estudiante[];
+}
+
+interface Curso {
+  id: number;
+  nombre: string;
+  codigo: string;
+  descripcion: string | null;
   estado: "activo" | "inactivo";
   profesor: Profesor | null;
   estudiantes: Estudiante[];
@@ -479,17 +489,19 @@ export default function CursoDetallePage({
                 )}
 
                 <div className="flex items-center gap-8 pt-6 border-t border-outline-variant/30">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-muted-foreground/60" />
-                    <div>
-                      <p className="font-sans text-xs text-muted-foreground">
-                        Créditos
-                      </p>
-                      <p className="font-sans text-sm font-semibold text-on-surface">
-                        {curso.creditos}
-                      </p>
+                  {curso.profesor && (
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="w-4 h-4 text-muted-foreground/60" />
+                      <div>
+                        <p className="font-sans text-xs text-muted-foreground">
+                          Profesor
+                        </p>
+                        <p className="font-sans text-sm font-semibold text-on-surface">
+                          {(curso.profesor as any)?.user?.name || (curso.profesor as any)?.name || "Sin asignar"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-muted-foreground/60" />
                     <div>
