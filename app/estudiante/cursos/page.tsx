@@ -194,12 +194,12 @@ export default function EstudianteCursosPage() {
     <div className="relative min-h-screen bg-surface">
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 px-8 py-10 max-w-6xl mx-auto">
+      <div className="relative z-10 px-4 md:px-8 py-10 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-3">
-            <BookOpen className="w-3 h-3 text-primary/70" />
-            <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary/70 font-medium">
+            <BookOpen className="w-4 h-4 text-primary/70" />
+            <span className="font-sans text-[12px] tracking-[0.22em] uppercase text-primary/70 font-medium">
               Plataforma / Cursos
             </span>
           </div>

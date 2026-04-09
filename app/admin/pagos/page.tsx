@@ -540,12 +540,12 @@ export default function AdminPagosPage() {
     <div className="relative min-h-screen bg-surface">
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 px-8 py-10 max-w-6xl mx-auto">
+      <div className="relative z-10 px-4 md:px-8 py-10 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-3">
             <CreditCard className="w-3 h-3 text-primary/70" />
-            <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary/70 font-medium">
+            <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-medium">
               Admin / Pagos
             </span>
           </div>
@@ -560,31 +560,31 @@ export default function AdminPagosPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
           {[
-            { label: "Total", value: stats.total, icon: CreditCard, cls: "" },
+            { label: "Total", value: stats.total, icon: CreditCard, cls: "text-on-primary-container" },
             {
               label: "Pendientes",
               value: stats.pendiente,
               icon: Clock,
-              cls: "text-amber-600",
+              cls: "text-on-primary-container",
             },
             {
               label: "Aprobados",
               value: stats.aprobado,
               icon: CheckCircle2,
-              cls: "text-emerald-600",
+              cls: "text-emerald-300",
             },
             {
               label: "Rechazados",
               value: stats.rechazado,
               icon: Ban,
-              cls: "text-red-500",
+              cls: "text-on-primary-container",
             },
           ].map((s) => (
             <div
               key={s.label}
               className="bg-surface-container-low rounded-sm p-4 ambient-shadow"
             >
-              <div className="w-8 h-8 rounded-md flex items-center justify-center bg-primary-container mb-3">
+              <div className="w-8 h-8 rounded-md flex items-center justify-center bg-primary-container/60 mb-3">
                 <s.icon
                   className={`w-4 h-4 ${s.cls || "text-on-primary-container"}`}
                 />
@@ -677,7 +677,7 @@ export default function AdminPagosPage() {
                     <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold">
                       Curso
                     </th>
-                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold hidden md:table-cell">
+                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold">
                       Referencia
                     </th>
                     <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold hidden lg:table-cell">
@@ -717,7 +717,7 @@ export default function AdminPagosPage() {
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-2 min-w-0">
-                            <BookOpen className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                            <BookOpen className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0 hidden md:flex" />
                             <div className="min-w-0">
                               <p className="font-sans text-sm text-on-surface truncate max-w-[160px]">
                                 {pago.curso.nombre}
@@ -728,7 +728,7 @@ export default function AdminPagosPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-5 py-4 hidden md:table-cell">
+                        <td className="px-5 py-4">
                           <span className="font-mono text-sm text-on-surface">
                             {pago.referencia}
                           </span>

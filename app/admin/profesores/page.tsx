@@ -269,13 +269,13 @@ export default function ProfesoresPage() {
     <div className="relative min-h-full bg-surface">
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 px-10 py-10 max-w-8xl">
+      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
-        <div className="mb-10 flex items-end justify-between">
+        <div className="mb-10 flex-col md:flex-row md:flex items-end justify-between">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <GraduationCap className="size-10 text-primary/70" />
-              <span className="font-sans text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
+              <GraduationCap className="size-6 md:size-10 text-primary/70" />
+              <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
                 Gestión / Profesores
               </span>
             </div>
@@ -298,7 +298,7 @@ export default function ProfesoresPage() {
             }}
           >
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="gap-2 mt-6 md:mt-0">
                 <Plus className="w-4 h-4" />
                 Nuevo profesor
               </Button>
@@ -508,21 +508,21 @@ export default function ProfesoresPage() {
           ].map((s) => (
             <div
               key={s.label}
-              className="bg-surface-container-low rounded-sm p-5 ambient-shadow"
+              className="bg-surface-container-low rounded-sm p-4 md:p-5 ambient-shadow"
             >
               <div
-                className={`w-10 h-10 rounded-md flex items-center justify-center ${s.glow} mb-4`}
+                className={`w-9 md:w-10 h-9 md:h-10 rounded-md flex items-center justify-center ${s.glow} mb-4`}
               >
-                <s.icon className={`w-5 h-5 ${s.color}`} />
+                <s.icon className={`w-4 md:w-5 h-4 md:h-5 ${s.color}`} />
               </div>
               {loading ? (
                 <Skeleton className="h-9 w-16 mb-1" />
               ) : (
-                <p className="font-sans text-4xl font-light tight-tracking text-on-surface tabular-nums mb-1">
+                <p className="font-sans text-2xl md:text-4xl font-light tight-tracking text-on-surface tabular-nums mb-1">
                   {s.value}
                 </p>
               )}
-              <p className="font-sans text-xs tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+              <p className="font-sans text-xs truncate tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
                 {s.label}
               </p>
             </div>
@@ -544,7 +544,7 @@ export default function ProfesoresPage() {
           <div className="flex items-center gap-2">
             <Filter className="w-3.5 h-3.5 text-muted-foreground/60" />
             <Select value={filterTitulo} onValueChange={setFilterTitulo}>
-              <SelectTrigger className="h-10 w-40 font-sans text-sm">
+              <SelectTrigger className="h-10 w-42 font-sans text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -559,7 +559,7 @@ export default function ProfesoresPage() {
               value={filterDepartamento}
               onValueChange={setFilterDepartamento}
             >
-              <SelectTrigger className="h-10 w-56 font-sans text-sm">
+              <SelectTrigger className="h-10 w-44 font-sans text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
