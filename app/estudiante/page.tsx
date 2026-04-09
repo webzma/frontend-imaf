@@ -80,7 +80,7 @@ export default function EstudianteDashboard() {
     <div className="relative min-h-screen bg-surface">
       <div className="absolute top-0 right-0 w-125 h-75 rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 px-8 py-10 max-w-5xl mx-auto">
+      <div className="relative z-10 px-4 md:px-8 py-10 max-w-5xl mx-auto">
         {/* Page header */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-3">

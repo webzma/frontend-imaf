@@ -536,7 +536,7 @@ export default function CursoDetailPage({
     <div className="relative min-h-full bg-surface">
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 px-10 py-10 max-w-8xl">
+      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Back */}
         <button
           onClick={() => router.back()}
@@ -551,7 +551,7 @@ export default function CursoDetailPage({
           <div className="flex items-start justify-between mb-6">
             <div className="flex-1 min-w-0">
               {/* Breadcrumb */}
-              <div className="flex items-center gap-2 mb-3">
+              <div className="hidden md:flex items-center gap-2 mb-3">
                 <BookOpen className="w-3 h-3 text-primary/70" />
                 <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary/70 font-medium">
                   Gestión / Cursos / Detalle
@@ -559,14 +559,14 @@ export default function CursoDetailPage({
               </div>
 
               {/* Name */}
-              <h1 className="font-serif font-light text-[2.8rem] tight-tracking leading-[1.08] text-on-surface mb-2">
+              <h1 className="font-serif font-light text-4xl md:text-[2.8rem] tight-tracking leading-[1.08] text-on-surface mb-2">
                 {curso.nombre}
               </h1>
 
               {/* Profesor */}
               {curso.profesor && (
                 <div className="flex items-center gap-3 mt-3">
-                  <div className="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-secondary-container md:flex items-center justify-center shrink-0 hidden">
                     <span className="font-sans text-xs font-bold text-on-secondary-container">
                       {getInitials(curso.profesor.name)}
                     </span>
@@ -585,7 +585,7 @@ export default function CursoDetailPage({
                         </span>
                       )}
                     </p>
-                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                    <div className="flex items-center gap-3 mt-2 flex-wrap">
                       <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
                         <Mail className="w-3 h-3" />
                         {curso.profesor.email}
