@@ -95,7 +95,7 @@ function getCookie(name: string): string {
 export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { state } = useSidebar();
+  const { toggleSidebar, state } = useSidebar();
   const collapsed = state === "collapsed";
   const [dark, setDark] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -171,8 +171,21 @@ export default function AppSidebar() {
     }
   };
 
+  const handleLinkClick = (href: string) => {
+    // Close sidebar only on mobile when clicking a link
+    if (typeof window !== 'undefined' && window.innerWidth < 768 && state === "expanded") {
+      // Small delay to ensure navigation starts first
+      setTimeout(() => {
+        toggleSidebar();
+      }, 50);
+    }
+  };
+
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar 
+      collapsible="icon"
+      className="transition-transform duration-300 ease-in-out md:transition-none"
+    >
       {/* Logo */}
       <SidebarHeader className="border-b border-sidebar-border px-5 py-5">
         <div className="flex items-center gap-3">
@@ -210,7 +223,7 @@ export default function AppSidebar() {
                       isActive={isActive(item.href, item.exact)}
                       tooltip={item.label}
                     >
-                      <Link href={item.href}>
+                      <Link href={item.href} onClick={() => handleLinkClick(item.href)}>
                         <item.icon />
                         <span>{item.label}</span>
                         {item.label === "Notificaciones" && unreadCount > 0 && (
