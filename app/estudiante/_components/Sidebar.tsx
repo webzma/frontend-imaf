@@ -12,6 +12,7 @@ import {
   Moon,
   Sun,
   Bell,
+  X,
 } from "lucide-react";
 import {
   Sidebar,
@@ -87,8 +88,7 @@ function getCookie(name: string): string {
 export default function EstudianteSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const { toggleSidebar, state } = useSidebar();
   const [dark, setDark] = useState(false);
   const [nombre, setNombre] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
@@ -187,17 +187,30 @@ export default function EstudianteSidebar() {
     }
   };
 
+  const handleLinkClick = (href: string) => {
+    // Close sidebar only on mobile when clicking a link
+    if (typeof window !== 'undefined' && window.innerWidth < 768 && state === "expanded") {
+      // Small delay to ensure navigation starts first
+      setTimeout(() => {
+        toggleSidebar();
+      }, 50);
+    }
+  };
+
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar 
+      collapsible="icon"
+      className="transition-transform duration-300 ease-in-out md:transition-none"
+    >
       {/* Logo */}
-      <SidebarHeader className="border-b border-sidebar-border px-5 py-5 shrink-0">
+      <SidebarHeader className="border-b border-sidebar-border px-5 py-5 shrink-0 relative">
         <div className="flex items-center gap-3">
           <div
-            className={`w-8 h-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}
+            className={`w-8 h-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${state === "collapsed" ? "-translate-x-3" : ""}`}
           >
             <Image src={logoImaf} alt="IMAF" width={28} height={28} />
           </div>
-          {!collapsed && (
+          {state !== "collapsed" && (
             <div>
               <span className="font-sans font-semibold text-sidebar-foreground tracking-tight">
                 IMAF
@@ -208,6 +221,16 @@ export default function EstudianteSidebar() {
             </div>
           )}
         </div>
+        {/* Close button for mobile */}
+        {typeof window !== 'undefined' && window.innerWidth < 768 && state === "expanded" && (
+          <button
+            onClick={toggleSidebar}
+            className="absolute top-5 right-5 p-1.5 rounded-sm hover:bg-sidebar-accent/50 transition-colors md:hidden"
+            aria-label="Cerrar sidebar"
+          >
+            <X className="w-4 h-4 text-sidebar-foreground" />
+          </button>
+        )}
       </SidebarHeader>
 
       {/* Navigation */}
@@ -227,7 +250,7 @@ export default function EstudianteSidebar() {
                         isActive={isActive(item.href, item.exact)}
                         tooltip={item.label}
                       >
-                        <Link href={item.href}>
+                        <Link href={item.href} onClick={() => handleLinkClick(item.href)}>
                           <item.icon />
                           <span>{item.label}</span>
                           {item.label === "Notificaciones" &&
@@ -247,7 +270,7 @@ export default function EstudianteSidebar() {
 
       {/* Footer */}
       <SidebarFooter className="border-t border-sidebar-border shrink-0">
-        {!collapsed && nombre && (
+        {state !== "collapsed" && nombre && (
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-sm bg-sidebar-accent/40">
             <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
               <span className="text-xs font-bold text-primary">
