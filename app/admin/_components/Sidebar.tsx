@@ -14,6 +14,7 @@ import {
   Sun,
   CreditCard,
   Bell,
+  X,
 } from "lucide-react";
 import {
   Sidebar,
@@ -187,7 +188,7 @@ export default function AppSidebar() {
       className="transition-transform duration-300 ease-in-out md:transition-none"
     >
       {/* Logo */}
-      <SidebarHeader className="border-b border-sidebar-border px-5 py-5">
+      <SidebarHeader className="border-b border-sidebar-border px-5 py-5 relative">
         <div className="flex items-center gap-3">
           <div
             className={`w-8 h-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}
@@ -205,6 +206,16 @@ export default function AppSidebar() {
             </div>
           )}
         </div>
+        {/* Close button for mobile */}
+        {typeof window !== 'undefined' && window.innerWidth < 768 && state === "expanded" && (
+          <button
+            onClick={toggleSidebar}
+            className="absolute top-5 right-5 p-1.5 rounded-sm hover:bg-sidebar-accent/50 transition-colors md:hidden"
+            aria-label="Cerrar sidebar"
+          >
+            <X className="w-4 h-4 text-sidebar-foreground" />
+          </button>
+        )}
       </SidebarHeader>
 
       {/* Navigation */}
