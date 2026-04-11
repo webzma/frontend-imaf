@@ -95,14 +95,13 @@ function formatDate(dateStr?: string | null): string {
   });
 }
 
-function formatPrice(precio: number): string {
+const formatPrice = (precio: number): string => {
   if (precio === 0) return "Gratuito";
   return new Intl.NumberFormat("es-CR", {
-    style: "currency",
-    currency: "CRC",
+    style: "decimal",
     maximumFractionDigits: 0,
   }).format(precio);
-}
+};
 
 /* ── Zod Schema ── */
 
