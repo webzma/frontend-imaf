@@ -1,4 +1,5 @@
 import EstudianteSidebar from "./_components/Sidebar";
+import MobileNavbar from "./_components/MobileNavbar";
 import {
   SidebarProvider,
   SidebarInset,
@@ -24,6 +25,7 @@ export default function EstudianteLayout({
             </span>
           </header>
           <div className="flex-1 min-h-screen overflow-y-auto">{children}</div>
+          <MobileNavbar />
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
