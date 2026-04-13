@@ -707,8 +707,7 @@ export default function CursoDetailPage({
                 {curso.precio === 0
                   ? "Gratuito"
                   : new Intl.NumberFormat("es-CR", {
-                      style: "currency",
-                      currency: "CRC",
+                      style: "decimal",
                       maximumFractionDigits: 0,
                     }).format(curso.precio)}
               </span>
