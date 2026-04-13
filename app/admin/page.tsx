@@ -103,7 +103,7 @@ export default function AdminDashboard() {
       {/* Blob decorativo tonal */}
       <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 px-10 py-10 max-w-8xl">
+      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* ── Header ── */}
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-4">

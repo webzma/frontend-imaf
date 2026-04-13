@@ -24,7 +24,7 @@ export default function LandingPage() {
               <div className="w-9 h-9 flex items-center justify-center">
                 <Image src={LogoImaf} alt="IMAF" width={30} height={30} />
               </div>
-              <span className="font-serif text-2xl font-semibold text-on-surface ml-1">
+              <span className="hidden md:flex font-serif text-2xl font-semibold text-on-surface ml-1">
                 IMAF
               </span>
             </Link>
@@ -51,13 +51,13 @@ export default function LandingPage() {
             <div className="flex items-center gap-3">
               <Link
                 href="/login"
-                className="text-primary hover:text-primary/80 transition-colors font-medium text-sm"
+                className="text-primary hover:text-primary/80 transition-colors font-medium text-xs md:text-sm"
               >
                 Iniciar Sesión
               </Link>
               <Link
                 href="/register"
-                className="bg-primary text-primary-foreground rounded-md px-5 py-2.5 ambient-shadow hover:opacity-90 transition-opacity text-sm font-medium"
+                className="bg-primary text-primary-foreground rounded-md px-5 py-2.5 ambient-shadow hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
               >
                 Comenzar Gratis
               </Link>
@@ -72,7 +72,7 @@ export default function LandingPage() {
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-primary-container/30 blur-[120px] pointer-events-none" />
         <div className="absolute bottom-[-30%] left-[-5%] w-[400px] h-[400px] rounded-full bg-secondary-container/40 blur-[100px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-6 lg:px-16 pt-20 pb-28 lg:pt-28 lg:pb-36 relative">
+        <div className="max-w-7xl mx-auto px-6 lg:px-16 pt-8 md:pt-20 pb-28 lg:pt-28 lg:pb-36 relative">
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-start">
             {/* Left — Text content */}
             <div className="lg:col-span-7 space-y-10">
@@ -147,7 +147,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats — Floating bar */}
-      <section className="relative -mt-14 z-10 pb-8">
+      <section className="relative -mt-14 z-10 pb-0 md:pb-8">
         <div className="max-w-5xl mx-auto px-6 lg:px-16">
           <div className="bg-surface-container-lowest rounded-sm ambient-shadow grid grid-cols-2 md:grid-cols-4 divide-x divide-outline-variant/10">
             {[
@@ -272,7 +272,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section */}
-      <section id="como-funciona" className="py-28">
+      <section id="como-funciona" className="py-8 md:py-28">
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <div className="text-center mb-20 space-y-4">
             <span className="font-sans text-xs uppercase tracking-widest text-primary font-semibold">
@@ -361,7 +361,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="bg-surface-container-low py-28">
+      <section id="faq" className="bg-surface-container-low py-8 md:py-28">
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-20">
             {/* Left — sticky heading */}
@@ -387,7 +387,7 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="relative overflow-hidden py-28">
+      <section className="relative overflow-hidden py-8 md:py-28">
         <div className="absolute inset-0 bg-primary/4" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary-container/10 blur-[150px] pointer-events-none" />
 

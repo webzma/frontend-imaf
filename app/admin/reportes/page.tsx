@@ -25,7 +25,6 @@ import {
   Users,
   GraduationCap,
   BookOpen,
-  Star,
   TrendingUp,
 } from "lucide-react";
 
@@ -42,7 +41,6 @@ interface Curso {
   id: number;
   nombre: string;
   codigo: string;
-  creditos: number;
   estado: "activo" | "inactivo";
   estudiantes?: Estudiante[];
 }
@@ -202,9 +200,6 @@ export default function ReportesPage() {
   const totalEstudiantes = estudiantes.length;
   const totalCursos = cursos.length;
   const totalProfesores = profesores.length;
-  const avgCreditos = totalCursos
-    ? (cursos.reduce((s, c) => s + c.creditos, 0) / totalCursos).toFixed(1)
-    : "—";
 
   // Students per course (top 8 by count)
   const estudiantesPorCurso = useMemo(() => {
@@ -238,23 +233,8 @@ export default function ReportesPage() {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [estudiantes]);
 
-  // Credits distribution
-  const creditosDistribucion = useMemo(() => {
-    const counts: Record<number, number> = {};
-    cursos.forEach((c) => {
-      counts[c.creditos] = (counts[c.creditos] || 0) + 1;
-    });
-    return Object.entries(counts)
-      .map(([creditos, cursos]) => ({ creditos: `${creditos} cr.`, cursos }))
-      .sort((a, b) => parseInt(a.creditos) - parseInt(b.creditos));
-  }, [cursos]);
-
   const barConfig = {
     estudiantes: { label: "Estudiantes", color: "var(--color-chart-1)" },
-  } satisfies ChartConfig;
-
-  const creditosConfig = {
-    cursos: { label: "Cursos", color: "var(--color-chart-2)" },
   } satisfies ChartConfig;
 
   const PIE_COLORS_STATUS = ["oklch(0.52 0.14 8)", "oklch(0.90 0.06 8)"];
@@ -269,12 +249,12 @@ export default function ReportesPage() {
     <div className="relative min-h-full bg-surface">
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 px-10 py-10 max-w-8xl">
+      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-4">
-            <BarChart2 className="size-10 text-primary/70" />
-            <span className="font-sans text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
+            <BarChart2 className="size-6 md:size-10 text-primary/70" />
+            <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
               Analítica / Reportes
             </span>
           </div>
@@ -308,14 +288,6 @@ export default function ReportesPage() {
             icon={GraduationCap}
             containerClass="bg-primary-container/70"
             iconClass="text-on-primary-container"
-          />
-          <StatCard
-            label="Créditos promedio"
-            value={loading ? "—" : avgCreditos}
-            icon={Star}
-            containerClass="bg-secondary-container/70"
-            iconClass="text-on-secondary-container"
-            sub="por curso"
           />
         </div>
 
@@ -437,52 +409,6 @@ export default function ReportesPage() {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-              )}
-            </ChartCard>
-
-            {/* Bar: Credits distribution */}
-            <ChartCard
-              title="Distribución de créditos"
-              description="Cantidad de cursos según sus créditos asignados"
-            >
-              {creditosDistribucion.length === 0 ? (
-                <p className="font-sans text-sm text-muted-foreground text-center py-10">
-                  Sin datos
-                </p>
-              ) : (
-                <ChartContainer
-                  config={creditosConfig}
-                  className="h-[260px] w-full"
-                >
-                  <BarChart
-                    data={creditosDistribucion}
-                    margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
-                  >
-                    <CartesianGrid
-                      vertical={false}
-                      strokeDasharray="3 3"
-                      stroke="oklch(0.45 0.10 8 / 0.12)"
-                    />
-                    <XAxis
-                      dataKey="creditos"
-                      tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      allowDecimals={false}
-                      tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar
-                      dataKey="cursos"
-                      fill="var(--color-chart-2)"
-                      radius={[3, 3, 0, 0]}
-                    />
-                  </BarChart>
-                </ChartContainer>
               )}
             </ChartCard>
 

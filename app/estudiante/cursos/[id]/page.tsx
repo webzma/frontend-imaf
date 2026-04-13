@@ -36,6 +36,7 @@ import {
 
 interface Profesor {
   id: number;
+  nombre: string;
   cedula: string | null;
   telefono: string | null;
   especialidad: string | null;
@@ -57,7 +58,16 @@ interface CursoDetalle {
   nombre: string;
   codigo: string;
   descripcion: string | null;
-  creditos: number;
+  estado: "activo" | "inactivo";
+  profesor: Profesor | null;
+  estudiantes: Estudiante[];
+}
+
+interface Curso {
+  id: number;
+  nombre: string;
+  codigo: string;
+  descripcion: string | null;
   estado: "activo" | "inactivo";
   profesor: Profesor | null;
   estudiantes: Estudiante[];
@@ -220,7 +230,7 @@ function PagoModal({
 
         {/* Datos de pago */}
         <div className="bg-primary-container/40 rounded-sm px-4 py-3 space-y-1 text-sm font-sans border border-primary/10">
-          <p className="font-semibold text-on-primary-container text-xs tracking-[0.15em] uppercase mb-2">
+          <p className="font-semibold text-on-primary-container dark:text-accent-foreground text-xs tracking-[0.15em] uppercase mb-2">
             Datos para el pago
           </p>
           <div className="flex justify-between">
@@ -338,7 +348,7 @@ function PagoModal({
             </Button>
             <Button
               type="submit"
-              className="flex-1 gradient-primary font-sans text-sm h-10 text-white"
+              className="flex-1 font-sans text-sm h-10 text-white dark:text-[#1a1817]"
               disabled={submitting}
             >
               {submitting ? (
@@ -414,7 +424,7 @@ export default function CursoDetallePage({
     <div className="relative min-h-screen bg-surface">
       <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 px-8 py-10 max-w-5xl mx-auto">
+      <div className="relative z-10 px-4 md:px-8 py-10 max-w-5xl mx-auto">
         {/* Back */}
         <Link
           href="/estudiante/cursos"
@@ -479,17 +489,19 @@ export default function CursoDetallePage({
                 )}
 
                 <div className="flex items-center gap-8 pt-6 border-t border-outline-variant/30">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-muted-foreground/60" />
-                    <div>
-                      <p className="font-sans text-xs text-muted-foreground">
-                        Créditos
-                      </p>
-                      <p className="font-sans text-sm font-semibold text-on-surface">
-                        {curso.creditos}
-                      </p>
+                  {curso.profesor && (
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="w-4 h-4 text-muted-foreground/60" />
+                      <div>
+                        <p className="font-sans text-xs text-muted-foreground">
+                          Profesor
+                        </p>
+                        <p className="font-sans text-sm font-semibold text-on-surface">
+                          {(curso.profesor as any)?.user?.name || (curso.profesor as any)?.name || "Sin asignar"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-muted-foreground/60" />
                     <div>
@@ -685,7 +697,7 @@ export default function CursoDetallePage({
                 <Button
                   onClick={() => setModalOpen(true)}
                   disabled={curso.estado !== "activo"}
-                  className="gradient-primary font-sans text-sm h-10 text-white"
+                  className="font-sans text-sm h-10 text-white dark:text-[#1a1817]"
                 >
                   <ImageIcon className="w-4 h-4 mr-2" />
                   Enviar pago móvil

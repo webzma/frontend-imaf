@@ -142,7 +142,7 @@ export default function AdminNotificacionesPage() {
     <div className="relative min-h-screen bg-surface">
       <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 px-8 py-10 max-w-4xl mx-auto">
+      <div className="relative z-10 px-4 md:px-8 py-10 max-w-4xl mx-auto">
         {/* Page header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
@@ -187,7 +187,7 @@ export default function AdminNotificacionesPage() {
             </div>
           </div>
         ) : notifications.length === 0 ? (
-          <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-12">
+          <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-8 md:p-12">
             <div className="flex flex-col items-center justify-center gap-4">
               <div className="w-16 h-16 rounded-full bg-primary-container/60 flex items-center justify-center">
                 <Bell className="w-7 h-7 text-on-primary-container" />
@@ -219,7 +219,7 @@ export default function AdminNotificacionesPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-sans text-lg font-semibold text-on-surface">
+                        <h3 className="font-sans text-md md:text-lg font-semibold text-on-surface">
                           {notification.data.titulo}
                         </h3>
                         {!notification.read_at && (
@@ -228,7 +228,7 @@ export default function AdminNotificacionesPage() {
                           </span>
                         )}
                       </div>
-                      <p className="font-sans text-base text-muted-foreground leading-relaxed mb-3">
+                      <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed mb-3">
                         {notification.data.mensaje}
                       </p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
