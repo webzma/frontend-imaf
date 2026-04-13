@@ -190,9 +190,9 @@ export default function ReportesPage() {
       ),
     ])
       .then(([c, e, p]) => {
-        setCursos(Array.isArray(c) ? c : []);
-        setEstudiantes(Array.isArray(e) ? e : []);
-        setProfesores(Array.isArray(p) ? p : []);
+        setCursos(Array.isArray(c) ? c : c.data ?? []);
+        setEstudiantes(Array.isArray(e) ? e : e.data ?? []);
+        setProfesores(Array.isArray(p) ? p : p.data ?? []);
       })
       .finally(() => setLoading(false));
   }, []);

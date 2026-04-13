@@ -213,7 +213,8 @@ export default function EstudiantesPage() {
         setError("No se pudo cargar la lista de estudiantes.");
         return;
       }
-      setEstudiantes(await res.json());
+      const data = await res.json();
+      setEstudiantes(Array.isArray(data) ? data : data.data ?? []);
     } catch {
       setError("Error al conectar con el servidor.");
     } finally {
