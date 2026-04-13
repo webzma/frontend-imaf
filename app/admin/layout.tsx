@@ -1,4 +1,5 @@
 import AppSidebar from "./_components/Sidebar";
+import AdminMobileNavbar from "./_components/MobileNavbar";
 import {
   SidebarProvider,
   SidebarInset,
@@ -24,6 +25,7 @@ export default function AdminLayout({
             </span>
           </header>
           <div className="flex-1 min-h-screen overflow-y-auto">{children}</div>
+          <AdminMobileNavbar />
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
