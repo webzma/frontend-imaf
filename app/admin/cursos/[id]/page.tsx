@@ -83,6 +83,16 @@ interface ProfesorFull {
   user: ProfesorUser;
 }
 
+interface CursoProfesor {
+  id: number;
+  user_id: number;
+  cedula: string | null;
+  especialidad: string | null;
+  titulo: string | null;
+  departamento: string | null;
+  user: ProfesorUser;
+}
+
 interface Curso {
   id: number;
   nombre: string;
@@ -96,7 +106,7 @@ interface Curso {
   precio: number;
   whatsapp_url: string | null;
   estado: "activo" | "inactivo";
-  profesor: ProfesorUser | null;
+  profesor: CursoProfesor | null;
   estudiantes: EstudianteEnCurso[];
 }
 
@@ -247,7 +257,7 @@ export default function CursoDetailPage({
 
   const profesorFull = useMemo(() => {
     if (!curso?.profesor) return null;
-    return profesores.find((p) => p.user_id === curso.profesor!.id) ?? null;
+    return profesores.find((p) => p.id === curso.profesor!.id) ?? null;
   }, [curso, profesores]);
 
   const stats = useMemo(() => {
@@ -571,13 +581,13 @@ export default function CursoDetailPage({
                 <div className="flex items-center gap-3 mt-3">
                   <div className="w-9 h-9 rounded-full bg-secondary-container md:flex items-center justify-center shrink-0 hidden">
                     <span className="font-sans text-xs font-bold text-on-secondary-container">
-                      {getInitials(curso.profesor.name)}
+                      {getInitials(curso.profesor.user.name)}
                     </span>
                   </div>
                   <div>
                     <p className="font-sans text-sm font-semibold text-on-surface flex items-center gap-1.5">
                       <GraduationCap className="w-4 h-4 text-primary/70" />
-                      {curso.profesor.name}
+                      {curso.profesor.user.name}
                       {profesorFull?.titulo && (
                         <span
                           className={`ml-1 inline-flex items-center px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold capitalize ${
@@ -591,7 +601,7 @@ export default function CursoDetailPage({
                     <div className="flex items-center gap-3 mt-2 flex-wrap">
                       <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
                         <Mail className="w-3 h-3" />
-                        {curso.profesor.email}
+                        {curso.profesor.user.email}
                       </span>
                       {profesorFull?.especialidad && (
                         <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
@@ -1080,7 +1090,7 @@ export default function CursoDetailPage({
                   </SelectTrigger>
                   <SelectContent>
                     {profesores.map((p) => (
-                      <SelectItem key={p.user_id} value={String(p.user_id)}>
+                      <SelectItem key={p.id} value={String(p.id)}>
                         <span className="font-sans">
                           {p.user.name}
                           {p.especialidad && (

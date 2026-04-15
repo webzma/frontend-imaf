@@ -66,7 +66,7 @@ interface Curso {
   precio: number;
   whatsapp_url?: string | null;
   estado: "activo" | "inactivo";
-  profesor?: { id: number; name: string } | null;
+  profesor?: { id: number; user_id: number; user: { id: number; name: string; email: string } } | null;
   estudiantes?: Estudiante[];
 }
 
@@ -182,7 +182,7 @@ function CursoCard({ curso }: { curso: Curso }) {
         {curso.profesor && (
           <p className="font-sans text-xs text-primary/70 font-medium mb-2 flex items-center gap-1">
             <GraduationCap className="w-3 h-3" />
-            {curso.profesor.name}
+            {curso.profesor.user.name}
           </p>
         )}
 
@@ -393,7 +393,7 @@ export default function CursosPage() {
         c.nombre.toLowerCase().includes(q) ||
         c.codigo.toLowerCase().includes(q) ||
         (c.descripcion?.toLowerCase().includes(q) ?? false) ||
-        (c.profesor?.name.toLowerCase().includes(q) ?? false);
+        (c.profesor?.user.name.toLowerCase().includes(q) ?? false);
       const matchEstado = filterEstado === "todos" || c.estado === filterEstado;
       const matchProfesor =
         filterProfesor === "todos" ||
@@ -504,7 +504,7 @@ export default function CursosPage() {
                           </SelectItem>
                         ) : (
                           profesores.map((p) => (
-                            <SelectItem key={p.id} value={String(p.user_id)}>
+                            <SelectItem key={p.id} value={String(p.id)}>
                               {p.user.name}
                             </SelectItem>
                           ))
@@ -758,7 +758,7 @@ export default function CursosPage() {
                 <SelectItem value="todos">Todos los profesores</SelectItem>
                 <SelectItem value="sin_profesor">Sin profesor</SelectItem>
                 {profesores.map((p) => (
-                  <SelectItem key={p.id} value={String(p.user_id)}>
+                  <SelectItem key={p.id} value={String(p.id)}>
                     {p.user.name}
                   </SelectItem>
                 ))}
