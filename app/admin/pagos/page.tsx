@@ -455,6 +455,7 @@ function PagoDetailModal({
 export default function AdminPagosPage() {
   const [pagos, setPagos] = useState<Pago[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterEstado, setFilterEstado] = useState("todos");
   const [selected, setSelected] = useState<Pago | null>(null);
@@ -464,9 +465,22 @@ export default function AdminPagosPage() {
     fetch(`${process.env.API_URL}api/admin/pagos`, {
       headers: getAuthHeaders(),
     })
-      .then((r) => r.json())
-      .then((data) => setPagos(Array.isArray(data) ? data : []))
-      .catch(() => toast.error("Error al cargar los pagos"))
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) {
+          const msg = data?.message || `Error ${r.status}`;
+          setFetchError(msg);
+          toast.error(`Error al cargar pagos: ${msg}`);
+          return;
+        }
+        const lista = Array.isArray(data) ? data : (data.data ?? []);
+        setPagos(lista);
+      })
+      .catch((err) => {
+        const msg = err?.message || "Error de conexión";
+        setFetchError(msg);
+        toast.error(`Error al cargar los pagos: ${msg}`);
+      })
       .finally(() => setLoading(false));
 
     // Listen for payment update events
@@ -495,11 +509,11 @@ export default function AdminPagosPage() {
       .filter((p) => {
         const q = search.toLowerCase();
         const matchSearch =
-          p.estudiante.nombre.toLowerCase().includes(q) ||
-          p.estudiante.cedula.includes(q) ||
-          p.referencia.toLowerCase().includes(q) ||
-          p.curso.nombre.toLowerCase().includes(q) ||
-          p.curso.codigo.toLowerCase().includes(q);
+          p.estudiante?.nombre?.toLowerCase()?.includes(q) ||
+          p.estudiante?.cedula?.includes(q) ||
+          p.referencia?.toLowerCase()?.includes(q) ||
+          p.curso?.nombre?.toLowerCase()?.includes(q) ||
+          p.curso?.codigo?.toLowerCase()?.includes(q);
         const matchEstado =
           filterEstado === "todos" || p.estado === filterEstado;
         return matchSearch && matchEstado;
@@ -652,6 +666,10 @@ export default function AdminPagosPage() {
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-16 w-full rounded-sm" />
             ))}
+          </div>
+        ) : fetchError ? (
+          <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-4 py-3 rounded-sm font-sans">
+            {fetchError}
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">

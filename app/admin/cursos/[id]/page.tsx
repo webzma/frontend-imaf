@@ -577,7 +577,7 @@ export default function CursoDetailPage({
               </h1>
 
               {/* Profesor */}
-              {curso.profesor && (
+              {curso.profesor?.user && (
                 <div className="flex items-center gap-3 mt-3">
                   <div className="w-9 h-9 rounded-full bg-secondary-container md:flex items-center justify-center shrink-0 hidden">
                     <span className="font-sans text-xs font-bold text-on-secondary-container">

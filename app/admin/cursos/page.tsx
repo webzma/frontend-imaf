@@ -183,7 +183,7 @@ function CursoCard({ curso }: { curso: Curso }) {
         </h3>
 
         {/* Profesor */}
-        {curso.profesor && (
+        {curso.profesor?.user?.name && (
           <p className="font-sans text-xs text-primary/70 font-medium mb-2 flex items-center gap-1">
             <GraduationCap className="w-3 h-3" />
             {curso.profesor.user.name}
@@ -328,7 +328,8 @@ export default function CursosPage() {
         setError("No se pudo cargar la lista de cursos.");
         return;
       }
-      setCursos(await res.json());
+      const data = await res.json();
+      setCursos(Array.isArray(data) ? data : (data.data ?? []));
     } catch {
       setError("Error al conectar con el servidor.");
     } finally {
@@ -341,7 +342,10 @@ export default function CursosPage() {
       const res = await fetch(`${process.env.API_URL}api/admin/profesores`, {
         headers: getAuthHeaders(),
       });
-      if (res.ok) setProfesores(await res.json());
+      if (res.ok) {
+        const data = await res.json();
+        setProfesores(Array.isArray(data) ? data : (data.data ?? []));
+      }
     } catch {
       /* silent */
     }
