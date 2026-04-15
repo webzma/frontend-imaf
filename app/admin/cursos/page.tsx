@@ -66,7 +66,11 @@ interface Curso {
   precio: number;
   whatsapp_url?: string | null;
   estado: "activo" | "inactivo";
-  profesor?: { id: number; user_id: number; user: { id: number; name: string; email: string } } | null;
+  profesor?: {
+    id: number;
+    user_id: number;
+    user: { id: number; name: string; email: string };
+  } | null;
   estudiantes?: Estudiante[];
 }
 
