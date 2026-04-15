@@ -178,15 +178,29 @@ function PagoModal({
         body: formData,
       });
 
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.message || "Error al enviar el pago.");
+      let body;
+      try {
+        body = await res.json();
+      } catch {
+        throw new Error(`Error del servidor (${res.status})`);
+      }
+
+      if (!res.ok) {
+        const msg =
+          body.message ||
+          (body.errors
+            ? Object.values(body.errors).flat().join(". ")
+            : "Error al enviar el pago.");
+        throw new Error(msg);
+      }
 
       toast.success(
         "Comprobante enviado. Espera la confirmación del administrador.",
       );
-      onSuccess(body);
+      onSuccess(body.pago || body);
       onClose();
     } catch (err: unknown) {
+      console.error("Error al enviar pago:", err);
       toast.error(
         err instanceof Error ? err.message : "Error al enviar el pago.",
       );
