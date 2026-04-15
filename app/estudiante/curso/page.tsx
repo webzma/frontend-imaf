@@ -6,7 +6,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen,
   Hash,
-  Star,
   GraduationCap,
   Info,
   CheckCircle2,

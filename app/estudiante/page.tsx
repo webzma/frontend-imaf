@@ -8,7 +8,6 @@ import {
   BookOpen,
   User,
   Hash,
-  Star,
   GraduationCap,
   CalendarDays,
   ArrowRight,

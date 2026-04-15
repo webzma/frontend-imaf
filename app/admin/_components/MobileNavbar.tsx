@@ -52,23 +52,23 @@ export default function AdminMobileNavbar() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Add padding to main content when navbar is visible
   useEffect(() => {
     if (isMobile) {
-      document.body.style.paddingBottom = '64px';
+      document.body.style.paddingBottom = "64px";
     } else {
-      document.body.style.paddingBottom = '0px';
+      document.body.style.paddingBottom = "0px";
     }
-    
+
     return () => {
-      document.body.style.paddingBottom = '0px';
+      document.body.style.paddingBottom = "0px";
     };
   }, [isMobile]);
 
@@ -76,7 +76,7 @@ export default function AdminMobileNavbar() {
     if (exact) {
       return pathname === href;
     }
-    
+
     // Para coincidencias no exactas, evitar match parciales
     if (href === "/admin/cursos" && pathname === "/admin/profesores") {
       return false;
@@ -96,7 +96,7 @@ export default function AdminMobileNavbar() {
     if (href === "/admin/pagos" && pathname === "/admin/profesores") {
       return false;
     }
-    
+
     return pathname.startsWith(href);
   };
 
@@ -108,25 +108,23 @@ export default function AdminMobileNavbar() {
         {navItems.map((item) => {
           const active = isActive(item.href, item.exact);
           const Icon = item.icon;
-          
+
           return (
             <Link
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ${
-                active 
-                  ? "text-pink-500" 
+                active
+                  ? "text-pink-500"
                   : "text-muted-foreground hover:text-on-surface"
               }`}
             >
-              <Icon 
+              <Icon
                 className={`w-5 h-5 transition-all duration-200 ${
                   active ? "scale-110" : ""
-                }`} 
+                }`}
               />
-              <span className="text-xs font-medium">
-                {item.label}
-              </span>
+              <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );
         })}

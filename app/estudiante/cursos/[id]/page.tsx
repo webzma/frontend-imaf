@@ -19,7 +19,6 @@ import {
   BookOpen,
   GraduationCap,
   Hash,
-  Star,
   Users,
   CheckCircle2,
   XCircle,
@@ -42,6 +41,7 @@ interface Profesor {
   especialidad: string | null;
   titulo: string | null;
   departamento: string | null;
+  name?: string;
   user: { id: number; name: string; email: string };
 }
 
@@ -54,16 +54,6 @@ interface Estudiante {
 }
 
 interface CursoDetalle {
-  id: number;
-  nombre: string;
-  codigo: string;
-  descripcion: string | null;
-  estado: "activo" | "inactivo";
-  profesor: Profesor | null;
-  estudiantes: Estudiante[];
-}
-
-interface Curso {
   id: number;
   nombre: string;
   codigo: string;
@@ -497,7 +487,9 @@ export default function CursoDetallePage({
                           Profesor
                         </p>
                         <p className="font-sans text-sm font-semibold text-on-surface">
-                          {(curso.profesor as any)?.user?.name || (curso.profesor as any)?.name || "Sin asignar"}
+                          {curso.profesor?.user?.name ||
+                            curso.profesor?.name ||
+                            "Sin asignar"}
                         </p>
                       </div>
                     </div>

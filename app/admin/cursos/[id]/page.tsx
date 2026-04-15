@@ -219,9 +219,9 @@ export default function CursoDetailPage({
       fetch(`${process.env.API_URL}api/admin/cursos/${id}`, { headers }).then(
         (r) => r.json(),
       ),
-      fetch(`${process.env.API_URL}api/admin/estudiantes?per_page=1000`, { headers }).then(
-        (r) => r.json(),
-      ),
+      fetch(`${process.env.API_URL}api/admin/estudiantes?per_page=1000`, {
+        headers,
+      }).then((r) => r.json()),
       fetch(`${process.env.API_URL}api/admin/profesores`, { headers }).then(
         (r) => r.json(),
       ),
@@ -230,7 +230,7 @@ export default function CursoDetailPage({
         setCurso(cursoData);
         const listaEstudiantes = Array.isArray(estudiantesData)
           ? estudiantesData
-          : estudiantesData.data ?? [];
+          : (estudiantesData.data ?? []);
         setSinCurso(
           listaEstudiantes.filter(
             (e: EstudianteSinCurso) =>

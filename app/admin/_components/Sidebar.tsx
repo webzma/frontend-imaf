@@ -172,9 +172,13 @@ export default function AppSidebar() {
     }
   };
 
-  const handleLinkClick = (href: string) => {
+  const handleLinkClick = (_href: string) => {
     // Close sidebar only on mobile when clicking a link
-    if (typeof window !== 'undefined' && window.innerWidth < 768 && state === "expanded") {
+    if (
+      typeof window !== "undefined" &&
+      window.innerWidth < 768 &&
+      state === "expanded"
+    ) {
       // Small delay to ensure navigation starts first
       setTimeout(() => {
         toggleSidebar();
@@ -183,7 +187,7 @@ export default function AppSidebar() {
   };
 
   return (
-    <Sidebar 
+    <Sidebar
       collapsible="icon"
       className="transition-transform duration-300 ease-in-out md:transition-none"
     >
@@ -207,15 +211,17 @@ export default function AppSidebar() {
           )}
         </div>
         {/* Close button for mobile */}
-        {typeof window !== 'undefined' && window.innerWidth < 768 && state === "expanded" && (
-          <button
-            onClick={toggleSidebar}
-            className="absolute top-5 right-5 p-1.5 rounded-sm hover:bg-sidebar-accent/50 transition-colors md:hidden"
-            aria-label="Cerrar sidebar"
-          >
-            <X className="w-4 h-4 text-sidebar-foreground" />
-          </button>
-        )}
+        {typeof window !== "undefined" &&
+          window.innerWidth < 768 &&
+          state === "expanded" && (
+            <button
+              onClick={toggleSidebar}
+              className="absolute top-5 right-5 p-1.5 rounded-sm hover:bg-sidebar-accent/50 transition-colors md:hidden"
+              aria-label="Cerrar sidebar"
+            >
+              <X className="w-4 h-4 text-sidebar-foreground" />
+            </button>
+          )}
       </SidebarHeader>
 
       {/* Navigation */}
@@ -234,7 +240,10 @@ export default function AppSidebar() {
                       isActive={isActive(item.href, item.exact)}
                       tooltip={item.label}
                     >
-                      <Link href={item.href} onClick={() => handleLinkClick(item.href)}>
+                      <Link
+                        href={item.href}
+                        onClick={() => handleLinkClick(item.href)}
+                      >
                         <item.icon />
                         <span>{item.label}</span>
                         {item.label === "Notificaciones" && unreadCount > 0 && (

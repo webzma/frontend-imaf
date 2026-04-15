@@ -560,7 +560,12 @@ export default function AdminPagosPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
           {[
-            { label: "Total", value: stats.total, icon: CreditCard, cls: "text-on-primary-container" },
+            {
+              label: "Total",
+              value: stats.total,
+              icon: CreditCard,
+              cls: "text-on-primary-container",
+            },
             {
               label: "Pendientes",
               value: stats.pendiente,

@@ -214,7 +214,7 @@ export default function EstudiantesPage() {
         return;
       }
       const data = await res.json();
-      setEstudiantes(Array.isArray(data) ? data : data.data ?? []);
+      setEstudiantes(Array.isArray(data) ? data : (data.data ?? []));
     } catch {
       setError("Error al conectar con el servidor.");
     } finally {

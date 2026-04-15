@@ -55,13 +55,13 @@ export default function AdminDashboard() {
       ),
     ])
       .then(([est, prof, cur]) => {
-        const estList  = Array.isArray(est)  ? est  : est.data  ?? [];
-        const profList = Array.isArray(prof) ? prof : prof.data ?? [];
-        const curList  = Array.isArray(cur)  ? cur  : cur.data  ?? [];
+        const estList = Array.isArray(est) ? est : (est.data ?? []);
+        const profList = Array.isArray(prof) ? prof : (prof.data ?? []);
+        const curList = Array.isArray(cur) ? cur : (cur.data ?? []);
         setCounts({
           estudiantes: estList.length,
-          profesores:  profList.length,
-          cursos:      curList.length,
+          profesores: profList.length,
+          cursos: curList.length,
         });
       })
       .catch(() => {})
