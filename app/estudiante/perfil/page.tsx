@@ -101,12 +101,27 @@ export default function PerfilPage() {
           genero: form.genero || null,
         }),
       });
+
+      const body = await res.json();
+
       if (!res.ok) {
-        toast.error("Error al guardar los cambios");
+        const msg =
+          body?.message ??
+          (body?.errors
+            ? Object.values(body.errors as Record<string, string[]>)
+                .flat()
+                .join(". ")
+            : "Error al guardar los cambios.");
+        toast.error(msg);
         return;
       }
-      const updated = await res.json();
-      setPerfil(updated);
+
+      setPerfil(body);
+      setForm({
+        telefono: body.telefono ?? "",
+        fecha_nacimiento: body.fecha_nacimiento ?? "",
+        genero: body.genero ?? "",
+      });
       setEditing(false);
       toast.success("Perfil actualizado correctamente");
     } catch {
