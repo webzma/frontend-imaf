@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
 import logoImaf from "@/public/logo-imaf.webp";
+import municipios from "@/data/municipios.json";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function RegisterPage() {
     telefono: "",
     fecha_nacimiento: "",
     genero: "",
+    municipio: "",
     password: "",
     password_confirmation: "",
   });
@@ -211,10 +213,30 @@ export default function RegisterPage() {
                 <SelectContent>
                   <SelectItem value="masculino">Masculino</SelectItem>
                   <SelectItem value="femenino">Femenino</SelectItem>
-                  <SelectItem value="otro">Otro</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Fila 4 - Municipio */}
+          <div className="space-y-2">
+            <Label htmlFor="municipio">{fieldLabel("Municipio")}</Label>
+            <Select
+              value={form.municipio}
+              onValueChange={(value) => setForm({ ...form, municipio: value })}
+              required
+            >
+              <SelectTrigger id="municipio">
+                <SelectValue placeholder="Seleccionar municipio" />
+              </SelectTrigger>
+              <SelectContent>
+                {municipios.map((municipio) => (
+                  <SelectItem key={municipio} value={municipio}>
+                    {municipio}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Contraseñas */}
