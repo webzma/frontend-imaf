@@ -34,6 +34,7 @@ import {
   Loader2,
   Filter,
 } from "lucide-react";
+import municipios from "@/data/municipios.json";
 
 /* ── Types ── */
 
@@ -49,6 +50,7 @@ interface Profesor {
   especialidad: string | null;
   titulo: "licenciatura" | "maestria" | "doctorado" | null;
   departamento: string | null;
+  municipio: string | null;
   fecha_nacimiento: string | null;
   genero: string | null;
   user: User;
@@ -102,6 +104,7 @@ const profesorSchema = z.object({
   password: z.string().min(8, "Mínimo 8 caracteres"),
   cedula: z.string().min(1, "La cédula es obligatoria"),
   telefono: z.string().max(20).optional(),
+  municipio: z.string().max(255).optional(),
   fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
   especialidad: z.string().max(255).optional(),
@@ -160,6 +163,7 @@ export default function ProfesoresPage() {
       password: "",
       cedula: "",
       telefono: "",
+      municipio: "",
       fecha_nacimiento: "",
       genero: undefined,
       especialidad: "",
@@ -196,6 +200,7 @@ export default function ProfesoresPage() {
       const body: Record<string, unknown> = {
         ...data,
         telefono: data.telefono || null,
+        municipio: data.municipio || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
         especialidad: data.especialidad || null,
@@ -384,6 +389,27 @@ export default function ProfesoresPage() {
                       {...form.register("telefono")}
                     />
                   </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="municipio">Municipio</Label>
+                  <Select
+                    value={form.watch("municipio") ?? ""}
+                    onValueChange={(v) =>
+                      form.setValue("municipio", v as string)
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar municipio" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {municipios.map((municipio) => (
+                        <SelectItem key={municipio} value={municipio}>
+                          {municipio}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
