@@ -609,9 +609,9 @@ export default function InstructoresPage() {
             </div>
             {filtered.length === 0 ? (
               <div className="flex items-center justify-center py-16 font-sans text-sm text-muted-foreground">
-                  {hasFilters
-                    ? "No hay instructores con esos filtros."
-                    : "No hay instructores registrados."}
+                {hasFilters
+                  ? "No hay instructores con esos filtros."
+                  : "No hay instructores registrados."}
               </div>
             ) : (
               <div className="overflow-x-auto">

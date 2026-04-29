@@ -758,7 +758,10 @@ export default function CursosPage() {
               </SelectContent>
             </Select>
 
-            <Select value={filterInstructor} onValueChange={setFilterInstructor}>
+            <Select
+              value={filterInstructor}
+              onValueChange={setFilterInstructor}
+            >
               <SelectTrigger className="h-10 w-44 font-sans text-sm">
                 <SelectValue />
               </SelectTrigger>

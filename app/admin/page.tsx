@@ -160,8 +160,8 @@ export default function AdminDashboard() {
                 icon: Users,
               },
               {
-            label: "Registrar instructor",
-            href: "/admin/instructores",
+                label: "Registrar instructor",
+                href: "/admin/instructores",
                 icon: GraduationCap,
               },
               { label: "Crear curso", href: "/admin/cursos", icon: BookOpen },
