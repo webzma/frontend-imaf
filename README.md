@@ -18,7 +18,7 @@ El sistema cuenta con tres roles principales:
 - Validación de comprobantes de pago de los estudiantes
 - Supervisión general del sistema
 
-### 👨‍🏫 Instructor (Profesor)
+### 👨‍🏫 Instructor
 
 - Gestión de los alumnos inscritos en sus cursos
 - Evaluación y seguimiento del progreso estudiantil
@@ -133,7 +133,7 @@ npm run type-check
 │   ├── (auth)/         # Rutas de autenticación
 │   ├── admin/          # Vistas del rol administrador
 │   ├── estudiante/     # Vistas del rol estudiante
-│   └── profesor/       # Vistas del rol instructor
+│   └── instructor/       # Vistas del rol instructor
 ├── components/         # Componentes reutilizables
 │   └── ui/            # Componentes UI base
 ├── hooks/             # Hooks personalizados

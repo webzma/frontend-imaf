@@ -66,13 +66,13 @@ interface EstudianteEnCurso {
   user: EstudianteUser;
 }
 
-interface ProfesorUser {
+interface InstructorUser {
   id: number;
   name: string;
   email: string;
 }
 
-interface ProfesorFull {
+interface InstructorFull {
   id: number;
   user_id: number;
   cedula: string | null;
@@ -80,17 +80,17 @@ interface ProfesorFull {
   especialidad: string | null;
   titulo: string | null;
   departamento: string | null;
-  user: ProfesorUser;
+  user: InstructorUser;
 }
 
-interface CursoProfesor {
+interface CursoInstructor {
   id: number;
   user_id: number;
   cedula: string | null;
   especialidad: string | null;
   titulo: string | null;
   departamento: string | null;
-  user: ProfesorUser;
+  user: InstructorUser;
 }
 
 interface Curso {
@@ -106,7 +106,7 @@ interface Curso {
   precio: number;
   whatsapp_url: string | null;
   estado: "activo" | "inactivo";
-  profesor: CursoProfesor | null;
+  instructor: CursoInstructor | null;
   estudiantes: EstudianteEnCurso[];
 }
 
@@ -174,7 +174,7 @@ export default function CursoDetailPage({
 
   const [curso, setCurso] = useState<Curso | null>(null);
   const [sinCurso, setSinCurso] = useState<EstudianteSinCurso[]>([]);
-  const [profesores, setProfesores] = useState<ProfesorFull[]>([]);
+  const [instructores, setInstructores] = useState<InstructorFull[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -236,7 +236,7 @@ export default function CursoDetailPage({
         (r) => r.json(),
       ),
     ])
-      .then(([cursoData, estudiantesData, profesoresData]) => {
+      .then(([cursoData, estudiantesData, instructoresData]) => {
         setCurso(cursoData);
         const listaEstudiantes = Array.isArray(estudiantesData)
           ? estudiantesData
@@ -247,7 +247,7 @@ export default function CursoDetailPage({
               e.curso === null || e.curso.id !== cursoData.id,
           ),
         );
-        setProfesores(profesoresData);
+        setInstructores(instructoresData);
       })
       .catch(() => setError("Error al cargar los datos del curso."))
       .finally(() => setLoading(false));
@@ -255,10 +255,10 @@ export default function CursoDetailPage({
 
   /* ── Derived ── */
 
-  const profesorFull = useMemo(() => {
-    if (!curso?.profesor) return null;
-    return profesores.find((p) => p.id === curso.profesor!.id) ?? null;
-  }, [curso, profesores]);
+  const instructorFull = useMemo(() => {
+    if (!curso?.instructor) return null;
+    return instructores.find((p) => p.id === curso.instructor!.id) ?? null;
+  }, [curso, instructores]);
 
   const stats = useMemo(() => {
     if (!curso) return { activo: 0, inactivo: 0, graduado: 0 };
@@ -343,7 +343,7 @@ export default function CursoDetailPage({
       precio: curso.precio,
       whatsapp_url: curso.whatsapp_url ?? "",
       estado: curso.estado,
-      profesor_id: curso.profesor ? String(curso.profesor.id) : "",
+      profesor_id: curso.instructor ? String(curso.instructor.id) : "",
     });
     setEditError("");
     setEditOpen(true);
@@ -576,43 +576,43 @@ export default function CursoDetailPage({
                 {curso.nombre}
               </h1>
 
-              {/* Profesor */}
-              {curso.profesor?.user && (
+              {/* Instructor */}
+              {curso.instructor?.user && (
                 <div className="flex items-center gap-3 mt-3">
                   <div className="w-9 h-9 rounded-full bg-secondary-container md:flex items-center justify-center shrink-0 hidden">
                     <span className="font-sans text-xs font-bold text-on-secondary-container">
-                      {getInitials(curso.profesor.user.name)}
+                      {getInitials(curso.instructor.user.name)}
                     </span>
                   </div>
                   <div>
                     <p className="font-sans text-sm font-semibold text-on-surface flex items-center gap-1.5">
                       <GraduationCap className="w-4 h-4 text-primary/70" />
-                      {curso.profesor.user.name}
-                      {profesorFull?.titulo && (
+                      {curso.instructor.user.name}
+                      {instructorFull?.titulo && (
                         <span
                           className={`ml-1 inline-flex items-center px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold capitalize ${
-                            tituloBadge[profesorFull.titulo] ?? ""
+                            tituloBadge[instructorFull.titulo] ?? ""
                           }`}
                         >
-                          {profesorFull.titulo}
+                          {instructorFull.titulo}
                         </span>
                       )}
                     </p>
                     <div className="flex items-center gap-3 mt-2 flex-wrap">
                       <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
                         <Mail className="w-3 h-3" />
-                        {curso.profesor.user.email}
+                        {curso.instructor.user.email}
                       </span>
-                      {profesorFull?.especialidad && (
+                      {instructorFull?.especialidad && (
                         <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
                           <BadgeCheck className="w-3 h-3" />
-                          {profesorFull.especialidad}
+                          {instructorFull.especialidad}
                         </span>
                       )}
-                      {profesorFull?.departamento && (
+                      {instructorFull?.departamento && (
                         <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
                           <Building2 className="w-3 h-3" />
-                          {profesorFull.departamento}
+                          {instructorFull.departamento}
                         </span>
                       )}
                     </div>
@@ -1073,11 +1073,11 @@ export default function CursoDetailPage({
               />
             </div>
 
-            {/* Profesor + Estado */}
+            {/* Instructor + Estado */}
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <label className="font-sans text-xs font-medium text-on-surface">
-                  Profesor
+                  Instructor
                 </label>
                 <Select
                   value={editForm.profesor_id}
@@ -1086,10 +1086,10 @@ export default function CursoDetailPage({
                   }
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Sin profesor asignado" />
+                    <SelectValue placeholder="Sin instructor asignado" />
                   </SelectTrigger>
                   <SelectContent>
-                    {profesores.map((p) => (
+                    {instructores.map((p) => (
                       <SelectItem key={p.id} value={String(p.id)}>
                         <span className="font-sans">
                           {p.user.name}

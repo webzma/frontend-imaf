@@ -43,7 +43,7 @@ export default function LoginPage() {
       document.cookie = `role=${role}; path=/; SameSite=Lax`;
       document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
       if (role === "admin") router.push("/admin");
-      else if (role === "profesor") router.push("/profesor");
+      else if (role === "profesor") router.push("/instructor");
       else router.push("/estudiante");
     } catch {
       setError("Error al conectar con el servidor.");
@@ -79,7 +79,7 @@ export default function LoginPage() {
           </h1>
           <p className="font-sans text-base text-muted-foreground leading-relaxed max-w-[18rem]">
             Accede a tu contenido, sigue tu progreso y conecta con tus
-            profesores desde un solo lugar.
+            instructores desde un solo lugar.
           </p>
         </div>
 

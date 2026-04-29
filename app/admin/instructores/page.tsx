@@ -42,7 +42,7 @@ interface User {
   email: string;
 }
 
-interface Profesor {
+interface Instructor {
   id: number;
   cedula: string;
   telefono: string | null;
@@ -96,7 +96,7 @@ const tituloLabel: Record<string, string> = {
 
 /* ── Zod Schema ── */
 
-const profesorSchema = z.object({
+const instructorSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio").max(255),
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
@@ -109,7 +109,7 @@ const profesorSchema = z.object({
   departamento: z.string().max(255).optional(),
 });
 
-type ProfesorForm = z.infer<typeof profesorSchema>;
+type InstructorForm = z.infer<typeof instructorSchema>;
 
 /* ── Table Skeleton ── */
 
@@ -141,8 +141,8 @@ function TableSkeleton() {
 
 /* ── Page ── */
 
-export default function ProfesoresPage() {
-  const [profesores, setProfesores] = useState<Profesor[]>([]);
+export default function InstructoresPage() {
+  const [instructores, setInstructores] = useState<Instructor[]>([]);
   const [search, setSearch] = useState("");
   const [filterTitulo, setFilterTitulo] = useState("todos");
   const [filterDepartamento, setFilterDepartamento] = useState("todos");
@@ -152,8 +152,8 @@ export default function ProfesoresPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  const form = useForm<ProfesorForm>({
-    resolver: zodResolver(profesorSchema),
+  const form = useForm<InstructorForm>({
+    resolver: zodResolver(instructorSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -168,16 +168,16 @@ export default function ProfesoresPage() {
     },
   });
 
-  const fetchProfesores = async () => {
+  const fetchInstructores = async () => {
     try {
       const res = await fetch(`${process.env.API_URL}api/admin/profesores`, {
         headers: getAuthHeaders(),
       });
       if (!res.ok) {
-        setError("No se pudo cargar la lista de profesores.");
+        setError("No se pudo cargar la lista de instructores.");
         return;
       }
-      setProfesores(await res.json());
+      setInstructores(await res.json());
     } catch {
       setError("Error al conectar con el servidor.");
     } finally {
@@ -186,10 +186,10 @@ export default function ProfesoresPage() {
   };
 
   useEffect(() => {
-    fetchProfesores();
+    fetchInstructores();
   }, []);
 
-  const onSubmit = async (data: ProfesorForm) => {
+  const onSubmit = async (data: InstructorForm) => {
     setSubmitting(true);
     setSubmitError("");
     try {
@@ -211,15 +211,15 @@ export default function ProfesoresPage() {
         const err = await res.json();
         const messages = err.errors
           ? Object.values(err.errors).flat().join(", ")
-          : err.message || "Error al crear el profesor.";
+          : err.message || "Error al crear el instructor.";
         setSubmitError(messages as string);
         return;
       }
       const created = await res.json();
-      setProfesores((prev) => [...prev, created]);
+      setInstructores((prev) => [...prev, created]);
       form.reset();
       setOpen(false);
-      toast.success("Profesor registrado correctamente");
+      toast.success("Instructor registrado correctamente");
     } catch {
       setSubmitError("Error al conectar con el servidor.");
     } finally {
@@ -230,13 +230,13 @@ export default function ProfesoresPage() {
   // Unique departments from data
   const departamentos = useMemo(() => {
     const set = new Set(
-      profesores.map((p) => p.departamento).filter(Boolean) as string[],
+      instructores.map((p) => p.departamento).filter(Boolean) as string[],
     );
     return Array.from(set).sort();
-  }, [profesores]);
+  }, [instructores]);
 
   const filtered = useMemo(() => {
-    return profesores.filter((p) => {
+    return instructores.filter((p) => {
       const q = search.toLowerCase();
       const matchSearch =
         p.user.name.toLowerCase().includes(q) ||
@@ -252,13 +252,13 @@ export default function ProfesoresPage() {
           : p.departamento === filterDepartamento);
       return matchSearch && matchTitulo && matchDept;
     });
-  }, [profesores, search, filterTitulo, filterDepartamento]);
+  }, [instructores, search, filterTitulo, filterDepartamento]);
 
   const counts = {
-    total: profesores.length,
-    conTitulo: profesores.filter((p) => p.titulo).length,
+    total: instructores.length,
+    conTitulo: instructores.filter((p) => p.titulo).length,
     departamentos: new Set(
-      profesores.map((p) => p.departamento).filter(Boolean),
+      instructores.map((p) => p.departamento).filter(Boolean),
     ).size,
   };
 
@@ -276,14 +276,14 @@ export default function ProfesoresPage() {
             <div className="flex items-center gap-2 mb-4">
               <GraduationCap className="size-6 md:size-10 text-primary/70" />
               <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
-                Gestión / Profesores
+                Gestión / Instructores
               </span>
             </div>
             <h1 className="font-serif font-light text-[3.2rem] tight-tracking leading-[1.08] text-on-surface mb-2">
-              Profesores
+              Instructores
             </h1>
             <p className="font-sans text-sm text-muted-foreground max-w-md">
-              Todos los profesores registrados en la plataforma.
+              Todos los instructores registrados en la plataforma.
             </p>
           </div>
 
@@ -300,16 +300,16 @@ export default function ProfesoresPage() {
             <DialogTrigger asChild>
               <Button className="gap-2 mt-6 md:mt-0">
                 <Plus className="w-4 h-4" />
-                Nuevo profesor
+                Nuevo instructor
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="font-serif font-semibold text-2xl text-on-surface">
-                  Registrar profesor
+                  Registrar instructor
                 </DialogTitle>
                 <DialogDescription className="font-sans text-sm text-muted-foreground">
-                  Completa los datos para crear un nuevo profesor.
+                  Completa los datos para crear un nuevo instructor.
                 </DialogDescription>
               </DialogHeader>
 
@@ -402,7 +402,7 @@ export default function ProfesoresPage() {
                     <Select
                       value={form.watch("genero") ?? ""}
                       onValueChange={(v) =>
-                        form.setValue("genero", v as ProfesorForm["genero"])
+                        form.setValue("genero", v as InstructorForm["genero"])
                       }
                     >
                       <SelectTrigger className="w-full">
@@ -441,7 +441,7 @@ export default function ProfesoresPage() {
                   <Select
                     value={form.watch("titulo") ?? ""}
                     onValueChange={(v) =>
-                      form.setValue("titulo", v as ProfesorForm["titulo"])
+                      form.setValue("titulo", v as InstructorForm["titulo"])
                     }
                   >
                     <SelectTrigger className="w-full">
@@ -473,7 +473,7 @@ export default function ProfesoresPage() {
                     {submitting && (
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     )}
-                    Crear profesor
+                    Crear instructor
                   </Button>
                 </DialogFooter>
               </form>
@@ -534,7 +534,7 @@ export default function ProfesoresPage() {
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
             <Input
-              placeholder="Buscar profesor..."
+              placeholder="Buscar instructor..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 h-10 font-sans text-sm"
@@ -601,7 +601,7 @@ export default function ProfesoresPage() {
           <div className="bg-surface-container-low rounded-sm overflow-hidden ambient-shadow">
             <div className="px-6 py-3.5 border-b border-outline-variant/50">
               <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-on-surface/55 font-medium">
-                {filtered.length} profesor{filtered.length !== 1 ? "es" : ""}
+                {filtered.length} instructor{filtered.length !== 1 ? "es" : ""}
                 {hasFilters
                   ? " encontrado" + (filtered.length !== 1 ? "s" : "")
                   : ""}
@@ -609,9 +609,9 @@ export default function ProfesoresPage() {
             </div>
             {filtered.length === 0 ? (
               <div className="flex items-center justify-center py-16 font-sans text-sm text-muted-foreground">
-                {hasFilters
-                  ? "No hay profesores con esos filtros."
-                  : "No hay profesores registrados."}
+                  {hasFilters
+                    ? "No hay instructores con esos filtros."
+                    : "No hay instructores registrados."}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -619,7 +619,7 @@ export default function ProfesoresPage() {
                   <thead>
                     <tr className="border-b border-outline-variant/40">
                       {[
-                        "Profesor",
+                        "Instructor",
                         "Cédula",
                         "Especialidad",
                         "Departamento",

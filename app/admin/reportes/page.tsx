@@ -45,7 +45,7 @@ interface Curso {
   estudiantes?: Estudiante[];
 }
 
-interface Profesor {
+interface Instructor {
   id: number;
   user?: { name: string };
 }
@@ -171,7 +171,7 @@ function PieLabel({
 export default function ReportesPage() {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
-  const [profesores, setProfesores] = useState<Profesor[]>([]);
+  const [instructores, setInstructores] = useState<Instructor[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -190,7 +190,7 @@ export default function ReportesPage() {
       .then(([c, e, p]) => {
         setCursos(Array.isArray(c) ? c : (c.data ?? []));
         setEstudiantes(Array.isArray(e) ? e : (e.data ?? []));
-        setProfesores(Array.isArray(p) ? p : (p.data ?? []));
+        setInstructores(Array.isArray(p) ? p : (p.data ?? []));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -199,7 +199,7 @@ export default function ReportesPage() {
 
   const totalEstudiantes = estudiantes.length;
   const totalCursos = cursos.length;
-  const totalProfesores = profesores.length;
+  const totalInstructores = instructores.length;
 
   // Students per course (top 8 by count)
   const estudiantesPorCurso = useMemo(() => {
@@ -283,8 +283,8 @@ export default function ReportesPage() {
             iconClass="text-on-secondary-container"
           />
           <StatCard
-            label="Profesores"
-            value={loading ? "—" : totalProfesores}
+            label="Instructores"
+            value={loading ? "—" : totalInstructores}
             icon={GraduationCap}
             containerClass="bg-primary-container/70"
             iconClass="text-on-primary-container"

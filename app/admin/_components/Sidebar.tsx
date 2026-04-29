@@ -55,8 +55,8 @@ const navItems = [
         exact: false,
       },
       {
-        label: "Profesores",
-        href: "/admin/profesores",
+        label: "Instructores",
+        href: "/admin/instructores",
         icon: GraduationCap,
         exact: false,
       },

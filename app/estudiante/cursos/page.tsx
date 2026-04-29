@@ -30,7 +30,7 @@ interface Curso {
   codigo: string;
   descripcion: string | null;
   estado: "activo" | "inactivo";
-  profesor?: { id: number; name: string } | null;
+  instructor?: { id: number; name: string } | null;
   estudiantes?: { id: number }[];
 }
 
@@ -83,10 +83,10 @@ function CursoCard({
           {curso.nombre}
         </h3>
 
-        {curso.profesor && (
+        {curso.instructor && (
           <p className="font-sans text-xs text-primary/70 font-medium mb-2 flex items-center gap-1">
             <GraduationCap className="w-3 h-3" />
-            {curso.profesor.name}
+            {curso.instructor.name}
           </p>
         )}
 
@@ -182,7 +182,7 @@ export default function EstudianteCursosPage() {
         c.nombre.toLowerCase().includes(q) ||
         c.codigo.toLowerCase().includes(q) ||
         (c.descripcion?.toLowerCase().includes(q) ?? false) ||
-        (c.profesor?.name.toLowerCase().includes(q) ?? false);
+        (c.instructor?.name.toLowerCase().includes(q) ?? false);
       const matchEstado = filterEstado === "todos" || c.estado === filterEstado;
       return matchSearch && matchEstado;
     });
@@ -252,7 +252,7 @@ export default function EstudianteCursosPage() {
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
             <Input
-              placeholder="Buscar por nombre, código o profesor..."
+              placeholder="Buscar por nombre, código o instructor..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 h-10 font-sans text-sm"

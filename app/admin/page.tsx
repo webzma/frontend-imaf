@@ -79,13 +79,13 @@ export default function AdminDashboard() {
       href: "/admin/estudiantes",
     },
     {
-      label: "Profesores",
+      label: "Instructores",
       value: loading ? "—" : counts.profesores,
       sub: "activos en la plataforma",
       icon: GraduationCap,
       color: "text-on-secondary-container",
       glow: "bg-secondary-container",
-      href: "/admin/profesores",
+      href: "/admin/instructores",
     },
     {
       label: "Cursos",
@@ -160,8 +160,8 @@ export default function AdminDashboard() {
                 icon: Users,
               },
               {
-                label: "Registrar profesor",
-                href: "/admin/profesores",
+            label: "Registrar instructor",
+            href: "/admin/instructores",
                 icon: GraduationCap,
               },
               { label: "Crear curso", href: "/admin/cursos", icon: BookOpen },

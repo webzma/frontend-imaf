@@ -33,7 +33,7 @@ import {
 
 /* ── Types ── */
 
-interface Profesor {
+interface Instructor {
   id: number;
   nombre: string;
   cedula: string | null;
@@ -59,7 +59,7 @@ interface CursoDetalle {
   codigo: string;
   descripcion: string | null;
   estado: "activo" | "inactivo";
-  profesor: Profesor | null;
+  instructor: Instructor | null;
   estudiantes: Estudiante[];
 }
 
@@ -493,16 +493,16 @@ export default function CursoDetallePage({
                 )}
 
                 <div className="flex items-center gap-8 pt-6 border-t border-outline-variant/30">
-                  {curso.profesor && (
+                  {curso.instructor && (
                     <div className="flex items-center gap-2">
                       <GraduationCap className="w-4 h-4 text-muted-foreground/60" />
                       <div>
                         <p className="font-sans text-xs text-muted-foreground">
-                          Profesor
+                          Instructor
                         </p>
                         <p className="font-sans text-sm font-semibold text-on-surface">
-                          {curso.profesor?.user?.name ||
-                            curso.profesor?.name ||
+                          {curso.instructor?.user?.name ||
+                            curso.instructor?.name ||
                             "Sin asignar"}
                         </p>
                       </div>
@@ -524,44 +524,44 @@ export default function CursoDetallePage({
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Profesor */}
+              {/* Instructor */}
               <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
                 <div className="flex items-center gap-2 mb-5">
                   <GraduationCap className="w-4 h-4 text-primary/70" />
                   <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
-                    Profesor
+                    Instructor
                   </h3>
                 </div>
-                {curso.profesor?.user ? (
+                {curso.instructor?.user ? (
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
                       <span className="font-sans text-base font-bold text-on-primary-container">
-                        {getInitials(curso.profesor.user.name ?? "")}
+                        {getInitials(curso.instructor.user.name ?? "")}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-serif font-light text-xl text-on-surface">
-                        {curso.profesor.user.name ?? "Sin nombre"}
+                        {curso.instructor.user.name ?? "Sin nombre"}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1">
                         <Mail className="w-3 h-3 text-muted-foreground/60" />
                         <p className="font-sans text-sm text-muted-foreground truncate">
-                          {curso.profesor.user.email ?? ""}
+                          {curso.instructor.user.email ?? ""}
                         </p>
                       </div>
-                      {curso.profesor.especialidad && (
+                      {curso.instructor.especialidad && (
                         <p className="font-sans text-xs text-primary/70 mt-2 font-medium">
-                          {curso.profesor.especialidad}
+                          {curso.instructor.especialidad}
                         </p>
                       )}
-                      {curso.profesor.titulo && (
+                      {curso.instructor.titulo && (
                         <p className="font-sans text-xs text-muted-foreground mt-1 capitalize">
-                          {curso.profesor.titulo}
+                          {curso.instructor.titulo}
                         </p>
                       )}
-                      {curso.profesor.departamento && (
+                      {curso.instructor.departamento && (
                         <p className="font-sans text-xs text-muted-foreground mt-1">
-                          Depto. {curso.profesor.departamento}
+                          Depto. {curso.instructor.departamento}
                         </p>
                       )}
                     </div>
@@ -572,7 +572,7 @@ export default function CursoDetallePage({
                       <GraduationCap className="w-4 h-4 text-on-primary-container" />
                     </div>
                     <p className="font-sans text-sm text-muted-foreground">
-                      Sin profesor asignado
+                      Sin instructor asignado
                     </p>
                   </div>
                 )}

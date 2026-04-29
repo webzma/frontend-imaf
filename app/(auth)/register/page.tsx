@@ -67,7 +67,7 @@ export default function RegisterPage() {
       document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
 
       if (role === "admin") router.push("/admin");
-      else if (role === "profesor") router.push("/profesor");
+      else if (role === "profesor") router.push("/instructor");
       else router.push("/estudiante");
     } catch {
       setError("Error al conectar con el servidor.");

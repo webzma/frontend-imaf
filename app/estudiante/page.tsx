@@ -19,7 +19,7 @@ interface Curso {
   codigo: string;
   descripcion: string | null;
   estado: string;
-  profesor?: { id: number; name: string } | null;
+  instructor?: { id: number; name: string } | null;
 }
 
 interface EstudiantePerfil {
@@ -210,7 +210,7 @@ export default function EstudianteDashboard() {
                     <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
                       <GraduationCap className="w-3.5 h-3.5" />
                       <span className="font-sans">
-                        {perfil.curso.profesor?.name || "Sin asignar"}
+                        {perfil.curso.instructor?.name || "Sin asignar"}
                       </span>
                     </div>
                   </div>

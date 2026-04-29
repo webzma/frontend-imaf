@@ -43,7 +43,7 @@ import {
 
 /* ── Types ── */
 
-interface Profesor {
+interface Instructor {
   id: number;
   user_id: number;
   user: { id: number; name: string; email: string };
@@ -66,7 +66,7 @@ interface Curso {
   precio: number;
   whatsapp_url?: string | null;
   estado: "activo" | "inactivo";
-  profesor?: {
+  instructor?: {
     id: number;
     user_id: number;
     user: { id: number; name: string; email: string };
@@ -112,7 +112,7 @@ const formatPrice = (precio: number): string => {
 const cursoSchema = z.object({
   nombre: z.string().min(1, "El nombre es obligatorio").max(255),
   descripcion: z.string().max(1000).optional(),
-  profesor_id: z.string().min(1, "Debes seleccionar un profesor"),
+  profesor_id: z.string().min(1, "Debes seleccionar un instructor"),
   limite_cupo: z.number().int().min(1, "Mínimo 1 participante"),
   fecha_inicio: z.string().optional(),
   fecha_fin: z.string().optional(),
@@ -182,11 +182,11 @@ function CursoCard({ curso }: { curso: Curso }) {
           {curso.nombre}
         </h3>
 
-        {/* Profesor */}
-        {curso.profesor?.user?.name && (
+        {/* Instructor */}
+        {curso.instructor?.user?.name && (
           <p className="font-sans text-xs text-primary/70 font-medium mb-2 flex items-center gap-1">
             <GraduationCap className="w-3 h-3" />
-            {curso.profesor.user.name}
+            {curso.instructor.user.name}
           </p>
         )}
 
@@ -293,10 +293,10 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
 
 export default function CursosPage() {
   const [cursos, setCursos] = useState<Curso[]>([]);
-  const [profesores, setProfesores] = useState<Profesor[]>([]);
+  const [instructores, setInstructores] = useState<Instructor[]>([]);
   const [search, setSearch] = useState("");
   const [filterEstado, setFilterEstado] = useState("todos");
-  const [filterProfesor, setFilterProfesor] = useState("todos");
+  const [filterInstructor, setFilterInstructor] = useState("todos");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
@@ -337,14 +337,14 @@ export default function CursosPage() {
     }
   };
 
-  const fetchProfesores = async () => {
+  const fetchInstructores = async () => {
     try {
       const res = await fetch(`${process.env.API_URL}api/admin/profesores`, {
         headers: getAuthHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
-        setProfesores(Array.isArray(data) ? data : (data.data ?? []));
+        setInstructores(Array.isArray(data) ? data : (data.data ?? []));
       }
     } catch {
       /* silent */
@@ -353,7 +353,7 @@ export default function CursosPage() {
 
   useEffect(() => {
     fetchCursos();
-    fetchProfesores();
+    fetchInstructores();
   }, []);
 
   const onSubmit = async (data: CursoForm) => {
@@ -401,16 +401,16 @@ export default function CursosPage() {
         c.nombre.toLowerCase().includes(q) ||
         c.codigo.toLowerCase().includes(q) ||
         (c.descripcion?.toLowerCase().includes(q) ?? false) ||
-        (c.profesor?.user.name.toLowerCase().includes(q) ?? false);
+        (c.instructor?.user.name.toLowerCase().includes(q) ?? false);
       const matchEstado = filterEstado === "todos" || c.estado === filterEstado;
-      const matchProfesor =
-        filterProfesor === "todos" ||
-        (filterProfesor === "sin_profesor"
-          ? !c.profesor
-          : String(c.profesor?.id) === filterProfesor);
-      return matchSearch && matchEstado && matchProfesor;
+      const matchInstructor =
+        filterInstructor === "todos" ||
+        (filterInstructor === "sin_instructor"
+          ? !c.instructor
+          : String(c.instructor?.id) === filterInstructor);
+      return matchSearch && matchEstado && matchInstructor;
     });
-  }, [cursos, search, filterEstado, filterProfesor]);
+  }, [cursos, search, filterEstado, filterInstructor]);
 
   const totalEstudiantes = cursos.reduce(
     (sum, c) => sum + (c.estudiantes?.length ?? 0),
@@ -420,7 +420,7 @@ export default function CursosPage() {
     (c) => (c.estudiantes?.length ?? 0) > 0,
   ).length;
   const hasFilters =
-    filterEstado !== "todos" || filterProfesor !== "todos" || search !== "";
+    filterEstado !== "todos" || filterInstructor !== "todos" || search !== "";
 
   return (
     <div className="relative min-h-full bg-surface">
@@ -490,10 +490,10 @@ export default function CursosPage() {
                   )}
                 </div>
 
-                {/* Profesor + Estado */}
+                {/* Instructor + Estado */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label>Profesor *</Label>
+                    <Label>Instructor *</Label>
                     <Select
                       value={form.watch("profesor_id")}
                       onValueChange={(v) =>
@@ -506,12 +506,12 @@ export default function CursosPage() {
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
                       <SelectContent>
-                        {profesores.length === 0 ? (
+                        {instructores.length === 0 ? (
                           <SelectItem value="__none__" disabled>
-                            No hay profesores registrados
+                            No hay instructores registrados
                           </SelectItem>
                         ) : (
-                          profesores.map((p) => (
+                          instructores.map((p) => (
                             <SelectItem key={p.id} value={String(p.id)}>
                               {p.user.name}
                             </SelectItem>
@@ -738,7 +738,7 @@ export default function CursosPage() {
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
             <Input
-              placeholder="Buscar por nombre, código o profesor..."
+              placeholder="Buscar por nombre, código o instructor..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 h-10 font-sans text-sm"
@@ -758,14 +758,14 @@ export default function CursosPage() {
               </SelectContent>
             </Select>
 
-            <Select value={filterProfesor} onValueChange={setFilterProfesor}>
+            <Select value={filterInstructor} onValueChange={setFilterInstructor}>
               <SelectTrigger className="h-10 w-44 font-sans text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="todos">Todos los profesores</SelectItem>
-                <SelectItem value="sin_profesor">Sin profesor</SelectItem>
-                {profesores.map((p) => (
+                <SelectItem value="todos">Todos los instructores</SelectItem>
+                <SelectItem value="sin_instructor">Sin instructor</SelectItem>
+                {instructores.map((p) => (
                   <SelectItem key={p.id} value={String(p.id)}>
                     {p.user.name}
                   </SelectItem>
@@ -778,7 +778,7 @@ export default function CursosPage() {
                 onClick={() => {
                   setSearch("");
                   setFilterEstado("todos");
-                  setFilterProfesor("todos");
+                  setFilterInstructor("todos");
                 }}
                 className="font-sans text-xs text-muted-foreground hover:text-on-surface transition-colors underline underline-offset-2"
               >

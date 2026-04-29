@@ -25,8 +25,8 @@ const navItems = [
     exact: false,
   },
   {
-    label: "Profesores",
-    href: "/admin/profesores",
+    label: "Instructores",
+    href: "/admin/instructores",
     icon: GraduationCap,
     exact: false,
   },
@@ -78,10 +78,10 @@ export default function AdminMobileNavbar() {
     }
 
     // Para coincidencias no exactas, evitar match parciales
-    if (href === "/admin/cursos" && pathname === "/admin/profesores") {
+    if (href === "/admin/cursos" && pathname === "/admin/instructores") {
       return false;
     }
-    if (href === "/admin/profesores" && pathname === "/admin/cursos") {
+    if (href === "/admin/instructores" && pathname === "/admin/cursos") {
       return false;
     }
     if (href === "/admin/cursos" && pathname === "/admin/pagos") {
@@ -90,10 +90,10 @@ export default function AdminMobileNavbar() {
     if (href === "/admin/pagos" && pathname === "/admin/cursos") {
       return false;
     }
-    if (href === "/admin/profesores" && pathname === "/admin/pagos") {
+    if (href === "/admin/instructores" && pathname === "/admin/pagos") {
       return false;
     }
-    if (href === "/admin/pagos" && pathname === "/admin/profesores") {
+    if (href === "/admin/pagos" && pathname === "/admin/instructores") {
       return false;
     }
 

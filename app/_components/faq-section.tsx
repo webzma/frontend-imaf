@@ -36,7 +36,7 @@ const FAQ_ITEMS = [
   {
     question: "¿Qué pasa si tengo dudas sobre el contenido?",
     answer:
-      "Cada curso tiene un espacio de discusión donde puedes hacer preguntas. Los profesores y otros estudiantes pueden ayudarte. También puedes contactar directamente al profesor del curso.",
+      "Cada curso tiene un espacio de discusión donde puedes hacer preguntas. Los instructores y otros estudiantes pueden ayudarte. También puedes contactar directamente al instructor del curso.",
   },
   {
     question: "¿Puedo acceder desde mi celular?",

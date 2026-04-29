@@ -44,7 +44,7 @@ interface Curso {
   estudiantes?: EstudianteEnCurso[];
 }
 
-interface ProfesorPerfil {
+interface InstructorPerfil {
   id: number;
   cedula: string;
   telefono: string | null;
@@ -95,9 +95,9 @@ const tituloStyle: Record<string, string> = {
 
 /* ── Page ── */
 
-export default function ProfesorPage() {
+export default function InstructorPage() {
   const router = useRouter();
-  const [perfil, setPerfil] = useState<ProfesorPerfil | null>(null);
+  const [perfil, setPerfil] = useState<InstructorPerfil | null>(null);
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -214,7 +214,7 @@ export default function ProfesorPage() {
             IMAF
           </span>
           <span className="font-sans text-[10px] text-muted-foreground/60 tracking-[0.2em] uppercase">
-            Profesor
+            Instructor
           </span>
         </div>
         <button
@@ -235,7 +235,7 @@ export default function ProfesorPage() {
             </span>
           </div>
           <h1 className="font-serif font-light text-[2.8rem] tight-tracking leading-[1.08] text-on-surface">
-            Panel del profesor
+            Panel del instructor
           </h1>
         </div>
 

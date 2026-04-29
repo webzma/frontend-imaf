@@ -36,7 +36,7 @@ interface MiCursoResponse {
     limite_cupo: number;
     cupos_restantes: number;
     whatsapp_url: string | null;
-    profesor: {
+    instructor: {
       id: number;
       nombre: string | null;
       especialidad: string | null;
@@ -287,38 +287,38 @@ export default function CursoPage() {
                 </div>
               </div>
 
-              {/* Profesor */}
+              {/* Instructor */}
               <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
                 <div className="flex items-center gap-2 mb-5">
                   <GraduationCap className="w-4 h-4 text-primary/70" />
                   <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
-                    Profesor
+                    Instructor
                   </h3>
                 </div>
-                {curso.profesor ? (
+                {curso.instructor ? (
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
                       <span className="font-sans text-base font-bold text-on-primary-container">
-                        {getInitials(curso.profesor.nombre)}
+                        {getInitials(curso.instructor.nombre)}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-serif font-light text-xl text-on-surface">
-                        {curso.profesor.nombre ?? "Sin nombre"}
+                        {curso.instructor.nombre ?? "Sin nombre"}
                       </p>
-                      {curso.profesor.especialidad && (
+                      {curso.instructor.especialidad && (
                         <p className="font-sans text-xs text-primary/70 mt-1 font-medium">
-                          {curso.profesor.especialidad}
+                          {curso.instructor.especialidad}
                         </p>
                       )}
-                      {curso.profesor.titulo && (
+                      {curso.instructor.titulo && (
                         <p className="font-sans text-xs text-muted-foreground mt-0.5 capitalize">
-                          {curso.profesor.titulo}
+                          {curso.instructor.titulo}
                         </p>
                       )}
-                      {curso.profesor.departamento && (
+                      {curso.instructor.departamento && (
                         <p className="font-sans text-xs text-muted-foreground mt-0.5">
-                          Depto. {curso.profesor.departamento}
+                          Depto. {curso.instructor.departamento}
                         </p>
                       )}
                     </div>
@@ -329,7 +329,7 @@ export default function CursoPage() {
                       <GraduationCap className="w-4 h-4 text-on-primary-container" />
                     </div>
                     <p className="font-sans text-sm text-muted-foreground">
-                      Sin profesor asignado
+                      Sin instructor asignado
                     </p>
                   </div>
                 )}

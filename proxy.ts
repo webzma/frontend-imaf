@@ -6,7 +6,7 @@ const AUTH_ROUTES = ["/login", "/register"];
 // Protected routes and the roles allowed to access them
 const PROTECTED_ROUTES: Record<string, string[]> = {
   "/admin": ["admin"],
-  "/profesor": ["admin", "profesor"],
+  "/instructor": ["admin", "profesor"],
   "/estudiante": ["admin", "estudiante"],
 };
 
@@ -58,7 +58,7 @@ function getDashboard(role: string): string {
     case "admin":
       return "/admin";
     case "profesor":
-      return "/profesor";
+      return "/instructor";
     default:
       return "/estudiante";
   }
