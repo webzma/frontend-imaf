@@ -5,6 +5,13 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   User,
@@ -16,13 +23,16 @@ import {
   Check,
   X,
   CalendarDays,
+  MapPin,
 } from "lucide-react";
+import municipios from "@/data/municipios.json";
 
 interface EstudiantePerfil {
   id: number;
   nombre: string;
   cedula: string;
   telefono: string | null;
+  municipio: string | null;
   fecha_nacimiento: string | null;
   genero: string | null;
   fecha_inscripcion: string;
@@ -67,6 +77,7 @@ export default function PerfilPage() {
 
   const [form, setForm] = useState({
     telefono: "",
+    municipio: "",
     fecha_nacimiento: "",
     genero: "",
   });
@@ -80,6 +91,7 @@ export default function PerfilPage() {
         setPerfil(data);
         setForm({
           telefono: data.telefono ?? "",
+          municipio: data.municipio ?? "",
           fecha_nacimiento: data.fecha_nacimiento ?? "",
           genero: data.genero ?? "",
         });
@@ -97,6 +109,7 @@ export default function PerfilPage() {
         headers: getAuthHeaders(),
         body: JSON.stringify({
           telefono: form.telefono || null,
+          municipio: form.municipio || null,
           fecha_nacimiento: form.fecha_nacimiento || null,
           genero: form.genero || null,
         }),
@@ -119,6 +132,7 @@ export default function PerfilPage() {
       setPerfil(body);
       setForm({
         telefono: body.telefono ?? "",
+        municipio: body.municipio ?? "",
         fecha_nacimiento: body.fecha_nacimiento ?? "",
         genero: body.genero ?? "",
       });
@@ -199,6 +213,14 @@ export default function PerfilPage() {
                         </span>
                       </div>
                     )}
+                    {perfil.municipio && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                        <span className="font-sans text-muted-foreground">
+                          {perfil.municipio}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 text-sm">
                       <Mail className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
                       <span className="font-sans text-muted-foreground text-xs break-all">
@@ -273,6 +295,26 @@ export default function PerfilPage() {
                       <option value="femenino">Femenino</option>
                       <option value="otro">Otro</option>
                     </select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="municipio">Municipio</Label>
+                    <Select
+                      value={form.municipio}
+                      onValueChange={(value) =>
+                        setForm((f) => ({ ...f, municipio: value }))
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar municipio" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {municipios.map((municipio) => (
+                          <SelectItem key={municipio} value={municipio}>
+                            {municipio}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="flex gap-2 justify-end">
                     <Button
