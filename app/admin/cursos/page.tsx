@@ -36,7 +36,6 @@ import {
   GraduationCap,
   Filter,
   CalendarDays,
-  DollarSign,
   MessageCircle,
   UsersRound,
 } from "lucide-react";
@@ -251,8 +250,8 @@ function CursoCard({ curso }: { curso: Curso }) {
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-outline-variant/40">
-          <div className="flex items-center gap-1 font-sans text-sm font-semibold text-on-surface">
-            <DollarSign className="w-3.5 h-3.5 text-muted-foreground/60" />
+          <div className="flex items-center gap-1 font-sans text-sm font-semibold text-muted-foreground">
+            <b>Bs.</b>
             {formatPrice(curso.precio)}
           </div>
           {curso.whatsapp_url && (

@@ -43,7 +43,6 @@ import {
   BadgeCheck,
   Building2,
   CalendarDays,
-  DollarSign,
   MessageCircle,
   UsersRound,
   ClipboardList,
@@ -715,7 +714,7 @@ export default function CursoDetailPage({
               </div>
             )}
             <div className="flex items-center gap-2 text-muted-foreground">
-              <DollarSign className="w-4 h-4" />
+              <b>Bs.</b>
               <span className="font-sans text-sm font-semibold text-on-surface">
                 {curso.precio === 0
                   ? "Gratuito"
