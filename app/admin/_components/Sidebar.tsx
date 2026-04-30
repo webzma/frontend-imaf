@@ -172,7 +172,7 @@ export default function AppSidebar() {
     }
   };
 
-  const handleLinkClick = (_href: string) => {
+  const handleLinkClick = () => {
     // Close sidebar only on mobile when clicking a link
     if (
       typeof window !== "undefined" &&
@@ -240,10 +240,7 @@ export default function AppSidebar() {
                       isActive={isActive(item.href, item.exact)}
                       tooltip={item.label}
                     >
-                      <Link
-                        href={item.href}
-                        onClick={() => handleLinkClick(item.href)}
-                      >
+                      <Link href={item.href} onClick={handleLinkClick}>
                         <item.icon />
                         <span>{item.label}</span>
                         {item.label === "Notificaciones" && unreadCount > 0 && (

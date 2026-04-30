@@ -251,7 +251,7 @@ export default function ReportesPage() {
   const [instructores, setInstructores] = useState<Instructor[]>([]);
   const [reporte, setReporte] = useState<ReporteData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [loadingReporte, setLoadingReporte] = useState(false);
+  const [loadingReporte, setLoadingReporte] = useState(true);
   const [periodo, setPeriodo] = useState<Periodo>("mensual");
 
   /* Base data */
@@ -278,7 +278,6 @@ export default function ReportesPage() {
 
   /* Reporte data (re-fetches when periodo changes) */
   useEffect(() => {
-    setLoadingReporte(true);
     fetch(`${process.env.API_URL}api/admin/reportes?periodo=${periodo}`, {
       headers: getAuthHeaders(),
     })
@@ -362,12 +361,6 @@ export default function ReportesPage() {
     "oklch(0.54 0.09 350)",
     "oklch(0.38 0.022 8)",
   ];
-  const PIE_PAGOS_COLORS = [
-    "oklch(0.60 0.15 150)",
-    "oklch(0.75 0.12 80)",
-    "oklch(0.52 0.14 8)",
-  ];
-
   const resumen = reporte?.resumen;
 
   return (
@@ -431,7 +424,10 @@ export default function ReportesPage() {
             {PERIODOS.map((p) => (
               <button
                 key={p.key}
-                onClick={() => setPeriodo(p.key)}
+                onClick={() => {
+                  setLoadingReporte(true);
+                  setPeriodo(p.key);
+                }}
                 className={`font-sans text-xs font-semibold px-3 py-1.5 rounded-[3px] transition-colors ${
                   periodo === p.key
                     ? "bg-primary text-white"
