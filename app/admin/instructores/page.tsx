@@ -458,16 +458,28 @@ export default function InstructoresPage() {
                         <SelectItem value="Física">Física</SelectItem>
                         <SelectItem value="Química">Química</SelectItem>
                         <SelectItem value="Biología">Biología</SelectItem>
-                        <SelectItem value="Ciencias Naturales">Ciencias Naturales</SelectItem>
-                        <SelectItem value="Lengua y Literatura">Lengua y Literatura</SelectItem>
+                        <SelectItem value="Ciencias Naturales">
+                          Ciencias Naturales
+                        </SelectItem>
+                        <SelectItem value="Lengua y Literatura">
+                          Lengua y Literatura
+                        </SelectItem>
                         <SelectItem value="Historia">Historia</SelectItem>
                         <SelectItem value="Geografía">Geografía</SelectItem>
                         <SelectItem value="Inglés">Inglés</SelectItem>
-                        <SelectItem value="Arte y Cultura">Arte y Cultura</SelectItem>
+                        <SelectItem value="Arte y Cultura">
+                          Arte y Cultura
+                        </SelectItem>
                         <SelectItem value="Música">Música</SelectItem>
-                        <SelectItem value="Educación Física">Educación Física</SelectItem>
-                        <SelectItem value="Computación e Informática">Computación e Informática</SelectItem>
-                        <SelectItem value="Administración">Administración</SelectItem>
+                        <SelectItem value="Educación Física">
+                          Educación Física
+                        </SelectItem>
+                        <SelectItem value="Computación e Informática">
+                          Computación e Informática
+                        </SelectItem>
+                        <SelectItem value="Administración">
+                          Administración
+                        </SelectItem>
                         <SelectItem value="Economía">Economía</SelectItem>
                       </SelectContent>
                     </Select>
@@ -482,15 +494,27 @@ export default function InstructoresPage() {
                         <SelectValue placeholder="Seleccionar departamento" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Ciencias Exactas">Ciencias Exactas</SelectItem>
-                        <SelectItem value="Ciencias Naturales">Ciencias Naturales</SelectItem>
-                        <SelectItem value="Ciencias Sociales">Ciencias Sociales</SelectItem>
+                        <SelectItem value="Ciencias Exactas">
+                          Ciencias Exactas
+                        </SelectItem>
+                        <SelectItem value="Ciencias Naturales">
+                          Ciencias Naturales
+                        </SelectItem>
+                        <SelectItem value="Ciencias Sociales">
+                          Ciencias Sociales
+                        </SelectItem>
                         <SelectItem value="Humanidades">Humanidades</SelectItem>
                         <SelectItem value="Idiomas">Idiomas</SelectItem>
-                        <SelectItem value="Arte y Cultura">Arte y Cultura</SelectItem>
+                        <SelectItem value="Arte y Cultura">
+                          Arte y Cultura
+                        </SelectItem>
                         <SelectItem value="Tecnología">Tecnología</SelectItem>
-                        <SelectItem value="Educación Física">Educación Física</SelectItem>
-                        <SelectItem value="Administración y Economía">Administración y Economía</SelectItem>
+                        <SelectItem value="Educación Física">
+                          Educación Física
+                        </SelectItem>
+                        <SelectItem value="Administración y Economía">
+                          Administración y Economía
+                        </SelectItem>
                         <SelectItem value="Música">Música</SelectItem>
                       </SelectContent>
                     </Select>
