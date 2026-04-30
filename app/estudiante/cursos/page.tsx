@@ -6,19 +6,11 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   BookOpen,
   GraduationCap,
   Hash,
   Star,
   Search,
-  Filter,
   Users,
 } from "lucide-react";
 
@@ -68,14 +60,8 @@ function CursoCard({
             <Hash className="w-3 h-3" />
             {curso.codigo}
           </span>
-          <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full font-sans text-xs font-semibold ${
-              curso.estado === "activo"
-                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
-                : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
-            }`}
-          >
-            {curso.estado === "activo" ? "Activo" : "Inactivo"}
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full font-sans text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400">
+            Activo
           </span>
         </div>
 
@@ -110,9 +96,7 @@ function CursoCard({
           </div>
           <div className="flex items-center gap-1 text-muted-foreground/60">
             <BookOpen className="w-3 h-3" />
-            <span className="font-sans text-xs">
-              {curso.estado === "activo" ? "Disponible" : "Inactivo"}
-            </span>
+            <span className="font-sans text-xs">Disponible</span>
           </div>
         </div>
       </div>
@@ -151,7 +135,6 @@ export default function EstudianteCursosPage() {
   const [miCursoId, setMiCursoId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterEstado, setFilterEstado] = useState("todos");
 
   useEffect(() => {
     const headers = {
@@ -178,17 +161,16 @@ export default function EstudianteCursosPage() {
   const filtered = useMemo(() => {
     return cursos.filter((c) => {
       const q = search.toLowerCase();
-      const matchSearch =
+      return (
         c.nombre.toLowerCase().includes(q) ||
         c.codigo.toLowerCase().includes(q) ||
         (c.descripcion?.toLowerCase().includes(q) ?? false) ||
-        (c.instructor?.name.toLowerCase().includes(q) ?? false);
-      const matchEstado = filterEstado === "todos" || c.estado === filterEstado;
-      return matchSearch && matchEstado;
+        (c.instructor?.name.toLowerCase().includes(q) ?? false)
+      );
     });
-  }, [cursos, search, filterEstado]);
+  }, [cursos, search]);
 
-  const hasFilters = search !== "" || filterEstado !== "todos";
+  const hasFilters = search !== "";
 
   return (
     <div className="relative min-h-screen bg-surface">
@@ -258,30 +240,14 @@ export default function EstudianteCursosPage() {
               className="pl-9 h-10 font-sans text-sm"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-muted-foreground/60" />
-            <Select value={filterEstado} onValueChange={setFilterEstado}>
-              <SelectTrigger className="h-10 w-44 font-sans text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos los estados</SelectItem>
-                <SelectItem value="activo">Activo</SelectItem>
-                <SelectItem value="inactivo">Inactivo</SelectItem>
-              </SelectContent>
-            </Select>
-            {hasFilters && (
-              <button
-                onClick={() => {
-                  setSearch("");
-                  setFilterEstado("todos");
-                }}
-                className="font-sans text-xs text-muted-foreground hover:text-on-surface transition-colors underline underline-offset-2"
-              >
-                Limpiar
-              </button>
-            )}
-          </div>
+          {hasFilters && (
+            <button
+              onClick={() => setSearch("")}
+              className="font-sans text-xs text-muted-foreground hover:text-on-surface transition-colors underline underline-offset-2"
+            >
+              Limpiar
+            </button>
+          )}
         </div>
 
         {/* Grid */}
