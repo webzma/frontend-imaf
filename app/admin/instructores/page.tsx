@@ -51,9 +51,15 @@ interface Instructor {
   titulo: "licenciatura" | "maestria" | "doctorado" | null;
   departamento: string | null;
   municipio: string | null;
+  tipo_contrato: { id: number; nombre: string } | null;
   fecha_nacimiento: string | null;
   genero: string | null;
   user: User;
+}
+
+interface TipoContrato {
+  id: number;
+  nombre: string;
 }
 
 /* ── Helpers ── */
@@ -105,6 +111,7 @@ const instructorSchema = z.object({
   cedula: z.string().min(1, "La cédula es obligatoria"),
   telefono: z.string().max(20).optional(),
   municipio: z.string().max(255).optional(),
+  tipo_contrato_id: z.number().optional(),
   fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
   especialidad: z.string().max(255).optional(),
@@ -146,10 +153,12 @@ function TableSkeleton() {
 
 export default function InstructoresPage() {
   const [instructores, setInstructores] = useState<Instructor[]>([]);
+  const [tiposContrato, setTiposContrato] = useState<TipoContrato[]>([]);
   const [search, setSearch] = useState("");
   const [filterTitulo, setFilterTitulo] = useState("todos");
   const [filterDepartamento, setFilterDepartamento] = useState("todos");
   const [loading, setLoading] = useState(true);
+  const [loadingTiposContrato, setLoadingTiposContrato] = useState(true);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -164,6 +173,7 @@ export default function InstructoresPage() {
       cedula: "",
       telefono: "",
       municipio: "",
+      tipo_contrato_id: undefined,
       fecha_nacimiento: "",
       genero: undefined,
       especialidad: "",
@@ -171,6 +181,21 @@ export default function InstructoresPage() {
       departamento: "",
     },
   });
+
+  const fetchTiposContrato = async () => {
+    try {
+      const res = await fetch(`${process.env.API_URL}api/admin/tipo-contratos`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        setTiposContrato(await res.json());
+      }
+    } catch {
+      // Silently fail for contract types
+    } finally {
+      setLoadingTiposContrato(false);
+    }
+  };
 
   const fetchInstructores = async () => {
     try {
@@ -191,6 +216,7 @@ export default function InstructoresPage() {
 
   useEffect(() => {
     fetchInstructores();
+    fetchTiposContrato();
   }, []);
 
   const onSubmit = async (data: InstructorForm) => {
@@ -201,6 +227,7 @@ export default function InstructoresPage() {
         ...data,
         telefono: data.telefono || null,
         municipio: data.municipio || null,
+        tipo_contrato_id: data.tipo_contrato_id || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
         especialidad: data.especialidad || null,
@@ -521,23 +548,49 @@ export default function InstructoresPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-2">
-                  <Label>Título académico</Label>
-                  <Select
-                    value={form.watch("titulo") ?? ""}
-                    onValueChange={(v) =>
-                      form.setValue("titulo", v as InstructorForm["titulo"])
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar título" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="licenciatura">Licenciatura</SelectItem>
-                      <SelectItem value="maestria">Maestría</SelectItem>
-                      <SelectItem value="doctorado">Doctorado</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Título académico</Label>
+                    <Select
+                      value={form.watch("titulo") ?? ""}
+                      onValueChange={(v) =>
+                        form.setValue("titulo", v as InstructorForm["titulo"])
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar título" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="licenciatura">Licenciatura</SelectItem>
+                        <SelectItem value="maestria">Maestría</SelectItem>
+                        <SelectItem value="doctorado">Doctorado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Tipo de Contrato</Label>
+                    {loadingTiposContrato ? (
+                      <div className="h-10 w-full rounded-sm border border-outline-variant/30 bg-surface-variant/50 animate-pulse" />
+                    ) : (
+                      <Select
+                        value={form.watch("tipo_contrato_id")?.toString() ?? ""}
+                        onValueChange={(v) =>
+                          form.setValue("tipo_contrato_id", v ? parseInt(v) : undefined)
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tiposContrato.map((tipo) => (
+                            <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                              {tipo.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
                 </div>
 
                 {submitError && (
