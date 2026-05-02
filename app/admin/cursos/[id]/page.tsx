@@ -47,6 +47,11 @@ import {
   MessageCircle,
   UsersRound,
   ClipboardList,
+  Plus,
+  Trash2,
+  ListChecks,
+  Clock,
+  CalendarClock,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -158,6 +163,25 @@ const tituloBadge: Record<string, string> = {
   doctorado: "bg-primary-container text-on-primary-container",
 };
 
+interface Temario {
+  id: number;
+  curso_id: number;
+  titulo: string;
+  descripcion: string | null;
+  orden: number;
+}
+
+interface Sesion {
+  id: number;
+  curso_id: number;
+  titulo: string;
+  descripcion: string | null;
+  fecha: string;
+  hora_inicio: string | null;
+  hora_fin: string | null;
+  estado: "programada" | "realizada" | "cancelada";
+}
+
 type SortKey = "nombre" | "cedula" | "estado" | "fecha_inscripcion";
 
 const PAGE_SIZE = 8;
@@ -221,6 +245,40 @@ export default function CursoDetailPage({
   // Cambio de estado por estudiante
   const [statusChanging, setStatusChanging] = useState<number | null>(null);
 
+  // Temario
+  const [temario, setTemario] = useState<Temario[]>([]);
+  const [temarioOpen, setTemarioOpen] = useState(false);
+  const [temarioEdit, setTemarioEdit] = useState<Temario | null>(null);
+  const [temarioForm, setTemarioForm] = useState({
+    titulo: "",
+    descripcion: "",
+    orden: 0,
+  });
+  const [temarioSubmitting, setTemarioSubmitting] = useState(false);
+  const [temarioError, setTemarioError] = useState("");
+  const [temarioDeleteTarget, setTemarioDeleteTarget] =
+    useState<Temario | null>(null);
+  const [temarioDeleting, setTemarioDeleting] = useState(false);
+
+  // Sesiones
+  const [sesiones, setSesiones] = useState<Sesion[]>([]);
+  const [sesionOpen, setSesionOpen] = useState(false);
+  const [sesionEdit, setSesionEdit] = useState<Sesion | null>(null);
+  const [sesionForm, setSesionForm] = useState({
+    titulo: "",
+    descripcion: "",
+    fecha: "",
+    hora_inicio: "",
+    hora_fin: "",
+    estado: "programada" as Sesion["estado"],
+  });
+  const [sesionSubmitting, setSesionSubmitting] = useState(false);
+  const [sesionError, setSesionError] = useState("");
+  const [sesionDeleteTarget, setSesionDeleteTarget] = useState<Sesion | null>(
+    null,
+  );
+  const [sesionDeleting, setSesionDeleting] = useState(false);
+
   /* ── Fetch ── */
   useEffect(() => {
     const headers = getAuthHeaders();
@@ -235,20 +293,36 @@ export default function CursoDetailPage({
       fetch(`${process.env.API_URL}api/admin/profesores`, { headers }).then(
         (r) => r.json(),
       ),
+      fetch(`${process.env.API_URL}api/admin/cursos/${id}/temario`, {
+        headers,
+      }).then((r) => r.json()),
+      fetch(`${process.env.API_URL}api/admin/cursos/${id}/sesiones`, {
+        headers,
+      }).then((r) => r.json()),
     ])
-      .then(([cursoData, estudiantesData, instructoresData]) => {
-        setCurso(cursoData);
-        const listaEstudiantes = Array.isArray(estudiantesData)
-          ? estudiantesData
-          : (estudiantesData.data ?? []);
-        setSinCurso(
-          listaEstudiantes.filter(
-            (e: EstudianteSinCurso) =>
-              e.curso === null || e.curso.id !== cursoData.id,
-          ),
-        );
-        setInstructores(instructoresData);
-      })
+      .then(
+        ([
+          cursoData,
+          estudiantesData,
+          instructoresData,
+          temarioData,
+          sesionesData,
+        ]) => {
+          setCurso(cursoData);
+          const listaEstudiantes = Array.isArray(estudiantesData)
+            ? estudiantesData
+            : (estudiantesData.data ?? []);
+          setSinCurso(
+            listaEstudiantes.filter(
+              (e: EstudianteSinCurso) =>
+                e.curso === null || e.curso.id !== cursoData.id,
+            ),
+          );
+          setInstructores(instructoresData);
+          setTemario(Array.isArray(temarioData) ? temarioData : []);
+          setSesiones(Array.isArray(sesionesData) ? sesionesData : []);
+        },
+      )
       .catch(() => setError("Error al cargar los datos del curso."))
       .finally(() => setLoading(false));
   }, [id]);
@@ -515,6 +589,187 @@ export default function CursoDetailPage({
       setRemoveError("Error al conectar con el servidor.");
     } finally {
       setRemoveSubmitting(false);
+    }
+  };
+
+  /* ── Temario handlers ── */
+
+  const openTemarioCreate = () => {
+    setTemarioEdit(null);
+    setTemarioForm({ titulo: "", descripcion: "", orden: temario.length });
+    setTemarioError("");
+    setTemarioOpen(true);
+  };
+
+  const openTemarioEdit = (t: Temario) => {
+    setTemarioEdit(t);
+    setTemarioForm({
+      titulo: t.titulo,
+      descripcion: t.descripcion ?? "",
+      orden: t.orden,
+    });
+    setTemarioError("");
+    setTemarioOpen(true);
+  };
+
+  const handleTemarioSubmit = async () => {
+    if (!temarioForm.titulo.trim()) {
+      setTemarioError("El título es obligatorio.");
+      return;
+    }
+    setTemarioSubmitting(true);
+    setTemarioError("");
+    try {
+      const url = temarioEdit
+        ? `${process.env.API_URL}api/admin/cursos/${id}/temario/${temarioEdit.id}`
+        : `${process.env.API_URL}api/admin/cursos/${id}/temario`;
+      const res = await fetch(url, {
+        method: temarioEdit ? "PUT" : "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          titulo: temarioForm.titulo,
+          descripcion: temarioForm.descripcion || null,
+          orden: Number(temarioForm.orden),
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        setTemarioError(err.message || "Error al guardar el tema.");
+        return;
+      }
+      const saved: Temario = await res.json();
+      setTemario((prev) =>
+        (temarioEdit
+          ? prev.map((t) => (t.id === saved.id ? saved : t))
+          : [...prev, saved]
+        ).sort((a, b) => a.orden - b.orden),
+      );
+      setTemarioOpen(false);
+      toast.success(temarioEdit ? "Tema actualizado" : "Tema agregado");
+    } catch {
+      setTemarioError("Error al conectar con el servidor.");
+    } finally {
+      setTemarioSubmitting(false);
+    }
+  };
+
+  const handleTemarioDelete = async () => {
+    if (!temarioDeleteTarget) return;
+    setTemarioDeleting(true);
+    try {
+      await fetch(
+        `${process.env.API_URL}api/admin/cursos/${id}/temario/${temarioDeleteTarget.id}`,
+        {
+          method: "DELETE",
+          headers: getAuthHeaders(),
+        },
+      );
+      setTemario((prev) => prev.filter((t) => t.id !== temarioDeleteTarget.id));
+      setTemarioDeleteTarget(null);
+      toast.success("Tema eliminado");
+    } finally {
+      setTemarioDeleting(false);
+    }
+  };
+
+  /* ── Sesiones handlers ── */
+
+  const openSesionCreate = () => {
+    setSesionEdit(null);
+    setSesionForm({
+      titulo: "",
+      descripcion: "",
+      fecha: "",
+      hora_inicio: "",
+      hora_fin: "",
+      estado: "programada",
+    });
+    setSesionError("");
+    setSesionOpen(true);
+  };
+
+  const openSesionEdit = (s: Sesion) => {
+    setSesionEdit(s);
+    setSesionForm({
+      titulo: s.titulo,
+      descripcion: s.descripcion ?? "",
+      fecha: s.fecha,
+      hora_inicio: s.hora_inicio ?? "",
+      hora_fin: s.hora_fin ?? "",
+      estado: s.estado,
+    });
+    setSesionError("");
+    setSesionOpen(true);
+  };
+
+  const handleSesionSubmit = async () => {
+    if (!sesionForm.titulo.trim()) {
+      setSesionError("El título es obligatorio.");
+      return;
+    }
+    if (!sesionForm.fecha) {
+      setSesionError("La fecha es obligatoria.");
+      return;
+    }
+    setSesionSubmitting(true);
+    setSesionError("");
+    try {
+      const url = sesionEdit
+        ? `${process.env.API_URL}api/admin/cursos/${id}/sesiones/${sesionEdit.id}`
+        : `${process.env.API_URL}api/admin/cursos/${id}/sesiones`;
+      const res = await fetch(url, {
+        method: sesionEdit ? "PUT" : "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          titulo: sesionForm.titulo,
+          descripcion: sesionForm.descripcion || null,
+          fecha: sesionForm.fecha,
+          hora_inicio: sesionForm.hora_inicio || null,
+          hora_fin: sesionForm.hora_fin || null,
+          estado: sesionForm.estado,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        setSesionError(err.message || "Error al guardar la sesión.");
+        return;
+      }
+      const saved: Sesion = await res.json();
+      setSesiones((prev) =>
+        (sesionEdit
+          ? prev.map((s) => (s.id === saved.id ? saved : s))
+          : [...prev, saved]
+        ).sort((a, b) =>
+          a.fecha !== b.fecha
+            ? a.fecha.localeCompare(b.fecha)
+            : (a.hora_inicio ?? "").localeCompare(b.hora_inicio ?? ""),
+        ),
+      );
+      setSesionOpen(false);
+      toast.success(sesionEdit ? "Sesión actualizada" : "Sesión agregada");
+    } catch {
+      setSesionError("Error al conectar con el servidor.");
+    } finally {
+      setSesionSubmitting(false);
+    }
+  };
+
+  const handleSesionDelete = async () => {
+    if (!sesionDeleteTarget) return;
+    setSesionDeleting(true);
+    try {
+      await fetch(
+        `${process.env.API_URL}api/admin/cursos/${id}/sesiones/${sesionDeleteTarget.id}`,
+        {
+          method: "DELETE",
+          headers: getAuthHeaders(),
+        },
+      );
+      setSesiones((prev) => prev.filter((s) => s.id !== sesionDeleteTarget.id));
+      setSesionDeleteTarget(null);
+      toast.success("Sesión eliminada");
+    } finally {
+      setSesionDeleting(false);
     }
   };
 
@@ -1039,6 +1294,179 @@ export default function CursoDetailPage({
             )}
           </div>
         </div>
+
+        {/* ── Temario ── */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <ListChecks className="w-4 h-4 text-primary/70" />
+              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-on-surface/55 font-medium">
+                Temario del curso
+              </p>
+            </div>
+            <Button size="sm" className="gap-1.5" onClick={openTemarioCreate}>
+              <Plus className="w-3.5 h-3.5" />
+              Agregar tema
+            </Button>
+          </div>
+
+          {temario.length === 0 ? (
+            <div className="bg-surface-container-low rounded-sm p-8 ambient-shadow flex flex-col items-center gap-3 text-center">
+              <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
+                <ListChecks className="w-5 h-5 text-on-primary-container" />
+              </div>
+              <p className="font-sans text-sm text-muted-foreground">
+                No hay temas en el temario. Agrega el primero.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-surface-container-low rounded-sm ambient-shadow overflow-hidden">
+              {temario.map((t, i) => (
+                <div
+                  key={t.id}
+                  className={`flex items-start gap-4 px-6 py-4 hover:bg-surface-container transition-colors ${
+                    i < temario.length - 1
+                      ? "border-b border-outline-variant/30"
+                      : ""
+                  }`}
+                >
+                  <span className="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="font-mono text-xs font-bold text-on-primary-container">
+                      {t.orden + 1}
+                    </span>
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-sans text-sm font-semibold text-on-surface">
+                      {t.titulo}
+                    </p>
+                    {t.descripcion && (
+                      <p className="font-sans text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                        {t.descripcion}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => openTemarioEdit(t)}
+                      className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setTemarioDeleteTarget(t)}
+                      className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── Sesiones ── */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <CalendarClock className="w-4 h-4 text-primary/70" />
+              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-on-surface/55 font-medium">
+                Sesiones / Clases
+              </p>
+            </div>
+            <Button size="sm" className="gap-1.5" onClick={openSesionCreate}>
+              <Plus className="w-3.5 h-3.5" />
+              Agregar sesión
+            </Button>
+          </div>
+
+          {sesiones.length === 0 ? (
+            <div className="bg-surface-container-low rounded-sm p-8 ambient-shadow flex flex-col items-center gap-3 text-center">
+              <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
+                <CalendarClock className="w-5 h-5 text-on-primary-container" />
+              </div>
+              <p className="font-sans text-sm text-muted-foreground">
+                No hay sesiones programadas. Agrega la primera clase.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-surface-container-low rounded-sm ambient-shadow overflow-hidden">
+              {sesiones.map((s, i) => {
+                const estadoStyle = {
+                  programada:
+                    "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-400",
+                  realizada:
+                    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+                  cancelada:
+                    "bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-400",
+                }[s.estado];
+                const fechaFmt = new Date(
+                  s.fecha + "T00:00:00",
+                ).toLocaleDateString("es-ES", {
+                  weekday: "short",
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                });
+                return (
+                  <div
+                    key={s.id}
+                    className={`flex items-start gap-4 px-6 py-4 hover:bg-surface-container transition-colors ${
+                      i < sesiones.length - 1
+                        ? "border-b border-outline-variant/30"
+                        : ""
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
+                      <CalendarDays className="w-4 h-4 text-primary/60" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="font-sans text-xs text-muted-foreground font-medium">
+                          {fechaFmt}
+                        </span>
+                        {(s.hora_inicio || s.hora_fin) && (
+                          <span className="flex items-center gap-1 font-sans text-xs text-muted-foreground">
+                            <Clock className="w-3 h-3" />
+                            {s.hora_inicio ?? ""}
+                            {s.hora_fin && ` – ${s.hora_fin}`}
+                          </span>
+                        )}
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold capitalize ${estadoStyle}`}
+                        >
+                          {s.estado}
+                        </span>
+                      </div>
+                      <p className="font-sans text-sm font-semibold text-on-surface">
+                        {s.titulo}
+                      </p>
+                      {s.descripcion && (
+                        <p className="font-sans text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                          {s.descripcion}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => openSesionEdit(s)}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setSesionDeleteTarget(s)}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Dialog: Editar curso ── */}
@@ -1405,6 +1833,322 @@ export default function CursoDetailPage({
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               )}
               Sí, quitar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Dialog: Temario crear / editar ── */}
+      <Dialog
+        open={temarioOpen}
+        onOpenChange={(v) => {
+          if (!v) setTemarioOpen(false);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif font-semibold text-xl text-on-surface">
+              {temarioEdit ? "Editar tema" : "Agregar tema"}
+            </DialogTitle>
+            <DialogDescription className="font-sans text-sm text-muted-foreground">
+              {temarioEdit
+                ? "Modifica los datos del tema."
+                : "Agrega un nuevo tema al temario del curso."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-2">
+            <div className="flex flex-col gap-1.5">
+              <label className="font-sans text-xs font-medium text-on-surface">
+                Título *
+              </label>
+              <Input
+                placeholder="Ej: Introducción al curso"
+                value={temarioForm.titulo}
+                onChange={(e) =>
+                  setTemarioForm((f) => ({ ...f, titulo: e.target.value }))
+                }
+                className="font-sans text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="font-sans text-xs font-medium text-on-surface">
+                Descripción{" "}
+                <span className="text-muted-foreground font-normal">
+                  (opcional)
+                </span>
+              </label>
+              <textarea
+                rows={3}
+                placeholder="Contenido o descripción del tema..."
+                value={temarioForm.descripcion}
+                onChange={(e) =>
+                  setTemarioForm((f) => ({ ...f, descripcion: e.target.value }))
+                }
+                className="w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="font-sans text-xs font-medium text-on-surface">
+                Orden
+              </label>
+              <Input
+                type="number"
+                min={0}
+                value={temarioForm.orden}
+                onChange={(e) =>
+                  setTemarioForm((f) => ({
+                    ...f,
+                    orden: Number(e.target.value),
+                  }))
+                }
+                className="font-sans text-sm w-24"
+              />
+            </div>
+            {temarioError && (
+              <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-3 py-2 rounded-sm">
+                {temarioError}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTemarioOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleTemarioSubmit} disabled={temarioSubmitting}>
+              {temarioSubmitting && (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              )}
+              {temarioEdit ? "Guardar cambios" : "Agregar tema"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Dialog: Temario eliminar ── */}
+      <Dialog
+        open={!!temarioDeleteTarget}
+        onOpenChange={(v) => {
+          if (!v) setTemarioDeleteTarget(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-serif font-semibold text-xl text-on-surface">
+              Eliminar tema
+            </DialogTitle>
+            <DialogDescription className="font-sans text-sm text-muted-foreground">
+              ¿Deseas eliminar el tema{" "}
+              <strong>{temarioDeleteTarget?.titulo}</strong>? Esta acción no se
+              puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setTemarioDeleteTarget(null)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleTemarioDelete}
+              disabled={temarioDeleting}
+            >
+              {temarioDeleting && (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              )}
+              Sí, eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Dialog: Sesión crear / editar ── */}
+      <Dialog
+        open={sesionOpen}
+        onOpenChange={(v) => {
+          if (!v) setSesionOpen(false);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif font-semibold text-xl text-on-surface">
+              {sesionEdit ? "Editar sesión" : "Agregar sesión"}
+            </DialogTitle>
+            <DialogDescription className="font-sans text-sm text-muted-foreground">
+              {sesionEdit
+                ? "Modifica los datos de la sesión."
+                : "Agrega una nueva clase al calendario del curso."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-2">
+            <div className="flex flex-col gap-1.5">
+              <label className="font-sans text-xs font-medium text-on-surface">
+                Título *
+              </label>
+              <Input
+                placeholder="Ej: Clase 1 – Introducción"
+                value={sesionForm.titulo}
+                onChange={(e) =>
+                  setSesionForm((f) => ({ ...f, titulo: e.target.value }))
+                }
+                className="font-sans text-sm"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="font-sans text-xs font-medium text-on-surface">
+                  Fecha *
+                </label>
+                <Input
+                  type="date"
+                  value={sesionForm.fecha}
+                  onChange={(e) =>
+                    setSesionForm((f) => ({ ...f, fecha: e.target.value }))
+                  }
+                  className="font-sans text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-sans text-xs font-medium text-on-surface">
+                  Estado
+                </label>
+                <Select
+                  value={sesionForm.estado}
+                  onValueChange={(v) =>
+                    setSesionForm((f) => ({
+                      ...f,
+                      estado: v as Sesion["estado"],
+                    }))
+                  }
+                >
+                  <SelectTrigger className="w-full font-sans text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="programada">Programada</SelectItem>
+                    <SelectItem value="realizada">Realizada</SelectItem>
+                    <SelectItem value="cancelada">Cancelada</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="font-sans text-xs font-medium text-on-surface">
+                  Hora inicio{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (opcional)
+                  </span>
+                </label>
+                <Input
+                  type="time"
+                  value={sesionForm.hora_inicio}
+                  onChange={(e) =>
+                    setSesionForm((f) => ({
+                      ...f,
+                      hora_inicio: e.target.value,
+                    }))
+                  }
+                  className="font-sans text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-sans text-xs font-medium text-on-surface">
+                  Hora fin{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (opcional)
+                  </span>
+                </label>
+                <Input
+                  type="time"
+                  value={sesionForm.hora_fin}
+                  onChange={(e) =>
+                    setSesionForm((f) => ({ ...f, hora_fin: e.target.value }))
+                  }
+                  className="font-sans text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="font-sans text-xs font-medium text-on-surface">
+                Descripción{" "}
+                <span className="text-muted-foreground font-normal">
+                  (opcional)
+                </span>
+              </label>
+              <textarea
+                rows={3}
+                placeholder="Temas a tratar, materiales necesarios..."
+                value={sesionForm.descripcion}
+                onChange={(e) =>
+                  setSesionForm((f) => ({ ...f, descripcion: e.target.value }))
+                }
+                className="w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+
+            {sesionError && (
+              <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-3 py-2 rounded-sm">
+                {sesionError}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSesionOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSesionSubmit} disabled={sesionSubmitting}>
+              {sesionSubmitting && (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              )}
+              {sesionEdit ? "Guardar cambios" : "Agregar sesión"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Dialog: Sesión eliminar ── */}
+      <Dialog
+        open={!!sesionDeleteTarget}
+        onOpenChange={(v) => {
+          if (!v) setSesionDeleteTarget(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-serif font-semibold text-xl text-on-surface">
+              Eliminar sesión
+            </DialogTitle>
+            <DialogDescription className="font-sans text-sm text-muted-foreground">
+              ¿Deseas eliminar la sesión{" "}
+              <strong>{sesionDeleteTarget?.titulo}</strong>? Esta acción no se
+              puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setSesionDeleteTarget(null)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleSesionDelete}
+              disabled={sesionDeleting}
+            >
+              {sesionDeleting && (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              )}
+              Sí, eliminar
             </Button>
           </DialogFooter>
         </DialogContent>

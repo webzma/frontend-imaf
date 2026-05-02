@@ -33,6 +33,7 @@ import {
   Plus,
   Loader2,
   Filter,
+  Pencil,
 } from "lucide-react";
 import municipios from "@/data/municipios.json";
 
@@ -121,6 +122,21 @@ const instructorSchema = z.object({
 
 type InstructorForm = z.infer<typeof instructorSchema>;
 
+const editInstructorSchema = z.object({
+  name: z.string().min(1, "El nombre es obligatorio").max(255),
+  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
+  cedula: z.string().min(1, "La cédula es obligatoria"),
+  telefono: z.string().max(20).optional(),
+  fecha_nacimiento: z.string().optional(),
+  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
+  especialidad: z.string().max(255).optional(),
+  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
+  departamento: z.string().max(255).optional(),
+  municipio: z.string().max(255).optional(),
+});
+
+type EditInstructorForm = z.infer<typeof editInstructorSchema>;
+
 /* ── Table Skeleton ── */
 
 function TableSkeleton() {
@@ -163,6 +179,12 @@ export default function InstructoresPage() {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingInstructor, setEditingInstructor] = useState<Instructor | null>(
+    null,
+  );
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editSubmitError, setEditSubmitError] = useState("");
 
   const form = useForm<InstructorForm>({
     resolver: zodResolver(instructorSchema),
@@ -762,6 +784,7 @@ export default function InstructoresPage() {
                         "Especialidad",
                         "Departamento",
                         "Título",
+                        "",
                       ].map((h) => (
                         <th
                           key={h}
@@ -833,6 +856,15 @@ export default function InstructoresPage() {
                             </span>
                           )}
                         </td>
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() => openEdit(p)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
+                            title="Editar instructor"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -842,6 +874,253 @@ export default function InstructoresPage() {
           </div>
         )}
       </div>
+
+      {/* ── Edit Dialog ── */}
+      <Dialog
+        open={editOpen}
+        onOpenChange={(v) => {
+          setEditOpen(v);
+          if (!v) setEditSubmitError("");
+        }}
+      >
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif font-semibold text-2xl text-on-surface">
+              Editar instructor
+            </DialogTitle>
+            <DialogDescription className="font-sans text-sm text-muted-foreground">
+              Modifica los datos del instructor y guarda los cambios.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={editForm.handleSubmit(onEditSubmit)}
+            className="grid gap-4"
+          >
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Nombre completo *</Label>
+              <Input
+                id="edit-name"
+                placeholder="Ej: María López"
+                {...editForm.register("name")}
+              />
+              {editForm.formState.errors.name && (
+                <p className="text-sm text-destructive">
+                  {editForm.formState.errors.name.message}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-email">Correo *</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  placeholder="correo@ejemplo.com"
+                  {...editForm.register("email")}
+                />
+                {editForm.formState.errors.email && (
+                  <p className="text-sm text-destructive">
+                    {editForm.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-cedula">Cédula *</Label>
+                <Input
+                  id="edit-cedula"
+                  placeholder="V-12345678"
+                  {...editForm.register("cedula")}
+                />
+                {editForm.formState.errors.cedula && (
+                  <p className="text-sm text-destructive">
+                    {editForm.formState.errors.cedula.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-telefono">Teléfono</Label>
+                <Input
+                  id="edit-telefono"
+                  placeholder="0412-1234567"
+                  {...editForm.register("telefono")}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-fecha_nacimiento">
+                  Fecha de nacimiento
+                </Label>
+                <Input
+                  id="edit-fecha_nacimiento"
+                  type="date"
+                  {...editForm.register("fecha_nacimiento")}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Género</Label>
+              <Select
+                value={editForm.watch("genero") ?? ""}
+                onValueChange={(v) =>
+                  editForm.setValue("genero", v as EditInstructorForm["genero"])
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="masculino">Masculino</SelectItem>
+                  <SelectItem value="femenino">Femenino</SelectItem>
+                  <SelectItem value="otro">Otro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Especialidad</Label>
+                <Select
+                  value={editForm.watch("especialidad") ?? ""}
+                  onValueChange={(v) => editForm.setValue("especialidad", v)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar especialidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Matemáticas">Matemáticas</SelectItem>
+                    <SelectItem value="Física">Física</SelectItem>
+                    <SelectItem value="Química">Química</SelectItem>
+                    <SelectItem value="Biología">Biología</SelectItem>
+                    <SelectItem value="Ciencias Naturales">
+                      Ciencias Naturales
+                    </SelectItem>
+                    <SelectItem value="Lengua y Literatura">
+                      Lengua y Literatura
+                    </SelectItem>
+                    <SelectItem value="Historia">Historia</SelectItem>
+                    <SelectItem value="Geografía">Geografía</SelectItem>
+                    <SelectItem value="Inglés">Inglés</SelectItem>
+                    <SelectItem value="Arte y Cultura">
+                      Arte y Cultura
+                    </SelectItem>
+                    <SelectItem value="Música">Música</SelectItem>
+                    <SelectItem value="Educación Física">
+                      Educación Física
+                    </SelectItem>
+                    <SelectItem value="Computación e Informática">
+                      Computación e Informática
+                    </SelectItem>
+                    <SelectItem value="Administración">
+                      Administración
+                    </SelectItem>
+                    <SelectItem value="Economía">Economía</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Departamento</Label>
+                <Select
+                  value={editForm.watch("departamento") ?? ""}
+                  onValueChange={(v) => editForm.setValue("departamento", v)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar departamento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Ciencias Exactas">
+                      Ciencias Exactas
+                    </SelectItem>
+                    <SelectItem value="Ciencias Naturales">
+                      Ciencias Naturales
+                    </SelectItem>
+                    <SelectItem value="Ciencias Sociales">
+                      Ciencias Sociales
+                    </SelectItem>
+                    <SelectItem value="Humanidades">Humanidades</SelectItem>
+                    <SelectItem value="Idiomas">Idiomas</SelectItem>
+                    <SelectItem value="Arte y Cultura">
+                      Arte y Cultura
+                    </SelectItem>
+                    <SelectItem value="Tecnología">Tecnología</SelectItem>
+                    <SelectItem value="Educación Física">
+                      Educación Física
+                    </SelectItem>
+                    <SelectItem value="Administración y Economía">
+                      Administración y Economía
+                    </SelectItem>
+                    <SelectItem value="Música">Música</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Municipio</Label>
+              <Select
+                value={editForm.watch("municipio") ?? ""}
+                onValueChange={(v) => editForm.setValue("municipio", v)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar municipio" />
+                </SelectTrigger>
+                <SelectContent>
+                  {municipios.map((municipio) => (
+                    <SelectItem key={municipio} value={municipio}>
+                      {municipio}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Título académico</Label>
+              <Select
+                value={editForm.watch("titulo") ?? ""}
+                onValueChange={(v) =>
+                  editForm.setValue("titulo", v as EditInstructorForm["titulo"])
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar título" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="licenciatura">Licenciatura</SelectItem>
+                  <SelectItem value="maestria">Maestría</SelectItem>
+                  <SelectItem value="doctorado">Doctorado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {editSubmitError && (
+              <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-4 py-3 rounded-sm">
+                {editSubmitError}
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={editSubmitting}>
+                {editSubmitting && (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                )}
+                Guardar cambios
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

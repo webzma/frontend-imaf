@@ -18,9 +18,28 @@ import {
   MessageCircle,
   FileText,
   Award,
+  BookMarked,
+  CalendarCheck,
 } from "lucide-react";
 
 /* ── Types ── */
+
+interface TemarioItem {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  orden: number;
+}
+
+interface SesionItem {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  fecha: string;
+  hora_inicio: string;
+  hora_fin: string;
+  estado: "programada" | "realizada" | "cancelada";
+}
 
 interface MiCursoResponse {
   curso: {
@@ -43,6 +62,8 @@ interface MiCursoResponse {
       titulo: string | null;
       departamento: string | null;
     } | null;
+    temario: TemarioItem[];
+    sesiones: SesionItem[];
   };
   estado_pago: "pendiente" | "aprobado" | "reprobado";
   estado_aprobacion_curso: "pendiente" | "aprobado" | "reprobado";
@@ -335,6 +356,108 @@ export default function CursoPage() {
                 )}
               </div>
             </div>
+
+            {/* Temario */}
+            {curso.temario?.length > 0 && (
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <BookMarked className="w-4 h-4 text-primary/70" />
+                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
+                    Temario
+                  </h3>
+                </div>
+                <ol className="space-y-3">
+                  {curso.temario.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex gap-3 py-2.5 border-b border-outline-variant/20 last:border-0"
+                    >
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-primary-container flex items-center justify-center font-mono text-xs font-bold text-on-primary-container mt-0.5">
+                        {item.orden}
+                      </span>
+                      <div>
+                        <p className="font-sans text-sm font-semibold text-on-surface">
+                          {item.titulo}
+                        </p>
+                        {item.descripcion && (
+                          <p className="font-sans text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                            {item.descripcion}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            {/* Sesiones */}
+            {curso.sesiones?.length > 0 && (
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <CalendarCheck className="w-4 h-4 text-primary/70" />
+                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
+                    Sesiones
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {curso.sesiones.map((sesion) => {
+                    const sesionEstado: Record<
+                      SesionItem["estado"],
+                      { label: string; cls: string }
+                    > = {
+                      programada: {
+                        label: "Programada",
+                        cls: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400",
+                      },
+                      realizada: {
+                        label: "Realizada",
+                        cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+                      },
+                      cancelada: {
+                        label: "Cancelada",
+                        cls: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400",
+                      },
+                    };
+                    const cfg =
+                      sesionEstado[sesion.estado] ?? sesionEstado.programada;
+                    return (
+                      <div
+                        key={sesion.id}
+                        className="flex flex-col sm:flex-row sm:items-start gap-3 py-3 border-b border-outline-variant/20 last:border-0"
+                      >
+                        <div className="flex items-center gap-2 sm:w-40 shrink-0">
+                          <Calendar className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                          <div>
+                            <p className="font-sans text-xs font-semibold text-on-surface">
+                              {formatDate(sesion.fecha)}
+                            </p>
+                            <p className="font-mono text-[11px] text-muted-foreground">
+                              {sesion.hora_inicio} – {sesion.hora_fin}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-sans text-sm font-semibold text-on-surface">
+                            {sesion.titulo}
+                          </p>
+                          {sesion.descripcion && (
+                            <p className="font-sans text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                              {sesion.descripcion}
+                            </p>
+                          )}
+                        </div>
+                        <span
+                          className={`self-start inline-flex items-center px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${cfg.cls}`}
+                        >
+                          {cfg.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Requisitos */}
             {curso.requisitos && (
