@@ -120,22 +120,23 @@ const instructorSchema = z.object({
   departamento: z.string().max(255).optional(),
 });
 
-type InstructorForm = z.infer<typeof instructorSchema>;
-
 const editInstructorSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio").max(255),
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   cedula: z.string().min(1, "La cédula es obligatoria"),
   telefono: z.string().max(20).optional(),
+  municipio: z.string().max(255).optional(),
+  tipo_contrato_id: z.number().optional(),
   fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
   especialidad: z.string().max(255).optional(),
   titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
   departamento: z.string().max(255).optional(),
-  municipio: z.string().max(255).optional(),
 });
 
+type InstructorForm = z.infer<typeof instructorSchema>;
 type EditInstructorForm = z.infer<typeof editInstructorSchema>;
+
 
 /* ── Table Skeleton ── */
 
@@ -204,6 +205,23 @@ export default function InstructoresPage() {
     },
   });
 
+  const editForm = useForm<EditInstructorForm>({
+    resolver: zodResolver(editInstructorSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      cedula: "",
+      telefono: "",
+      fecha_nacimiento: "",
+      genero: undefined,
+      especialidad: "",
+      titulo: undefined,
+      departamento: "",
+      municipio: "",
+      tipo_contrato_id: undefined,
+    },
+  });
+
   const fetchTiposContrato = async () => {
     try {
       const res = await fetch(`${process.env.API_URL}api/admin/tipo-contratos`, {
@@ -233,6 +251,72 @@ export default function InstructoresPage() {
       setError("Error al conectar con el servidor.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openEdit = (instructor: Instructor) => {
+    setEditingInstructor(instructor);
+    setEditSubmitError("");
+    editForm.reset({
+      name: instructor.user.name,
+      email: instructor.user.email,
+      cedula: instructor.cedula,
+      telefono: instructor.telefono ?? "",
+      fecha_nacimiento: instructor.fecha_nacimiento
+        ? instructor.fecha_nacimiento.slice(0, 10)
+        : "",
+      genero: (instructor.genero as EditInstructorForm["genero"]) ?? undefined,
+      especialidad: instructor.especialidad ?? "",
+      titulo: (instructor.titulo as EditInstructorForm["titulo"]) ?? undefined,
+      departamento: instructor.departamento ?? "",
+      municipio: instructor.municipio ?? "",
+      tipo_contrato_id: instructor.tipo_contrato?.id ?? undefined,
+    });
+    setEditOpen(true);
+  };
+
+  const onEditSubmit = async (data: EditInstructorForm) => {
+    if (!editingInstructor) return;
+    setEditSubmitting(true);
+    setEditSubmitError("");
+    try {
+      const body: Record<string, unknown> = {
+        ...data,
+        telefono: data.telefono || null,
+        fecha_nacimiento: data.fecha_nacimiento || null,
+        genero: data.genero || null,
+        especialidad: data.especialidad || null,
+        titulo: data.titulo || null,
+        departamento: data.departamento || null,
+        municipio: data.municipio || null,
+        tipo_contrato_id: data.tipo_contrato_id || null,
+      };
+      const res = await fetch(
+        `${process.env.API_URL}api/admin/profesores/${editingInstructor.id}`,
+        {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(body),
+        },
+      );
+      if (!res.ok) {
+        const err = await res.json();
+        const messages = err.errors
+          ? Object.values(err.errors).flat().join(", ")
+          : err.message || "Error al actualizar el instructor.";
+        setEditSubmitError(messages as string);
+        return;
+      }
+      const updated: Instructor = await res.json();
+      setInstructores((prev) =>
+        prev.map((p) => (p.id === updated.id ? updated : p)),
+      );
+      setEditOpen(false);
+      toast.success("Instructor actualizado correctamente");
+    } catch {
+      setEditSubmitError("Error al conectar con el servidor.");
+    } finally {
+      setEditSubmitting(false);
     }
   };
 
@@ -486,7 +570,6 @@ export default function InstructoresPage() {
                       <SelectContent>
                         <SelectItem value="masculino">Masculino</SelectItem>
                         <SelectItem value="femenino">Femenino</SelectItem>
-                        <SelectItem value="otro">Otro</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -976,7 +1059,6 @@ export default function InstructoresPage() {
                 <SelectContent>
                   <SelectItem value="masculino">Masculino</SelectItem>
                   <SelectItem value="femenino">Femenino</SelectItem>
-                  <SelectItem value="otro">Otro</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1078,24 +1160,50 @@ export default function InstructoresPage() {
               </Select>
             </div>
 
-            <div className="grid gap-2">
-              <Label>Título académico</Label>
-              <Select
-                value={editForm.watch("titulo") ?? ""}
-                onValueChange={(v) =>
-                  editForm.setValue("titulo", v as EditInstructorForm["titulo"])
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar título" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="licenciatura">Licenciatura</SelectItem>
-                  <SelectItem value="maestria">Maestría</SelectItem>
-                  <SelectItem value="doctorado">Doctorado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Título académico</Label>
+                    <Select
+                      value={editForm.watch("titulo") ?? ""}
+                      onValueChange={(v) =>
+                        editForm.setValue("titulo", v as EditInstructorForm["titulo"])
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar título" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="licenciatura">Licenciatura</SelectItem>
+                        <SelectItem value="maestria">Maestría</SelectItem>
+                        <SelectItem value="doctorado">Doctorado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Tipo de Contrato</Label>
+                    {loadingTiposContrato ? (
+                      <div className="h-10 w-full rounded-sm border border-outline-variant/30 bg-surface-variant/50 animate-pulse" />
+                    ) : (
+                      <Select
+                        value={editForm.watch("tipo_contrato_id")?.toString() ?? ""}
+                        onValueChange={(v) =>
+                          editForm.setValue("tipo_contrato_id", v ? parseInt(v) : undefined)
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tiposContrato.map((tipo) => (
+                            <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                              {tipo.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </div>
 
             {editSubmitError && (
               <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-4 py-3 rounded-sm">
