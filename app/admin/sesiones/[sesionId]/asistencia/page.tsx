@@ -402,7 +402,7 @@ export default function AsistenciaPage({
           ) : filtered.length === 0 ? (
             <div className="bg-surface-container-low rounded-sm p-10 ambient-shadow flex flex-col items-center gap-3">
               <p className="font-sans text-sm text-muted-foreground">
-                No se encontraron estudiantes con "{search}".
+                No se encontraron estudiantes con {search}.
               </p>
             </div>
           ) : (
