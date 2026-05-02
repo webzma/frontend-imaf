@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import {
   Check,
   X,
   Save,
+  Search,
+  CheckCheck,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -88,6 +90,7 @@ export default function AsistenciaPage({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
   /* ── Fetch ── */
   useEffect(() => {
@@ -112,6 +115,16 @@ export default function AsistenciaPage({
   const presentes = asistencia.filter((r) => r.presente).length;
   const total = asistencia.length;
   const pct = total > 0 ? Math.round((presentes / total) * 100) : 0;
+
+  const filtered = useMemo(
+    () =>
+      asistencia.filter(
+        (r) =>
+          r.nombre.toLowerCase().includes(search.toLowerCase()) ||
+          r.cedula.includes(search),
+      ),
+    [asistencia, search],
+  );
 
   /* ── Handlers ── */
   const setPresente = (estudianteId: number, value: boolean) => {
@@ -167,7 +180,8 @@ export default function AsistenciaPage({
   /* ── Loading / Error ── */
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-muted-foreground font-sans text-sm">
+      <div className="flex items-center justify-center min-h-screen gap-2 text-muted-foreground font-sans text-sm">
+        <Loader2 className="w-4 h-4 animate-spin" />
         Cargando asistencia...
       </div>
     );
@@ -200,129 +214,182 @@ export default function AsistenciaPage({
     <div className="relative min-h-full bg-surface">
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 px-4 md:px-10 py-10 max-w-4xl">
-        {/* Back */}
-        <button
-          onClick={() => router.push(`/admin/cursos/${sesion.curso_id}`)}
-          className="flex items-center gap-2 font-sans text-sm text-muted-foreground hover:text-on-surface transition-colors mb-8"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Volver a {sesion.curso_nombre}
-        </button>
+      <div className="relative z-10">
+        {/* ── Sticky top bar ── */}
+        <div className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md border-b border-outline-variant/20">
+          <div className="px-4 md:px-10 py-3 max-w-4xl mx-auto flex items-center gap-4">
+            <button
+              onClick={() => router.push(`/admin/cursos/${sesion.curso_id}`)}
+              className="flex items-center gap-2 font-sans text-sm text-muted-foreground hover:text-on-surface transition-colors shrink-0"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">
+                Volver a {sesion.curso_nombre}
+              </span>
+              <span className="sm:hidden">Volver</span>
+            </button>
 
-        {/* ── Sesión header ── */}
-        <div className="bg-surface-container-low rounded-sm p-8 ambient-shadow mb-6">
-          <div className="flex items-start justify-between gap-6">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-3">
-                <CalendarDays className="w-3 h-3 text-primary/70" />
-                <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary/70 font-medium">
-                  Asistencia / {sesion.curso_nombre}
+            <div className="flex-1" />
+
+            {/* Live stats chips */}
+            {total > 0 && (
+              <div className="hidden md:flex items-center gap-4">
+                <span className="flex items-center gap-1.5 font-sans text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  <Check className="w-3.5 h-3.5" />
+                  {presentes} presentes
                 </span>
-              </div>
-              <h1 className="font-serif font-light text-3xl md:text-4xl tight-tracking text-on-surface mb-3">
-                {sesion.titulo}
-              </h1>
-              <div className="flex items-center gap-4 flex-wrap">
-                <span className="flex items-center gap-1.5 font-sans text-sm text-muted-foreground">
-                  <CalendarDays className="w-3.5 h-3.5" />
-                  {fechaFmt}
+                <span className="flex items-center gap-1.5 font-sans text-xs font-semibold text-rose-500 dark:text-rose-400">
+                  <X className="w-3.5 h-3.5" />
+                  {total - presentes} ausentes
                 </span>
-                {(sesion.hora_inicio || sesion.hora_fin) && (
-                  <span className="flex items-center gap-1.5 font-sans text-sm text-muted-foreground">
-                    <Clock className="w-3.5 h-3.5" />
-                    {formatTime(sesion.hora_inicio)}
-                    {sesion.hora_fin && ` – ${formatTime(sesion.hora_fin)}`}
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="font-sans text-xs text-muted-foreground tabular-nums">
+                    {pct}%
                   </span>
-                )}
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-sans text-xs font-semibold capitalize ${estadoSesionStyle[sesion.estado]}`}
-                >
-                  {sesion.estado}
-                </span>
+                </div>
               </div>
-            </div>
+            )}
 
             <Button
               onClick={handleSave}
               disabled={saving}
+              size="sm"
               className="gap-2 shrink-0"
             >
               {saving ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <Save className="w-4 h-4" />
+                <Save className="w-3.5 h-3.5" />
               )}
               Guardar
             </Button>
           </div>
         </div>
 
-        {/* ── Resumen ── */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-sm p-4">
-            <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
-              Presentes
-            </p>
-            <p className="font-sans text-3xl font-light text-emerald-700 dark:text-emerald-400">
-              {presentes}
-            </p>
-            <p className="font-sans text-xs text-muted-foreground mt-1">
-              de {total} estudiantes
-            </p>
-          </div>
-          <div className="bg-rose-50 dark:bg-rose-500/10 rounded-sm p-4">
-            <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
-              Ausentes
-            </p>
-            <p className="font-sans text-3xl font-light text-rose-700 dark:text-rose-400">
-              {total - presentes}
-            </p>
-            <p className="font-sans text-xs text-muted-foreground mt-1">
-              de {total} estudiantes
-            </p>
-          </div>
-          <div className="bg-primary/5 rounded-sm p-4">
-            <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
-              Asistencia
-            </p>
-            <p className="font-sans text-3xl font-light text-primary">{pct}%</p>
-            <div className="mt-2 h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all duration-300"
-                style={{ width: `${pct}%` }}
-              />
+        <div className="px-4 md:px-10 py-8 max-w-4xl mx-auto">
+          {/* ── Session header ── */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-2">
+              <CalendarDays className="w-3 h-3 text-primary/70" />
+              <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary/70 font-medium">
+                Asistencia / {sesion.curso_nombre}
+              </span>
+            </div>
+            <h1 className="font-serif font-light text-3xl md:text-4xl tight-tracking text-on-surface mb-3">
+              {sesion.titulo}
+            </h1>
+            <div className="flex items-center gap-4 flex-wrap">
+              <span className="flex items-center gap-1.5 font-sans text-sm text-muted-foreground capitalize">
+                <CalendarDays className="w-3.5 h-3.5" />
+                {fechaFmt}
+              </span>
+              {(sesion.hora_inicio || sesion.hora_fin) && (
+                <span className="flex items-center gap-1.5 font-sans text-sm text-muted-foreground">
+                  <Clock className="w-3.5 h-3.5" />
+                  {formatTime(sesion.hora_inicio)}
+                  {sesion.hora_fin && ` – ${formatTime(sesion.hora_fin)}`}
+                </span>
+              )}
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-sans text-xs font-semibold capitalize ${estadoSesionStyle[sesion.estado]}`}
+              >
+                {sesion.estado}
+              </span>
             </div>
           </div>
-        </div>
 
-        {/* ── Lista de estudiantes ── */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
+          {/* ── Stats ── */}
+          {total > 0 && (
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-sm p-4">
+                <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
+                  Presentes
+                </p>
+                <p className="font-sans text-3xl font-light text-emerald-700 dark:text-emerald-400">
+                  {presentes}
+                </p>
+                <p className="font-sans text-xs text-muted-foreground mt-1">
+                  de {total}
+                </p>
+              </div>
+              <div className="bg-rose-50 dark:bg-rose-500/10 rounded-sm p-4">
+                <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
+                  Ausentes
+                </p>
+                <p className="font-sans text-3xl font-light text-rose-700 dark:text-rose-400">
+                  {total - presentes}
+                </p>
+                <p className="font-sans text-xs text-muted-foreground mt-1">
+                  de {total}
+                </p>
+              </div>
+              <div className="bg-primary/5 rounded-sm p-4">
+                <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
+                  Asistencia
+                </p>
+                <p className="font-sans text-3xl font-light text-primary">
+                  {pct}%
+                </p>
+                <div className="mt-2 h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-300"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Toolbar ── */}
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <div className="flex items-center gap-2 shrink-0">
               <Users className="w-4 h-4 text-primary/70" />
               <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-on-surface/55 font-medium">
-                Estudiantes inscritos ({total})
+                Estudiantes ({total})
               </p>
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => marcarTodos(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
-              >
-                <Check className="w-3.5 h-3.5" />
-                Todos presentes
-              </button>
-              <button
-                onClick={() => marcarTodos(false)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-xs font-medium text-muted-foreground hover:bg-surface-container transition-colors"
-              >
-                <X className="w-3.5 h-3.5" />
-                Todos ausentes
-              </button>
-            </div>
+
+            {total > 0 && (
+              <>
+                <div className="relative flex-1 max-w-xs">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre o cédula..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/60 font-sans text-xs placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1 ml-auto">
+                  <button
+                    onClick={() => marcarTodos(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+                  >
+                    <CheckCheck className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Todos presentes</span>
+                    <span className="sm:hidden">Todos</span>
+                  </button>
+                  <button
+                    onClick={() => marcarTodos(false)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-xs font-medium text-muted-foreground hover:bg-surface-container transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Todos ausentes</span>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
+          {/* ── Student list ── */}
           {total === 0 ? (
             <div className="bg-surface-container-low rounded-sm p-10 ambient-shadow flex flex-col items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
@@ -332,102 +399,103 @@ export default function AsistenciaPage({
                 No hay estudiantes inscritos en este curso.
               </p>
             </div>
+          ) : filtered.length === 0 ? (
+            <div className="bg-surface-container-low rounded-sm p-10 ambient-shadow flex flex-col items-center gap-3">
+              <p className="font-sans text-sm text-muted-foreground">
+                No se encontraron estudiantes con "{search}".
+              </p>
+            </div>
           ) : (
-            <div className="bg-surface-container-low rounded-sm ambient-shadow overflow-hidden">
-              {asistencia.map((registro, i) => (
+            <div className="space-y-2">
+              {filtered.map((registro) => (
                 <div
                   key={registro.estudiante_id}
-                  className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${
+                  className={`rounded-sm ambient-shadow transition-all duration-200 ${
                     registro.presente
-                      ? "bg-emerald-50/60 dark:bg-emerald-500/5"
-                      : ""
-                  } ${i < asistencia.length - 1 ? "border-b border-outline-variant/30" : ""}`}
+                      ? "bg-emerald-50/80 dark:bg-emerald-950/40 ring-1 ring-emerald-500/25"
+                      : "bg-surface-container-low"
+                  }`}
                 >
-                  {/* Avatar */}
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                      registro.presente
-                        ? "bg-emerald-100 dark:bg-emerald-500/20"
-                        : "bg-surface-container"
-                    }`}
-                  >
-                    <span
-                      className={`font-sans text-xs font-bold ${
+                  {/* Main row */}
+                  <div className="flex items-center gap-4 px-5 pt-4 pb-3">
+                    {/* Avatar */}
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                         registro.presente
-                          ? "text-emerald-800 dark:text-emerald-300"
-                          : "text-muted-foreground"
+                          ? "bg-emerald-100 dark:bg-emerald-500/25"
+                          : "bg-surface-container"
                       }`}
                     >
-                      {getInitials(registro.nombre)}
-                    </span>
+                      <span
+                        className={`font-sans text-xs font-bold ${
+                          registro.presente
+                            ? "text-emerald-800 dark:text-emerald-300"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {getInitials(registro.nombre)}
+                      </span>
+                    </div>
+
+                    {/* Name + cedula */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-sans text-sm font-semibold text-on-surface truncate">
+                        {registro.nombre}
+                      </p>
+                      <p className="font-mono text-xs text-muted-foreground">
+                        {registro.cedula}
+                      </p>
+                    </div>
+
+                    {/* Toggle pill */}
+                    <div className="flex rounded-lg overflow-hidden border border-outline-variant/50 shrink-0 text-xs font-semibold font-sans">
+                      <button
+                        onClick={() =>
+                          setPresente(registro.estudiante_id, false)
+                        }
+                        className={`flex items-center gap-1.5 px-4 py-2.5 transition-colors ${
+                          !registro.presente
+                            ? "bg-rose-500 text-white"
+                            : "text-muted-foreground hover:bg-surface-container"
+                        }`}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        Ausente
+                      </button>
+                      <div className="w-px bg-outline-variant/50" />
+                      <button
+                        onClick={() =>
+                          setPresente(registro.estudiante_id, true)
+                        }
+                        className={`flex items-center gap-1.5 px-4 py-2.5 transition-colors ${
+                          registro.presente
+                            ? "bg-emerald-500 text-white"
+                            : "text-muted-foreground hover:bg-surface-container"
+                        }`}
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        Presente
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-sans text-sm font-semibold text-on-surface truncate">
-                      {registro.nombre}
-                    </p>
-                    <p className="font-mono text-xs text-muted-foreground">
-                      {registro.cedula}
-                    </p>
-                  </div>
-
-                  {/* Observación */}
-                  <input
-                    type="text"
-                    placeholder="Observación..."
-                    value={registro.observacion ?? ""}
-                    onChange={(e) =>
-                      setObservacion(registro.estudiante_id, e.target.value)
-                    }
-                    className="hidden sm:block w-44 shrink-0 rounded-md border border-input bg-background/60 px-3 py-1.5 font-sans text-xs placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-
-                  {/* Toggle pill: Ausente | Presente */}
-                  <div className="flex rounded-lg overflow-hidden border border-outline-variant/50 shrink-0 text-xs font-semibold font-sans">
-                    <button
-                      onClick={() => setPresente(registro.estudiante_id, false)}
-                      className={`flex items-center gap-1.5 px-3 py-2 transition-colors ${
-                        !registro.presente
-                          ? "bg-rose-500 text-white"
-                          : "text-muted-foreground hover:bg-surface-container"
-                      }`}
-                    >
-                      <X className="w-3 h-3" />
-                      Ausente
-                    </button>
-                    <div className="w-px bg-outline-variant/50" />
-                    <button
-                      onClick={() => setPresente(registro.estudiante_id, true)}
-                      className={`flex items-center gap-1.5 px-3 py-2 transition-colors ${
-                        registro.presente
-                          ? "bg-emerald-500 text-white"
-                          : "text-muted-foreground hover:bg-surface-container"
-                      }`}
-                    >
-                      <Check className="w-3 h-3" />
-                      Presente
-                    </button>
+                  {/* Observation row */}
+                  <div className="px-5 pb-3.5 pl-[4.75rem]">
+                    <input
+                      type="text"
+                      placeholder="Agregar observación (opcional)..."
+                      value={registro.observacion ?? ""}
+                      onChange={(e) =>
+                        setObservacion(registro.estudiante_id, e.target.value)
+                      }
+                      className="w-full rounded-md border border-input/50 bg-background/50 px-3 py-1.5 font-sans text-xs placeholder:text-muted-foreground/35 focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-
-        {/* ── Guardar (bottom) ── */}
-        {total > 0 && (
-          <div className="mt-6 flex justify-end">
-            <Button onClick={handleSave} disabled={saving} className="gap-2">
-              {saving ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
-              Guardar asistencia
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
