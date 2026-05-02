@@ -26,7 +26,6 @@ import {
   GraduationCap,
   BookOpen,
   TrendingUp,
-  DollarSign,
   CheckCircle,
   Clock,
   XCircle,
@@ -115,7 +114,7 @@ function getAuthHeaders() {
 function fmt(n: number) {
   return new Intl.NumberFormat("es-VE", {
     style: "currency",
-    currency: "USD",
+    currency: "VES",
     minimumFractionDigits: 2,
   }).format(n);
 }
@@ -430,7 +429,7 @@ export default function ReportesPage() {
                 }}
                 className={`font-sans text-xs font-semibold px-3 py-1.5 rounded-[3px] transition-colors ${
                   periodo === p.key
-                    ? "bg-primary text-white"
+                    ? "bg-primary dark:bg-primary-container text-white "
                     : "text-muted-foreground hover:text-on-surface"
                 }`}
               >
@@ -442,13 +441,21 @@ export default function ReportesPage() {
 
         {/* Income stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <StatCard
-            label="Total ingresos"
-            value={resumen ? fmt(resumen.total_ingresos) : "—"}
-            icon={DollarSign}
-            containerClass="bg-emerald-100 dark:bg-emerald-500/15"
-            iconClass="text-emerald-700 dark:text-emerald-400"
-          />
+          <div className="bg-surface-container-low rounded-sm p-5 ambient-shadow">
+            <div
+              className="w-10 h-10 rounded-md flex items-center justify-center bg-emerald-100 dark:bg-emerald-500/15 mb-4"
+            >
+              <span className="text-emerald-700 dark:text-emerald-400 font-sans text-sm font-semibold">
+                Bs.
+              </span>
+            </div>
+            <p className="font-sans text-3xl font-light tight-tracking text-on-surface tabular-nums mb-1">
+              {resumen ? fmt(resumen.total_ingresos) : "—"}
+            </p>
+            <p className="font-sans text-xs tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+              Total ingresos
+            </p>
+          </div>
           <StatCard
             label="Pagos aprobados"
             value={resumen?.aprobados ?? "—"}
@@ -507,7 +514,7 @@ export default function ReportesPage() {
                     axisLine={false}
                   />
                   <YAxis
-                    tickFormatter={(v) => `$${v}`}
+                    tickFormatter={(v) => `Bs.S ${v}`}
                     tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
                     tickLine={false}
                     axisLine={false}
@@ -638,7 +645,7 @@ export default function ReportesPage() {
                       axisLine={false}
                     />
                     <YAxis
-                      tickFormatter={(v) => `$${v}`}
+                      tickFormatter={(v) => `Bs.S ${v}`}
                       tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
                       tickLine={false}
                       axisLine={false}
