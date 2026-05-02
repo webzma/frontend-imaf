@@ -442,9 +442,7 @@ export default function ReportesPage() {
         {/* Income stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           <div className="bg-surface-container-low rounded-sm p-5 ambient-shadow">
-            <div
-              className="w-10 h-10 rounded-md flex items-center justify-center bg-emerald-100 dark:bg-emerald-500/15 mb-4"
-            >
+            <div className="w-10 h-10 rounded-md flex items-center justify-center bg-emerald-100 dark:bg-emerald-500/15 mb-4">
               <span className="text-emerald-700 dark:text-emerald-400 font-sans text-sm font-semibold">
                 Bs.
               </span>
