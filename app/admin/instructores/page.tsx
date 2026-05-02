@@ -52,9 +52,15 @@ interface Instructor {
   titulo: "licenciatura" | "maestria" | "doctorado" | null;
   departamento: string | null;
   municipio: string | null;
+  tipo_contrato: { id: number; nombre: string } | null;
   fecha_nacimiento: string | null;
   genero: string | null;
   user: User;
+}
+
+interface TipoContrato {
+  id: number;
+  nombre: string;
 }
 
 /* ── Helpers ── */
@@ -106,6 +112,21 @@ const instructorSchema = z.object({
   cedula: z.string().min(1, "La cédula es obligatoria"),
   telefono: z.string().max(20).optional(),
   municipio: z.string().max(255).optional(),
+  tipo_contrato_id: z.number().optional(),
+  fecha_nacimiento: z.string().optional(),
+  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
+  especialidad: z.string().max(255).optional(),
+  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
+  departamento: z.string().max(255).optional(),
+});
+
+const editInstructorSchema = z.object({
+  name: z.string().min(1, "El nombre es obligatorio").max(255),
+  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
+  cedula: z.string().min(1, "La cédula es obligatoria"),
+  telefono: z.string().max(20).optional(),
+  municipio: z.string().max(255).optional(),
+  tipo_contrato_id: z.number().optional(),
   fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
   especialidad: z.string().max(255).optional(),
@@ -114,21 +135,8 @@ const instructorSchema = z.object({
 });
 
 type InstructorForm = z.infer<typeof instructorSchema>;
-
-const editInstructorSchema = z.object({
-  name: z.string().min(1, "El nombre es obligatorio").max(255),
-  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  cedula: z.string().min(1, "La cédula es obligatoria"),
-  telefono: z.string().max(20).optional(),
-  fecha_nacimiento: z.string().optional(),
-  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
-  especialidad: z.string().max(255).optional(),
-  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
-  departamento: z.string().max(255).optional(),
-  municipio: z.string().max(255).optional(),
-});
-
 type EditInstructorForm = z.infer<typeof editInstructorSchema>;
+
 
 /* ── Table Skeleton ── */
 
@@ -162,10 +170,12 @@ function TableSkeleton() {
 
 export default function InstructoresPage() {
   const [instructores, setInstructores] = useState<Instructor[]>([]);
+  const [tiposContrato, setTiposContrato] = useState<TipoContrato[]>([]);
   const [search, setSearch] = useState("");
   const [filterTitulo, setFilterTitulo] = useState("todos");
   const [filterDepartamento, setFilterDepartamento] = useState("todos");
   const [loading, setLoading] = useState(true);
+  const [loadingTiposContrato, setLoadingTiposContrato] = useState(true);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -186,6 +196,7 @@ export default function InstructoresPage() {
       cedula: "",
       telefono: "",
       municipio: "",
+      tipo_contrato_id: undefined,
       fecha_nacimiento: "",
       genero: undefined,
       especialidad: "",
@@ -207,8 +218,41 @@ export default function InstructoresPage() {
       titulo: undefined,
       departamento: "",
       municipio: "",
+      tipo_contrato_id: undefined,
     },
   });
+
+  const fetchTiposContrato = async () => {
+    try {
+      const res = await fetch(`${process.env.API_URL}api/admin/tipo-contratos`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        setTiposContrato(await res.json());
+      }
+    } catch {
+      // Silently fail for contract types
+    } finally {
+      setLoadingTiposContrato(false);
+    }
+  };
+
+  const fetchInstructores = async () => {
+    try {
+      const res = await fetch(`${process.env.API_URL}api/admin/profesores`, {
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        setError("No se pudo cargar la lista de instructores.");
+        return;
+      }
+      setInstructores(await res.json());
+    } catch {
+      setError("Error al conectar con el servidor.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openEdit = (instructor: Instructor) => {
     setEditingInstructor(instructor);
@@ -226,6 +270,7 @@ export default function InstructoresPage() {
       titulo: (instructor.titulo as EditInstructorForm["titulo"]) ?? undefined,
       departamento: instructor.departamento ?? "",
       municipio: instructor.municipio ?? "",
+      tipo_contrato_id: instructor.tipo_contrato?.id ?? undefined,
     });
     setEditOpen(true);
   };
@@ -244,6 +289,7 @@ export default function InstructoresPage() {
         titulo: data.titulo || null,
         departamento: data.departamento || null,
         municipio: data.municipio || null,
+        tipo_contrato_id: data.tipo_contrato_id || null,
       };
       const res = await fetch(
         `${process.env.API_URL}api/admin/profesores/${editingInstructor.id}`,
@@ -274,25 +320,9 @@ export default function InstructoresPage() {
     }
   };
 
-  const fetchInstructores = async () => {
-    try {
-      const res = await fetch(`${process.env.API_URL}api/admin/profesores`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) {
-        setError("No se pudo cargar la lista de instructores.");
-        return;
-      }
-      setInstructores(await res.json());
-    } catch {
-      setError("Error al conectar con el servidor.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchInstructores();
+    fetchTiposContrato();
   }, []);
 
   const onSubmit = async (data: InstructorForm) => {
@@ -303,6 +333,7 @@ export default function InstructoresPage() {
         ...data,
         telefono: data.telefono || null,
         municipio: data.municipio || null,
+        tipo_contrato_id: data.tipo_contrato_id || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
         especialidad: data.especialidad || null,
@@ -539,7 +570,6 @@ export default function InstructoresPage() {
                       <SelectContent>
                         <SelectItem value="masculino">Masculino</SelectItem>
                         <SelectItem value="femenino">Femenino</SelectItem>
-                        <SelectItem value="otro">Otro</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -623,23 +653,49 @@ export default function InstructoresPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-2">
-                  <Label>Título académico</Label>
-                  <Select
-                    value={form.watch("titulo") ?? ""}
-                    onValueChange={(v) =>
-                      form.setValue("titulo", v as InstructorForm["titulo"])
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar título" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="licenciatura">Licenciatura</SelectItem>
-                      <SelectItem value="maestria">Maestría</SelectItem>
-                      <SelectItem value="doctorado">Doctorado</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Título académico</Label>
+                    <Select
+                      value={form.watch("titulo") ?? ""}
+                      onValueChange={(v) =>
+                        form.setValue("titulo", v as InstructorForm["titulo"])
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar título" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="licenciatura">Licenciatura</SelectItem>
+                        <SelectItem value="maestria">Maestría</SelectItem>
+                        <SelectItem value="doctorado">Doctorado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Tipo de Contrato</Label>
+                    {loadingTiposContrato ? (
+                      <div className="h-10 w-full rounded-sm border border-outline-variant/30 bg-surface-variant/50 animate-pulse" />
+                    ) : (
+                      <Select
+                        value={form.watch("tipo_contrato_id")?.toString() ?? ""}
+                        onValueChange={(v) =>
+                          form.setValue("tipo_contrato_id", v ? parseInt(v) : undefined)
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tiposContrato.map((tipo) => (
+                            <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                              {tipo.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
                 </div>
 
                 {submitError && (
@@ -1003,7 +1059,6 @@ export default function InstructoresPage() {
                 <SelectContent>
                   <SelectItem value="masculino">Masculino</SelectItem>
                   <SelectItem value="femenino">Femenino</SelectItem>
-                  <SelectItem value="otro">Otro</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1105,24 +1160,50 @@ export default function InstructoresPage() {
               </Select>
             </div>
 
-            <div className="grid gap-2">
-              <Label>Título académico</Label>
-              <Select
-                value={editForm.watch("titulo") ?? ""}
-                onValueChange={(v) =>
-                  editForm.setValue("titulo", v as EditInstructorForm["titulo"])
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar título" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="licenciatura">Licenciatura</SelectItem>
-                  <SelectItem value="maestria">Maestría</SelectItem>
-                  <SelectItem value="doctorado">Doctorado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Título académico</Label>
+                    <Select
+                      value={editForm.watch("titulo") ?? ""}
+                      onValueChange={(v) =>
+                        editForm.setValue("titulo", v as EditInstructorForm["titulo"])
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar título" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="licenciatura">Licenciatura</SelectItem>
+                        <SelectItem value="maestria">Maestría</SelectItem>
+                        <SelectItem value="doctorado">Doctorado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Tipo de Contrato</Label>
+                    {loadingTiposContrato ? (
+                      <div className="h-10 w-full rounded-sm border border-outline-variant/30 bg-surface-variant/50 animate-pulse" />
+                    ) : (
+                      <Select
+                        value={editForm.watch("tipo_contrato_id")?.toString() ?? ""}
+                        onValueChange={(v) =>
+                          editForm.setValue("tipo_contrato_id", v ? parseInt(v) : undefined)
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tiposContrato.map((tipo) => (
+                            <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                              {tipo.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </div>
 
             {editSubmitError && (
               <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-4 py-3 rounded-sm">
