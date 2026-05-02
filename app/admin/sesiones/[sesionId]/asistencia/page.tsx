@@ -10,8 +10,8 @@ import {
   Clock,
   Loader2,
   Users,
-  CheckCircle2,
-  XCircle,
+  Check,
+  X,
   Save,
 } from "lucide-react";
 
@@ -59,6 +59,11 @@ function getInitials(name: string) {
     .map((n) => n[0])
     .join("")
     .toUpperCase();
+}
+
+function formatTime(t: string | null) {
+  if (!t) return "";
+  return t.slice(0, 5);
 }
 
 const estadoSesionStyle: Record<string, string> = {
@@ -109,10 +114,10 @@ export default function AsistenciaPage({
   const pct = total > 0 ? Math.round((presentes / total) * 100) : 0;
 
   /* ── Handlers ── */
-  const togglePresente = (estudianteId: number) => {
+  const setPresente = (estudianteId: number, value: boolean) => {
     setAsistencia((prev) =>
       prev.map((r) =>
-        r.estudiante_id === estudianteId ? { ...r, presente: !r.presente } : r,
+        r.estudiante_id === estudianteId ? { ...r, presente: value } : r,
       ),
     );
   };
@@ -207,18 +212,18 @@ export default function AsistenciaPage({
 
         {/* ── Sesión header ── */}
         <div className="bg-surface-container-low rounded-sm p-8 ambient-shadow mb-6">
-          <div className="flex items-start justify-between">
-            <div>
+          <div className="flex items-start justify-between gap-6">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-3">
                 <CalendarDays className="w-3 h-3 text-primary/70" />
                 <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary/70 font-medium">
                   Asistencia / {sesion.curso_nombre}
                 </span>
               </div>
-              <h1 className="font-serif font-light text-3xl md:text-4xl tight-tracking text-on-surface mb-2">
+              <h1 className="font-serif font-light text-3xl md:text-4xl tight-tracking text-on-surface mb-3">
                 {sesion.titulo}
               </h1>
-              <div className="flex items-center gap-4 flex-wrap mt-3">
+              <div className="flex items-center gap-4 flex-wrap">
                 <span className="flex items-center gap-1.5 font-sans text-sm text-muted-foreground">
                   <CalendarDays className="w-3.5 h-3.5" />
                   {fechaFmt}
@@ -226,8 +231,8 @@ export default function AsistenciaPage({
                 {(sesion.hora_inicio || sesion.hora_fin) && (
                   <span className="flex items-center gap-1.5 font-sans text-sm text-muted-foreground">
                     <Clock className="w-3.5 h-3.5" />
-                    {sesion.hora_inicio ?? ""}
-                    {sesion.hora_fin && ` – ${sesion.hora_fin}`}
+                    {formatTime(sesion.hora_inicio)}
+                    {sesion.hora_fin && ` – ${formatTime(sesion.hora_fin)}`}
                   </span>
                 )}
                 <span
@@ -241,14 +246,14 @@ export default function AsistenciaPage({
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="gap-2 shrink-0 ml-4"
+              className="gap-2 shrink-0"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              Guardar asistencia
+              Guardar
             </Button>
           </div>
         </div>
@@ -256,29 +261,35 @@ export default function AsistenciaPage({
         {/* ── Resumen ── */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-sm p-4">
-            <p className="font-sans text-sm tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
+            <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
               Presentes
             </p>
             <p className="font-sans text-3xl font-light text-emerald-700 dark:text-emerald-400">
               {presentes}
             </p>
+            <p className="font-sans text-xs text-muted-foreground mt-1">
+              de {total} estudiantes
+            </p>
           </div>
           <div className="bg-rose-50 dark:bg-rose-500/10 rounded-sm p-4">
-            <p className="font-sans text-sm tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
+            <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
               Ausentes
             </p>
             <p className="font-sans text-3xl font-light text-rose-700 dark:text-rose-400">
               {total - presentes}
             </p>
+            <p className="font-sans text-xs text-muted-foreground mt-1">
+              de {total} estudiantes
+            </p>
           </div>
           <div className="bg-primary/5 rounded-sm p-4">
-            <p className="font-sans text-sm tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
+            <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
               Asistencia
             </p>
             <p className="font-sans text-3xl font-light text-primary">{pct}%</p>
-            <div className="mt-2 h-1 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+            <div className="mt-2 h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-primary rounded-full transition-all"
+                className="h-full bg-primary rounded-full transition-all duration-300"
                 style={{ width: `${pct}%` }}
               />
             </div>
@@ -294,20 +305,20 @@ export default function AsistenciaPage({
                 Estudiantes inscritos ({total})
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => marcarTodos(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-xs text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Marcar todos
+                <Check className="w-3.5 h-3.5" />
+                Todos presentes
               </button>
               <button
                 onClick={() => marcarTodos(false)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-xs text-muted-foreground hover:bg-surface-container transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-xs font-medium text-muted-foreground hover:bg-surface-container transition-colors"
               >
-                <XCircle className="w-3.5 h-3.5" />
-                Desmarcar todos
+                <X className="w-3.5 h-3.5" />
+                Todos ausentes
               </button>
             </div>
           </div>
@@ -326,77 +337,78 @@ export default function AsistenciaPage({
               {asistencia.map((registro, i) => (
                 <div
                   key={registro.estudiante_id}
-                  className={`flex items-center gap-4 px-6 py-4 hover:bg-surface-container transition-colors ${
-                    i < asistencia.length - 1
-                      ? "border-b border-outline-variant/30"
+                  className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${
+                    registro.presente
+                      ? "bg-emerald-50/60 dark:bg-emerald-500/5"
                       : ""
-                  }`}
+                  } ${i < asistencia.length - 1 ? "border-b border-outline-variant/30" : ""}`}
                 >
-                  {/* Toggle presente */}
-                  <button
-                    onClick={() => togglePresente(registro.estudiante_id)}
-                    className="shrink-0 transition-transform active:scale-95"
-                    title={
-                      registro.presente ? "Marcar ausente" : "Marcar presente"
-                    }
-                  >
-                    {registro.presente ? (
-                      <CheckCircle2 className="w-6 h-6 text-emerald-500" />
-                    ) : (
-                      <XCircle className="w-6 h-6 text-rose-400" />
-                    )}
-                  </button>
-
-                  {/* Avatar + info */}
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div
-                      className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                        registro.presente
-                          ? "bg-emerald-100 dark:bg-emerald-500/15"
-                          : "bg-surface-container"
-                      }`}
-                    >
-                      <span
-                        className={`font-sans text-xs font-bold ${
-                          registro.presente
-                            ? "text-emerald-800 dark:text-emerald-400"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        {getInitials(registro.nombre)}
-                      </span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-sans text-sm font-semibold text-on-surface truncate">
-                        {registro.nombre}
-                      </p>
-                      <p className="font-mono text-xs text-muted-foreground">
-                        {registro.cedula}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Estado badge */}
-                  <span
-                    className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full font-sans text-xs font-semibold ${
+                  {/* Avatar */}
+                  <div
+                    className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                       registro.presente
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
-                        : "bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-400"
+                        ? "bg-emerald-100 dark:bg-emerald-500/20"
+                        : "bg-surface-container"
                     }`}
                   >
-                    {registro.presente ? "Presente" : "Ausente"}
-                  </span>
+                    <span
+                      className={`font-sans text-xs font-bold ${
+                        registro.presente
+                          ? "text-emerald-800 dark:text-emerald-300"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {getInitials(registro.nombre)}
+                    </span>
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-sans text-sm font-semibold text-on-surface truncate">
+                      {registro.nombre}
+                    </p>
+                    <p className="font-mono text-xs text-muted-foreground">
+                      {registro.cedula}
+                    </p>
+                  </div>
 
                   {/* Observación */}
                   <input
                     type="text"
-                    placeholder="Observación (opcional)"
+                    placeholder="Observación..."
                     value={registro.observacion ?? ""}
                     onChange={(e) =>
                       setObservacion(registro.estudiante_id, e.target.value)
                     }
-                    className="w-52 shrink-0 rounded-md border border-input bg-background px-3 py-1.5 font-sans text-xs placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="hidden sm:block w-44 shrink-0 rounded-md border border-input bg-background/60 px-3 py-1.5 font-sans text-xs placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
                   />
+
+                  {/* Toggle pill: Ausente | Presente */}
+                  <div className="flex rounded-lg overflow-hidden border border-outline-variant/50 shrink-0 text-xs font-semibold font-sans">
+                    <button
+                      onClick={() => setPresente(registro.estudiante_id, false)}
+                      className={`flex items-center gap-1.5 px-3 py-2 transition-colors ${
+                        !registro.presente
+                          ? "bg-rose-500 text-white"
+                          : "text-muted-foreground hover:bg-surface-container"
+                      }`}
+                    >
+                      <X className="w-3 h-3" />
+                      Ausente
+                    </button>
+                    <div className="w-px bg-outline-variant/50" />
+                    <button
+                      onClick={() => setPresente(registro.estudiante_id, true)}
+                      className={`flex items-center gap-1.5 px-3 py-2 transition-colors ${
+                        registro.presente
+                          ? "bg-emerald-500 text-white"
+                          : "text-muted-foreground hover:bg-surface-container"
+                      }`}
+                    >
+                      <Check className="w-3 h-3" />
+                      Presente
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
