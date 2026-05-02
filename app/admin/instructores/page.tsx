@@ -137,7 +137,6 @@ const editInstructorSchema = z.object({
 type InstructorForm = z.infer<typeof instructorSchema>;
 type EditInstructorForm = z.infer<typeof editInstructorSchema>;
 
-
 /* ── Table Skeleton ── */
 
 function TableSkeleton() {
@@ -224,9 +223,12 @@ export default function InstructoresPage() {
 
   const fetchTiposContrato = async () => {
     try {
-      const res = await fetch(`${process.env.API_URL}api/admin/tipo-contratos`, {
-        headers: getAuthHeaders(),
-      });
+      const res = await fetch(
+        `${process.env.API_URL}api/admin/tipo-contratos`,
+        {
+          headers: getAuthHeaders(),
+        },
+      );
       if (res.ok) {
         setTiposContrato(await res.json());
       }
@@ -666,7 +668,9 @@ export default function InstructoresPage() {
                         <SelectValue placeholder="Seleccionar título" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="licenciatura">Licenciatura</SelectItem>
+                        <SelectItem value="licenciatura">
+                          Licenciatura
+                        </SelectItem>
                         <SelectItem value="maestria">Maestría</SelectItem>
                         <SelectItem value="doctorado">Doctorado</SelectItem>
                       </SelectContent>
@@ -680,7 +684,10 @@ export default function InstructoresPage() {
                       <Select
                         value={form.watch("tipo_contrato_id")?.toString() ?? ""}
                         onValueChange={(v) =>
-                          form.setValue("tipo_contrato_id", v ? parseInt(v) : undefined)
+                          form.setValue(
+                            "tipo_contrato_id",
+                            v ? parseInt(v) : undefined,
+                          )
                         }
                       >
                         <SelectTrigger className="w-full">
@@ -688,7 +695,10 @@ export default function InstructoresPage() {
                         </SelectTrigger>
                         <SelectContent>
                           {tiposContrato.map((tipo) => (
-                            <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                            <SelectItem
+                              key={tipo.id}
+                              value={tipo.id.toString()}
+                            >
                               {tipo.nombre}
                             </SelectItem>
                           ))}
@@ -1161,49 +1171,55 @@ export default function InstructoresPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label>Título académico</Label>
-                    <Select
-                      value={editForm.watch("titulo") ?? ""}
-                      onValueChange={(v) =>
-                        editForm.setValue("titulo", v as EditInstructorForm["titulo"])
-                      }
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Seleccionar título" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="licenciatura">Licenciatura</SelectItem>
-                        <SelectItem value="maestria">Maestría</SelectItem>
-                        <SelectItem value="doctorado">Doctorado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Tipo de Contrato</Label>
-                    {loadingTiposContrato ? (
-                      <div className="h-10 w-full rounded-sm border border-outline-variant/30 bg-surface-variant/50 animate-pulse" />
-                    ) : (
-                      <Select
-                        value={editForm.watch("tipo_contrato_id")?.toString() ?? ""}
-                        onValueChange={(v) =>
-                          editForm.setValue("tipo_contrato_id", v ? parseInt(v) : undefined)
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Seleccionar tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tiposContrato.map((tipo) => (
-                            <SelectItem key={tipo.id} value={tipo.id.toString()}>
-                              {tipo.nombre}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                </div>
+              <div className="grid gap-2">
+                <Label>Título académico</Label>
+                <Select
+                  value={editForm.watch("titulo") ?? ""}
+                  onValueChange={(v) =>
+                    editForm.setValue(
+                      "titulo",
+                      v as EditInstructorForm["titulo"],
+                    )
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar título" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="licenciatura">Licenciatura</SelectItem>
+                    <SelectItem value="maestria">Maestría</SelectItem>
+                    <SelectItem value="doctorado">Doctorado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Tipo de Contrato</Label>
+                {loadingTiposContrato ? (
+                  <div className="h-10 w-full rounded-sm border border-outline-variant/30 bg-surface-variant/50 animate-pulse" />
+                ) : (
+                  <Select
+                    value={editForm.watch("tipo_contrato_id")?.toString() ?? ""}
+                    onValueChange={(v) =>
+                      editForm.setValue(
+                        "tipo_contrato_id",
+                        v ? parseInt(v) : undefined,
+                      )
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tiposContrato.map((tipo) => (
+                        <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                          {tipo.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            </div>
 
             {editSubmitError && (
               <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-4 py-3 rounded-sm">
