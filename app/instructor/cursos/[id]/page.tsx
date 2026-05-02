@@ -530,11 +530,24 @@ export default function CursoDetailPage({
                         )}
                       </div>
                     </div>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-sans text-xs font-semibold capitalize shrink-0 ${sesionEstadoStyle[sesion.estado]}`}
-                    >
-                      {sesion.estado}
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-sans text-xs font-semibold capitalize ${sesionEstadoStyle[sesion.estado]}`}
+                      >
+                        {sesion.estado}
+                      </span>
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/instructor/sesiones/${sesion.id}/asistencia`,
+                          )
+                        }
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+                      >
+                        <ClipboardCheck className="w-3.5 h-3.5" />
+                        Asistencia
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
