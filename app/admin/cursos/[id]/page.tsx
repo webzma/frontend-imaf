@@ -52,6 +52,7 @@ import {
   ListChecks,
   Clock,
   CalendarClock,
+  ClipboardCheck,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -1448,6 +1449,16 @@ export default function CursoDetailPage({
                       )}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() =>
+                          router.push(`/admin/sesiones/${s.id}/asistencia`)
+                        }
+                        title="Tomar asistencia"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-primary hover:bg-primary/10 transition-colors"
+                      >
+                        <ClipboardCheck className="w-3.5 h-3.5" />
+                        Asistencia
+                      </button>
                       <button
                         onClick={() => openSesionEdit(s)}
                         className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
