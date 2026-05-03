@@ -77,9 +77,10 @@ interface SesionItem {
 
 interface CursoDetalle {
   id: number;
-  nombre: string;
   codigo: string;
+  nombre: string;
   descripcion: string | null;
+  precio: string;
   estado: "activo" | "inactivo";
   instructor: Instructor | null;
   estudiantes: Estudiante[];
@@ -285,6 +286,12 @@ function PagoModal({
             <span className="text-muted-foreground">Concepto</span>
             <span className="font-medium text-on-surface truncate max-w-[180px]">
               {curso.nombre}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Precio</span>
+            <span className="font-mono font-bold text-primary tabular-nums">
+              ${parseFloat(curso.precio).toFixed(2)}
             </span>
           </div>
           <div className="flex justify-between">
