@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import {
   BookOpen,
   Hash,
@@ -23,6 +24,8 @@ import {
   CalendarCheck,
   Sparkles,
   ArrowUpRight,
+  Download,
+  Loader2,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -146,6 +149,7 @@ function StatusRow({ label, estado }: { label: string; estado: EstadoKey }) {
 export default function CursoPage() {
   const [data, setData] = useState<MiCursoResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloadingCertificado, setDownloadingCertificado] = useState(false);
 
   useEffect(() => {
     fetch(`${process.env.API_URL}api/estudiante/curso`, {
@@ -165,6 +169,57 @@ export default function CursoPage() {
   }, []);
 
   const curso = data?.curso ?? null;
+  const canDownloadCertificate =
+    data?.estado_pago === "aprobado" ||
+    data?.estado_aprobacion_curso === "aprobado";
+
+  const handleDownloadCertificate = async () => {
+    setDownloadingCertificado(true);
+    try {
+      const response = await fetch(
+        `${process.env.API_URL}api/estudiante/certificado`,
+        {
+          headers: {
+            Authorization: `Bearer ${getCookie("token")}`,
+            Accept: "application/pdf,application/json",
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const contentType = response.headers.get("content-type") || "";
+        const body = contentType.includes("application/json")
+          ? await response.json()
+          : null;
+        throw new Error(
+          body?.message || "No se pudo descargar el certificado.",
+        );
+      }
+
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get("content-disposition");
+      const match = contentDisposition?.match(/filename="?([^"]+)"?/i);
+      const filename = match?.[1] ?? "certificado.pdf";
+
+      const fileUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(fileUrl);
+      toast.success("Certificado descargado correctamente.");
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Error al descargar el certificado.",
+      );
+    } finally {
+      setDownloadingCertificado(false);
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-surface">
@@ -384,6 +439,36 @@ export default function CursoPage() {
                 )}
               </div>
             </div>
+
+            {canDownloadCertificate && (
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-sm ambient-shadow px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p className="font-sans text-sm font-semibold text-emerald-800 dark:text-emerald-400">
+                    Tu certificado está disponible
+                  </p>
+                  <p className="font-sans text-xs text-emerald-700/70 dark:text-emerald-500/70 mt-0.5">
+                    Descárgalo en PDF para guardarlo o imprimirlo.
+                  </p>
+                </div>
+                <Button
+                  onClick={handleDownloadCertificate}
+                  disabled={downloadingCertificado}
+                  className="font-sans text-sm h-10 text-white dark:text-[#1a1817]"
+                >
+                  {downloadingCertificado ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Descargando...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Descargar certificado
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
 
             {/* Temario */}
             {curso.temario?.length > 0 && (
