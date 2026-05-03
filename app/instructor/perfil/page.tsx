@@ -74,6 +74,11 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
+function toDateInput(value: string | null | undefined): string {
+  if (!value) return "";
+  return value.slice(0, 10);
+}
+
 const tituloLabel: Record<string, string> = {
   licenciatura: "Licenciatura",
   maestria: "Maestría",
@@ -87,9 +92,12 @@ const tituloStyle: Record<string, string> = {
   doctorado: "bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary",
 };
 
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr + "T00:00:00").toLocaleDateString("es-ES", {
+function formatDate(value: string | null | undefined): string {
+  if (!value) return "—";
+  const ymd = value.slice(0, 10);
+  const date = new Date(`${ymd}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString("es-VE", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -137,7 +145,7 @@ export default function PerfilPage() {
       especialidad: p.especialidad ?? "",
       titulo: p.titulo ?? "",
       departamento: p.departamento ?? "",
-      fecha_nacimiento: p.fecha_nacimiento ?? "",
+      fecha_nacimiento: toDateInput(p.fecha_nacimiento),
       genero: p.genero ?? "",
     });
   };
