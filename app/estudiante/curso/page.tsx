@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -20,6 +21,8 @@ import {
   Award,
   BookMarked,
   CalendarCheck,
+  Sparkles,
+  ArrowUpRight,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -126,8 +129,8 @@ function StatusRow({ label, estado }: { label: string; estado: EstadoKey }) {
   const Icon = cfg.icon;
 
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-outline-variant/20 last:border-0">
-      <p className="font-sans text-sm text-on-surface">{label}</p>
+    <div className="flex items-center justify-between py-3 border-b border-outline-variant/20 last:border-0">
+      <p className="font-sans text-sm text-on-surface font-medium">{label}</p>
       <span
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${cfg.cls}`}
       >
@@ -165,24 +168,29 @@ export default function CursoPage() {
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 px-4 md:px-8 py-10 max-w-4xl mx-auto">
+      <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-5xl mx-auto">
         {/* Page header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <BookOpen className="w-3 h-3 text-primary/70" />
-            <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary/70 font-medium">
+        <div className="mb-10 md:mb-12">
+          <div className="flex items-center gap-2 mb-4">
+            <BookOpen className="w-3.5 h-3.5 text-primary/80" />
+            <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
               Mi curso
             </span>
           </div>
-          <h1 className="font-serif font-light text-[2.8rem] tight-tracking leading-[1.08] text-on-surface">
+          <h1 className="font-serif font-light text-[2.6rem] md:text-[3.2rem] tight-tracking leading-[1.05] text-on-surface mb-2">
             Curso inscrito
           </h1>
+          <p className="font-sans text-sm md:text-base text-muted-foreground max-w-lg">
+            Revisa los detalles, el temario, las sesiones y el estado de tu
+            inscripción.
+          </p>
         </div>
 
         {loading ? (
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-8">
               <Skeleton className="h-9 w-64 mb-3" />
               <Skeleton className="h-5 w-32 mb-6" />
@@ -190,98 +198,115 @@ export default function CursoPage() {
               <Skeleton className="h-4 w-3/4 mb-8" />
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-outline-variant/30">
                 {[...Array(4)].map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
+                  <Skeleton key={i} className="h-12 w-full" />
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <Skeleton className="h-40 w-full rounded-sm" />
               <Skeleton className="h-40 w-full rounded-sm" />
             </div>
           </div>
         ) : curso ? (
-          <div className="space-y-6">
-            {/* Main course card */}
-            <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
-              <div className="h-1 gradient-primary" />
-              <div className="p-8">
-                <div className="flex items-start justify-between gap-4 mb-6">
-                  <div>
-                    <h2 className="font-serif font-light text-4xl text-on-surface mb-3 leading-tight">
-                      {curso.nombre}
-                    </h2>
-                    <span className="inline-flex items-center gap-1.5 font-mono text-sm font-bold text-on-primary-container bg-primary-container px-3 py-1 rounded-sm">
-                      <Hash className="w-3 h-3" />
+          <div className="space-y-5">
+            {/* Hero course card */}
+            <div className="relative bg-surface-container-lowest rounded-md overflow-hidden ambient-shadow">
+              <div className="absolute inset-0 gradient-primary opacity-[0.05] pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-[2px] gradient-primary" />
+              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+
+              <div className="relative p-7 md:p-9">
+                <div className="flex items-start justify-between gap-4 mb-5 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="inline-flex items-center gap-1.5 font-sans text-[10px] tracking-[0.22em] uppercase text-primary font-bold">
+                      <Sparkles className="w-3 h-3" />
+                      Mi curso
+                    </span>
+                    <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-on-primary-container bg-primary-container/70 px-2 py-1 rounded-sm">
+                      <Hash className="w-2.5 h-2.5" />
                       {curso.codigo}
                     </span>
                   </div>
                   <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-sans text-sm font-semibold shrink-0 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-sans text-xs font-semibold shrink-0 ${
                       curso.estado === "activo"
-                        ? "bg-emerald-100 text-emerald-800"
-                        : "bg-amber-100 text-amber-800"
+                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
+                        : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
                     }`}
                   >
                     {curso.estado === "activo" ? (
                       <>
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Activo
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+                        Activo
                       </>
                     ) : (
                       <>
-                        <XCircle className="w-3.5 h-3.5" /> Inactivo
+                        <XCircle className="w-3 h-3" /> Inactivo
                       </>
                     )}
                   </span>
                 </div>
 
+                <h2 className="font-serif font-light text-3xl md:text-5xl tight-tracking text-on-surface mb-4 leading-[1.05]">
+                  {curso.nombre}
+                </h2>
+
                 {curso.descripcion && (
-                  <p className="font-sans text-base text-muted-foreground leading-relaxed mb-6">
+                  <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed mb-6 max-w-2xl">
                     {curso.descripcion}
                   </p>
                 )}
 
                 {/* Meta grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-outline-variant/30">
-                  <div className="flex items-start gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground/60 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-sans text-xs text-muted-foreground">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-outline-variant/30">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0">
+                      <Calendar className="w-3.5 h-3.5 text-on-primary-container" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
                         Inicio
                       </p>
-                      <p className="font-sans text-sm font-semibold text-on-surface">
+                      <p className="font-sans text-sm font-semibold text-on-surface mt-0.5">
                         {formatDate(curso.fecha_inicio)}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground/60 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-sans text-xs text-muted-foreground">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0">
+                      <CalendarCheck className="w-3.5 h-3.5 text-on-primary-container" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
                         Finalización
                       </p>
-                      <p className="font-sans text-sm font-semibold text-on-surface">
+                      <p className="font-sans text-sm font-semibold text-on-surface mt-0.5">
                         {formatDate(curso.fecha_fin)}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <DollarSign className="w-4 h-4 text-muted-foreground/60 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-sans text-xs text-muted-foreground">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0">
+                      <DollarSign className="w-3.5 h-3.5 text-on-primary-container" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
                         Precio
                       </p>
-                      <p className="font-sans text-sm font-semibold text-on-surface">
+                      <p className="font-sans text-sm font-semibold text-on-surface mt-0.5 tabular-nums">
                         ${parseFloat(curso.precio).toFixed(2)}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <Users className="w-4 h-4 text-muted-foreground/60 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-sans text-xs text-muted-foreground">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0">
+                      <Users className="w-3.5 h-3.5 text-on-primary-container" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
                         Cupos
                       </p>
-                      <p className="font-sans text-sm font-semibold text-on-surface">
+                      <p className="font-sans text-sm font-semibold text-on-surface mt-0.5 tabular-nums">
                         {curso.cupos_restantes} disponibles
                       </p>
                     </div>
@@ -290,12 +315,12 @@ export default function CursoPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {/* Estado de inscripción */}
               <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <Award className="w-4 h-4 text-primary/70" />
-                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
+                <div className="flex items-center gap-2 mb-4">
+                  <Award className="w-3.5 h-3.5 text-primary/80" />
+                  <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
                     Estado de inscripción
                   </h3>
                 </div>
@@ -310,30 +335,33 @@ export default function CursoPage() {
 
               {/* Instructor */}
               <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <GraduationCap className="w-4 h-4 text-primary/70" />
-                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
+                <div className="flex items-center gap-2 mb-4">
+                  <GraduationCap className="w-3.5 h-3.5 text-primary/80" />
+                  <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
                     Instructor
                   </h3>
                 </div>
                 {curso.instructor ? (
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                      <span className="font-sans text-base font-bold text-on-primary-container">
-                        {getInitials(curso.instructor.nombre)}
-                      </span>
+                    <div className="relative shrink-0">
+                      <div className="absolute inset-0 rounded-full gradient-primary opacity-30 blur-md" />
+                      <div className="relative w-12 h-12 rounded-full bg-primary-container flex items-center justify-center ring-2 ring-primary/10">
+                        <span className="font-sans text-base font-bold text-on-primary-container">
+                          {getInitials(curso.instructor.nombre)}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-serif font-light text-xl text-on-surface">
+                      <p className="font-serif font-light text-xl text-on-surface tight-tracking leading-tight">
                         {curso.instructor.nombre ?? "Sin nombre"}
                       </p>
                       {curso.instructor.especialidad && (
-                        <p className="font-sans text-xs text-primary/70 mt-1 font-medium">
+                        <p className="font-sans text-xs text-primary/80 mt-1.5 font-semibold">
                           {curso.instructor.especialidad}
                         </p>
                       )}
                       {curso.instructor.titulo && (
-                        <p className="font-sans text-xs text-muted-foreground mt-0.5 capitalize">
+                        <p className="font-sans text-xs text-muted-foreground mt-1 capitalize">
                           {curso.instructor.titulo}
                         </p>
                       )}
@@ -359,28 +387,28 @@ export default function CursoPage() {
 
             {/* Temario */}
             {curso.temario?.length > 0 && (
-              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6 md:p-7">
                 <div className="flex items-center gap-2 mb-5">
-                  <BookMarked className="w-4 h-4 text-primary/70" />
-                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
-                    Temario
+                  <BookMarked className="w-3.5 h-3.5 text-primary/80" />
+                  <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                    Temario · {curso.temario.length} módulos
                   </h3>
                 </div>
-                <ol className="space-y-3">
-                  {curso.temario.map((item) => (
+                <ol className="space-y-1">
+                  {curso.temario.map((item, idx) => (
                     <li
                       key={item.id}
-                      className="flex gap-3 py-2.5 border-b border-outline-variant/20 last:border-0"
+                      className="group flex gap-4 py-3 border-b border-outline-variant/20 last:border-0 hover:bg-surface-container-low/30 -mx-2 px-2 rounded-sm transition-colors"
                     >
-                      <span className="shrink-0 w-6 h-6 rounded-full bg-primary-container flex items-center justify-center font-mono text-xs font-bold text-on-primary-container mt-0.5">
-                        {item.orden}
+                      <span className="shrink-0 w-7 h-7 rounded-full bg-primary-container flex items-center justify-center font-mono text-xs font-bold text-on-primary-container mt-0.5 group-hover:scale-105 transition-transform">
+                        {item.orden ?? idx + 1}
                       </span>
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <p className="font-sans text-sm font-semibold text-on-surface">
                           {item.titulo}
                         </p>
                         {item.descripcion && (
-                          <p className="font-sans text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          <p className="font-sans text-xs text-muted-foreground mt-1 leading-relaxed">
                             {item.descripcion}
                           </p>
                         )}
@@ -393,30 +421,33 @@ export default function CursoPage() {
 
             {/* Sesiones */}
             {curso.sesiones?.length > 0 && (
-              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6 md:p-7">
                 <div className="flex items-center gap-2 mb-5">
-                  <CalendarCheck className="w-4 h-4 text-primary/70" />
-                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
-                    Sesiones
+                  <CalendarCheck className="w-3.5 h-3.5 text-primary/80" />
+                  <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                    Sesiones · {curso.sesiones.length}
                   </h3>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {curso.sesiones.map((sesion) => {
                     const sesionEstado: Record<
                       SesionItem["estado"],
-                      { label: string; cls: string }
+                      { label: string; cls: string; dot: string }
                     > = {
                       programada: {
                         label: "Programada",
                         cls: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400",
+                        dot: "bg-blue-500",
                       },
                       realizada: {
                         label: "Realizada",
                         cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+                        dot: "bg-emerald-500",
                       },
                       cancelada: {
                         label: "Cancelada",
                         cls: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400",
+                        dot: "bg-red-500",
                       },
                     };
                     const cfg =
@@ -424,18 +455,18 @@ export default function CursoPage() {
                     return (
                       <div
                         key={sesion.id}
-                        className="flex flex-col sm:flex-row sm:items-start gap-3 py-3 border-b border-outline-variant/20 last:border-0"
+                        className="flex flex-col sm:flex-row sm:items-start gap-3 py-3.5 border-b border-outline-variant/20 last:border-0"
                       >
-                        <div className="flex items-center gap-2 sm:w-40 shrink-0">
-                          <Calendar className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                          <div>
+                        <div className="sm:w-44 shrink-0">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
                             <p className="font-sans text-xs font-semibold text-on-surface">
                               {formatDate(sesion.fecha)}
                             </p>
-                            <p className="font-mono text-[11px] text-muted-foreground">
-                              {sesion.hora_inicio} – {sesion.hora_fin}
-                            </p>
                           </div>
+                          <p className="font-mono text-[11px] text-muted-foreground mt-0.5 ml-5">
+                            {sesion.hora_inicio} – {sesion.hora_fin}
+                          </p>
                         </div>
                         <div className="flex-1">
                           <p className="font-sans text-sm font-semibold text-on-surface">
@@ -448,8 +479,11 @@ export default function CursoPage() {
                           )}
                         </div>
                         <span
-                          className={`self-start inline-flex items-center px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${cfg.cls}`}
+                          className={`self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-[10px] font-semibold ${cfg.cls}`}
                         >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`}
+                          />
                           {cfg.label}
                         </span>
                       </div>
@@ -461,14 +495,14 @@ export default function CursoPage() {
 
             {/* Requisitos */}
             {curso.requisitos && (
-              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6 md:p-7">
                 <div className="flex items-center gap-2 mb-4">
-                  <FileText className="w-4 h-4 text-primary/70" />
-                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
+                  <FileText className="w-3.5 h-3.5 text-primary/80" />
+                  <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
                     Requisitos
                   </h3>
                 </div>
-                <p className="font-sans text-sm text-muted-foreground leading-relaxed">
+                <p className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                   {curso.requisitos}
                 </p>
               </div>
@@ -480,10 +514,12 @@ export default function CursoPage() {
                 href={curso.whatsapp_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 rounded-sm px-5 py-4 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/15 transition-colors"
+                className="group flex items-center gap-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-sm px-5 py-4 hover:bg-emerald-100 dark:hover:bg-emerald-500/15 transition-colors ambient-shadow"
               >
-                <MessageCircle className="w-5 h-5 text-emerald-600 shrink-0" />
-                <div>
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 dark:bg-emerald-500/20 flex items-center justify-center shrink-0">
+                  <MessageCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="flex-1">
                   <p className="font-sans text-sm font-semibold text-emerald-800 dark:text-emerald-400">
                     Grupo de WhatsApp del curso
                   </p>
@@ -491,33 +527,44 @@ export default function CursoPage() {
                     Únete para recibir información y actualizaciones
                   </p>
                 </div>
+                <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
               </a>
             )}
 
             {/* Info note */}
-            <div className="flex items-start gap-3 bg-secondary-container/40 rounded-sm px-4 py-3 border border-outline-variant/20">
+            <div className="flex items-start gap-3 bg-secondary-container/30 rounded-sm px-5 py-4">
               <Info className="w-4 h-4 text-on-surface/50 shrink-0 mt-0.5" />
-              <p className="font-sans text-sm text-muted-foreground">
+              <p className="font-sans text-sm text-muted-foreground leading-relaxed">
                 Si necesitas cambiar de curso o tienes alguna consulta sobre tu
                 inscripción, comunícate con la administración.
               </p>
             </div>
           </div>
         ) : (
-          <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-12">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-primary-container/60 flex items-center justify-center">
-                <BookOpen className="w-7 h-7 text-on-primary-container" />
+          <div className="bg-surface-container-low/50 rounded-sm p-12 md:p-16">
+            <div className="flex flex-col items-center justify-center gap-5">
+              <div className="relative">
+                <div className="absolute inset-0 rounded-full gradient-primary opacity-20 blur-md" />
+                <div className="relative w-16 h-16 rounded-full bg-primary-container/70 flex items-center justify-center ring-2 ring-primary/10">
+                  <BookOpen className="w-7 h-7 text-on-primary-container" />
+                </div>
               </div>
-              <div className="text-center">
-                <h3 className="font-serif font-light text-2xl text-on-surface mb-2">
+              <div className="text-center max-w-sm">
+                <h3 className="font-serif font-light text-2xl tight-tracking text-on-surface mb-2">
                   Sin curso asignado
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground">
-                  No estás inscrito en ningún curso actualmente. Comunícate con
-                  la administración para más información.
+                  No estás inscrito en ningún curso actualmente. Explora el
+                  catálogo para encontrar uno que te interese.
                 </p>
               </div>
+              <Link
+                href="/estudiante/cursos"
+                className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary hover:gap-2 transition-all"
+              >
+                Explorar catálogo
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </div>
         )}

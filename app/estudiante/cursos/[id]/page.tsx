@@ -32,6 +32,8 @@ import {
   BookMarked,
   CalendarCheck,
   Calendar,
+  Sparkles,
+  ArrowUpRight,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -129,26 +131,38 @@ function getInitials(name: string) {
 }
 
 const estadoStyle: Record<string, string> = {
-  activo: "bg-emerald-100 text-emerald-800",
-  inactivo: "bg-amber-100 text-amber-800",
+  activo:
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+  inactivo:
+    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
   graduado: "bg-primary-container text-on-primary-container",
 };
 
 const pagoEstadoConfig = {
   pendiente: {
     label: "Pago en revisión",
+    description: "Tu comprobante está siendo verificado por la administración.",
     icon: Clock,
-    cls: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
+    cls: "bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20",
+    titleCls: "text-amber-800 dark:text-amber-400",
+    iconCls: "text-amber-600",
   },
   aprobado: {
     label: "Inscripción aprobada",
+    description: "Tu pago fue aprobado. ¡Bienvenido al curso!",
     icon: CheckCircle2,
-    cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+    cls: "bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20",
+    titleCls: "text-emerald-800 dark:text-emerald-400",
+    iconCls: "text-emerald-600",
   },
   rechazado: {
     label: "Pago rechazado",
+    description:
+      "Tu comprobante fue rechazado. Puedes enviar un nuevo pago a continuación.",
     icon: Ban,
-    cls: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400",
+    cls: "bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/20",
+    titleCls: "text-red-800 dark:text-red-400",
+    iconCls: "text-red-600",
   },
 };
 
@@ -240,7 +254,6 @@ function PagoModal({
     }
   };
 
-  // Reset on close
   useEffect(() => {
     if (!open) {
       setReferencia("");
@@ -264,11 +277,11 @@ function PagoModal({
         </DialogHeader>
 
         {/* Datos de pago */}
-        <div className="bg-primary-container/40 rounded-sm px-4 py-3 space-y-1 text-sm font-sans border border-primary/10">
-          <p className="font-semibold text-on-primary-container dark:text-accent-foreground text-xs tracking-[0.15em] uppercase mb-2">
+        <div className="bg-primary-container/40 rounded-sm px-4 py-3 space-y-1.5 text-sm font-sans">
+          <p className="font-bold text-on-primary-container dark:text-accent-foreground text-[10px] tracking-[0.18em] uppercase mb-2">
             Datos para el pago
           </p>
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-3">
             <span className="text-muted-foreground">Concepto</span>
             <span className="font-medium text-on-surface truncate max-w-[180px]">
               {curso.nombre}
@@ -282,11 +295,15 @@ function PagoModal({
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Teléfono</span>
-            <span className="font-medium text-on-surface">0414-0000000</span>
+            <span className="font-mono font-medium text-on-surface tabular-nums">
+              0414-0000000
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Cédula</span>
-            <span className="font-medium text-on-surface">V-00.000.000</span>
+            <span className="font-mono font-medium text-on-surface tabular-nums">
+              V-00.000.000
+            </span>
           </div>
         </div>
 
@@ -294,7 +311,7 @@ function PagoModal({
           <div className="space-y-1.5">
             <Label
               htmlFor="referencia"
-              className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-on-surface/70"
+              className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70"
             >
               Número de referencia *
             </Label>
@@ -311,7 +328,7 @@ function PagoModal({
           <div className="space-y-1.5">
             <Label
               htmlFor="banco"
-              className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-on-surface/70"
+              className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70"
             >
               Banco origen (opcional)
             </Label>
@@ -325,12 +342,12 @@ function PagoModal({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-on-surface/70">
+            <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
               Captura del comprobante *
             </Label>
             <div
               onClick={() => fileRef.current?.click()}
-              className="cursor-pointer border-2 border-dashed border-outline-variant/50 hover:border-primary/40 rounded-sm transition-colors"
+              className="cursor-pointer border-2 border-dashed border-outline-variant/50 hover:border-primary/50 hover:bg-primary/2 rounded-sm transition-colors"
             >
               {preview ? (
                 <div className="relative">
@@ -340,8 +357,8 @@ function PagoModal({
                     alt="Comprobante"
                     className="w-full max-h-48 object-contain rounded-sm"
                   />
-                  <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity rounded-sm flex items-center justify-center">
-                    <p className="font-sans text-white text-xs font-medium">
+                  <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-sm flex items-center justify-center">
+                    <p className="font-sans text-white text-xs font-semibold">
                       Cambiar imagen
                     </p>
                   </div>
@@ -457,81 +474,92 @@ export default function CursoDetallePage({
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 px-4 md:px-8 py-10 max-w-5xl mx-auto">
+      <div className="relative z-10 px-4 md:px-8 py-10 md:py-12 max-w-5xl mx-auto">
         {/* Back */}
         <Link
           href="/estudiante/cursos"
-          className="inline-flex items-center gap-1.5 font-sans text-sm text-muted-foreground hover:text-on-surface transition-colors mb-8"
+          className="group inline-flex items-center gap-1.5 font-sans text-sm text-muted-foreground hover:text-on-surface transition-colors mb-8"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           Volver al catálogo
         </Link>
 
         {loading ? (
           <div className="space-y-6">
-            <Skeleton className="h-10 w-72" />
+            <Skeleton className="h-12 w-72" />
             <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <div className="grid grid-cols-2 gap-5">
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-40 w-full" />
+            </div>
           </div>
         ) : curso ? (
-          <div className="space-y-6">
-            {/* Header card */}
-            <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
-              <div className="h-1 gradient-primary" />
-              <div className="p-8">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="inline-flex items-center gap-1.5 font-mono text-sm font-bold text-on-primary-container bg-primary-container px-3 py-1 rounded-sm">
-                        <Hash className="w-3 h-3" />
-                        {curso.codigo}
+          <div className="space-y-5">
+            {/* Hero card */}
+            <div className="relative bg-surface-container-lowest rounded-md overflow-hidden ambient-shadow">
+              <div className="absolute inset-0 gradient-primary opacity-[0.05] pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-[2px] gradient-primary" />
+              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+
+              <div className="relative p-7 md:p-9">
+                <div className="flex items-start justify-between mb-5 gap-4 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-on-primary-container bg-primary-container/70 px-2 py-1 rounded-sm">
+                      <Hash className="w-2.5 h-2.5" />
+                      {curso.codigo}
+                    </span>
+                    {esMiCurso && (
+                      <span className="inline-flex items-center gap-1.5 font-sans text-[10px] tracking-[0.22em] uppercase text-primary font-bold">
+                        <Sparkles className="w-3 h-3" />
+                        Mi curso
                       </span>
-                      {esMiCurso && (
-                        <span className="inline-flex items-center gap-1 font-sans text-xs font-bold text-white bg-primary px-2.5 py-1 rounded-full uppercase tracking-wide">
-                          Mi curso
-                        </span>
-                      )}
-                    </div>
-                    <h1 className="font-serif font-light text-4xl tight-tracking text-on-surface leading-tight">
-                      {curso.nombre}
-                    </h1>
+                    )}
                   </div>
                   <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-sans text-sm font-semibold shrink-0 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-sans text-xs font-semibold shrink-0 ${
                       curso.estado === "activo"
-                        ? "bg-emerald-100 text-emerald-800"
-                        : "bg-amber-100 text-amber-800"
+                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
+                        : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
                     }`}
                   >
                     {curso.estado === "activo" ? (
                       <>
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Activo
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+                        Activo
                       </>
                     ) : (
                       <>
-                        <XCircle className="w-3.5 h-3.5" /> Inactivo
+                        <XCircle className="w-3 h-3" /> Inactivo
                       </>
                     )}
                   </span>
                 </div>
 
+                <h1 className="font-serif font-light text-3xl md:text-5xl tight-tracking text-on-surface leading-[1.05] mb-4">
+                  {curso.nombre}
+                </h1>
+
                 {curso.descripcion && (
-                  <p className="font-sans text-base text-muted-foreground leading-relaxed mb-6">
+                  <p className="font-sans text-sm md:text-base text-muted-foreground leading-relaxed mb-6 max-w-2xl">
                     {curso.descripcion}
                   </p>
                 )}
 
-                <div className="flex items-center gap-8 pt-6 border-t border-outline-variant/30">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-outline-variant/30">
                   {curso.instructor && (
-                    <div className="flex items-center gap-2">
-                      <GraduationCap className="w-4 h-4 text-muted-foreground/60" />
-                      <div>
-                        <p className="font-sans text-xs text-muted-foreground">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0">
+                        <GraduationCap className="w-4 h-4 text-on-primary-container" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
                           Instructor
                         </p>
-                        <p className="font-sans text-sm font-semibold text-on-surface">
+                        <p className="font-sans text-sm font-semibold text-on-surface truncate">
                           {curso.instructor?.user?.name ||
                             curso.instructor?.name ||
                             "Sin asignar"}
@@ -539,13 +567,15 @@ export default function CursoDetallePage({
                       </div>
                     </div>
                   )}
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-muted-foreground/60" />
-                    <div>
-                      <p className="font-sans text-xs text-muted-foreground">
-                        Estudiantes
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0">
+                      <Users className="w-4 h-4 text-on-primary-container" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                        Estudiantes inscritos
                       </p>
-                      <p className="font-sans text-sm font-semibold text-on-surface">
+                      <p className="font-sans text-sm font-semibold text-on-surface tabular-nums">
                         {curso.estudiantes.length}
                       </p>
                     </div>
@@ -554,221 +584,13 @@ export default function CursoDetallePage({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Instructor */}
-              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <GraduationCap className="w-4 h-4 text-primary/70" />
-                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
-                    Instructor
-                  </h3>
-                </div>
-                {curso.instructor?.user ? (
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                      <span className="font-sans text-base font-bold text-on-primary-container">
-                        {getInitials(curso.instructor.user.name ?? "")}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-serif font-light text-xl text-on-surface">
-                        {curso.instructor.user.name ?? "Sin nombre"}
-                      </p>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <Mail className="w-3 h-3 text-muted-foreground/60" />
-                        <p className="font-sans text-sm text-muted-foreground truncate">
-                          {curso.instructor.user.email ?? ""}
-                        </p>
-                      </div>
-                      {curso.instructor.especialidad && (
-                        <p className="font-sans text-xs text-primary/70 mt-2 font-medium">
-                          {curso.instructor.especialidad}
-                        </p>
-                      )}
-                      {curso.instructor.titulo && (
-                        <p className="font-sans text-xs text-muted-foreground mt-1 capitalize">
-                          {curso.instructor.titulo}
-                        </p>
-                      )}
-                      {curso.instructor.departamento && (
-                        <p className="font-sans text-xs text-muted-foreground mt-1">
-                          Depto. {curso.instructor.departamento}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-6 gap-2">
-                    <div className="w-10 h-10 rounded-full bg-primary-container/60 flex items-center justify-center">
-                      <GraduationCap className="w-4 h-4 text-on-primary-container" />
-                    </div>
-                    <p className="font-sans text-sm text-muted-foreground">
-                      Sin instructor asignado
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Estudiantes */}
-              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary/70" />
-                    <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
-                      Estudiantes
-                    </h3>
-                  </div>
-                  <span className="font-sans text-xs text-muted-foreground bg-surface-container px-2 py-0.5 rounded-full">
-                    {curso.estudiantes.length}
-                  </span>
-                </div>
-
-                {curso.estudiantes.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-6 gap-2">
-                    <div className="w-10 h-10 rounded-full bg-primary-container/60 flex items-center justify-center">
-                      <Users className="w-4 h-4 text-on-primary-container" />
-                    </div>
-                    <p className="font-sans text-sm text-muted-foreground">
-                      Sin estudiantes matriculados
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {curso.estudiantes.map((est) => (
-                      <div
-                        key={est.id}
-                        className="flex items-center gap-3 py-2 border-b border-outline-variant/20 last:border-0"
-                      >
-                        <div className="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
-                          <span className="font-sans text-[10px] font-bold text-on-secondary-container">
-                            {getInitials(est.nombre)}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-sans text-sm text-on-surface truncate">
-                            {est.nombre}
-                          </p>
-                        </div>
-                        <span
-                          className={`inline-flex px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold shrink-0 ${estadoStyle[est.estado] ?? "bg-muted text-muted-foreground"}`}
-                        >
-                          {est.estado.charAt(0).toUpperCase() +
-                            est.estado.slice(1)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Temario */}
-            {curso.temario?.length > 0 && (
-              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <BookMarked className="w-4 h-4 text-primary/70" />
-                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
-                    Temario
-                  </h3>
-                </div>
-                <ol className="space-y-3">
-                  {curso.temario.map((item) => (
-                    <li
-                      key={item.id}
-                      className="flex gap-3 py-2.5 border-b border-outline-variant/20 last:border-0"
-                    >
-                      <span className="shrink-0 w-6 h-6 rounded-full bg-primary-container flex items-center justify-center font-mono text-xs font-bold text-on-primary-container mt-0.5">
-                        {item.orden}
-                      </span>
-                      <div>
-                        <p className="font-sans text-sm font-semibold text-on-surface">
-                          {item.titulo}
-                        </p>
-                        {item.descripcion && (
-                          <p className="font-sans text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                            {item.descripcion}
-                          </p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
-
-            {/* Sesiones */}
-            {curso.sesiones?.length > 0 && (
-              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <CalendarCheck className="w-4 h-4 text-primary/70" />
-                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
-                    Sesiones
-                  </h3>
-                </div>
-                <div className="space-y-3">
-                  {curso.sesiones.map((sesion) => {
-                    const sesionEstado: Record<
-                      SesionItem["estado"],
-                      { label: string; cls: string }
-                    > = {
-                      programada: {
-                        label: "Programada",
-                        cls: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400",
-                      },
-                      realizada: {
-                        label: "Realizada",
-                        cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-                      },
-                      cancelada: {
-                        label: "Cancelada",
-                        cls: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400",
-                      },
-                    };
-                    const cfg =
-                      sesionEstado[sesion.estado] ?? sesionEstado.programada;
-                    return (
-                      <div
-                        key={sesion.id}
-                        className="flex flex-col sm:flex-row sm:items-start gap-3 py-3 border-b border-outline-variant/20 last:border-0"
-                      >
-                        <div className="flex items-center gap-2 sm:w-40 shrink-0">
-                          <Calendar className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-                          <div>
-                            <p className="font-sans text-xs font-semibold text-on-surface">
-                              {formatDate(sesion.fecha)}
-                            </p>
-                            <p className="font-mono text-[11px] text-muted-foreground">
-                              {sesion.hora_inicio} – {sesion.hora_fin}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-sans text-sm font-semibold text-on-surface">
-                            {sesion.titulo}
-                          </p>
-                          {sesion.descripcion && (
-                            <p className="font-sans text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                              {sesion.descripcion}
-                            </p>
-                          )}
-                        </div>
-                        <span
-                          className={`self-start inline-flex items-center px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${cfg.cls}`}
-                        >
-                          {cfg.label}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Sección de inscripción / estado de pago */}
+            {/* Sección de inscripción / estado de pago — destacado arriba */}
             {esMiCurso ? (
-              <div className="flex items-start gap-3 bg-emerald-50 dark:bg-emerald-500/10 rounded-sm px-4 py-4 border border-emerald-200 dark:border-emerald-500/20">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-sm px-5 py-4 ambient-shadow">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="flex-1">
                   <p className="font-sans text-sm font-semibold text-emerald-800 dark:text-emerald-400">
                     Ya estás inscrito en este curso
                   </p>
@@ -783,20 +605,21 @@ export default function CursoDetallePage({
                 const Icon = cfg.icon;
                 return (
                   <div
-                    className={`flex items-start gap-3 rounded-sm px-4 py-4 border ${pagoActivo.estado === "pendiente" ? "bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20" : pagoActivo.estado === "aprobado" ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20" : "bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/20"}`}
+                    className={`flex items-start gap-4 rounded-sm px-5 py-4 border ambient-shadow ${cfg.cls}`}
                   >
-                    <Icon
-                      className={`w-4 h-4 shrink-0 mt-0.5 ${pagoActivo.estado === "pendiente" ? "text-amber-600" : pagoActivo.estado === "aprobado" ? "text-emerald-600" : "text-red-600"}`}
-                    />
+                    <div className="w-10 h-10 rounded-full bg-white/40 dark:bg-black/20 flex items-center justify-center shrink-0">
+                      <Icon className={`w-5 h-5 ${cfg.iconCls}`} />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <p
-                        className={`font-sans text-sm font-semibold ${pagoActivo.estado === "pendiente" ? "text-amber-800 dark:text-amber-400" : pagoActivo.estado === "aprobado" ? "text-emerald-800 dark:text-emerald-400" : "text-red-800 dark:text-red-400"}`}
-                      >
+                      <p className={`font-sans text-sm font-semibold ${cfg.titleCls}`}>
                         {cfg.label}
                       </p>
                       <p className="font-sans text-xs text-muted-foreground mt-0.5">
+                        {cfg.description}
+                      </p>
+                      <p className="font-sans text-xs text-muted-foreground mt-2">
                         Referencia:{" "}
-                        <span className="font-mono font-semibold">
+                        <span className="font-mono font-semibold text-on-surface/80">
                           {pagoActivo.referencia}
                         </span>
                       </p>
@@ -818,27 +641,30 @@ export default function CursoDetallePage({
                 );
               })()
             ) : (
-              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                    <CreditCard className="w-4 h-4 text-on-primary-container" />
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6 md:p-7">
+                <div className="flex items-start gap-4 mb-5">
+                  <div className="relative shrink-0">
+                    <div className="absolute inset-0 rounded-full gradient-primary opacity-30 blur-md" />
+                    <div className="relative w-12 h-12 rounded-full bg-primary-container flex items-center justify-center ring-2 ring-primary/10">
+                      <CreditCard className="w-5 h-5 text-on-primary-container" />
+                    </div>
                   </div>
                   <div>
-                    <h3 className="font-sans text-sm font-semibold text-on-surface">
+                    <h3 className="font-serif font-light text-xl text-on-surface tight-tracking">
                       Inscríbete en este curso
                     </h3>
-                    <p className="font-sans text-xs text-muted-foreground">
+                    <p className="font-sans text-xs text-muted-foreground mt-1 max-w-md">
                       Realiza un pago móvil y envía tu comprobante para
-                      inscribirte.
+                      formalizar tu inscripción.
                     </p>
                   </div>
                 </div>
                 <Button
                   onClick={() => setModalOpen(true)}
                   disabled={curso.estado !== "activo"}
-                  className="font-sans text-sm h-10 text-white dark:text-[#1a1817]"
+                  className="font-sans text-sm h-10 text-white dark:text-[#1a1817] gap-2"
                 >
-                  <ImageIcon className="w-4 h-4 mr-2" />
+                  <ImageIcon className="w-4 h-4" />
                   Enviar pago móvil
                 </Button>
                 {curso.estado !== "activo" && (
@@ -848,21 +674,250 @@ export default function CursoDetallePage({
                 )}
               </div>
             )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {/* Instructor */}
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <GraduationCap className="w-3.5 h-3.5 text-primary/80" />
+                  <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                    Instructor
+                  </h3>
+                </div>
+                {curso.instructor?.user ? (
+                  <div className="flex items-start gap-4">
+                    <div className="relative shrink-0">
+                      <div className="absolute inset-0 rounded-full gradient-primary opacity-30 blur-md" />
+                      <div className="relative w-12 h-12 rounded-full bg-primary-container flex items-center justify-center ring-2 ring-primary/10">
+                        <span className="font-sans text-base font-bold text-on-primary-container">
+                          {getInitials(curso.instructor.user.name ?? "")}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-serif font-light text-xl text-on-surface tight-tracking leading-tight">
+                        {curso.instructor.user.name ?? "Sin nombre"}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <Mail className="w-3 h-3 text-muted-foreground/60" />
+                        <p className="font-sans text-xs text-muted-foreground truncate">
+                          {curso.instructor.user.email ?? ""}
+                        </p>
+                      </div>
+                      {curso.instructor.especialidad && (
+                        <p className="font-sans text-xs text-primary/80 mt-2 font-semibold">
+                          {curso.instructor.especialidad}
+                        </p>
+                      )}
+                      {curso.instructor.titulo && (
+                        <p className="font-sans text-xs text-muted-foreground mt-1 capitalize">
+                          {curso.instructor.titulo}
+                        </p>
+                      )}
+                      {curso.instructor.departamento && (
+                        <p className="font-sans text-xs text-muted-foreground mt-0.5">
+                          Depto. {curso.instructor.departamento}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-6 gap-2">
+                    <div className="w-10 h-10 rounded-full bg-primary-container/60 flex items-center justify-center">
+                      <GraduationCap className="w-4 h-4 text-on-primary-container" />
+                    </div>
+                    <p className="font-sans text-sm text-muted-foreground">
+                      Sin instructor asignado
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Estudiantes */}
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-3.5 h-3.5 text-primary/80" />
+                    <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                      Estudiantes
+                    </h3>
+                  </div>
+                  <span className="inline-flex items-center font-sans text-[10px] font-bold text-on-primary-container bg-primary-container/70 px-2 py-0.5 rounded-full tabular-nums">
+                    {curso.estudiantes.length}
+                  </span>
+                </div>
+
+                {curso.estudiantes.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-6 gap-2">
+                    <div className="w-10 h-10 rounded-full bg-primary-container/60 flex items-center justify-center">
+                      <Users className="w-4 h-4 text-on-primary-container" />
+                    </div>
+                    <p className="font-sans text-sm text-muted-foreground">
+                      Sin estudiantes matriculados
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
+                    {curso.estudiantes.map((est) => (
+                      <div
+                        key={est.id}
+                        className="flex items-center gap-3 py-2 border-b border-outline-variant/20 last:border-0"
+                      >
+                        <div className="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+                          <span className="font-sans text-[10px] font-bold text-on-secondary-container">
+                            {getInitials(est.nombre)}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-sans text-sm text-on-surface truncate">
+                            {est.nombre}
+                          </p>
+                        </div>
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold shrink-0 ${estadoStyle[est.estado] ?? "bg-muted text-muted-foreground"}`}
+                        >
+                          {est.estado.charAt(0).toUpperCase() +
+                            est.estado.slice(1)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Temario */}
+            {curso.temario?.length > 0 && (
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6 md:p-7">
+                <div className="flex items-center gap-2 mb-5">
+                  <BookMarked className="w-3.5 h-3.5 text-primary/80" />
+                  <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                    Temario · {curso.temario.length} módulos
+                  </h3>
+                </div>
+                <ol className="space-y-1">
+                  {curso.temario.map((item, idx) => (
+                    <li
+                      key={item.id}
+                      className="group flex gap-4 py-3 border-b border-outline-variant/20 last:border-0 hover:bg-surface-container-low/30 -mx-2 px-2 rounded-sm transition-colors"
+                    >
+                      <span className="shrink-0 w-7 h-7 rounded-full bg-primary-container flex items-center justify-center font-mono text-xs font-bold text-on-primary-container mt-0.5 group-hover:scale-105 transition-transform">
+                        {item.orden ?? idx + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-sans text-sm font-semibold text-on-surface">
+                          {item.titulo}
+                        </p>
+                        {item.descripcion && (
+                          <p className="font-sans text-xs text-muted-foreground mt-1 leading-relaxed">
+                            {item.descripcion}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            {/* Sesiones */}
+            {curso.sesiones?.length > 0 && (
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6 md:p-7">
+                <div className="flex items-center gap-2 mb-5">
+                  <CalendarCheck className="w-3.5 h-3.5 text-primary/80" />
+                  <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                    Sesiones · {curso.sesiones.length}
+                  </h3>
+                </div>
+                <div className="space-y-1">
+                  {curso.sesiones.map((sesion) => {
+                    const sesionEstado: Record<
+                      SesionItem["estado"],
+                      { label: string; cls: string; dot: string }
+                    > = {
+                      programada: {
+                        label: "Programada",
+                        cls: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400",
+                        dot: "bg-blue-500",
+                      },
+                      realizada: {
+                        label: "Realizada",
+                        cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+                        dot: "bg-emerald-500",
+                      },
+                      cancelada: {
+                        label: "Cancelada",
+                        cls: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400",
+                        dot: "bg-red-500",
+                      },
+                    };
+                    const cfg =
+                      sesionEstado[sesion.estado] ?? sesionEstado.programada;
+                    return (
+                      <div
+                        key={sesion.id}
+                        className="flex flex-col sm:flex-row sm:items-start gap-3 py-3.5 border-b border-outline-variant/20 last:border-0"
+                      >
+                        <div className="sm:w-44 shrink-0">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                            <p className="font-sans text-xs font-semibold text-on-surface">
+                              {formatDate(sesion.fecha)}
+                            </p>
+                          </div>
+                          <p className="font-mono text-[11px] text-muted-foreground mt-0.5 ml-5">
+                            {sesion.hora_inicio} – {sesion.hora_fin}
+                          </p>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-sans text-sm font-semibold text-on-surface">
+                            {sesion.titulo}
+                          </p>
+                          {sesion.descripcion && (
+                            <p className="font-sans text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                              {sesion.descripcion}
+                            </p>
+                          )}
+                        </div>
+                        <span
+                          className={`self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-[10px] font-semibold ${cfg.cls}`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`}
+                          />
+                          {cfg.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
-          <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-12">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-primary-container/60 flex items-center justify-center">
-                <BookOpen className="w-7 h-7 text-on-primary-container" />
+          <div className="bg-surface-container-low/50 rounded-sm p-12 md:p-16">
+            <div className="flex flex-col items-center justify-center gap-5">
+              <div className="relative">
+                <div className="absolute inset-0 rounded-full gradient-primary opacity-20 blur-md" />
+                <div className="relative w-16 h-16 rounded-full bg-primary-container/70 flex items-center justify-center ring-2 ring-primary/10">
+                  <BookOpen className="w-7 h-7 text-on-primary-container" />
+                </div>
               </div>
-              <div className="text-center">
-                <h3 className="font-serif font-light text-2xl text-on-surface mb-2">
+              <div className="text-center max-w-sm">
+                <h3 className="font-serif font-light text-2xl tight-tracking text-on-surface mb-2">
                   Curso no encontrado
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground">
                   El curso que buscas no existe o no está disponible.
                 </p>
               </div>
+              <Link
+                href="/estudiante/cursos"
+                className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary hover:gap-2 transition-all"
+              >
+                Volver al catálogo
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </div>
         )}

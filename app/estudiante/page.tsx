@@ -10,7 +10,11 @@ import {
   Hash,
   GraduationCap,
   CalendarDays,
-  ArrowRight,
+  ArrowUpRight,
+  Sparkles,
+  Mail,
+  Phone,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface Curso {
@@ -42,8 +46,10 @@ function getCookie(name: string): string {
 }
 
 const estadoStyle: Record<string, string> = {
-  activo: "bg-emerald-100 text-emerald-800",
-  inactivo: "bg-amber-100 text-amber-800",
+  activo:
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+  inactivo:
+    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
   graduado: "bg-primary-container text-on-primary-container",
 };
 
@@ -54,6 +60,23 @@ function getInitials(name: string) {
     .map((n) => n[0])
     .join("")
     .toUpperCase();
+}
+
+function formatDate(value: string | null | undefined): string {
+  if (!value) return "—";
+  const ymd = value.slice(0, 10);
+  return new Date(ymd + "T00:00:00").toLocaleDateString("es-VE", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Buenos días";
+  if (hour < 19) return "Buenas tardes";
+  return "Buenas noches";
 }
 
 export default function EstudianteDashboard() {
@@ -74,175 +97,209 @@ export default function EstudianteDashboard() {
   }, []);
 
   const firstName = perfil?.nombre.split(" ")[0] ?? "";
+  const today = new Date().toLocaleDateString("es-VE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-125 h-75 rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 px-4 md:px-8 py-10 max-w-5xl mx-auto">
+      <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-5xl mx-auto">
         {/* Page header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-2 mb-3">
-            <LayoutDashboardIcon />
-            <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary/70 font-medium">
-              Dashboard
+        <div className="mb-12">
+          <div className="flex items-center gap-2 mb-4">
+            <LayoutDashboard className="w-3.5 h-3.5 text-primary/80" />
+            <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
+              Dashboard · {today}
             </span>
           </div>
           {loading ? (
-            <Skeleton className="h-12 w-64" />
+            <Skeleton className="h-14 w-72" />
           ) : (
-            <h1 className="font-serif font-light text-[2.8rem] tight-tracking leading-[1.08] text-on-surface">
-              Bienvenido, {firstName}
-            </h1>
+            <>
+              <h1 className="font-serif font-light text-[2.6rem] md:text-[3.2rem] tight-tracking leading-[1.05] text-on-surface mb-2">
+                {getGreeting()}, {firstName}
+              </h1>
+              <p className="font-sans text-sm md:text-base text-muted-foreground max-w-lg">
+                Bienvenido a tu espacio académico. Aquí encontrarás el resumen
+                de tu actividad y tu curso actual.
+              </p>
+            </>
           )}
         </div>
 
         {/* Summary cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-10">
           {/* Estado */}
-          <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-5">
-            <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-medium mb-3">
-              Estado
-            </p>
-            {loading ? (
-              <Skeleton className="h-6 w-24" />
-            ) : (
-              <span
-                className={`inline-flex items-center px-3 py-1 rounded-full font-sans text-sm font-semibold ${
-                  estadoStyle[perfil?.estado ?? ""] ??
-                  "bg-muted text-muted-foreground"
-                }`}
-              >
-                {perfil
-                  ? perfil.estado.charAt(0).toUpperCase() +
-                    perfil.estado.slice(1)
-                  : "—"}
-              </span>
-            )}
-          </div>
-
-          {/* Cédula */}
-          <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-5">
-            <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-medium mb-3">
-              Cédula
-            </p>
-            {loading ? (
-              <Skeleton className="h-6 w-28" />
-            ) : (
-              <div className="flex items-center gap-2">
-                <Hash className="w-4 h-4 text-muted-foreground/60" />
-                <span className="font-mono text-sm text-on-surface">
-                  {perfil?.cedula ?? "—"}
-                </span>
+          <div className="relative bg-surface-container-low rounded-sm p-5 ambient-shadow overflow-hidden group">
+            <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-primary/[0.04] group-hover:bg-primary/[0.08] transition-colors pointer-events-none" />
+            <div className="relative">
+              <div className="w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 mb-3">
+                <Sparkles className="w-4 h-4 text-on-primary-container" />
               </div>
-            )}
-          </div>
-
-          {/* Inscripción */}
-          <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-5">
-            <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-medium mb-3">
-              Inscripción
-            </p>
-            {loading ? (
-              <Skeleton className="h-6 w-36" />
-            ) : (
-              <div className="flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-muted-foreground/60" />
-                <span className="font-sans text-sm text-on-surface">
+              <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/60 font-semibold mb-2">
+                Estado
+              </p>
+              {loading ? (
+                <Skeleton className="h-6 w-24" />
+              ) : (
+                <span
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${
+                    estadoStyle[perfil?.estado ?? ""] ??
+                    "bg-muted text-muted-foreground"
+                  }`}
+                >
                   {perfil
-                    ? new Date(perfil.fecha_inscripcion).toLocaleDateString(
-                        "es-VE",
-                        {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        },
-                      )
+                    ? perfil.estado.charAt(0).toUpperCase() +
+                      perfil.estado.slice(1)
                     : "—"}
                 </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Main content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Mi Curso */}
-          <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
-            <div className="h-1 gradient-primary" />
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-primary/70" />
-                  <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
-                    Mi Curso
-                  </h3>
-                </div>
-                <Link
-                  href="/estudiante/curso"
-                  className="flex items-center gap-1 font-sans text-xs text-primary hover:text-primary/80 transition-colors"
-                >
-                  Ver detalle <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-
-              {loading ? (
-                <div className="space-y-3">
-                  <Skeleton className="h-7 w-48" />
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-full" />
-                </div>
-              ) : perfil?.curso ? (
-                <div>
-                  <h4 className="font-serif font-light text-2xl text-on-surface mb-1">
-                    {perfil.curso.nombre}
-                  </h4>
-                  <span className="inline-flex items-center gap-1 font-mono text-xs font-bold text-on-primary-container bg-primary-container px-2 py-0.5 rounded-sm">
-                    <Hash className="w-2.5 h-2.5" />
-                    {perfil.curso.codigo}
-                  </span>
-                  {perfil.curso.descripcion && (
-                    <p className="font-sans text-sm text-muted-foreground mt-3 line-clamp-2">
-                      {perfil.curso.descripcion}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-5 pt-4 mt-4 border-t border-outline-variant/30">
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                      <GraduationCap className="w-3.5 h-3.5" />
-                      <span className="font-sans">
-                        {perfil.curso.instructor?.name || "Sin asignar"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary-container/60 flex items-center justify-center">
-                    <BookOpen className="w-5 h-5 text-on-primary-container" />
-                  </div>
-                  <p className="font-sans text-sm text-muted-foreground text-center">
-                    No estás inscrito en ningún curso actualmente.
-                  </p>
-                </div>
               )}
             </div>
           </div>
 
+          {/* Cédula */}
+          <div className="relative bg-surface-container-low rounded-sm p-5 ambient-shadow overflow-hidden group">
+            <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-primary/[0.04] group-hover:bg-primary/[0.08] transition-colors pointer-events-none" />
+            <div className="relative">
+              <div className="w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 mb-3">
+                <Hash className="w-4 h-4 text-on-primary-container" />
+              </div>
+              <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/60 font-semibold mb-2">
+                Cédula
+              </p>
+              {loading ? (
+                <Skeleton className="h-6 w-28" />
+              ) : (
+                <p className="font-mono text-base text-on-surface tabular-nums">
+                  {perfil?.cedula ?? "—"}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Inscripción */}
+          <div className="relative bg-surface-container-low rounded-sm p-5 ambient-shadow overflow-hidden group">
+            <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-primary/[0.04] group-hover:bg-primary/[0.08] transition-colors pointer-events-none" />
+            <div className="relative">
+              <div className="w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 mb-3">
+                <CalendarDays className="w-4 h-4 text-on-primary-container" />
+              </div>
+              <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/60 font-semibold mb-2">
+                Inscripción
+              </p>
+              {loading ? (
+                <Skeleton className="h-6 w-36" />
+              ) : (
+                <p className="font-sans text-sm text-on-surface font-medium">
+                  {perfil ? formatDate(perfil.fecha_inscripcion) : "—"}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Main content */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          {/* Mi Curso (featured) */}
+          <Link
+            href="/estudiante/curso"
+            className="lg:col-span-3 group relative block bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-0.5 transition-all duration-300"
+          >
+            <div className="absolute inset-0 gradient-primary opacity-[0.04] group-hover:opacity-[0.08] transition-opacity" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] gradient-primary" />
+            <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+
+            <div className="relative p-6 md:p-7 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-3.5 h-3.5 text-primary/80" />
+                  <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                    Mi Curso
+                  </h3>
+                </div>
+                <span className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-primary group-hover:gap-1.5 transition-all">
+                  Ver detalle
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+
+              {loading ? (
+                <div className="space-y-3">
+                  <Skeleton className="h-9 w-3/4" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              ) : perfil?.curso ? (
+                <div className="flex-1 flex flex-col">
+                  <h4 className="font-serif font-light text-3xl md:text-4xl tight-tracking text-on-surface mb-3 leading-[1.05]">
+                    {perfil.curso.nombre}
+                  </h4>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-on-primary-container bg-primary-container/70 px-2 py-1 rounded-sm">
+                      <Hash className="w-2.5 h-2.5" />
+                      {perfil.curso.codigo}
+                    </span>
+                  </div>
+                  {perfil.curso.descripcion && (
+                    <p className="font-sans text-sm text-muted-foreground line-clamp-2 mb-5">
+                      {perfil.curso.descripcion}
+                    </p>
+                  )}
+                  <div className="mt-auto pt-4 border-t border-outline-variant/30 flex items-center gap-2">
+                    <GraduationCap className="w-3.5 h-3.5 text-primary/70" />
+                    <span className="font-sans text-xs text-muted-foreground">
+                      Impartido por{" "}
+                      <span className="text-on-surface/80 font-medium">
+                        {perfil.curso.instructor?.name || "Sin asignar"}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center py-8 gap-3">
+                  <div className="w-14 h-14 rounded-full bg-primary-container/60 flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-on-primary-container" />
+                  </div>
+                  <div className="text-center max-w-xs">
+                    <p className="font-serif font-light text-xl text-on-surface mb-1">
+                      Sin curso asignado
+                    </p>
+                    <p className="font-sans text-sm text-muted-foreground">
+                      No estás inscrito en ningún curso actualmente.
+                    </p>
+                  </div>
+                  <Link
+                    href="/estudiante/cursos"
+                    className="font-sans text-xs font-medium text-primary hover:underline underline-offset-4 mt-1"
+                  >
+                    Explorar catálogo →
+                  </Link>
+                </div>
+              )}
+            </div>
+          </Link>
+
           {/* Mi Perfil */}
-          <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-            <div className="flex items-center justify-between mb-4">
+          <Link
+            href="/estudiante/perfil"
+            className="lg:col-span-2 group bg-surface-container-lowest rounded-sm ambient-shadow p-6 hover:-translate-y-0.5 transition-all duration-300 block"
+          >
+            <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-primary/70" />
-                <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold">
+                <User className="w-3.5 h-3.5 text-primary/80" />
+                <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
                   Mi Perfil
                 </h3>
               </div>
-              <Link
-                href="/estudiante/perfil"
-                className="flex items-center gap-1 font-sans text-xs text-primary hover:text-primary/80 transition-colors"
-              >
-                Editar <ArrowRight className="w-3 h-3" />
-              </Link>
+              <span className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-primary group-hover:gap-1.5 transition-all">
+                Editar
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </span>
             </div>
 
             {loading ? (
@@ -253,33 +310,37 @@ export default function EstudianteDashboard() {
               </div>
             ) : perfil ? (
               <div className="flex flex-col items-center text-center gap-3">
-                <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center">
-                  <span className="font-sans text-xl font-bold text-on-primary-container">
-                    {getInitials(perfil.nombre)}
-                  </span>
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full gradient-primary opacity-30 blur-md" />
+                  <div className="relative w-16 h-16 rounded-full bg-primary-container flex items-center justify-center ring-2 ring-primary/10">
+                    <span className="font-sans text-xl font-bold text-on-primary-container">
+                      {getInitials(perfil.nombre)}
+                    </span>
+                  </div>
                 </div>
                 <div>
-                  <h4 className="font-serif font-light text-xl text-on-surface">
+                  <h4 className="font-serif font-light text-xl text-on-surface tight-tracking">
                     {perfil.nombre}
                   </h4>
-                  <p className="font-sans text-sm text-muted-foreground">
+                  <p className="font-sans text-xs text-muted-foreground break-all">
                     {perfil.user.email}
                   </p>
                 </div>
-                <div className="w-full pt-3 border-t border-outline-variant/30 space-y-2 text-left">
+                <div className="w-full pt-4 border-t border-outline-variant/30 space-y-2.5 text-left">
                   {perfil.telefono && (
-                    <div className="flex justify-between">
-                      <span className="font-sans text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold flex items-center gap-1.5">
+                        <Phone className="w-3 h-3" />
                         Teléfono
                       </span>
-                      <span className="font-sans text-xs text-on-surface">
+                      <span className="font-sans text-xs text-on-surface tabular-nums">
                         {perfil.telefono}
                       </span>
                     </div>
                   )}
                   {perfil.genero && (
-                    <div className="flex justify-between">
-                      <span className="font-sans text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
                         Género
                       </span>
                       <span className="font-sans text-xs text-on-surface capitalize">
@@ -288,49 +349,74 @@ export default function EstudianteDashboard() {
                     </div>
                   )}
                   {perfil.fecha_nacimiento && (
-                    <div className="flex justify-between">
-                      <span className="font-sans text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
                         Nacimiento
                       </span>
                       <span className="font-sans text-xs text-on-surface">
-                        {new Date(perfil.fecha_nacimiento).toLocaleDateString(
-                          "es-VE",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          },
-                        )}
+                        {formatDate(perfil.fecha_nacimiento)}
                       </span>
                     </div>
                   )}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold flex items-center gap-1.5">
+                      <Mail className="w-3 h-3" />
+                      Usuario
+                    </span>
+                    <span className="font-sans text-xs text-on-surface truncate max-w-[140px]">
+                      {perfil.user.name}
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : null}
-          </div>
+          </Link>
         </div>
+
+        {/* Quick links */}
+        {!loading && (
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Link
+              href="/estudiante/cursos"
+              className="group flex items-center justify-between gap-3 bg-surface-container-low rounded-sm px-5 py-4 hover:bg-surface-container transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-md bg-primary-container/70 flex items-center justify-center">
+                  <BookOpen className="w-4 h-4 text-on-primary-container" />
+                </div>
+                <div>
+                  <p className="font-sans text-sm font-semibold text-on-surface">
+                    Catálogo de cursos
+                  </p>
+                  <p className="font-sans text-xs text-muted-foreground">
+                    Explora todos los cursos disponibles
+                  </p>
+                </div>
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-primary/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </Link>
+            <Link
+              href="/estudiante/notificaciones"
+              className="group flex items-center justify-between gap-3 bg-surface-container-low rounded-sm px-5 py-4 hover:bg-surface-container transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-md bg-primary-container/70 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-on-primary-container" />
+                </div>
+                <div>
+                  <p className="font-sans text-sm font-semibold text-on-surface">
+                    Centro de notificaciones
+                  </p>
+                  <p className="font-sans text-xs text-muted-foreground">
+                    Revisa tus avisos recientes
+                  </p>
+                </div>
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-primary/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </Link>
+          </div>
+        )}
       </div>
     </div>
-  );
-}
-
-function LayoutDashboardIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-primary/70"
-    >
-      <rect width="7" height="9" x="3" y="3" rx="1" />
-      <rect width="7" height="5" x="14" y="3" rx="1" />
-      <rect width="7" height="9" x="14" y="12" rx="1" />
-      <rect width="7" height="5" x="3" y="16" rx="1" />
-    </svg>
   );
 }
