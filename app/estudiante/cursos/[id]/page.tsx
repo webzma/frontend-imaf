@@ -611,7 +611,9 @@ export default function CursoDetallePage({
                       <Icon className={`w-5 h-5 ${cfg.iconCls}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`font-sans text-sm font-semibold ${cfg.titleCls}`}>
+                      <p
+                        className={`font-sans text-sm font-semibold ${cfg.titleCls}`}
+                      >
                         {cfg.label}
                       </p>
                       <p className="font-sans text-xs text-muted-foreground mt-0.5">
