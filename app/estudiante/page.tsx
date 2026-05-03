@@ -23,7 +23,10 @@ interface Curso {
   codigo: string;
   descripcion: string | null;
   estado: string;
-  instructor?: { id: number; name: string } | null;
+  instructor?: {
+    id: number;
+    user?: { name: string } | null;
+  } | null;
 }
 
 interface EstudiantePerfil {
@@ -255,7 +258,7 @@ export default function EstudianteDashboard() {
                     <span className="font-sans text-xs text-muted-foreground">
                       Impartido por{" "}
                       <span className="text-on-surface/80 font-medium">
-                        {perfil.curso.instructor?.name || "Sin asignar"}
+                        {perfil.curso.instructor?.user?.name || "Sin asignar"}
                       </span>
                     </span>
                   </div>

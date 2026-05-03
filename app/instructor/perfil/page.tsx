@@ -87,6 +87,15 @@ const tituloStyle: Record<string, string> = {
   doctorado: "bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary",
 };
 
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "—";
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 /* ── Page ── */
 
 export default function PerfilPage() {
@@ -446,17 +455,7 @@ export default function PerfilPage() {
               <InfoRow
                 icon={<CalendarDays className="w-4 h-4" />}
                 label="Fecha de nacimiento"
-                value={
-                  p.fecha_nacimiento
-                    ? new Date(
-                        p.fecha_nacimiento + "T00:00:00",
-                      ).toLocaleDateString("es-ES", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      })
-                    : null
-                }
+                value={formatDate(p.fecha_nacimiento)}
               />
               <InfoRow
                 icon={<User className="w-4 h-4" />}
