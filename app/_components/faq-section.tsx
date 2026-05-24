@@ -11,7 +11,7 @@ const FAQ_ITEMS = [
   {
     question: "¿Cómo me registro en IMAF?",
     answer:
-      'Crea tu cuenta en esta plataforma con tu correo electrónico y una contraseña. Luego, explora los cursos disponibles, selecciona el que se ajuste a tus metas y completa tu inscripción. Si el curso tiene costo, podrás pagar en línea (total o por partes). Recibirás una confirmación con la sede, horario y requisitos para iniciar.',
+      "Crea tu cuenta en esta plataforma con tu correo electrónico y una contraseña. Luego, explora los cursos disponibles, selecciona el que se ajuste a tus metas y completa tu inscripción. Si el curso tiene costo, podrás pagar en línea (total o por partes). Recibirás una confirmación con la sede, horario y requisitos para iniciar.",
   },
   {
     question: "¿Puedo gestionar mi inscripción desde el celular?",
@@ -42,12 +42,12 @@ const FAQ_ITEMS = [
     question: "¿Cómo funciona el sistema de certificados?",
     answer:
       "Al completar la asistencia requerida y aprobar las evaluaciones prácticas de tu curso presencial, recibirás un certificado oficial emitido por IMAF, con validez institucional. Podrás descargarlo desde tu cuenta o recogerlo en sede, según la modalidad que se indique al finalizar tu formación.",
-  }, 
+  },
   {
     question: "¿Qué formas de pago aceptan?",
     answer:
       "Aceptamos pagos en Bolívares (Bs.), tanto en efectivo como en digital (transferencia bancaria o pago móvil). El método disponible se indica durante el proceso de inscripción y todos los pagos generan comprobante oficial.",
-  }, 
+  },
   {
     question: "¿Necesito llevar materiales o equipos?",
     answer:

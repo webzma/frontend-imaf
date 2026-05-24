@@ -93,10 +93,15 @@ export default function LandingPage() {
                 <h1 className="text-5xl sm:text-6xl lg:text-[4.5rem] tight-tracking text-on-surface leading-[1.05]">
                   Inscríbete en línea.
                   <br />
-                  <span className="text-primary italic">Aprende presencialmente.</span>
+                  <span className="text-primary italic">
+                    Aprende presencialmente.
+                  </span>
                 </h1>
                 <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-lg lg:pl-1">
-                  Reserva y paga tu curso en esta web. Asiste a nuestras clases en la institución, aprende con metodología práctica y recibe tu certificado. Cursos gratuitos y con costo para mujeres, familias y todos quienes buscan crecer.
+                  Reserva y paga tu curso en esta web. Asiste a nuestras clases
+                  en la institución, aprende con metodología práctica y recibe
+                  tu certificado. Cursos gratuitos y con costo para mujeres,
+                  familias y todos quienes buscan crecer.
                 </p>
               </div>
 
@@ -187,7 +192,9 @@ export default function LandingPage() {
               <span className="text-primary">IMAF</span>
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-lg">
-              Gestiona todo en línea y vive una experiencia presencial de calidad. Cada paso está pensado para que accedas a formación real, certificados válidos y oportunidades concretas.
+              Gestiona todo en línea y vive una experiencia presencial de
+              calidad. Cada paso está pensado para que accedas a formación real,
+              certificados válidos y oportunidades concretas.
             </p>
           </div>
 
@@ -214,7 +221,9 @@ export default function LandingPage() {
                     Amplia oferta formativa
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    Cursos prácticos en oficios, emprendimiento y desarrollo personal. Elige la formación que se ajuste a tus metas y a tu realidad.
+                    Cursos prácticos en oficios, emprendimiento y desarrollo
+                    personal. Elige la formación que se ajuste a tus metas y a
+                    tu realidad.
                   </p>
                 </div>
               </div>
@@ -255,9 +264,7 @@ export default function LandingPage() {
                   <div className="w-12 h-12 rounded-md bg-surface-container-high flex items-center justify-center group-hover:bg-primary-container transition-colors">
                     <Icon className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
-                  <h3 className="text-2xl text-on-surface">
-                    {feature.title}
-                  </h3>
+                  <h3 className="text-2xl text-on-surface">{feature.title}</h3>
                   <p className="text-muted-foreground leading-relaxed text-sm">
                     {feature.description}
                   </p>
@@ -279,7 +286,8 @@ export default function LandingPage() {
               Tres pasos simples
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Gestiona todo en línea y asiste presencialmente a nuestra sede. Sin complicaciones, sin filas.
+              Gestiona todo en línea y asiste presencialmente a nuestra sede.
+              Sin complicaciones, sin filas.
             </p>
           </div>
 
@@ -383,7 +391,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-            {/* Mission & Vision Section */}
+      {/* Mission & Vision Section */}
       <section className="bg-surface py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
           {/* Header */}
@@ -397,7 +405,9 @@ export default function LandingPage() {
             <h2 className="text-4xl lg:text-6xl tight-tracking text-on-surface leading-tight mb-6">
               Formación, derechos y oportunidades
               <br />
-              <span className="text-primary italic">reales para el Municipio Independencia</span>
+              <span className="text-primary italic">
+                reales para el Municipio Independencia
+              </span>
             </h2>
           </div>
 
@@ -409,12 +419,15 @@ export default function LandingPage() {
                 <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
                   <Target className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-2xl lg:text-3xl text-on-surface">
-                  Misión
-                </h3>
+                <h3 className="text-2xl lg:text-3xl text-on-surface">Misión</h3>
               </div>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Formar, proteger y empoderar a las mujeres y familias del Municipio Independencia, Yaracuy, mediante programas integrales de atención, prevención y capacitación. Promovemos la igualdad de género, el cuidado de la maternidad y la corresponsabilidad familiar, en estricto cumplimiento de la ley y los derechos fundamentales.
+                Formar, proteger y empoderar a las mujeres y familias del
+                Municipio Independencia, Yaracuy, mediante programas integrales
+                de atención, prevención y capacitación. Promovemos la igualdad
+                de género, el cuidado de la maternidad y la corresponsabilidad
+                familiar, en estricto cumplimiento de la ley y los derechos
+                fundamentales.
               </p>
             </div>
 
@@ -424,12 +437,14 @@ export default function LandingPage() {
                 <div className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center">
                   <Award className="w-6 h-6 text-on-secondary-container" />
                 </div>
-                <h3 className="text-2xl lg:text-3xl text-on-surface">
-                  Visión
-                </h3>
+                <h3 className="text-2xl lg:text-3xl text-on-surface">Visión</h3>
               </div>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Ser el instituto referente en Yaracuy en la defensa y promoción de los derechos de la mujer y la familia, reconocido por la calidad, el impacto social y la innovación de sus servicios. Construimos, día a día, una comunidad más justa, equitativa y libre de violencia.
+                Ser el instituto referente en Yaracuy en la defensa y promoción
+                de los derechos de la mujer y la familia, reconocido por la
+                calidad, el impacto social y la innovación de sus servicios.
+                Construimos, día a día, una comunidad más justa, equitativa y
+                libre de violencia.
               </p>
             </div>
           </div>
@@ -454,7 +469,9 @@ export default function LandingPage() {
             <span className="text-primary italic">empieza hoy</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Únete a cientos de mujeres y hombres que ya están construyendo su trayectoria con IMAF. Regístrate en línea, asegura tu cupo presencial y avanza con formación práctica y certificación.
+            Únete a cientos de mujeres y hombres que ya están construyendo su
+            trayectoria con IMAF. Regístrate en línea, asegura tu cupo
+            presencial y avanza con formación práctica y certificación.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Link
@@ -488,7 +505,9 @@ export default function LandingPage() {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-                Instituto público dedicado a la formación práctica de la mujer, la familia y el desarrollo laboral. Cursos presenciales, accesibles y con certificación oficial.
+                Instituto público dedicado a la formación práctica de la mujer,
+                la familia y el desarrollo laboral. Cursos presenciales,
+                accesibles y con certificación oficial.
               </p>
             </div>
             <div className="md:col-span-2 space-y-4">
@@ -553,39 +572,46 @@ export default function LandingPage() {
                 <div className="flex items-start gap-3">
                   <Phone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <div>
-                    <a 
-                      href="https://wa.me/584121512141" 
-                      target="_blank" 
+                    <a
+                      href="https://wa.me/584121512141"
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="hover:text-primary transition-colors"
                     >
                       +58 412-151 21 41
                     </a>
-                    <p className="text-xs text-muted-foreground/70 mt-1">WhatsApp</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">
+                      WhatsApp
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Instagram className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <div>
-                    <a 
-                      href="https://www.instagram.com/imaf_independencia?igsh=MXBoMnJrOHJ5aHk2aw==" 
-                      target="_blank" 
+                    <a
+                      href="https://www.instagram.com/imaf_independencia?igsh=MXBoMnJrOHJ5aHk2aw=="
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="hover:text-primary transition-colors"
                     >
                       @imaf_independencia
                     </a>
-                    <p className="text-xs text-muted-foreground/70 mt-1">Instagram</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">
+                      Instagram
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <div>
                     <p className="text-on-surface">
-                      5ta av. entre calles 29 y 30.<br />
+                      5ta av. entre calles 29 y 30.
+                      <br />
                       Antigua sede de la Unidad de Diálisis.
                     </p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">Dirección</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">
+                      Dirección
+                    </p>
                   </div>
                 </div>
               </div>
@@ -594,7 +620,9 @@ export default function LandingPage() {
           <div className="bg-surface-container-high/50 h-px w-full" />
           <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Alcaldía de Independencia. Todos los derechos reservados. | Instituto de la Mujer, Atención a la Familia y Formación para el Trabajo (IMAF)
+              © {new Date().getFullYear()} Alcaldía de Independencia. Todos los
+              derechos reservados. | Instituto de la Mujer, Atención a la
+              Familia y Formación para el Trabajo (IMAF)
             </p>
           </div>
         </div>
