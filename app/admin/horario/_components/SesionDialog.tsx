@@ -37,10 +37,10 @@ const schema = z
     hora_fin: z.string().optional(),
     estado: z.enum(["programada", "realizada", "cancelada"]),
   })
-  .refine(
-    (d) => !d.hora_inicio || !d.hora_fin || d.hora_fin > d.hora_inicio,
-    { message: "La hora fin debe ser posterior", path: ["hora_fin"] },
-  );
+  .refine((d) => !d.hora_inicio || !d.hora_fin || d.hora_fin > d.hora_inicio, {
+    message: "La hora fin debe ser posterior",
+    path: ["hora_fin"],
+  });
 
 type FormValues = z.infer<typeof schema>;
 
@@ -167,10 +167,10 @@ export default function SesionDialog({
       return;
     setDeleting(true);
     try {
-      const res = await fetch(
-        `${apiUrl}api/admin/sesiones/${initial.id}`,
-        { method: "DELETE", headers: getAuthHeaders() },
-      );
+      const res = await fetch(`${apiUrl}api/admin/sesiones/${initial.id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       if (!res.ok) {
         toast.error("No se pudo eliminar la sesión.");
         return;
@@ -199,7 +199,10 @@ export default function SesionDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 pt-1">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid gap-4 pt-1"
+        >
           <div className="grid gap-2">
             <Label>Curso *</Label>
             <Select

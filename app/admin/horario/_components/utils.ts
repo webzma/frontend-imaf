@@ -126,9 +126,9 @@ export function cursosActivosForDate(
 }
 
 /** Asigna columnas para que eventos solapados se muestren lado a lado. */
-export function layoutOverlap<T extends { hora_inicio?: string | null; hora_fin?: string | null }>(
-  events: T[],
-): Array<T & { _col: number; _cols: number }> {
+export function layoutOverlap<
+  T extends { hora_inicio?: string | null; hora_fin?: string | null },
+>(events: T[]): Array<T & { _col: number; _cols: number }> {
   const toMin = (t?: string | null) => {
     if (!t) return null;
     const [h, m] = t.split(":").map(Number);
@@ -169,7 +169,10 @@ export function layoutOverlap<T extends { hora_inicio?: string | null; hora_fin?
     let col = 0;
     while (used.has(col)) col++;
 
-    const item = { ...ev, _col: col, _cols: 1 } as T & { _col: number; _cols: number };
+    const item = { ...ev, _col: col, _cols: 1 } as T & {
+      _col: number;
+      _cols: number;
+    };
     result.push(item);
     cluster.push(result.length - 1);
     active.push({ end, col, idx: result.length - 1 });

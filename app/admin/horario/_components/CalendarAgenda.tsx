@@ -88,8 +88,12 @@ export default function CalendarAgenda({ current, sesiones, onEdit }: Props) {
                   <div className="flex items-center gap-2 md:min-w-[150px]">
                     <Clock className="w-3.5 h-3.5 text-on-surface/40" />
                     <span className="font-sans text-sm font-medium text-on-surface tabular-nums">
-                      {s.hora_inicio ? formatHour(s.hora_inicio) : "Todo el día"}
-                      {s.hora_fin && s.hora_inicio && ` – ${formatHour(s.hora_fin)}`}
+                      {s.hora_inicio
+                        ? formatHour(s.hora_inicio)
+                        : "Todo el día"}
+                      {s.hora_fin &&
+                        s.hora_inicio &&
+                        ` – ${formatHour(s.hora_fin)}`}
                     </span>
                   </div>
 

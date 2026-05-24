@@ -157,8 +157,7 @@ export default function HorarioPage() {
     else setCurrent((d) => addDays(d, -1));
   };
   const goNext = () => {
-    if (view === "mes" || view === "agenda")
-      setCurrent((d) => addMonths(d, 1));
+    if (view === "mes" || view === "agenda") setCurrent((d) => addMonths(d, 1));
     else if (view === "semana") setCurrent((d) => addDays(d, 7));
     else setCurrent((d) => addDays(d, 1));
   };
@@ -214,9 +213,7 @@ export default function HorarioPage() {
       toast.success("Sesión reprogramada");
     } catch {
       setSesiones((prev) =>
-        prev.map((s) =>
-          s.id === sesionId ? { ...s, fecha: previous } : s,
-        ),
+        prev.map((s) => (s.id === sesionId ? { ...s, fecha: previous } : s)),
       );
       toast.error("No se pudo mover la sesión.");
     }

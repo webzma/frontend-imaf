@@ -57,7 +57,9 @@ export default function CalendarDay({
     [HOUR_START, HOUR_END],
   );
 
-  const cursosDia = showCursoRanges ? cursosActivosForDate(cursos, current) : [];
+  const cursosDia = showCursoRanges
+    ? cursosActivosForDate(cursos, current)
+    : [];
 
   const timeToPx = (time: string | null | undefined): number => {
     if (!time) return 0;
