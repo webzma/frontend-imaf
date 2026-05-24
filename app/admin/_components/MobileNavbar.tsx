@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   BookOpen,
+  CalendarDays,
   GraduationCap,
   CreditCard,
   Bell,
@@ -22,6 +23,12 @@ const navItems = [
     label: "Cursos",
     href: "/admin/cursos",
     icon: BookOpen,
+    exact: false,
+  },
+  {
+    label: "Horario",
+    href: "/admin/horario",
+    icon: CalendarDays,
     exact: false,
   },
   {

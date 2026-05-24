@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "sonner";
+import Providers from "./providers";
 
 const cormorantGaramond = Cormorant_Garamond({
   subsets: ["latin"],
@@ -41,7 +42,7 @@ export default function RootLayout({
           height={2}
         />
         <Toaster richColors position="bottom-right" />
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

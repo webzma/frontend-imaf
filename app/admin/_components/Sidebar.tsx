@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -15,6 +16,7 @@ import {
   CreditCard,
   Bell,
   X,
+  CalendarDays,
 } from "lucide-react";
 import {
   Sidebar,
@@ -61,6 +63,12 @@ const navItems = [
         exact: false,
       },
       { label: "Cursos", href: "/admin/cursos", icon: BookOpen, exact: false },
+      {
+        label: "Horario",
+        href: "/admin/horario",
+        icon: CalendarDays,
+        exact: false,
+      },
       { label: "Pagos", href: "/admin/pagos", icon: CreditCard, exact: false },
       {
         label: "Notificaciones",
@@ -93,14 +101,37 @@ function getCookie(name: string): string {
   return match ? match[2] : "";
 }
 
+const NOTIF_COUNT_KEY = ["admin", "notificaciones", "count"] as const;
+
+async function fetchNotificationCount(): Promise<number> {
+  const res = await fetch(
+    `${process.env.API_URL}api/admin/notificaciones/count`,
+    {
+      headers: {
+        Authorization: `Bearer ${getCookie("token")}`,
+        Accept: "application/json",
+      },
+    },
+  );
+  const data = await res.json();
+  return data.unread_count || 0;
+}
+
 export default function AppSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
+  const { push } = useRouter();
   const { toggleSidebar, state } = useSidebar();
   const collapsed = state === "collapsed";
   const [dark, setDark] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const queryClient = useQueryClient();
 
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: NOTIF_COUNT_KEY,
+    queryFn: fetchNotificationCount,
+    refetchInterval: 30000, // Poll every 30 seconds
+  });
+
+  // Initialize theme from storage / system preference
   useEffect(() => {
     const stored = localStorage.getItem("theme");
     const isDark =
@@ -108,28 +139,12 @@ export default function AppSidebar() {
       (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
     setDark(isDark);
     document.documentElement.classList.toggle("dark", isDark);
+  }, []);
 
-    // Fetch notifications count
-    const fetchNotifications = () => {
-      fetch(`${process.env.API_URL}api/admin/notificaciones/count`, {
-        headers: {
-          Authorization: `Bearer ${getCookie("token")}`,
-          Accept: "application/json",
-        },
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          setUnreadCount(data.unread_count || 0);
-        })
-        .catch(() => {});
-    };
-
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
-
-    // Listen for notification read events
+  // Sync the unread count when a notification is read elsewhere
+  useEffect(() => {
     const handleNotificationRead = (event: CustomEvent) => {
-      setUnreadCount(event.detail.count);
+      queryClient.setQueryData(NOTIF_COUNT_KEY, event.detail.count);
     };
 
     window.addEventListener(
@@ -138,13 +153,12 @@ export default function AppSidebar() {
     );
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener(
         "notificationRead",
         handleNotificationRead as EventListener,
       );
     };
-  }, []);
+  }, [queryClient]);
 
   const toggleDark = () => {
     const next = !dark;
@@ -168,7 +182,7 @@ export default function AppSidebar() {
     } finally {
       document.cookie = "token=; path=/; max-age=0";
       document.cookie = "role=; path=/; max-age=0";
-      router.push("/login");
+      push("/login");
     }
   };
 
@@ -192,10 +206,10 @@ export default function AppSidebar() {
       className="transition-transform duration-300 ease-in-out md:transition-none"
     >
       {/* Logo */}
-      <SidebarHeader className="border-b border-sidebar-border px-5 py-5 relative">
+      <SidebarHeader className="border-b border-sidebar-border p-5 relative">
         <div className="flex items-center gap-3">
           <div
-            className={`w-8 h-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}
+            className={`size-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}
           >
             <Image src={logoImaf} alt="IMAF" width={28} height={28} />
           </div>
@@ -219,7 +233,7 @@ export default function AppSidebar() {
               className="absolute top-5 right-5 p-1.5 rounded-sm hover:bg-sidebar-accent/50 transition-colors md:hidden"
               aria-label="Cerrar sidebar"
             >
-              <X className="w-4 h-4 text-sidebar-foreground" />
+              <X className="size-4 text-sidebar-foreground" />
             </button>
           )}
       </SidebarHeader>
@@ -244,7 +258,7 @@ export default function AppSidebar() {
                         <item.icon />
                         <span>{item.label}</span>
                         {item.label === "Notificaciones" && unreadCount > 0 && (
-                          <span className="w-2 h-2 bg-pink-500 rounded-full ml-auto" />
+                          <span className="size-2 bg-pink-500 rounded-full ml-auto" />
                         )}
                       </Link>
                     </SidebarMenuButton>
@@ -260,7 +274,7 @@ export default function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border">
         {!collapsed && (
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-sm bg-sidebar-accent/40">
-            <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+            <div className="size-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
               <span className="text-xs font-bold text-primary">A</span>
             </div>
             <div className="flex-1 min-w-0">
