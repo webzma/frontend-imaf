@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -9,6 +11,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
+  --font-league-spartan: var(--font-league-spartan);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -116,6 +119,7 @@
   --radius-sm: 0.125rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.625rem;
+  --font-league-spartan: 'League-Spartan';
 }
 
 .dark {
@@ -170,6 +174,12 @@
   --sidebar-ring: #ffb1c5;
 }
 
+.league-spartan {
+  font-family: "League Spartan", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -187,7 +197,8 @@
   h4,
   h5,
   h6 {
-    @apply font-serif;
+    font-family: "League Spartan", sans-serif;
+    font-weight: 600;
   }
 }
 

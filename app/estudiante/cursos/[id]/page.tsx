@@ -291,7 +291,7 @@ function PagoModal({
           <div className="flex justify-between">
             <span className="text-muted-foreground">Precio</span>
             <span className="font-mono font-bold text-primary tabular-nums">
-              ${parseFloat(curso.precio).toFixed(2)}
+              Bs {parseFloat(curso.precio).toFixed(2)}
             </span>
           </div>
           <div className="flex justify-between">
