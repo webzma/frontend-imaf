@@ -357,7 +357,7 @@ function PagoDetailModal({
             </Button>
             <Button
               onClick={() => handleDecision("aprobado")}
-              className="flex-1 gradient-primary font-sans text-sm h-10 text-white"
+              className="flex-1 font-sans text-sm h-10"
               disabled={!!saving}
             >
               {saving === "aprobado" ? (
@@ -430,7 +430,7 @@ function PagoDetailModal({
                 }
                 className={`flex-1 ${
                   confirmDialog.action === "aprobado"
-                    ? "gradient-primary text-white"
+                    ? ""
                     : "bg-red-600 hover:bg-red-700 text-white"
                 }`}
               >
