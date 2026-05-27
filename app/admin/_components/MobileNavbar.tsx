@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   BookOpen,
-  CalendarDays,
   GraduationCap,
   CreditCard,
   Bell,
@@ -23,12 +22,6 @@ const navItems = [
     label: "Cursos",
     href: "/admin/cursos",
     icon: BookOpen,
-    exact: false,
-  },
-  {
-    label: "Horario",
-    href: "/admin/horario",
-    icon: CalendarDays,
     exact: false,
   },
   {
@@ -176,10 +169,9 @@ export default function AdminMobileNavbar() {
                   active ? "scale-110" : ""
                 }`}
               />
-              {item.label === "Notificaciones" &&
-                unreadCount > 0 && (
-                  <span className="absolute top-2 translate-x-1/2 w-2 h-2 bg-pink-500 rounded-full" />
-                )}
+              {item.label === "Notificaciones" && unreadCount > 0 && (
+                <span className="absolute top-2 translate-x-1/2 w-2 h-2 bg-pink-500 rounded-full" />
+              )}
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );
