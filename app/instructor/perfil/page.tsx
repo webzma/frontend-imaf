@@ -219,9 +219,10 @@ export default function PerfilPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 px-4 md:px-10 py-10 max-w-2xl">
+      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
@@ -425,48 +426,67 @@ export default function PerfilPage() {
           </div>
         ) : (
           /* ── View mode ── */
-          <div className="bg-surface-container-low rounded-sm ambient-shadow p-6">
-            <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold mb-5">
-              Información personal
-            </h3>
-            <div className="space-y-4">
+          <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 md:p-7">
+            <div className="flex items-center gap-2 mb-5">
+              <User className="w-3.5 h-3.5 text-primary/80" />
+              <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                Información personal
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
               <InfoRow
-                icon={<BadgeCheck className="w-4 h-4" />}
+                icon={
+                  <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
+                }
                 label="Cédula"
                 value={p.cedula}
               />
               <InfoRow
-                icon={<Phone className="w-4 h-4" />}
+                icon={
+                  <Phone className="w-3.5 h-3.5 text-on-primary-container" />
+                }
                 label="Teléfono"
                 value={p.telefono}
               />
               <InfoRow
-                icon={<MapPin className="w-4 h-4" />}
+                icon={
+                  <MapPin className="w-3.5 h-3.5 text-on-primary-container" />
+                }
                 label="Municipio"
                 value={p.municipio}
               />
               <InfoRow
-                icon={<Building2 className="w-4 h-4" />}
+                icon={
+                  <Building2 className="w-3.5 h-3.5 text-on-primary-container" />
+                }
                 label="Departamento"
                 value={p.departamento}
               />
               <InfoRow
-                icon={<GraduationCap className="w-4 h-4" />}
+                icon={
+                  <GraduationCap className="w-3.5 h-3.5 text-on-primary-container" />
+                }
                 label="Especialidad"
                 value={p.especialidad}
               />
               <InfoRow
-                icon={<BadgeCheck className="w-4 h-4" />}
+                icon={
+                  <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
+                }
                 label="Título"
                 value={p.titulo ? tituloLabel[p.titulo] : null}
               />
               <InfoRow
-                icon={<CalendarDays className="w-4 h-4" />}
+                icon={
+                  <CalendarDays className="w-3.5 h-3.5 text-on-primary-container" />
+                }
                 label="Fecha de nacimiento"
                 value={formatDate(p.fecha_nacimiento)}
               />
               <InfoRow
-                icon={<User className="w-4 h-4" />}
+                icon={
+                  <User className="w-3.5 h-3.5 text-on-primary-container" />
+                }
                 label="Género"
                 value={
                   p.genero
@@ -493,12 +513,18 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="text-muted-foreground mt-0.5 shrink-0">{icon}</span>
-      <div className="flex-1 min-w-0">
-        <p className="font-sans text-xs text-muted-foreground">{label}</p>
-        <p className="font-sans text-sm text-on-surface mt-0.5">
-          {value ?? (
-            <span className="text-muted-foreground/50 italic">
+      <div className="w-8 h-8 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0 mt-0.5">
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold mb-1">
+          {label}
+        </p>
+        <p className="font-sans text-sm text-on-surface font-medium">
+          {value && value !== "—" ? (
+            value
+          ) : (
+            <span className="text-muted-foreground/50 italic font-normal">
               Sin especificar
             </span>
           )}

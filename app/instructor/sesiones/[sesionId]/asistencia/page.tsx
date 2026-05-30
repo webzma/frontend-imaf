@@ -213,7 +213,8 @@ export default function AsistenciaInstructorPage({
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10">
         {/* Sticky top bar */}
@@ -274,7 +275,7 @@ export default function AsistenciaInstructorPage({
           </div>
         </div>
 
-        <div className="px-4 md:px-10 py-8 max-w-4xl mx-auto">
+        <div className="px-4 md:px-10 py-8 max-w-8xl mx-auto">
           {/* Session header */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-2">
