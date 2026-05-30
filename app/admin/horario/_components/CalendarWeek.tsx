@@ -86,7 +86,7 @@ export default function CalendarWeek({
               <div
                 className={`inline-flex items-center justify-center font-sans text-lg tabular-nums ${
                   today
-                    ? "bg-primary text-on-primary font-semibold w-8 h-8 rounded-full"
+                    ? "bg-primary text-surface font-semibold w-8 h-8 rounded-full"
                     : "text-on-surface font-medium"
                 }`}
               >

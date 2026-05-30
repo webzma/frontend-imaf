@@ -344,7 +344,7 @@ export default function HorarioPage() {
                 onClick={() => setView(v)}
                 className={`px-3 py-1.5 rounded-sm font-sans text-xs font-semibold transition-colors ${
                   view === v
-                    ? "bg-primary text-on-primary"
+                    ? "bg-primary text-surface"
                     : "text-on-surface/60 hover:text-on-surface"
                 }`}
               >

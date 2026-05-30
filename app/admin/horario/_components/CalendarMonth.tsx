@@ -111,7 +111,7 @@ export default function CalendarMonth({
                   <span
                     className={`inline-flex items-center justify-center text-xs font-sans tabular-nums ${
                       today
-                        ? "bg-primary text-on-primary font-semibold w-6 h-6 rounded-full"
+                        ? "bg-primary text-surface font-semibold w-6 h-6 rounded-full"
                         : inMonth
                           ? "text-on-surface font-medium"
                           : "text-on-surface/30"
