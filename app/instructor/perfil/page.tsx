@@ -219,9 +219,9 @@ export default function PerfilPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 px-4 md:px-10 py-10 max-w-2xl">
+      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
