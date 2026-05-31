@@ -102,7 +102,7 @@ export default function MobileNavbar() {
     };
   }, [isMobile]);
 
-  const isActive = (href: string, exact: boolean) =>
+  const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
 
   if (!isMobile) return null;
