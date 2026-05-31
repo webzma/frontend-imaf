@@ -12,6 +12,7 @@ import {
   Moon,
   Sun,
   X,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -57,6 +58,12 @@ const navItems = [
         icon: User,
         exact: false,
       },
+      {
+        label: "Notificaciones",
+        href: "/instructor/notificaciones",
+        icon: Bell,
+        exact: false,
+      },
     ],
   },
 ];
@@ -68,6 +75,7 @@ function getCookie(name: string): string {
 }
 
 const PROFILE_KEY = ["instructor", "me"] as const;
+const NOTIF_COUNT_KEY = ["instructor", "notificaciones", "count"] as const;
 
 async function fetchProfile(): Promise<{
   nombre: string | null;
@@ -86,6 +94,21 @@ async function fetchProfile(): Promise<{
   };
 }
 
+async function fetchNotificationCount(): Promise<number> {
+  const res = await fetch(
+    `${process.env.API_URL}api/profesor/notificaciones/count`,
+    {
+      headers: {
+        Authorization: `Bearer ${getCookie("token")}`,
+        Accept: "application/json",
+      },
+    },
+  );
+  if (!res.ok) return 0;
+  const data = await res.json();
+  return data.unread_count || 0;
+}
+
 export default function InstructorSidebar() {
   const pathname = usePathname();
   const { push } = useRouter();
@@ -98,6 +121,46 @@ export default function InstructorSidebar() {
   });
   const nombre = profile?.nombre ?? null;
   const email = profile?.email ?? null;
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Use react-query for initial fetch and generic polling
+  const { data: initialUnread } = useQuery({
+    queryKey: NOTIF_COUNT_KEY,
+    queryFn: fetchNotificationCount,
+    refetchInterval: 30000, // Background poll every 30s
+  });
+
+  useEffect(() => {
+    if (typeof initialUnread === "number") {
+      setUnreadCount(initialUnread);
+    }
+  }, [initialUnread]);
+
+  // Listen for custom events to update local state immediately
+  useEffect(() => {
+    const handleNotificationRead = (e: CustomEvent) => {
+      if (e.detail.type === "all") {
+        setUnreadCount(0);
+      } else if (
+        e.detail.type === "single" &&
+        typeof e.detail.count === "number"
+      ) {
+        setUnreadCount(e.detail.count);
+      }
+    };
+
+    window.addEventListener(
+      "notificationRead",
+      handleNotificationRead as EventListener,
+    );
+    return () => {
+      window.removeEventListener(
+        "notificationRead",
+        handleNotificationRead as EventListener,
+      );
+    };
+  }, []);
 
   // Initialize theme from storage / system preference
   useEffect(() => {
@@ -208,6 +271,10 @@ export default function InstructorSidebar() {
                         <Link href={item.href} onClick={handleLinkClick}>
                           <item.icon />
                           <span>{item.label}</span>
+                          {item.label === "Notificaciones" &&
+                            unreadCount > 0 && (
+                              <span className="size-2 bg-pink-500 rounded-full ml-auto" />
+                            )}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
