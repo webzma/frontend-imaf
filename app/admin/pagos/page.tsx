@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -98,19 +99,19 @@ const estadoConfig = {
   pendiente: {
     label: "Pendiente",
     icon: Clock,
-    cls: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
+    variant: "pendiente" as const,
     dot: "bg-amber-500",
   },
   aprobado: {
     label: "Aprobado",
     icon: CheckCircle2,
-    cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+    variant: "aprobado" as const,
     dot: "bg-emerald-500",
   },
   rechazado: {
     label: "Rechazado",
     icon: Ban,
-    cls: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400",
+    variant: "rechazado" as const,
     dot: "bg-red-500",
   },
 };
@@ -273,12 +274,10 @@ function PagoDetailModal({
 
         {/* Estado actual */}
         <div className="flex items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${cfg.cls}`}
-          >
+          <Badge variant={cfg.variant} className="font-sans text-xs font-semibold px-2.5 py-1">
             <Icon className="w-3 h-3" />
             {cfg.label}
-          </span>
+          </Badge>
           <span className="font-sans text-xs text-muted-foreground">
             {formatDate(pago.created_at)}
           </span>
@@ -768,12 +767,10 @@ export default function AdminPagosPage() {
                           </span>
                         </td>
                         <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${cfg.cls}`}
-                          >
+                          <Badge variant={cfg.variant} className="font-sans text-xs font-semibold px-2.5 py-1">
                             <Icon className="w-3 h-3" />
                             {cfg.label}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="px-5 py-4">
                           <Button

@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   User,
   Mail,
@@ -80,13 +81,6 @@ function formatDate(value: string | null | undefined): string {
   });
 }
 
-const estadoStyle: Record<string, string> = {
-  activo:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  inactivo:
-    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
-  graduado: "bg-primary-container text-on-primary-container",
-};
 
 export default function PerfilPage() {
   const [perfil, setPerfil] = useState<EstudiantePerfil | null>(null);
@@ -219,16 +213,11 @@ export default function PerfilPage() {
                         {perfil.user.email}
                       </p>
                     </div>
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-sans text-xs font-semibold ${
-                        estadoStyle[perfil.estado] ??
-                        "bg-muted text-muted-foreground"
-                      }`}
-                    >
+                    <Badge variant={perfil.estado as "activo" | "inactivo" | "graduado"} className="gap-1.5 px-3 py-1">
                       <Sparkles className="w-3 h-3" />
                       {perfil.estado.charAt(0).toUpperCase() +
                         perfil.estado.slice(1)}
-                    </span>
+                    </Badge>
 
                     <div className="w-full pt-5 mt-2 border-t border-outline-variant/30 space-y-3 text-left">
                       <div className="flex items-center gap-2.5">

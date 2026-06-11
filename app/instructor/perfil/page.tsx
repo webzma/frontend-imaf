@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   GraduationCap,
   Mail,
@@ -85,12 +86,6 @@ const tituloLabel: Record<string, string> = {
   doctorado: "Doctorado",
 };
 
-const tituloStyle: Record<string, string> = {
-  licenciatura: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-400",
-  maestria:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  doctorado: "bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary",
-};
 
 function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
@@ -255,12 +250,10 @@ export default function PerfilPage() {
                 </span>
               </div>
               {p.titulo && (
-                <span
-                  className={`inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 rounded-full font-sans text-xs font-semibold ${tituloStyle[p.titulo]}`}
-                >
+                <Badge variant={p.titulo as "licenciatura" | "maestria" | "doctorado"} className="mt-2 gap-1">
                   <BadgeCheck className="w-3 h-3" />
                   {tituloLabel[p.titulo]}
-                </span>
+                </Badge>
               )}
             </div>
             {!editing && (
