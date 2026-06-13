@@ -152,8 +152,8 @@ export default function NotificacionesPage() {
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-4xl mx-auto">
         {/* Page header */}
         <div className="mb-10 md:mb-12">
-          <div className="flex items-center gap-2 mb-4">
-            <Bell className="w-3.5 h-3.5 text-primary/80" />
+          <div className="flex items-center gap-4 mb-4">
+            <Bell className="size-6 text-primary/80" />
             <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
               Notificaciones
             </span>

@@ -106,9 +106,9 @@ export default function AdminDashboard() {
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* ── Header ── */}
         <div className="mb-12">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="size-10 text-primary/70" />
-            <span className="font-sans text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
+          <div className="flex items-center gap-4 mb-4">
+            <TrendingUp className="size-6 md:size-7 text-primary/70" />
+            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
               Resumen general
             </span>
           </div>

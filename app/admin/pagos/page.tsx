@@ -558,9 +558,9 @@ export default function AdminPagosPage() {
       <div className="relative z-10 px-4 md:px-8 py-10 mx-auto">
         {/* Header */}
         <div className="mb-10">
-          <div className="flex items-center gap-2 mb-3">
-            <CreditCard className="w-3 h-3 text-primary/70" />
-            <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-medium">
+          <div className="flex items-center gap-4 mb-3">
+            <CreditCard className="size-6 md:size-7 text-primary/70" />
+            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-medium">
               Admin / Pagos
             </span>
           </div>
