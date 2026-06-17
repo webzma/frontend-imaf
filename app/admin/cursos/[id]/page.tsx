@@ -1317,7 +1317,7 @@ export default function CursoDetailPage({
                 >
                   <span className="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-0.5">
                     <span className="font-mono text-xs font-bold text-on-primary-container">
-                      {t.orden + 1}
+                      {t.orden}
                     </span>
                   </span>
                   <div className="flex-1 min-w-0">
