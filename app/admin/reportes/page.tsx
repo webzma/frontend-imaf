@@ -370,9 +370,9 @@ export default function ReportesPage() {
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-10">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart2 className="size-6 md:size-10 text-primary/70" />
-            <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
+          <div className="flex items-center gap-4 mb-4">
+            <BarChart2 className="size-6 md:size-7 text-primary/70" />
+            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
               Analítica / Reportes
             </span>
           </div>

@@ -408,9 +408,9 @@ export default function InstructoresPage() {
         {/* Header */}
         <div className="mb-10 flex-col md:flex-row md:flex items-end justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <GraduationCap className="size-6 md:size-10 text-primary/70" />
-              <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
+            <div className="flex items-center gap-4 mb-4">
+              <GraduationCap className="size-6 md:size-7 text-primary/70" />
+              <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
                 Gestión / Instructores
               </span>
             </div>

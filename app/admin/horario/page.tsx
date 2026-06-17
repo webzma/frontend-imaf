@@ -248,9 +248,9 @@ export default function HorarioPage() {
         {/* Header */}
         <div className="mb-8 flex-col md:flex-row md:flex items-end justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <CalendarDays className="size-6 md:size-10 text-primary/70" />
-              <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
+            <div className="flex items-center gap-4 mb-4">
+              <CalendarDays className="size-6 md:size-7 text-primary/70" />
+              <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
                 Planificación / Horario
               </span>
             </div>
