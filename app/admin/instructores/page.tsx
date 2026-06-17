@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -89,13 +90,6 @@ function getInitials(name: string): string {
 }
 
 /* ── Styles ── */
-
-const tituloStyle: Record<string, string> = {
-  licenciatura: "bg-sky-100 text-sky-800 border border-sky-200",
-  maestria: "bg-emerald-100 text-emerald-800 border border-emerald-200",
-  doctorado:
-    "bg-primary-container text-on-primary-container border border-primary-container",
-};
 
 const tituloLabel: Record<string, string> = {
   licenciatura: "Licenciatura",
@@ -939,11 +933,9 @@ export default function InstructoresPage() {
                         </td>
                         <td className="px-6 py-4">
                           {p.titulo ? (
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full font-sans text-xs font-semibold ${tituloStyle[p.titulo]}`}
-                            >
+                            <Badge variant={p.titulo as "licenciatura" | "maestria" | "doctorado"} className="font-sans text-xs font-semibold px-3 py-1">
                               {tituloLabel[p.titulo]}
-                            </span>
+                            </Badge>
                           ) : (
                             <span className="text-muted-foreground/50 font-sans text-sm">
                               —

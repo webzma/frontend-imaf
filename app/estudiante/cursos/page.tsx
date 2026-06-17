@@ -5,6 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
   GraduationCap,
@@ -136,10 +137,10 @@ function CursoCard({
             <Hash className="w-2.5 h-2.5" />
             {curso.codigo}
           </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400">
+          <Badge variant="activo" className="gap-1 px-2 py-0.5 text-[10px]">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
             Activo
-          </span>
+          </Badge>
         </div>
 
         <h3 className="font-serif font-light text-2xl tight-tracking text-on-surface mb-2 leading-[1.15] group-hover:text-primary transition-colors">

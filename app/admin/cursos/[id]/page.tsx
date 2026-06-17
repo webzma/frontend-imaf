@@ -4,6 +4,7 @@ import { useState, useEffect, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -148,20 +149,7 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-const estadoBadge: Record<string, string> = {
-  activo:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  inactivo:
-    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
-  graduado: "bg-primary-container text-on-primary-container",
-};
-
-const tituloBadge: Record<string, string> = {
-  licenciatura: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-400",
-  maestria:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  doctorado: "bg-primary-container text-on-primary-container",
-};
+/* ── No more local badge styles — using <Badge> component variants ── */
 
 interface Temario {
   id: number;
@@ -845,13 +833,9 @@ export default function CursoDetailPage({
                       <GraduationCap className="w-4 h-4 text-primary/70" />
                       {curso.instructor.user.name}
                       {instructorFull?.titulo && (
-                        <span
-                          className={`ml-1 inline-flex items-center px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold capitalize ${
-                            tituloBadge[instructorFull.titulo] ?? ""
-                          }`}
-                        >
+                        <Badge variant={instructorFull.titulo as "licenciatura" | "maestria" | "doctorado"} className="font-sans text-[10px] px-1.5 py-0 capitalize">
                           {instructorFull.titulo}
-                        </span>
+                        </Badge>
                       )}
                     </p>
                     <div className="flex items-center gap-3 mt-2 flex-wrap">
@@ -879,15 +863,9 @@ export default function CursoDetailPage({
 
             {/* Actions */}
             <div className="flex items-center gap-2 ml-4 shrink-0">
-              <span
-                className={`inline-flex items-center px-3 py-1 rounded-full font-sans text-sm font-semibold ${
-                  curso.estado === "activo"
-                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
-                    : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
-                }`}
-              >
+              <Badge variant={curso.estado === "activo" ? "activo" : "inactivo"} className="font-sans text-sm font-semibold px-3 py-1">
                 {curso.estado === "activo" ? "Activo" : "Inactivo"}
-              </span>
+              </Badge>
               <button
                 onClick={() => setToggleOpen(true)}
                 title={
@@ -1215,7 +1193,13 @@ export default function CursoDetailPage({
                               }
                             >
                               <SelectTrigger
-                                className={`w-32 h-7 text-xs font-semibold border-0 px-2.5 rounded-full ${estadoBadge[e.estado]}`}
+                                className={`w-32 h-7 text-xs font-semibold border-0 px-2.5 rounded-full ${
+                                  e.estado === "activo"
+                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
+                                    : e.estado === "inactivo"
+                                      ? "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
+                                      : "bg-primary-container text-on-primary-container"
+                                }`}
                               >
                                 <SelectValue />
                               </SelectTrigger>
@@ -1393,13 +1377,10 @@ export default function CursoDetailPage({
           ) : (
             <div className="bg-surface-container-low rounded-sm ambient-shadow overflow-hidden">
               {sesiones.map((s, i) => {
-                const estadoStyle = {
-                  programada:
-                    "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-400",
-                  realizada:
-                    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-                  cancelada:
-                    "bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-400",
+                const sesionEstadoVariant = {
+                  programada: "programada" as const,
+                  realizada: "realizada" as const,
+                  cancelada: "cancelada" as const,
                 }[s.estado];
                 const fechaFmt = new Date(
                   s.fecha + "T00:00:00",
@@ -1433,11 +1414,9 @@ export default function CursoDetailPage({
                             {s.hora_fin && ` – ${s.hora_fin}`}
                           </span>
                         )}
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold capitalize ${estadoStyle}`}
-                        >
+                        <Badge variant={sesionEstadoVariant} className="font-sans text-[10px] font-semibold capitalize px-1.5 py-0">
                           {s.estado}
-                        </span>
+                        </Badge>
                       </div>
                       <p className="font-sans text-sm font-semibold text-on-surface">
                         {s.titulo}

@@ -4,6 +4,7 @@ import { useState, useEffect, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   CalendarDays,
@@ -68,12 +69,6 @@ function formatTime(t: string | null) {
   return t.slice(0, 5);
 }
 
-const estadoSesionStyle: Record<string, string> = {
-  programada: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-400",
-  realizada:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  cancelada: "bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-400",
-};
 
 /* ── Page ── */
 
@@ -299,11 +294,9 @@ export default function AsistenciaInstructorPage({
                   {sesion.hora_fin && ` – ${formatTime(sesion.hora_fin)}`}
                 </span>
               )}
-              <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-sans text-xs font-semibold capitalize ${estadoSesionStyle[sesion.estado]}`}
-              >
+              <Badge variant={sesion.estado as "programada" | "realizada" | "cancelada"} className="capitalize">
                 {sesion.estado}
-              </span>
+              </Badge>
             </div>
           </div>
 

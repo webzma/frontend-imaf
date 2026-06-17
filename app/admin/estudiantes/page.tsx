@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -87,14 +88,7 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-/* ── Styles ── */
-
-const estadoStyle: Record<string, string> = {
-  activo: "bg-emerald-100 text-emerald-800 border border-emerald-200",
-  inactivo: "bg-amber-100 text-amber-800 border border-amber-200",
-  graduado:
-    "bg-primary-container text-on-primary-container border border-primary-container",
-};
+/* ── Labels ── */
 
 const estadoLabel: Record<string, string> = {
   activo: "Activo",
@@ -792,11 +786,9 @@ export default function EstudiantesPage() {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full font-sans text-xs font-semibold ${estadoStyle[e.estado]}`}
-                          >
+                          <Badge variant={e.estado as "activo" | "inactivo" | "graduado"} className="font-sans px-3 py-1">
                             {estadoLabel[e.estado]}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="px-4 py-4">
                           <button

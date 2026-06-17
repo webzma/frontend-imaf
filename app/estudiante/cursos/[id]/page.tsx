@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -131,13 +132,6 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-const estadoStyle: Record<string, string> = {
-  activo:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  inactivo:
-    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
-  graduado: "bg-primary-container text-on-primary-container",
-};
 
 const pagoEstadoConfig = {
   pendiente: {
@@ -526,13 +520,7 @@ export default function CursoDetallePage({
                       </span>
                     )}
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-sans text-xs font-semibold shrink-0 ${
-                      curso.estado === "activo"
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
-                        : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
-                    }`}
-                  >
+                  <Badge variant={curso.estado as "activo" | "inactivo"} className="gap-1.5 px-3 py-1 shrink-0">
                     {curso.estado === "activo" ? (
                       <>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
@@ -543,7 +531,7 @@ export default function CursoDetallePage({
                         <XCircle className="w-3 h-3" /> Inactivo
                       </>
                     )}
-                  </span>
+                  </Badge>
                 </div>
 
                 <h1 className="font-serif font-light text-3xl md:text-5xl tight-tracking text-on-surface leading-[1.05] mb-4">
@@ -782,12 +770,10 @@ export default function CursoDetallePage({
                             {est.nombre}
                           </p>
                         </div>
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold shrink-0 ${estadoStyle[est.estado] ?? "bg-muted text-muted-foreground"}`}
-                        >
+                        <Badge variant={est.estado as "activo" | "inactivo" | "graduado"} className="text-[10px] shrink-0">
                           {est.estado.charAt(0).toUpperCase() +
                             est.estado.slice(1)}
-                        </span>
+                        </Badge>
                       </div>
                     ))}
                   </div>
@@ -842,22 +828,22 @@ export default function CursoDetallePage({
                   {curso.sesiones.map((sesion) => {
                     const sesionEstado: Record<
                       SesionItem["estado"],
-                      { label: string; cls: string; dot: string }
+                      { label: string; variant: "programada" | "realizada" | "cancelada"; dot: string }
                     > = {
                       programada: {
                         label: "Programada",
-                        cls: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400",
-                        dot: "bg-blue-500",
+                        variant: "programada",
+                        dot: "bg-sky-500",
                       },
                       realizada: {
                         label: "Realizada",
-                        cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+                        variant: "realizada",
                         dot: "bg-emerald-500",
                       },
                       cancelada: {
                         label: "Cancelada",
-                        cls: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400",
-                        dot: "bg-red-500",
+                        variant: "cancelada",
+                        dot: "bg-rose-500",
                       },
                     };
                     const cfg =
@@ -888,14 +874,12 @@ export default function CursoDetallePage({
                             </p>
                           )}
                         </div>
-                        <span
-                          className={`self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-[10px] font-semibold ${cfg.cls}`}
-                        >
+                        <Badge variant={cfg.variant} className="gap-1.5 px-2.5 py-1 text-[10px] shrink-0">
                           <span
                             className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`}
                           />
                           {cfg.label}
-                        </span>
+                        </Badge>
                       </div>
                     );
                   })}

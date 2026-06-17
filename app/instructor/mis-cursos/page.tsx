@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
   Users,
@@ -57,11 +58,6 @@ function formatDate(d: string | null) {
   });
 }
 
-const estadoStyle: Record<string, string> = {
-  activo:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  inactivo: "bg-zinc-100 text-zinc-600 dark:bg-zinc-500/15 dark:text-zinc-400",
-};
 
 /* ── Page ── */
 
@@ -231,11 +227,9 @@ export default function MisCursosPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full font-sans text-xs font-semibold capitalize ${estadoStyle[curso.estado]}`}
-                        >
+                        <Badge variant={curso.estado as "activo" | "inactivo"} className="capitalize">
                           {curso.estado}
-                        </span>
+                        </Badge>
                         <span className="font-mono text-xs text-muted-foreground">
                           {curso.codigo}
                         </span>

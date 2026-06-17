@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
   User,
@@ -48,13 +49,6 @@ function getCookie(name: string): string {
   return match ? match[2] : "";
 }
 
-const estadoStyle: Record<string, string> = {
-  activo:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  inactivo:
-    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
-  graduado: "bg-primary-container text-on-primary-container",
-};
 
 function getInitials(name: string) {
   return name
@@ -150,17 +144,12 @@ export default function EstudianteDashboard() {
               {loading ? (
                 <Skeleton className="h-6 w-24" />
               ) : (
-                <span
-                  className={`inline-flex items-center px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${
-                    estadoStyle[perfil?.estado ?? ""] ??
-                    "bg-muted text-muted-foreground"
-                  }`}
-                >
+                <Badge variant={(perfil?.estado ?? "activo") as "activo" | "inactivo" | "graduado"} className="px-2.5 py-1">
                   {perfil
                     ? perfil.estado.charAt(0).toUpperCase() +
                       perfil.estado.slice(1)
                     : "—"}
-                </span>
+                </Badge>
               )}
             </div>
           </div>
