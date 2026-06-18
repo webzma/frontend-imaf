@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { LayoutDashboard, BookOpen, User } from "lucide-react";
+import { LayoutDashboard, BookOpen, CalendarDays, User } from "lucide-react";
 
 const navItems = [
   {
@@ -16,6 +16,12 @@ const navItems = [
     label: "Mis Cursos",
     href: "/instructor/mis-cursos",
     icon: BookOpen,
+    exact: false,
+  },
+  {
+    label: "Horario",
+    href: "/instructor/horario",
+    icon: CalendarDays,
     exact: false,
   },
   {

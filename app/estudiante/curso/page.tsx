@@ -169,9 +169,7 @@ export default function CursoPage() {
   }, []);
 
   const curso = data?.curso ?? null;
-  const canDownloadCertificate =
-    data?.estado_pago === "aprobado" ||
-    data?.estado_aprobacion_curso === "aprobado";
+  const canDownloadCertificate = data?.estado_aprobacion_curso === "aprobado";
 
   const handleDownloadCertificate = async () => {
     setDownloadingCertificado(true);
@@ -480,26 +478,28 @@ export default function CursoPage() {
                   </h3>
                 </div>
                 <ol className="space-y-1">
-                  {curso.temario.map((item, idx) => (
-                    <li
-                      key={item.id}
-                      className="group flex gap-4 py-3 border-b border-outline-variant/20 last:border-0 hover:bg-surface-container-low/30 -mx-2 px-2 rounded-sm transition-colors"
-                    >
-                      <span className="shrink-0 w-7 h-7 rounded-full bg-primary-container flex items-center justify-center font-mono text-xs font-bold text-on-primary-container mt-0.5 group-hover:scale-105 transition-transform">
-                        {item.orden ?? idx + 1}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-sans text-sm font-semibold text-on-surface">
-                          {item.titulo}
-                        </p>
-                        {item.descripcion && (
-                          <p className="font-sans text-xs text-muted-foreground mt-1 leading-relaxed">
-                            {item.descripcion}
+                  {[...curso.temario]
+                    .sort((a, b) => a.orden - b.orden)
+                    .map((item, idx) => (
+                      <li
+                        key={item.id}
+                        className="group flex gap-4 py-3 border-b border-outline-variant/20 last:border-0 hover:bg-surface-container-low/30 -mx-2 px-2 rounded-sm transition-colors"
+                      >
+                        <span className="shrink-0 w-7 h-7 rounded-full bg-primary-container flex items-center justify-center font-mono text-xs font-bold text-on-primary-container mt-0.5 group-hover:scale-105 transition-transform">
+                          {idx + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-sans text-sm font-semibold text-on-surface">
+                            {item.titulo}
                           </p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
+                          {item.descripcion && (
+                            <p className="font-sans text-xs text-muted-foreground mt-1 leading-relaxed">
+                              {item.descripcion}
+                            </p>
+                          )}
+                        </div>
+                      </li>
+                    ))}
                 </ol>
               </div>
             )}
