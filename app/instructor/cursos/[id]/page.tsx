@@ -98,7 +98,6 @@ function formatTime(t: string | null) {
   return t.slice(0, 5);
 }
 
-
 /* ── Page ── */
 
 export default function CursoDetailPage({
@@ -244,7 +243,10 @@ export default function CursoDetailPage({
                 {curso.fecha_fin && ` → ${formatDate(curso.fecha_fin)}`}
               </span>
             )}
-            <Badge variant={curso.estado as "activo" | "inactivo"} className="capitalize">
+            <Badge
+              variant={curso.estado as "activo" | "inactivo"}
+              className="capitalize"
+            >
               {curso.estado}
             </Badge>
           </div>
@@ -387,13 +389,29 @@ export default function CursoDetailPage({
                           <span className="font-mono text-xs text-muted-foreground">
                             {est.cedula}
                           </span>
-                          <Badge variant={est.estado_pago as "pendiente" | "aprobado" | "reprobado"} className="text-[10px]">
+                          <Badge
+                            variant={
+                              est.estado_pago as
+                                | "pendiente"
+                                | "aprobado"
+                                | "reprobado"
+                            }
+                            className="text-[10px]"
+                          >
                             Pago: {est.estado_pago}
                           </Badge>
                         </div>
                       </div>
                       {/* Estado aprobación actual */}
-                      <Badge variant={est.estado_aprobacion_curso as "pendiente" | "aprobado" | "reprobado"} className="capitalize">
+                      <Badge
+                        variant={
+                          est.estado_aprobacion_curso as
+                            | "pendiente"
+                            | "aprobado"
+                            | "reprobado"
+                        }
+                        className="capitalize"
+                      >
                         {est.estado_aprobacion_curso}
                       </Badge>
                     </div>
@@ -501,7 +519,15 @@ export default function CursoDetailPage({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <Badge variant={sesion.estado as "programada" | "realizada" | "cancelada"} className="capitalize">
+                      <Badge
+                        variant={
+                          sesion.estado as
+                            | "programada"
+                            | "realizada"
+                            | "cancelada"
+                        }
+                        className="capitalize"
+                      >
                         {sesion.estado}
                       </Badge>
                       <button

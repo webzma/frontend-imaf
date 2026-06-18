@@ -132,7 +132,6 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-
 const pagoEstadoConfig = {
   pendiente: {
     label: "Pago en revisión",
@@ -520,7 +519,10 @@ export default function CursoDetallePage({
                       </span>
                     )}
                   </div>
-                  <Badge variant={curso.estado as "activo" | "inactivo"} className="gap-1.5 px-3 py-1 shrink-0">
+                  <Badge
+                    variant={curso.estado as "activo" | "inactivo"}
+                    className="gap-1.5 px-3 py-1 shrink-0"
+                  >
                     {curso.estado === "activo" ? (
                       <>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
@@ -770,7 +772,12 @@ export default function CursoDetallePage({
                             {est.nombre}
                           </p>
                         </div>
-                        <Badge variant={est.estado as "activo" | "inactivo" | "graduado"} className="text-[10px] shrink-0">
+                        <Badge
+                          variant={
+                            est.estado as "activo" | "inactivo" | "graduado"
+                          }
+                          className="text-[10px] shrink-0"
+                        >
                           {est.estado.charAt(0).toUpperCase() +
                             est.estado.slice(1)}
                         </Badge>
@@ -830,7 +837,11 @@ export default function CursoDetallePage({
                   {curso.sesiones.map((sesion) => {
                     const sesionEstado: Record<
                       SesionItem["estado"],
-                      { label: string; variant: "programada" | "realizada" | "cancelada"; dot: string }
+                      {
+                        label: string;
+                        variant: "programada" | "realizada" | "cancelada";
+                        dot: string;
+                      }
                     > = {
                       programada: {
                         label: "Programada",
@@ -876,7 +887,10 @@ export default function CursoDetallePage({
                             </p>
                           )}
                         </div>
-                        <Badge variant={cfg.variant} className="gap-1.5 px-2.5 py-1 text-[10px] shrink-0">
+                        <Badge
+                          variant={cfg.variant}
+                          className="gap-1.5 px-2.5 py-1 text-[10px] shrink-0"
+                        >
                           <span
                             className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`}
                           />

@@ -786,7 +786,12 @@ export default function EstudiantesPage() {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <Badge variant={e.estado as "activo" | "inactivo" | "graduado"} className="font-sans px-3 py-1">
+                          <Badge
+                            variant={
+                              e.estado as "activo" | "inactivo" | "graduado"
+                            }
+                            className="font-sans px-3 py-1"
+                          >
                             {estadoLabel[e.estado]}
                           </Badge>
                         </td>

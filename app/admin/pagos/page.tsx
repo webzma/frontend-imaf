@@ -274,7 +274,10 @@ function PagoDetailModal({
 
         {/* Estado actual */}
         <div className="flex items-center gap-2">
-          <Badge variant={cfg.variant} className="font-sans text-xs font-semibold px-2.5 py-1">
+          <Badge
+            variant={cfg.variant}
+            className="font-sans text-xs font-semibold px-2.5 py-1"
+          >
             <Icon className="w-3 h-3" />
             {cfg.label}
           </Badge>
@@ -767,7 +770,10 @@ export default function AdminPagosPage() {
                           </span>
                         </td>
                         <td className="px-5 py-4">
-                          <Badge variant={cfg.variant} className="font-sans text-xs font-semibold px-2.5 py-1">
+                          <Badge
+                            variant={cfg.variant}
+                            className="font-sans text-xs font-semibold px-2.5 py-1"
+                          >
                             <Icon className="w-3 h-3" />
                             {cfg.label}
                           </Badge>

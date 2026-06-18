@@ -145,10 +145,9 @@ export default function MobileNavbar() {
                   active ? "scale-110" : ""
                 }`}
               />
-              {item.label === "Notificaciones" &&
-                unreadCount > 0 && (
-                  <span className="absolute top-2 translate-x-1/2 w-2 h-2 bg-pink-500 rounded-full" />
-                )}
+              {item.label === "Notificaciones" && unreadCount > 0 && (
+                <span className="absolute top-2 translate-x-1/2 w-2 h-2 bg-pink-500 rounded-full" />
+              )}
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );

@@ -83,7 +83,6 @@ function formatDate(value: string | null | undefined): string {
   });
 }
 
-
 export default function PerfilPage() {
   const [perfil, setPerfil] = useState<EstudiantePerfil | null>(null);
   const [loading, setLoading] = useState(true);
@@ -289,7 +288,12 @@ export default function PerfilPage() {
                         {perfil.user.email}
                       </p>
                     </div>
-                    <Badge variant={perfil.estado as "activo" | "inactivo" | "graduado"} className="gap-1.5 px-3 py-1">
+                    <Badge
+                      variant={
+                        perfil.estado as "activo" | "inactivo" | "graduado"
+                      }
+                      className="gap-1.5 px-3 py-1"
+                    >
                       <Sparkles className="w-3 h-3" />
                       {perfil.estado.charAt(0).toUpperCase() +
                         perfil.estado.slice(1)}

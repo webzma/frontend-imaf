@@ -49,7 +49,6 @@ function getCookie(name: string): string {
   return match ? match[2] : "";
 }
 
-
 function getInitials(name: string) {
   return name
     .split(" ")
@@ -144,7 +143,15 @@ export default function EstudianteDashboard() {
               {loading ? (
                 <Skeleton className="h-6 w-24" />
               ) : (
-                <Badge variant={(perfil?.estado ?? "activo") as "activo" | "inactivo" | "graduado"} className="px-2.5 py-1">
+                <Badge
+                  variant={
+                    (perfil?.estado ?? "activo") as
+                      | "activo"
+                      | "inactivo"
+                      | "graduado"
+                  }
+                  className="px-2.5 py-1"
+                >
                   {perfil
                     ? perfil.estado.charAt(0).toUpperCase() +
                       perfil.estado.slice(1)

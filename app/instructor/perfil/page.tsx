@@ -88,7 +88,6 @@ const tituloLabel: Record<string, string> = {
   doctorado: "Doctorado",
 };
 
-
 function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
   const ymd = value.slice(0, 10);
@@ -330,7 +329,12 @@ export default function PerfilPage() {
                 </span>
               </div>
               {p.titulo && (
-                <Badge variant={p.titulo as "licenciatura" | "maestria" | "doctorado"} className="mt-2 gap-1">
+                <Badge
+                  variant={
+                    p.titulo as "licenciatura" | "maestria" | "doctorado"
+                  }
+                  className="mt-2 gap-1"
+                >
                   <BadgeCheck className="w-3 h-3" />
                   {tituloLabel[p.titulo]}
                 </Badge>
