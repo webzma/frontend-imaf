@@ -23,14 +23,14 @@ function getCookie(name: string): string {
   return match ? match[2] : "";
 }
 
-export default function NotificacionesPage() {
+export default function InstructorNotificacionesPage() {
   const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "unread">("all");
 
   const fetchNotifications = () => {
-    fetch(`${process.env.API_URL}api/estudiante/notificaciones`, {
+    fetch(`${process.env.API_URL}api/profesor/notificaciones`, {
       headers: {
         Authorization: `Bearer ${getCookie("token")}`,
         Accept: "application/json",
@@ -52,9 +52,18 @@ export default function NotificacionesPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const markAsRead = (notificationId: number, url: string) => {
+  const markAsRead = (notificationId: number, rawUrl: string) => {
+    let url = rawUrl || "/instructor";
+    if (url.includes("/admin/cursos")) {
+      url = url.replace("/admin/cursos", "/instructor/cursos");
+    } else if (url.includes("/profesor/cursos")) {
+      url = url.replace("/profesor/cursos", "/instructor/cursos");
+    } else if (url.startsWith("/cursos/")) {
+      url = `/instructor${url}`;
+    }
+
     fetch(
-      `${process.env.API_URL}api/estudiante/notificaciones/${notificationId}/read`,
+      `${process.env.API_URL}api/profesor/notificaciones/${notificationId}/read`,
       {
         method: "POST",
         headers: {
@@ -89,7 +98,7 @@ export default function NotificacionesPage() {
   };
 
   const markAllAsRead = () => {
-    fetch(`${process.env.API_URL}api/estudiante/notificaciones/mark-all-read`, {
+    fetch(`${process.env.API_URL}api/profesor/notificaciones/mark-all-read`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${getCookie("token")}`,
@@ -153,7 +162,7 @@ export default function NotificacionesPage() {
         {/* Page header */}
         <div className="mb-10 md:mb-12">
           <div className="flex items-center gap-4 mb-4">
-            <Bell className="size-6 text-primary/80" />
+            <Bell className="size-6 md:size-7 text-primary/80" />
             <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
               Notificaciones
             </span>

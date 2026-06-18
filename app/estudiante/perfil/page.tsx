@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   User,
   Mail,
@@ -82,13 +83,6 @@ function formatDate(value: string | null | undefined): string {
   });
 }
 
-const estadoStyle: Record<string, string> = {
-  activo:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  inactivo:
-    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
-  graduado: "bg-primary-container text-on-primary-container",
-};
 
 export default function PerfilPage() {
   const [perfil, setPerfil] = useState<EstudiantePerfil | null>(null);
@@ -219,8 +213,8 @@ export default function PerfilPage() {
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-5xl mx-auto">
         {/* Page header */}
         <div className="mb-10 md:mb-12">
-          <div className="flex items-center gap-2 mb-4">
-            <User className="w-3.5 h-3.5 text-primary/80" />
+          <div className="flex items-center gap-4 mb-4">
+            <User className="size-6 text-primary/80" />
             <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
               Mi perfil
             </span>
@@ -295,16 +289,11 @@ export default function PerfilPage() {
                         {perfil.user.email}
                       </p>
                     </div>
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-sans text-xs font-semibold ${
-                        estadoStyle[perfil.estado] ??
-                        "bg-muted text-muted-foreground"
-                      }`}
-                    >
+                    <Badge variant={perfil.estado as "activo" | "inactivo" | "graduado"} className="gap-1.5 px-3 py-1">
                       <Sparkles className="w-3 h-3" />
                       {perfil.estado.charAt(0).toUpperCase() +
                         perfil.estado.slice(1)}
-                    </span>
+                    </Badge>
 
                     <div className="w-full pt-5 mt-2 border-t border-outline-variant/30 space-y-3 text-left">
                       <div className="flex items-center gap-2.5">

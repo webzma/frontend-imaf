@@ -4,6 +4,7 @@ import { useState, useEffect, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   CalendarDays,
@@ -68,12 +69,6 @@ function formatTime(t: string | null) {
   return t.slice(0, 5);
 }
 
-const estadoSesionStyle: Record<string, string> = {
-  programada: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-400",
-  realizada:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  cancelada: "bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-400",
-};
 
 /* ── Page ── */
 
@@ -213,7 +208,8 @@ export default function AsistenciaInstructorPage({
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10">
         {/* Sticky top bar */}
@@ -274,7 +270,7 @@ export default function AsistenciaInstructorPage({
           </div>
         </div>
 
-        <div className="px-4 md:px-10 py-8 max-w-4xl mx-auto">
+        <div className="px-4 md:px-10 py-8 max-w-8xl mx-auto">
           {/* Session header */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-2">
@@ -298,11 +294,9 @@ export default function AsistenciaInstructorPage({
                   {sesion.hora_fin && ` – ${formatTime(sesion.hora_fin)}`}
                 </span>
               )}
-              <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-sans text-xs font-semibold capitalize ${estadoSesionStyle[sesion.estado]}`}
-              >
+              <Badge variant={sesion.estado as "programada" | "realizada" | "cancelada"} className="capitalize">
                 {sesion.estado}
-              </span>
+              </Badge>
             </div>
           </div>
 

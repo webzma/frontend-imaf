@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   BookOpen,
-  CalendarDays,
   GraduationCap,
   CreditCard,
   Bell,
@@ -23,12 +22,6 @@ const navItems = [
     label: "Cursos",
     href: "/admin/cursos",
     icon: BookOpen,
-    exact: false,
-  },
-  {
-    label: "Horario",
-    href: "/admin/horario",
-    icon: CalendarDays,
     exact: false,
   },
   {
@@ -51,9 +44,16 @@ const navItems = [
   },
 ];
 
+function getCookie(name: string): string {
+  if (typeof document === "undefined") return "";
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+  return match ? match[2] : "";
+}
+
 export default function AdminMobileNavbar() {
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -64,6 +64,44 @@ export default function AdminMobileNavbar() {
     window.addEventListener("resize", checkMobile);
 
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    // Fetch notifications count
+    const fetchNotifications = () => {
+      fetch(`${process.env.API_URL}api/admin/notificaciones/count`, {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+          Accept: "application/json",
+        },
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          setUnreadCount(data.unread_count || 0);
+        })
+        .catch(() => {});
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+
+    // Listen for notification read events
+    const handleNotificationRead = (event: CustomEvent) => {
+      setUnreadCount(event.detail.count);
+    };
+
+    window.addEventListener(
+      "notificationRead",
+      handleNotificationRead as EventListener,
+    );
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(
+        "notificationRead",
+        handleNotificationRead as EventListener,
+      );
+    };
   }, []);
 
   // Add padding to main content when navbar is visible
@@ -120,7 +158,7 @@ export default function AdminMobileNavbar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 relative ${
                 active
                   ? "text-pink-500"
                   : "text-muted-foreground hover:text-on-surface"
@@ -131,6 +169,9 @@ export default function AdminMobileNavbar() {
                   active ? "scale-110" : ""
                 }`}
               />
+              {item.label === "Notificaciones" && unreadCount > 0 && (
+                <span className="absolute top-2 translate-x-1/2 w-2 h-2 bg-pink-500 rounded-full" />
+              )}
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
   Users,
@@ -57,11 +58,6 @@ function formatDate(d: string | null) {
   });
 }
 
-const estadoStyle: Record<string, string> = {
-  activo:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  inactivo: "bg-zinc-100 text-zinc-600 dark:bg-zinc-500/15 dark:text-zinc-400",
-};
 
 /* ── Page ── */
 
@@ -113,14 +109,15 @@ export default function MisCursosPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 px-4 md:px-10 py-10 max-w-4xl">
+      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <BookOpen className="w-3 h-3 text-primary/70" />
-            <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary/70 font-medium">
+          <div className="flex items-center gap-4 mb-3">
+            <BookOpen className="size-6 md:size-7 text-primary/70" />
+            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-medium">
               Instructor / Mis Cursos
             </span>
           </div>
@@ -230,11 +227,9 @@ export default function MisCursosPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full font-sans text-xs font-semibold capitalize ${estadoStyle[curso.estado]}`}
-                        >
+                        <Badge variant={curso.estado as "activo" | "inactivo"} className="capitalize">
                           {curso.estado}
-                        </span>
+                        </Badge>
                         <span className="font-mono text-xs text-muted-foreground">
                           {curso.codigo}
                         </span>

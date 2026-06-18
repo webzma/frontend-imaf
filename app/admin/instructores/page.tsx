@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -89,13 +90,6 @@ function getInitials(name: string): string {
 }
 
 /* ── Styles ── */
-
-const tituloStyle: Record<string, string> = {
-  licenciatura: "bg-sky-100 text-sky-800 border border-sky-200",
-  maestria: "bg-emerald-100 text-emerald-800 border border-emerald-200",
-  doctorado:
-    "bg-primary-container text-on-primary-container border border-primary-container",
-};
 
 const tituloLabel: Record<string, string> = {
   licenciatura: "Licenciatura",
@@ -407,15 +401,16 @@ export default function InstructoresPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-10 flex-col md:flex-row md:flex items-end justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <GraduationCap className="size-6 md:size-10 text-primary/70" />
-              <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
+            <div className="flex items-center gap-4 mb-4">
+              <GraduationCap className="size-6 md:size-7 text-primary/70" />
+              <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
                 Gestión / Instructores
               </span>
             </div>
@@ -938,11 +933,9 @@ export default function InstructoresPage() {
                         </td>
                         <td className="px-6 py-4">
                           {p.titulo ? (
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full font-sans text-xs font-semibold ${tituloStyle[p.titulo]}`}
-                            >
+                            <Badge variant={p.titulo as "licenciatura" | "maestria" | "doctorado"} className="font-sans text-xs font-semibold px-3 py-1">
                               {tituloLabel[p.titulo]}
-                            </span>
+                            </Badge>
                           ) : (
                             <span className="text-muted-foreground/50 font-sans text-sm">
                               —

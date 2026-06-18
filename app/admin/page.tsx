@@ -100,15 +100,15 @@ export default function AdminDashboard() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      {/* Blob decorativo tonal */}
-      <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* ── Header ── */}
         <div className="mb-12">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="size-10 text-primary/70" />
-            <span className="font-sans text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
+          <div className="flex items-center gap-4 mb-4">
+            <TrendingUp className="size-6 md:size-7 text-primary/70" />
+            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
               Resumen general
             </span>
           </div>

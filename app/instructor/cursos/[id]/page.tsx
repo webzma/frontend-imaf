@@ -3,6 +3,7 @@
 import { useState, useEffect, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   Users,
@@ -97,28 +98,6 @@ function formatTime(t: string | null) {
   return t.slice(0, 5);
 }
 
-const aprobacionStyle = {
-  pendiente:
-    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
-  aprobado:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  reprobado: "bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-400",
-};
-
-const pagoStyle = {
-  pendiente:
-    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
-  aprobado:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  reprobado: "bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-400",
-};
-
-const sesionEstadoStyle = {
-  programada: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-400",
-  realizada:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
-  cancelada: "bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-400",
-};
 
 /* ── Page ── */
 
@@ -230,9 +209,10 @@ export default function CursoDetailPage({
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 px-4 md:px-10 py-10 max-w-4xl">
+      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Back */}
         <button
           onClick={() => router.push("/instructor/mis-cursos")}
@@ -264,15 +244,9 @@ export default function CursoDetailPage({
                 {curso.fecha_fin && ` → ${formatDate(curso.fecha_fin)}`}
               </span>
             )}
-            <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-sans text-xs font-semibold capitalize ${
-                curso.estado === "activo"
-                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
-                  : "bg-zinc-100 text-zinc-600 dark:bg-zinc-500/15 dark:text-zinc-400"
-              }`}
-            >
+            <Badge variant={curso.estado as "activo" | "inactivo"} className="capitalize">
               {curso.estado}
-            </span>
+            </Badge>
           </div>
           {curso.descripcion && (
             <p className="mt-3 font-sans text-sm text-muted-foreground max-w-2xl">
@@ -413,19 +387,15 @@ export default function CursoDetailPage({
                           <span className="font-mono text-xs text-muted-foreground">
                             {est.cedula}
                           </span>
-                          <span
-                            className={`inline-flex items-center px-1.5 py-0.5 rounded-full font-sans text-[10px] font-semibold ${pagoStyle[est.estado_pago]}`}
-                          >
+                          <Badge variant={est.estado_pago as "pendiente" | "aprobado" | "reprobado"} className="text-[10px]">
                             Pago: {est.estado_pago}
-                          </span>
+                          </Badge>
                         </div>
                       </div>
                       {/* Estado aprobación actual */}
-                      <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full font-sans text-xs font-semibold capitalize ${aprobacionStyle[est.estado_aprobacion_curso]}`}
-                      >
+                      <Badge variant={est.estado_aprobacion_curso as "pendiente" | "aprobado" | "reprobado"} className="capitalize">
                         {est.estado_aprobacion_curso}
-                      </span>
+                      </Badge>
                     </div>
 
                     {/* Acciones de aprobación */}
@@ -531,11 +501,9 @@ export default function CursoDetailPage({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-sans text-xs font-semibold capitalize ${sesionEstadoStyle[sesion.estado]}`}
-                      >
+                      <Badge variant={sesion.estado as "programada" | "realizada" | "cancelada"} className="capitalize">
                         {sesion.estado}
-                      </span>
+                      </Badge>
                       <button
                         onClick={() =>
                           router.push(

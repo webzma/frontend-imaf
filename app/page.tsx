@@ -76,7 +76,7 @@ export default function LandingPage() {
       <section className="relative overflow-hidden">
         {/* Decorative blobs */}
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-primary-container/30 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-30%] left-[-5%] w-[400px] h-[400px] rounded-full bg-secondary-container/40 blur-[100px] pointer-events-none" />
+        {/*<div className="absolute bottom-[-30%] left-[-5%] w-[400px] h-[400px] rounded-full bg-secondary-container/40 blur-[100px] pointer-events-none" />*/}
 
         <div className="max-w-7xl mx-auto px-6 lg:px-16 pt-8 md:pt-20 pb-28 lg:pt-28 lg:pb-36 relative">
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-start">
@@ -494,7 +494,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="bg-surface-container-highest py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
-          <div className="grid md:grid-cols-12 gap-12 mb-12">
+          <div className="grid md:grid-cols-11 gap-12 mb-12">
             <div className="md:col-span-4 space-y-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 flex items-center justify-center">
@@ -604,7 +604,7 @@ export default function LandingPage() {
                 <div className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-on-surface">
+                    <p className="text-muted-foreground">
                       5ta av. entre calles 29 y 30.
                       <br />
                       Antigua sede de la Unidad de Diálisis.

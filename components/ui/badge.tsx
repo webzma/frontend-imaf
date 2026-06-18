@@ -19,6 +19,33 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // ── Status variants ──
+        activo:
+          "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10",
+        inactivo:
+          "text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10",
+        graduado:
+          "text-primary dark:text-primary bg-primary/10 dark:bg-primary/20",
+        pendiente:
+          "text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10",
+        aprobado:
+          "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10",
+        rechazado:
+          "text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-500/10",
+        programada:
+          "text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10",
+        realizada:
+          "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10",
+        cancelada:
+          "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10",
+        reprobado:
+          "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10",
+        licenciatura:
+          "text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10",
+        maestria:
+          "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10",
+        doctorado:
+          "text-primary dark:text-primary bg-primary/10 dark:bg-primary/20",
       },
     },
     defaultVariants: {

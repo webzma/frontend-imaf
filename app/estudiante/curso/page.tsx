@@ -5,6 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
   Hash,
@@ -108,22 +109,22 @@ function getInitials(name: string | null): string {
 
 const estadoConfig: Record<
   EstadoKey,
-  { label: string; icon: React.ElementType; cls: string }
+  { label: string; icon: React.ElementType; variant: "pendiente" | "aprobado" | "reprobado" }
 > = {
   pendiente: {
     label: "Pendiente",
     icon: Clock,
-    cls: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
+    variant: "pendiente",
   },
   aprobado: {
     label: "Aprobado",
     icon: CheckCircle2,
-    cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+    variant: "aprobado",
   },
   reprobado: {
     label: "Reprobado",
     icon: Ban,
-    cls: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400",
+    variant: "reprobado",
   },
 };
 
@@ -134,12 +135,10 @@ function StatusRow({ label, estado }: { label: string; estado: EstadoKey }) {
   return (
     <div className="flex items-center justify-between py-3 border-b border-outline-variant/20 last:border-0">
       <p className="font-sans text-sm text-on-surface font-medium">{label}</p>
-      <span
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${cfg.cls}`}
-      >
+      <Badge variant={cfg.variant} className="gap-1.5 px-2.5 py-1">
         <Icon className="w-3 h-3" />
         {cfg.label}
-      </span>
+      </Badge>
     </div>
   );
 }
@@ -227,8 +226,8 @@ export default function CursoPage() {
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-5xl mx-auto">
         {/* Page header */}
         <div className="mb-10 md:mb-12">
-          <div className="flex items-center gap-2 mb-4">
-            <BookOpen className="w-3.5 h-3.5 text-primary/80" />
+          <div className="flex items-center gap-4 mb-4">
+            <BookOpen className="size-6 text-primary/80" />
             <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
               Mi curso
             </span>
@@ -280,13 +279,7 @@ export default function CursoPage() {
                       {curso.codigo}
                     </span>
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-sans text-xs font-semibold shrink-0 ${
-                      curso.estado === "activo"
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
-                        : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
-                    }`}
-                  >
+                  <Badge variant={curso.estado as "activo" | "inactivo"} className="gap-1.5 px-3 py-1 shrink-0">
                     {curso.estado === "activo" ? (
                       <>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
@@ -297,7 +290,7 @@ export default function CursoPage() {
                         <XCircle className="w-3 h-3" /> Inactivo
                       </>
                     )}
-                  </span>
+                  </Badge>
                 </div>
 
                 <h2 className="font-serif font-light text-3xl md:text-5xl tight-tracking text-on-surface mb-4 leading-[1.05]">
@@ -517,22 +510,22 @@ export default function CursoPage() {
                   {curso.sesiones.map((sesion) => {
                     const sesionEstado: Record<
                       SesionItem["estado"],
-                      { label: string; cls: string; dot: string }
+                      { label: string; variant: "programada" | "realizada" | "cancelada"; dot: string }
                     > = {
                       programada: {
                         label: "Programada",
-                        cls: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400",
-                        dot: "bg-blue-500",
+                        variant: "programada",
+                        dot: "bg-sky-500",
                       },
                       realizada: {
                         label: "Realizada",
-                        cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+                        variant: "realizada",
                         dot: "bg-emerald-500",
                       },
                       cancelada: {
                         label: "Cancelada",
-                        cls: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400",
-                        dot: "bg-red-500",
+                        variant: "cancelada",
+                        dot: "bg-rose-500",
                       },
                     };
                     const cfg =
@@ -563,14 +556,12 @@ export default function CursoPage() {
                             </p>
                           )}
                         </div>
-                        <span
-                          className={`self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-[10px] font-semibold ${cfg.cls}`}
-                        >
+                        <Badge variant={cfg.variant} className="gap-1.5 px-2.5 py-1 text-[10px] shrink-0">
                           <span
                             className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`}
                           />
                           {cfg.label}
-                        </span>
+                        </Badge>
                       </div>
                     );
                   })}

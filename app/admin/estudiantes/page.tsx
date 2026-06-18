@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -87,14 +88,7 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-/* ── Styles ── */
-
-const estadoStyle: Record<string, string> = {
-  activo: "bg-emerald-100 text-emerald-800 border border-emerald-200",
-  inactivo: "bg-amber-100 text-amber-800 border border-amber-200",
-  graduado:
-    "bg-primary-container text-on-primary-container border border-primary-container",
-};
+/* ── Labels ── */
 
 const estadoLabel: Record<string, string> = {
   activo: "Activo",
@@ -364,15 +358,16 @@ export default function EstudiantesPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-10 flex-col md:flex-row md:flex items-end justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Users className="size-6 md:size-10 text-primary/70" />
-              <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
+            <div className="flex items-center gap-4 mb-4">
+              <Users className="size-6 md:size-7 text-primary/70" />
+              <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
                 Gestión / Estudiantes
               </span>
             </div>
@@ -791,11 +786,9 @@ export default function EstudiantesPage() {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full font-sans text-xs font-semibold ${estadoStyle[e.estado]}`}
-                          >
+                          <Badge variant={e.estado as "activo" | "inactivo" | "graduado"} className="font-sans px-3 py-1">
                             {estadoLabel[e.estado]}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="px-4 py-4">
                           <button

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
   GraduationCap,
@@ -136,10 +137,10 @@ function CursoCard({
             <Hash className="w-2.5 h-2.5" />
             {curso.codigo}
           </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400">
+          <Badge variant="activo" className="gap-1 px-2 py-0.5 text-[10px]">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
             Activo
-          </span>
+          </Badge>
         </div>
 
         <h3 className="font-serif font-light text-2xl tight-tracking text-on-surface mb-2 leading-[1.15] group-hover:text-primary transition-colors">
@@ -286,8 +287,8 @@ export default function EstudianteCursosPage() {
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12 md:mb-14">
-          <div className="flex items-center gap-2 mb-4">
-            <BookOpen className="w-3.5 h-3.5 text-primary/80" />
+          <div className="flex items-center gap-4 mb-4">
+            <BookOpen className="size-6 text-primary/80" />
             <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
               Plataforma · Cursos
             </span>

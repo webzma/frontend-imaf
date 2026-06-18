@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -98,19 +99,19 @@ const estadoConfig = {
   pendiente: {
     label: "Pendiente",
     icon: Clock,
-    cls: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
+    variant: "pendiente" as const,
     dot: "bg-amber-500",
   },
   aprobado: {
     label: "Aprobado",
     icon: CheckCircle2,
-    cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400",
+    variant: "aprobado" as const,
     dot: "bg-emerald-500",
   },
   rechazado: {
     label: "Rechazado",
     icon: Ban,
-    cls: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-400",
+    variant: "rechazado" as const,
     dot: "bg-red-500",
   },
 };
@@ -273,12 +274,10 @@ function PagoDetailModal({
 
         {/* Estado actual */}
         <div className="flex items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${cfg.cls}`}
-          >
+          <Badge variant={cfg.variant} className="font-sans text-xs font-semibold px-2.5 py-1">
             <Icon className="w-3 h-3" />
             {cfg.label}
-          </span>
+          </Badge>
           <span className="font-sans text-xs text-muted-foreground">
             {formatDate(pago.created_at)}
           </span>
@@ -357,7 +356,7 @@ function PagoDetailModal({
             </Button>
             <Button
               onClick={() => handleDecision("aprobado")}
-              className="flex-1 gradient-primary font-sans text-sm h-10 text-white"
+              className="flex-1 font-sans text-sm h-10"
               disabled={!!saving}
             >
               {saving === "aprobado" ? (
@@ -430,7 +429,7 @@ function PagoDetailModal({
                 }
                 className={`flex-1 ${
                   confirmDialog.action === "aprobado"
-                    ? "gradient-primary text-white"
+                    ? ""
                     : "bg-red-600 hover:bg-red-700 text-white"
                 }`}
               >
@@ -552,14 +551,15 @@ export default function AdminPagosPage() {
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
+      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-8 py-10 mx-auto">
         {/* Header */}
         <div className="mb-10">
-          <div className="flex items-center gap-2 mb-3">
-            <CreditCard className="w-3 h-3 text-primary/70" />
-            <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-medium">
+          <div className="flex items-center gap-4 mb-3">
+            <CreditCard className="size-6 md:size-7 text-primary/70" />
+            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-medium">
               Admin / Pagos
             </span>
           </div>
@@ -767,12 +767,10 @@ export default function AdminPagosPage() {
                           </span>
                         </td>
                         <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-xs font-semibold ${cfg.cls}`}
-                          >
+                          <Badge variant={cfg.variant} className="font-sans text-xs font-semibold px-2.5 py-1">
                             <Icon className="w-3 h-3" />
                             {cfg.label}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="px-5 py-4">
                           <Button
