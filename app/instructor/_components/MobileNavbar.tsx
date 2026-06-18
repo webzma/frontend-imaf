@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { LayoutDashboard, BookOpen, User, Bell } from "lucide-react";
+import { LayoutDashboard, BookOpen, User, Bell, CalendarDays } from "lucide-react";
 
 const navItems = [
   {
