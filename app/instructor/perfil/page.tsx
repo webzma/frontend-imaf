@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ import {
   Save,
   X,
   CalendarDays,
+  Camera,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -40,6 +41,7 @@ interface Profesor {
   departamento: string | null;
   fecha_nacimiento: string | null;
   genero: "masculino" | "femenino" | "otro" | null;
+  foto: string | null;
 }
 
 interface MeResponse {
@@ -106,7 +108,9 @@ export default function PerfilPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingFoto, setUploadingFoto] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     cedula: "",
@@ -148,6 +152,51 @@ export default function PerfilPage() {
   const handleCancel = () => {
     if (me) populateForm(me.profesor);
     setEditing(false);
+  };
+
+  const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("El archivo debe ser una imagen.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("La imagen no debe superar los 2 MB.");
+      return;
+    }
+
+    setUploadingFoto(true);
+    try {
+      const formData = new FormData();
+      formData.append("foto", file);
+      const res = await fetch(
+        `${process.env.API_URL}api/profesor/perfil/foto`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${getCookie("token")}`,
+            Accept: "application/json",
+          },
+          body: formData,
+        },
+      );
+      const body = await res.json();
+      if (!res.ok) {
+        toast.error(body?.message ?? "Error al subir la foto.");
+        return;
+      }
+      setMe((prev) =>
+        prev ? { ...prev, profesor: { ...prev.profesor, ...body } } : prev,
+      );
+      toast.success("Foto de perfil actualizada");
+    } catch {
+      toast.error("Error al conectar con el servidor");
+    } finally {
+      setUploadingFoto(false);
+    }
   };
 
   const handleSave = async () => {
@@ -234,10 +283,41 @@ export default function PerfilPage() {
         {/* Avatar + identidad */}
         <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 mb-6">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-full bg-primary/15 border-2 border-primary/20 flex items-center justify-center shrink-0">
-              <span className="font-sans text-xl font-bold text-primary">
-                {getInitials(me.name)}
-              </span>
+            <div className="relative shrink-0">
+              <div className="w-16 h-16 rounded-full bg-primary/15 border-2 border-primary/20 flex items-center justify-center overflow-hidden">
+                {p.foto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={p.foto}
+                    alt={me.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="font-sans text-xl font-bold text-primary">
+                    {getInitials(me.name)}
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingFoto}
+                aria-label="Cambiar foto de perfil"
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary text-white dark:text-[#1a1817] flex items-center justify-center ring-2 ring-surface-container-low shadow-sm hover:opacity-90 transition-opacity disabled:opacity-60"
+              >
+                {uploadingFoto ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Camera className="w-3.5 h-3.5" />
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={handleFotoChange}
+              />
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="font-serif font-light text-2xl text-on-surface">

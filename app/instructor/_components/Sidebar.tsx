@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   User,
   BookOpen,
+  CalendarDays,
   LogOut,
   Moon,
   Sun,
@@ -50,6 +51,12 @@ const navItems = [
         label: "Mis Cursos",
         href: "/instructor/mis-cursos",
         icon: BookOpen,
+        exact: false,
+      },
+      {
+        label: "Mi Horario",
+        href: "/instructor/horario",
+        icon: CalendarDays,
         exact: false,
       },
       {

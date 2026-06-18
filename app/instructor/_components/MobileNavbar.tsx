@@ -19,6 +19,12 @@ const navItems = [
     exact: false,
   },
   {
+    label: "Horario",
+    href: "/instructor/horario",
+    icon: CalendarDays,
+    exact: false,
+  },
+  {
     label: "Perfil",
     href: "/instructor/perfil",
     icon: User,
