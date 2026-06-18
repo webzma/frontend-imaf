@@ -69,7 +69,6 @@ function formatTime(t: string | null) {
   return t.slice(0, 5);
 }
 
-
 /* ── Page ── */
 
 export default function AsistenciaInstructorPage({
@@ -294,7 +293,12 @@ export default function AsistenciaInstructorPage({
                   {sesion.hora_fin && ` – ${formatTime(sesion.hora_fin)}`}
                 </span>
               )}
-              <Badge variant={sesion.estado as "programada" | "realizada" | "cancelada"} className="capitalize">
+              <Badge
+                variant={
+                  sesion.estado as "programada" | "realizada" | "cancelada"
+                }
+                className="capitalize"
+              >
                 {sesion.estado}
               </Badge>
             </div>

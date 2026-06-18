@@ -933,7 +933,15 @@ export default function InstructoresPage() {
                         </td>
                         <td className="px-6 py-4">
                           {p.titulo ? (
-                            <Badge variant={p.titulo as "licenciatura" | "maestria" | "doctorado"} className="font-sans text-xs font-semibold px-3 py-1">
+                            <Badge
+                              variant={
+                                p.titulo as
+                                  | "licenciatura"
+                                  | "maestria"
+                                  | "doctorado"
+                              }
+                              className="font-sans text-xs font-semibold px-3 py-1"
+                            >
                               {tituloLabel[p.titulo]}
                             </Badge>
                           ) : (

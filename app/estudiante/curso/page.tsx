@@ -109,7 +109,11 @@ function getInitials(name: string | null): string {
 
 const estadoConfig: Record<
   EstadoKey,
-  { label: string; icon: React.ElementType; variant: "pendiente" | "aprobado" | "reprobado" }
+  {
+    label: string;
+    icon: React.ElementType;
+    variant: "pendiente" | "aprobado" | "reprobado";
+  }
 > = {
   pendiente: {
     label: "Pendiente",
@@ -279,7 +283,10 @@ export default function CursoPage() {
                       {curso.codigo}
                     </span>
                   </div>
-                  <Badge variant={curso.estado as "activo" | "inactivo"} className="gap-1.5 px-3 py-1 shrink-0">
+                  <Badge
+                    variant={curso.estado as "activo" | "inactivo"}
+                    className="gap-1.5 px-3 py-1 shrink-0"
+                  >
                     {curso.estado === "activo" ? (
                       <>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
@@ -510,7 +517,11 @@ export default function CursoPage() {
                   {curso.sesiones.map((sesion) => {
                     const sesionEstado: Record<
                       SesionItem["estado"],
-                      { label: string; variant: "programada" | "realizada" | "cancelada"; dot: string }
+                      {
+                        label: string;
+                        variant: "programada" | "realizada" | "cancelada";
+                        dot: string;
+                      }
                     > = {
                       programada: {
                         label: "Programada",
@@ -556,7 +567,10 @@ export default function CursoPage() {
                             </p>
                           )}
                         </div>
-                        <Badge variant={cfg.variant} className="gap-1.5 px-2.5 py-1 text-[10px] shrink-0">
+                        <Badge
+                          variant={cfg.variant}
+                          className="gap-1.5 px-2.5 py-1 text-[10px] shrink-0"
+                        >
                           <span
                             className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`}
                           />

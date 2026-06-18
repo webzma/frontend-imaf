@@ -58,7 +58,6 @@ function formatDate(d: string | null) {
   });
 }
 
-
 /* ── Page ── */
 
 export default function MisCursosPage() {
@@ -227,7 +226,10 @@ export default function MisCursosPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <Badge variant={curso.estado as "activo" | "inactivo"} className="capitalize">
+                        <Badge
+                          variant={curso.estado as "activo" | "inactivo"}
+                          className="capitalize"
+                        >
                           {curso.estado}
                         </Badge>
                         <span className="font-mono text-xs text-muted-foreground">

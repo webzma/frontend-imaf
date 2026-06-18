@@ -64,7 +64,6 @@ function formatDate(d: string | null) {
   });
 }
 
-
 /* ── Page ── */
 
 export default function InstructorDashboard() {
@@ -245,7 +244,10 @@ export default function InstructorDashboard() {
                       <span className="font-sans text-xs text-muted-foreground">
                         {inscritos}/{curso.limite_cupo}
                       </span>
-                      <Badge variant={curso.estado as "activo" | "inactivo"} className="capitalize">
+                      <Badge
+                        variant={curso.estado as "activo" | "inactivo"}
+                        className="capitalize"
+                      >
                         {curso.estado}
                       </Badge>
                       <ArrowRight className="w-4 h-4 text-muted-foreground/40" />

@@ -833,7 +833,15 @@ export default function CursoDetailPage({
                       <GraduationCap className="w-4 h-4 text-primary/70" />
                       {curso.instructor.user.name}
                       {instructorFull?.titulo && (
-                        <Badge variant={instructorFull.titulo as "licenciatura" | "maestria" | "doctorado"} className="font-sans text-[10px] px-1.5 py-0 capitalize">
+                        <Badge
+                          variant={
+                            instructorFull.titulo as
+                              | "licenciatura"
+                              | "maestria"
+                              | "doctorado"
+                          }
+                          className="font-sans text-[10px] px-1.5 py-0 capitalize"
+                        >
                           {instructorFull.titulo}
                         </Badge>
                       )}
@@ -863,7 +871,10 @@ export default function CursoDetailPage({
 
             {/* Actions */}
             <div className="flex items-center gap-2 ml-4 shrink-0">
-              <Badge variant={curso.estado === "activo" ? "activo" : "inactivo"} className="font-sans text-sm font-semibold px-3 py-1">
+              <Badge
+                variant={curso.estado === "activo" ? "activo" : "inactivo"}
+                className="font-sans text-sm font-semibold px-3 py-1"
+              >
                 {curso.estado === "activo" ? "Activo" : "Inactivo"}
               </Badge>
               <button
@@ -1414,7 +1425,10 @@ export default function CursoDetailPage({
                             {s.hora_fin && ` – ${s.hora_fin}`}
                           </span>
                         )}
-                        <Badge variant={sesionEstadoVariant} className="font-sans text-[10px] font-semibold capitalize px-1.5 py-0">
+                        <Badge
+                          variant={sesionEstadoVariant}
+                          className="font-sans text-[10px] font-semibold capitalize px-1.5 py-0"
+                        >
                           {s.estado}
                         </Badge>
                       </div>
