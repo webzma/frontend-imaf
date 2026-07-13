@@ -485,7 +485,8 @@ export default function EstudiantesPage() {
                   <div className="grid gap-2">
                     <Label htmlFor="cedula">Cédula *</Label>
                     <Input
-                      id="cedula" inputMode="numeric"
+                      id="cedula"
+                      inputMode="numeric"
                       placeholder="V-12345678"
                       {...form.register("cedula")}
                     />
@@ -498,7 +499,8 @@ export default function EstudiantesPage() {
                   <div className="grid gap-2">
                     <Label htmlFor="telefono">Teléfono</Label>
                     <Input
-                      id="telefono" inputMode="numeric"
+                      id="telefono"
+                      inputMode="numeric"
                       placeholder="0412-1234567"
                       {...form.register("telefono")}
                     />
@@ -885,7 +887,11 @@ export default function EstudiantesPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-cedula">Cédula *</Label>
-                <Input id="edit-cedula" inputMode="numeric" {...editForm.register("cedula")} />
+                <Input
+                  id="edit-cedula"
+                  inputMode="numeric"
+                  {...editForm.register("cedula")}
+                />
                 {editForm.formState.errors.cedula && (
                   <p className="text-sm text-destructive">
                     {editForm.formState.errors.cedula.message}
@@ -898,7 +904,8 @@ export default function EstudiantesPage() {
               <div className="grid gap-2">
                 <Label htmlFor="edit-telefono">Teléfono</Label>
                 <Input
-                  id="edit-telefono" inputMode="numeric"
+                  id="edit-telefono"
+                  inputMode="numeric"
                   placeholder="0412-1234567"
                   {...editForm.register("telefono")}
                 />

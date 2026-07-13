@@ -108,30 +108,32 @@ const formatPrice = (precio: number): string => {
 
 /* ── Zod Schema ── */
 
-const cursoSchema = z.object({
-  nombre: z.string().min(1, "El nombre es obligatorio").max(255),
-  descripcion: z.string().max(1000).optional(),
-  profesor_id: z.string().min(1, "Debes seleccionar un instructor"),
-  limite_cupo: z.number().int().min(1, "Mínimo 1 participante"),
-  minimo_estudiantes: z.preprocess(
-    (v) => (typeof v === "number" && Number.isNaN(v) ? undefined : v),
-    z.number().int().min(1, "Mínimo 1 estudiante").optional(),
-  ),
-  fecha_inicio: z.string().optional(),
-  fecha_fin: z.string().optional(),
-  requisitos: z.string().max(2000).optional(),
-  precio: z.number().min(0, "El precio no puede ser negativo"),
-  whatsapp_url: z.string().url("URL inválida").optional().or(z.literal("")),
-  estado: z.enum(["activo", "inactivo"]),
-}).refine(
-  (d) =>
-    d.minimo_estudiantes === undefined ||
-    d.minimo_estudiantes <= d.limite_cupo,
-  {
-    message: "El mínimo no puede superar el límite de cupo",
-    path: ["minimo_estudiantes"],
-  },
-);
+const cursoSchema = z
+  .object({
+    nombre: z.string().min(1, "El nombre es obligatorio").max(255),
+    descripcion: z.string().max(1000).optional(),
+    profesor_id: z.string().min(1, "Debes seleccionar un instructor"),
+    limite_cupo: z.number().int().min(1, "Mínimo 1 participante"),
+    minimo_estudiantes: z.preprocess(
+      (v) => (typeof v === "number" && Number.isNaN(v) ? undefined : v),
+      z.number().int().min(1, "Mínimo 1 estudiante").optional(),
+    ),
+    fecha_inicio: z.string().optional(),
+    fecha_fin: z.string().optional(),
+    requisitos: z.string().max(2000).optional(),
+    precio: z.number().min(0, "El precio no puede ser negativo"),
+    whatsapp_url: z.string().url("URL inválida").optional().or(z.literal("")),
+    estado: z.enum(["activo", "inactivo"]),
+  })
+  .refine(
+    (d) =>
+      d.minimo_estudiantes === undefined ||
+      d.minimo_estudiantes <= d.limite_cupo,
+    {
+      message: "El mínimo no puede superar el límite de cupo",
+      path: ["minimo_estudiantes"],
+    },
+  );
 
 type CursoForm = z.infer<typeof cursoSchema>;
 

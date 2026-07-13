@@ -322,9 +322,7 @@ function PagoModal({
             <Input
               id="referencia"
               value={referencia}
-              onChange={(e) =>
-                setReferencia(e.target.value.replace(/\D/g, ""))
-              }
+              onChange={(e) => setReferencia(e.target.value.replace(/\D/g, ""))}
               inputMode="numeric"
               pattern="[0-9]*"
               placeholder="Ej: 1234567890"
