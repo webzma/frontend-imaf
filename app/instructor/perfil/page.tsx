@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { sanitizarDigitos } from "@/lib/validators";
 import {
   GraduationCap,
   Mail,
@@ -366,9 +367,15 @@ export default function PerfilPage() {
                   <Label htmlFor="cedula">Cédula</Label>
                   <Input
                     id="cedula"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={15}
                     value={form.cedula}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, cedula: e.target.value }))
+                      setForm((f) => ({
+                        ...f,
+                        cedula: sanitizarDigitos(e.target.value),
+                      }))
                     }
                     placeholder="Ej: 12345678"
                   />
@@ -377,11 +384,17 @@ export default function PerfilPage() {
                   <Label htmlFor="telefono">Teléfono</Label>
                   <Input
                     id="telefono"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={20}
                     value={form.telefono}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, telefono: e.target.value }))
+                      setForm((f) => ({
+                        ...f,
+                        telefono: sanitizarDigitos(e.target.value),
+                      }))
                     }
-                    placeholder="Ej: 0412-0000000"
+                    placeholder="Ej: 04120000000"
                   />
                 </div>
               </div>

@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
+import { sanitizarDigitos, sanitizarLetras } from "@/lib/validators";
 import logoImaf from "@/public/logo-imaf.webp";
 import municipios from "@/data/municipios.json";
 
@@ -36,7 +37,14 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const sanitizado =
+      name === "cedula" || name === "telefono"
+        ? sanitizarDigitos(value)
+        : name === "name"
+          ? sanitizarLetras(value)
+          : value;
+    setForm({ ...form, [name]: sanitizado });
   };
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
@@ -164,10 +172,13 @@ export default function RegisterPage() {
                 id="cedula"
                 name="cedula"
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="0000000000"
                 value={form.cedula}
                 onChange={handleChange}
                 required
+                maxLength={15}
               />
             </div>
             <div className="space-y-2">
@@ -176,6 +187,8 @@ export default function RegisterPage() {
                 id="telefono"
                 name="telefono"
                 type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="0999999999"
                 value={form.telefono}
                 onChange={handleChange}

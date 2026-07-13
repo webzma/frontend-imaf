@@ -30,6 +30,7 @@ import {
   Camera,
 } from "lucide-react";
 import municipios from "@/data/municipios.json";
+import { sanitizarDigitos } from "@/lib/validators";
 
 interface EstudiantePerfil {
   id: number;
@@ -385,10 +386,16 @@ export default function PerfilPage() {
                       </Label>
                       <Input
                         id="telefono"
-                        placeholder="0412-1234567"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={20}
+                        placeholder="04121234567"
                         value={form.telefono}
                         onChange={(e) =>
-                          setForm((f) => ({ ...f, telefono: e.target.value }))
+                          setForm((f) => ({
+                            ...f,
+                            telefono: sanitizarDigitos(e.target.value),
+                          }))
                         }
                       />
                     </div>

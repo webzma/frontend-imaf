@@ -113,13 +113,25 @@ const cursoSchema = z.object({
   descripcion: z.string().max(1000).optional(),
   profesor_id: z.string().min(1, "Debes seleccionar un instructor"),
   limite_cupo: z.number().int().min(1, "Mínimo 1 participante"),
+  minimo_estudiantes: z.preprocess(
+    (v) => (typeof v === "number" && Number.isNaN(v) ? undefined : v),
+    z.number().int().min(1, "Mínimo 1 estudiante").optional(),
+  ),
   fecha_inicio: z.string().optional(),
   fecha_fin: z.string().optional(),
   requisitos: z.string().max(2000).optional(),
   precio: z.number().min(0, "El precio no puede ser negativo"),
   whatsapp_url: z.string().url("URL inválida").optional().or(z.literal("")),
   estado: z.enum(["activo", "inactivo"]),
-});
+}).refine(
+  (d) =>
+    d.minimo_estudiantes === undefined ||
+    d.minimo_estudiantes <= d.limite_cupo,
+  {
+    message: "El mínimo no puede superar el límite de cupo",
+    path: ["minimo_estudiantes"],
+  },
+);
 
 type CursoForm = z.infer<typeof cursoSchema>;
 
@@ -309,6 +321,7 @@ export default function CursosPage() {
       descripcion: "",
       profesor_id: "",
       limite_cupo: 30,
+      minimo_estudiantes: undefined,
       fecha_inicio: "",
       fecha_fin: "",
       requisitos: "",
@@ -367,6 +380,7 @@ export default function CursosPage() {
         fecha_fin: data.fecha_fin || null,
         whatsapp_url: data.whatsapp_url || null,
         profesor_id: Number(data.profesor_id),
+        minimo_estudiantes: data.minimo_estudiantes ?? null,
       };
       const res = await fetch(`${process.env.API_URL}api/admin/cursos`, {
         method: "POST",
@@ -558,6 +572,25 @@ export default function CursosPage() {
                     {form.formState.errors.limite_cupo && (
                       <p className="text-sm text-destructive">
                         {form.formState.errors.limite_cupo.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="minimo_estudiantes">
+                      Mínimo de estudiantes
+                    </Label>
+                    <Input
+                      id="minimo_estudiantes"
+                      type="number"
+                      min={1}
+                      placeholder="Para aperturar el curso"
+                      {...form.register("minimo_estudiantes", {
+                        valueAsNumber: true,
+                      })}
+                    />
+                    {form.formState.errors.minimo_estudiantes && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.minimo_estudiantes.message}
                       </p>
                     )}
                   </div>

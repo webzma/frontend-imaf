@@ -105,6 +105,7 @@ interface Curso {
   codigo: string;
   descripcion: string | null;
   limite_cupo: number;
+  minimo_estudiantes: number | null;
   cupos_restantes: number;
   fecha_inicio: string | null;
   fecha_fin: string | null;
@@ -202,6 +203,7 @@ export default function CursoDetailPage({
     nombre: "",
     descripcion: "",
     limite_cupo: 30,
+    minimo_estudiantes: "" as string | number,
     fecha_inicio: "",
     fecha_fin: "",
     requisitos: "",
@@ -399,6 +401,7 @@ export default function CursoDetailPage({
       nombre: curso.nombre,
       descripcion: curso.descripcion ?? "",
       limite_cupo: curso.limite_cupo,
+      minimo_estudiantes: curso.minimo_estudiantes ?? "",
       fecha_inicio: curso.fecha_inicio ?? "",
       fecha_fin: curso.fecha_fin ?? "",
       requisitos: curso.requisitos ?? "",
@@ -425,6 +428,10 @@ export default function CursoDetailPage({
             nombre: editForm.nombre,
             descripcion: editForm.descripcion || null,
             limite_cupo: Number(editForm.limite_cupo),
+            minimo_estudiantes:
+              editForm.minimo_estudiantes === ""
+                ? null
+                : Number(editForm.minimo_estudiantes),
             fecha_inicio: editForm.fecha_inicio || null,
             fecha_fin: editForm.fecha_fin || null,
             requisitos: editForm.requisitos || null,
@@ -1574,6 +1581,24 @@ export default function CursoDetailPage({
                     setEditForm((f) => ({
                       ...f,
                       limite_cupo: Number(e.target.value),
+                    }))
+                  }
+                  className="font-sans text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-sans text-xs font-medium text-on-surface">
+                  Mínimo de estudiantes
+                </label>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Para aperturar el curso"
+                  value={editForm.minimo_estudiantes}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      minimo_estudiantes: e.target.value,
                     }))
                   }
                   className="font-sans text-sm"

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { SOLO_DIGITOS, SOLO_LETRAS } from "@/lib/validators";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,11 +101,24 @@ const tituloLabel: Record<string, string> = {
 /* ── Zod Schema ── */
 
 const instructorSchema = z.object({
-  name: z.string().min(1, "El nombre es obligatorio").max(255),
+  name: z
+    .string()
+    .min(1, "El nombre es obligatorio")
+    .max(255)
+    .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
-  cedula: z.string().min(1, "La cédula es obligatoria"),
-  telefono: z.string().max(20).optional(),
+  cedula: z
+    .string()
+    .min(1, "La cédula es obligatoria")
+    .max(15)
+    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  telefono: z
+    .string()
+    .max(20)
+    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .optional()
+    .or(z.literal("")),
   municipio: z.string().max(255).optional(),
   tipo_contrato_id: z.number().optional(),
   fecha_nacimiento: z.string().optional(),
@@ -115,10 +129,23 @@ const instructorSchema = z.object({
 });
 
 const editInstructorSchema = z.object({
-  name: z.string().min(1, "El nombre es obligatorio").max(255),
+  name: z
+    .string()
+    .min(1, "El nombre es obligatorio")
+    .max(255)
+    .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  cedula: z.string().min(1, "La cédula es obligatoria"),
-  telefono: z.string().max(20).optional(),
+  cedula: z
+    .string()
+    .min(1, "La cédula es obligatoria")
+    .max(15)
+    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  telefono: z
+    .string()
+    .max(20)
+    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .optional()
+    .or(z.literal("")),
   municipio: z.string().max(255).optional(),
   tipo_contrato_id: z.number().optional(),
   fecha_nacimiento: z.string().optional(),
@@ -501,7 +528,7 @@ export default function InstructoresPage() {
                   <div className="grid gap-2">
                     <Label htmlFor="cedula">Cédula *</Label>
                     <Input
-                      id="cedula"
+                      id="cedula" inputMode="numeric"
                       placeholder="V-12345678"
                       {...form.register("cedula")}
                     />
@@ -514,7 +541,7 @@ export default function InstructoresPage() {
                   <div className="grid gap-2">
                     <Label htmlFor="telefono">Teléfono</Label>
                     <Input
-                      id="telefono"
+                      id="telefono" inputMode="numeric"
                       placeholder="0412-1234567"
                       {...form.register("telefono")}
                     />
@@ -1023,7 +1050,7 @@ export default function InstructoresPage() {
               <div className="grid gap-2">
                 <Label htmlFor="edit-cedula">Cédula *</Label>
                 <Input
-                  id="edit-cedula"
+                  id="edit-cedula" inputMode="numeric"
                   placeholder="V-12345678"
                   {...editForm.register("cedula")}
                 />
@@ -1039,7 +1066,7 @@ export default function InstructoresPage() {
               <div className="grid gap-2">
                 <Label htmlFor="edit-telefono">Teléfono</Label>
                 <Input
-                  id="edit-telefono"
+                  id="edit-telefono" inputMode="numeric"
                   placeholder="0412-1234567"
                   {...editForm.register("telefono")}
                 />

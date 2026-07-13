@@ -198,6 +198,10 @@ function PagoModal({
       toast.error("Ingresa el número de referencia.");
       return;
     }
+    if (!/^\d+$/.test(referencia.trim())) {
+      toast.error("El número de referencia solo puede contener dígitos.");
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -318,7 +322,11 @@ function PagoModal({
             <Input
               id="referencia"
               value={referencia}
-              onChange={(e) => setReferencia(e.target.value)}
+              onChange={(e) =>
+                setReferencia(e.target.value.replace(/\D/g, ""))
+              }
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Ej: 1234567890"
               className="font-sans text-sm h-10"
               required
