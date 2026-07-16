@@ -320,7 +320,10 @@ export default function HorarioPage() {
           subtitle="Planifica y gestiona las sesiones de todos los cursos."
           className="mb-8 md:mb-8"
           actions={
-            <Button className="gap-2" onClick={() => openCreate(toISODate(current))}>
+            <Button
+              className="gap-2"
+              onClick={() => openCreate(toISODate(current))}
+            >
               <Plus className="w-4 h-4" />
               Nueva sesión
             </Button>

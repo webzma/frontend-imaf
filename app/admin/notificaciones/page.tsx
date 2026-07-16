@@ -112,7 +112,6 @@ export default function AdminNotificacionesPage() {
       .catch(() => {});
   };
 
-
   const unreadCount = notifications.filter((n) => !n.read_at).length;
   const visibleNotifications =
     filter === "unread"

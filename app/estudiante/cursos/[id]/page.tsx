@@ -494,47 +494,47 @@ function PagoModal({
                     <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
                       Captura del comprobante *
                     </Label>
-            <div
-              onClick={() => fileRef.current?.click()}
-              className="cursor-pointer border-2 border-dashed border-outline-variant/50 hover:border-primary/50 hover:bg-primary/2 rounded-sm transition-colors"
-            >
-              {preview ? (
-                <div className="relative">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={preview}
-                    alt="Comprobante"
-                    className="w-full max-h-48 object-contain rounded-sm"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-sm flex items-center justify-center">
-                    <p className="font-sans text-white text-xs font-semibold">
-                      Cambiar imagen
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center gap-2 py-8 px-4">
-                  <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
-                    <Upload className="w-4 h-4 text-on-primary-container" />
-                  </div>
-                  <div className="text-center">
-                    <p className="font-sans text-sm text-on-surface font-medium">
-                      Haz clic para subir
-                    </p>
-                    <p className="font-sans text-xs text-muted-foreground">
-                      JPG, PNG, WEBP o PDF · Máx. 5 MB
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
-              onChange={handleFile}
-              className="hidden"
-            />
+                    <div
+                      onClick={() => fileRef.current?.click()}
+                      className="cursor-pointer border-2 border-dashed border-outline-variant/50 hover:border-primary/50 hover:bg-primary/2 rounded-sm transition-colors"
+                    >
+                      {preview ? (
+                        <div className="relative">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={preview}
+                            alt="Comprobante"
+                            className="w-full max-h-48 object-contain rounded-sm"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-sm flex items-center justify-center">
+                            <p className="font-sans text-white text-xs font-semibold">
+                              Cambiar imagen
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center gap-2 py-8 px-4">
+                          <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
+                            <Upload className="w-4 h-4 text-on-primary-container" />
+                          </div>
+                          <div className="text-center">
+                            <p className="font-sans text-sm text-on-surface font-medium">
+                              Haz clic para subir
+                            </p>
+                            <p className="font-sans text-xs text-muted-foreground">
+                              JPG, PNG, WEBP o PDF · Máx. 5 MB
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      onChange={handleFile}
+                      className="hidden"
+                    />
                   </div>
                 </>
               )}
@@ -777,7 +777,11 @@ export default function CursoDetallePage({
                       <p className="font-sans text-xs text-muted-foreground mt-2">
                         Método:{" "}
                         <span className="font-semibold text-on-surface/80">
-                          {METODO_LABELS[pagoActivo.metodo_pago ?? "pago_movil"]}
+                          {
+                            METODO_LABELS[
+                              pagoActivo.metodo_pago ?? "pago_movil"
+                            ]
+                          }
                         </span>
                         {pagoActivo.referencia && (
                           <>
@@ -819,8 +823,8 @@ export default function CursoDetallePage({
                       Inscríbete en este curso
                     </h3>
                     <p className="font-sans text-xs text-muted-foreground mt-1 max-w-md">
-                      Paga por transferencia, pago móvil o efectivo y reporta
-                      tu pago para formalizar tu inscripción.
+                      Paga por transferencia, pago móvil o efectivo y reporta tu
+                      pago para formalizar tu inscripción.
                     </p>
                   </div>
                 </div>
