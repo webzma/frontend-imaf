@@ -1,6 +1,8 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect } from "react";
+import { formatDateLong } from "@/lib/format";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -84,15 +86,6 @@ function getCookie(name: string): string {
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
   return match ? match[2] : "";
-}
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr + "T00:00:00").toLocaleDateString("es-ES", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 }
 
 function getInitials(name: string | null): string {
@@ -228,22 +221,12 @@ export default function CursoPage() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-5xl mx-auto">
-        {/* Page header */}
-        <div className="mb-10 md:mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <BookOpen className="size-6 text-primary/80" />
-            <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
-              Mi curso
-            </span>
-          </div>
-          <h1 className="font-serif font-light text-[2.6rem] md:text-[3.2rem] tight-tracking leading-[1.05] text-on-surface mb-2">
-            Curso inscrito
-          </h1>
-          <p className="font-sans text-sm md:text-base text-muted-foreground max-w-lg">
-            Revisa los detalles, el temario, las sesiones y el estado de tu
-            inscripción.
-          </p>
-        </div>
+        <PageHeader
+          icon={BookOpen}
+          eyebrow="Mi curso"
+          title="Curso inscrito"
+          subtitle="Revisa los detalles, el temario, las sesiones y el estado de tu inscripción."
+        />
 
         {loading ? (
           <div className="space-y-5">
@@ -321,7 +304,7 @@ export default function CursoPage() {
                         Inicio
                       </p>
                       <p className="font-sans text-sm font-semibold text-on-surface mt-0.5">
-                        {formatDate(curso.fecha_inicio)}
+                        {formatDateLong(curso.fecha_inicio)}
                       </p>
                     </div>
                   </div>
@@ -334,7 +317,7 @@ export default function CursoPage() {
                         Finalización
                       </p>
                       <p className="font-sans text-sm font-semibold text-on-surface mt-0.5">
-                        {formatDate(curso.fecha_fin)}
+                        {formatDateLong(curso.fecha_fin)}
                       </p>
                     </div>
                   </div>
@@ -550,7 +533,7 @@ export default function CursoPage() {
                           <div className="flex items-center gap-2">
                             <Calendar className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
                             <p className="font-sans text-xs font-semibold text-on-surface">
-                              {formatDate(sesion.fecha)}
+                              {formatDateLong(sesion.fecha)}
                             </p>
                           </div>
                           <p className="font-mono text-[11px] text-muted-foreground mt-0.5 ml-5">

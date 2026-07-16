@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -191,21 +192,13 @@ export default function InstructorHorarioPage() {
       <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <CalendarDays className="size-6 md:size-10 text-primary/70" />
-            <span className="font-sans text-xs md:text-sm tracking-[0.22em] uppercase text-primary/70 font-semibold">
-              Mi trabajo / Cronograma
-            </span>
-          </div>
-          <h1 className="font-serif font-light text-[3.2rem] tight-tracking leading-[1.08] text-on-surface mb-2">
-            Mi Cronograma
-          </h1>
-          <p className="font-sans text-sm text-muted-foreground max-w-md">
-            Consulta tus clases asignadas por día y hora.
-          </p>
-        </div>
+        <PageHeader
+          icon={CalendarDays}
+          eyebrow="Mi trabajo / Cronograma"
+          title="Mi Cronograma"
+          subtitle="Consulta tus clases asignadas por día y hora."
+          className="mb-8 md:mb-8"
+        />
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-5 mb-8 max-w-2xl">

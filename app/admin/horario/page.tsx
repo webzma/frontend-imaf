@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -33,9 +34,12 @@ import {
   MONTH_LABELS,
   addDays,
   addMonths,
+  estadoColor,
   formatLongDate,
   formatShortDate,
   normalizeDate,
+  parseISODate,
+  startOfMonth,
   startOfWeek,
   toISODate,
 } from "./_components/utils";
@@ -94,17 +98,29 @@ export default function HorarioPage() {
         fetch(`${apiUrl}api/admin/cursos`, { headers: getAuthHeaders() }),
         fetch(`${apiUrl}api/admin/profesores`, { headers: getAuthHeaders() }),
       ]);
+      const fallos: string[] = [];
       if (hRes.ok) {
         const d = await hRes.json();
         setSesiones(Array.isArray(d) ? d : (d.data ?? []));
+      } else {
+        fallos.push("sesiones");
       }
       if (cRes.ok) {
         const d = await cRes.json();
         setCursos(Array.isArray(d) ? d : (d.data ?? []));
+      } else {
+        fallos.push("cursos");
       }
       if (iRes.ok) {
         const d = await iRes.json();
         setInstructores(Array.isArray(d) ? d : (d.data ?? []));
+      } else {
+        fallos.push("instructores");
+      }
+      if (fallos.length > 0) {
+        toast.error(
+          `No se pudo cargar: ${fallos.join(", ")}. Verifica tu sesión e intenta de nuevo.`,
+        );
       }
     } catch {
       toast.error("Error al cargar el horario.");
@@ -207,16 +223,68 @@ export default function HorarioPage() {
         headers: getAuthHeaders(),
         body: JSON.stringify({ fecha: newDate }),
       });
-      if (!res.ok) throw new Error("update failed");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const msg = err.errors
+          ? Object.values(err.errors).flat().join(", ")
+          : err.message;
+        throw new Error(
+          typeof msg === "string" && msg ? msg : "No se pudo mover la sesión.",
+        );
+      }
       const updated: Sesion = await res.json();
       setSesiones((prev) => prev.map((s) => (s.id === sesionId ? updated : s)));
       toast.success("Sesión reprogramada");
-    } catch {
+    } catch (e) {
       setSesiones((prev) =>
         prev.map((s) => (s.id === sesionId ? { ...s, fecha: previous } : s)),
       );
-      toast.error("No se pudo mover la sesión.");
+      toast.error(
+        e instanceof Error ? e.message : "No se pudo mover la sesión.",
+      );
     }
+  };
+
+  // Rango de fechas visible según la vista actual (fin exclusivo)
+  const visibleRange = useMemo(() => {
+    if (view === "semana") {
+      const start = startOfWeek(current);
+      return { start, end: addDays(start, 7) };
+    }
+    if (view === "dia") {
+      return { start: current, end: addDays(current, 1) };
+    }
+    return { start: startOfMonth(current), end: addMonths(current, 1) };
+  }, [view, current]);
+
+  const sesionesEnRango = useMemo(() => {
+    const desde = toISODate(visibleRange.start);
+    const hasta = toISODate(visibleRange.end);
+    return filteredSesiones.filter((s) => {
+      const f = normalizeDate(s.fecha);
+      return f >= desde && f < hasta;
+    });
+  }, [filteredSesiones, visibleRange]);
+
+  // Sesión más cercana a la fecha visible (para orientar cuando el rango está vacío)
+  const sesionMasCercana = useMemo(() => {
+    if (filteredSesiones.length === 0) return null;
+    const ref = current.getTime();
+    return [...filteredSesiones].sort((a, b) => {
+      const da = Math.abs(parseISODate(normalizeDate(a.fecha)).getTime() - ref);
+      const db = Math.abs(parseISODate(normalizeDate(b.fecha)).getTime() - ref);
+      return da - db;
+    })[0];
+  }, [filteredSesiones, current]);
+
+  const goToSesion = (fecha: string) => {
+    setCurrent(parseISODate(normalizeDate(fecha)));
+  };
+
+  const clearFilters = () => {
+    setFilterCurso("todos");
+    setFilterInstructor("todos");
+    setFilterEstado("todos");
   };
 
   // Etiqueta del rango actual
@@ -245,31 +313,19 @@ export default function HorarioPage() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
-        {/* Header */}
-        <div className="mb-8 flex-col md:flex-row md:flex items-end justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-4 mb-4">
-              <CalendarDays className="size-6 md:size-7 text-primary/70" />
-              <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
-                Planificación / Horario
-              </span>
-            </div>
-            <h1 className="font-serif font-light text-[3.2rem] tight-tracking leading-[1.08] text-on-surface mb-2">
-              Horario
-            </h1>
-            <p className="font-sans text-sm text-muted-foreground max-w-md">
-              Planifica y gestiona las sesiones de todos los cursos.
-            </p>
-          </div>
-
-          <Button
-            className="gap-2 mt-6 md:mt-0"
-            onClick={() => openCreate(toISODate(current))}
-          >
-            <Plus className="w-4 h-4" />
-            Nueva sesión
-          </Button>
-        </div>
+        <PageHeader
+          icon={CalendarDays}
+          eyebrow="Planificación / Horario"
+          title="Horario"
+          subtitle="Planifica y gestiona las sesiones de todos los cursos."
+          className="mb-8 md:mb-8"
+          actions={
+            <Button className="gap-2" onClick={() => openCreate(toISODate(current))}>
+              <Plus className="w-4 h-4" />
+              Nueva sesión
+            </Button>
+          }
+        />
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-5 mb-8 max-w-2xl">
@@ -403,18 +459,80 @@ export default function HorarioPage() {
             </Select>
           </div>
 
-          <label className="inline-flex items-center gap-2 cursor-pointer ml-auto">
-            <input
-              type="checkbox"
-              checked={showCursoRanges}
-              onChange={(e) => setShowCursoRanges(e.target.checked)}
-              className="accent-primary"
-            />
-            <span className="font-sans text-xs text-on-surface/65">
-              Mostrar rango de cursos
-            </span>
-          </label>
+          <div className="flex items-center gap-4 ml-auto flex-wrap">
+            {/* Leyenda de estados */}
+            <div className="flex items-center gap-3">
+              {(["programada", "realizada", "cancelada"] as const).map((e) => (
+                <span
+                  key={e}
+                  className="inline-flex items-center gap-1.5 font-sans text-xs text-on-surface/65 capitalize"
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${estadoColor(e).dot}`}
+                  />
+                  {e}
+                </span>
+              ))}
+            </div>
+
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showCursoRanges}
+                onChange={(e) => setShowCursoRanges(e.target.checked)}
+                className="accent-primary"
+              />
+              <span className="font-sans text-xs text-on-surface/65">
+                Mostrar rango de cursos
+              </span>
+            </label>
+          </div>
         </div>
+
+        {/* Aviso cuando el rango visible no tiene sesiones */}
+        {!loading && sesionesEnRango.length === 0 && (
+          <div className="flex flex-wrap items-center gap-3 bg-secondary-container/40 border border-outline-variant/30 rounded-sm px-4 py-3 mb-6">
+            <p className="font-sans text-sm text-on-surface/75">
+              {sesiones.length === 0 ? (
+                <>
+                  Aún no hay sesiones creadas. Usa{" "}
+                  <span className="font-semibold">“Nueva sesión”</span> o haz
+                  clic en un día del calendario para crear la primera.
+                </>
+              ) : filteredSesiones.length === 0 ? (
+                <>Ninguna sesión coincide con los filtros seleccionados.</>
+              ) : (
+                <>
+                  No hay sesiones en este rango. La sesión más cercana es{" "}
+                  <span className="font-semibold">
+                    “{sesionMasCercana?.titulo}”
+                  </span>{" "}
+                  el{" "}
+                  <span className="font-semibold">
+                    {formatLongDate(
+                      parseISODate(normalizeDate(sesionMasCercana!.fecha)),
+                    )}
+                  </span>
+                  .
+                </>
+              )}
+            </p>
+            {sesiones.length > 0 &&
+              (filteredSesiones.length === 0 ? (
+                <Button variant="outline" size="sm" onClick={clearFilters}>
+                  Limpiar filtros
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => goToSesion(sesionMasCercana!.fecha)}
+                >
+                  Ir a esa fecha
+                </Button>
+              ))}
+          </div>
+        )}
 
         {/* Vistas */}
         {loading ? (

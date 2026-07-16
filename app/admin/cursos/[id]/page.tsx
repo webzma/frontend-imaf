@@ -3,6 +3,7 @@
 import { useState, useEffect, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { formatDate, formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -945,36 +946,15 @@ export default function CursoDetailPage({
               <div className="flex items-center gap-2 text-muted-foreground">
                 <CalendarDays className="w-4 h-4" />
                 <span className="font-sans text-sm">
-                  {curso.fecha_inicio
-                    ? new Date(
-                        curso.fecha_inicio + "T00:00:00",
-                      ).toLocaleDateString("es-ES", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })
-                    : "—"}
-                  {curso.fecha_fin &&
-                    " → " +
-                      new Date(
-                        curso.fecha_fin + "T00:00:00",
-                      ).toLocaleDateString("es-ES", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                  {formatDate(curso.fecha_inicio)}
+                  {curso.fecha_fin && " → " + formatDate(curso.fecha_fin)}
                 </span>
               </div>
             )}
             <div className="flex items-center gap-2 text-muted-foreground">
               <b>Bs.</b>
               <span className="font-sans text-sm font-semibold text-on-surface">
-                {curso.precio === 0
-                  ? "Gratuito"
-                  : new Intl.NumberFormat("es-CR", {
-                      style: "decimal",
-                      maximumFractionDigits: 0,
-                    }).format(curso.precio)}
+                {formatPrice(curso.precio)}
               </span>
             </div>
             {curso.whatsapp_url && (
@@ -1188,14 +1168,7 @@ export default function CursoDetailPage({
                           {e.cedula}
                         </td>
                         <td className="px-6 py-3.5 font-sans text-sm text-muted-foreground whitespace-nowrap">
-                          {new Date(e.fecha_inscripcion).toLocaleDateString(
-                            "es-VE",
-                            {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            },
-                          )}
+                          {formatDate(e.fecha_inscripcion)}
                         </td>
                         <td className="px-6 py-3.5">
                           {statusChanging === e.id ? (
@@ -1400,9 +1373,7 @@ export default function CursoDetailPage({
                   realizada: "realizada" as const,
                   cancelada: "cancelada" as const,
                 }[s.estado];
-                const fechaFmt = new Date(
-                  s.fecha + "T00:00:00",
-                ).toLocaleDateString("es-ES", {
+                const fechaFmt = formatDate(s.fecha, {
                   weekday: "short",
                   day: "2-digit",
                   month: "short",

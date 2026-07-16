@@ -1,6 +1,8 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect } from "react";
+import { formatDate } from "@/lib/format";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -55,15 +57,6 @@ function getAuthHeaders() {
   };
 }
 
-function formatDate(d: string | null) {
-  if (!d) return null;
-  return new Date(d + "T00:00:00").toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 /* ── Page ── */
 
 export default function InstructorDashboard() {
@@ -112,23 +105,12 @@ export default function InstructorDashboard() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-4 mb-3">
-            <GraduationCap className="size-6 md:size-7 text-primary/70" />
-            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-medium">
-              Panel de Instructor
-            </span>
-          </div>
-          <h1 className="font-serif font-light text-4xl tight-tracking text-on-surface mb-1">
-            Bienvenido, {firstName}
-          </h1>
-          {me.profesor?.especialidad && (
-            <p className="font-sans text-sm text-muted-foreground">
-              {me.profesor.especialidad}
-            </p>
-          )}
-        </div>
+        <PageHeader
+          icon={GraduationCap}
+          eyebrow="Panel de Instructor"
+          title={<>Bienvenido, {firstName}</>}
+          subtitle={me.profesor?.especialidad}
+        />
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-10">

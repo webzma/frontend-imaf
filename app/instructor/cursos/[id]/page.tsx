@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, use, useMemo } from "react";
+import { formatDate, formatTime } from "@/lib/format";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -82,20 +83,6 @@ function getInitials(name: string) {
     .map((n) => n[0])
     .join("")
     .toUpperCase();
-}
-
-function formatDate(d: string | null) {
-  if (!d) return "—";
-  return new Date(d + "T00:00:00").toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatTime(t: string | null) {
-  if (!t) return "";
-  return t.slice(0, 5);
 }
 
 /* ── Page ── */

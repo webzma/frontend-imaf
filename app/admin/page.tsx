@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -104,21 +105,12 @@ export default function AdminDashboard() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
-        {/* ── Header ── */}
-        <div className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <TrendingUp className="size-6 md:size-7 text-primary/70" />
-            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
-              Resumen general
-            </span>
-          </div>
-          <h1 className="font-serif font-light text-[3.2rem] tight-tracking leading-[1.08] text-on-surface mb-3">
-            Bienvenido al Panel
-          </h1>
-          <p className="font-sans text-sm text-muted-foreground max-w-md">
-            Aquí tienes un resumen del estado actual de la plataforma.
-          </p>
-        </div>
+        <PageHeader
+          icon={TrendingUp}
+          eyebrow="Resumen general"
+          title="Bienvenido al Panel"
+          subtitle="Aquí tienes un resumen del estado actual de la plataforma."
+        />
 
         {/* ── Stat cards ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">

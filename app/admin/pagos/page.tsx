@@ -1,7 +1,9 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import { formatDateTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,12 +40,21 @@ import {
 
 /* ── Types ── */
 
+type MetodoPago = "transferencia" | "pago_movil" | "efectivo";
+
+const METODO_LABELS: Record<MetodoPago, string> = {
+  transferencia: "Transferencia",
+  pago_movil: "Pago Móvil",
+  efectivo: "Efectivo",
+};
+
 interface Pago {
   id: number;
-  referencia: string;
+  metodo_pago?: MetodoPago;
+  referencia: string | null;
   banco_origen: string | null;
-  comprobante: string;
-  comprobante_url: string;
+  comprobante: string | null;
+  comprobante_url: string | null;
   estado: "pendiente" | "aprobado" | "rechazado";
   nota_admin: string | null;
   created_at: string;
@@ -83,16 +94,6 @@ function getInitials(name: string) {
     .map((n) => n[0])
     .join("")
     .toUpperCase();
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("es-VE", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 const estadoConfig = {
@@ -216,7 +217,7 @@ function PagoDetailModal({
 
   const cfg = estadoConfig[pago.estado];
   const Icon = cfg.icon;
-  const isPdf = pago.comprobante.endsWith(".pdf");
+  const isPdf = pago.comprobante?.endsWith(".pdf") ?? false;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -256,13 +257,21 @@ function PagoDetailModal({
           </div>
           <div className="bg-surface-container-low rounded-sm p-3">
             <p className="text-[10px] uppercase tracking-[0.15em] text-on-surface/50 font-semibold mb-1">
-              Referencia
+              Método de pago
             </p>
-            <p className="font-mono font-semibold text-on-surface">
-              {pago.referencia}
+            <p className="font-medium text-on-surface">
+              {METODO_LABELS[pago.metodo_pago ?? "pago_movil"]}
             </p>
           </div>
           <div className="bg-surface-container-low rounded-sm p-3">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-on-surface/50 font-semibold mb-1">
+              Referencia
+            </p>
+            <p className="font-mono font-semibold text-on-surface">
+              {pago.referencia || "—"}
+            </p>
+          </div>
+          <div className="bg-surface-container-low rounded-sm p-3 col-span-2">
             <p className="text-[10px] uppercase tracking-[0.15em] text-on-surface/50 font-semibold mb-1">
               Banco origen
             </p>
@@ -282,7 +291,7 @@ function PagoDetailModal({
             {cfg.label}
           </Badge>
           <span className="font-sans text-xs text-muted-foreground">
-            {formatDate(pago.created_at)}
+            {formatDateTime(pago.created_at)}
           </span>
         </div>
 
@@ -291,7 +300,12 @@ function PagoDetailModal({
           <p className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-on-surface/70 mb-2">
             Comprobante adjunto
           </p>
-          {isPdf ? (
+          {!pago.comprobante_url ? (
+            <p className="font-sans text-sm text-muted-foreground italic">
+              Sin comprobante — pago reportado en efectivo. Verifica en caja
+              antes de aprobar.
+            </p>
+          ) : isPdf ? (
             <a
               href={pago.comprobante_url}
               target="_blank"
@@ -558,21 +572,12 @@ export default function AdminPagosPage() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-8 py-10 mx-auto">
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-4 mb-3">
-            <CreditCard className="size-6 md:size-7 text-primary/70" />
-            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-medium">
-              Admin / Pagos
-            </span>
-          </div>
-          <h1 className="font-serif font-light text-[2.8rem] tight-tracking leading-[1.08] text-on-surface mb-2">
-            Comprobantes de pago
-          </h1>
-          <p className="font-sans text-sm text-muted-foreground">
-            Revisa y gestiona las solicitudes de inscripción por pago móvil.
-          </p>
-        </div>
+        <PageHeader
+          icon={CreditCard}
+          eyebrow="Admin / Pagos"
+          title="Comprobantes de pago"
+          subtitle="Revisa y gestiona las solicitudes de inscripción por pago móvil."
+        />
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
@@ -704,7 +709,7 @@ export default function AdminPagosPage() {
                       Curso
                     </th>
                     <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold">
-                      Referencia
+                      Método / Referencia
                     </th>
                     <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold hidden lg:table-cell">
                       Fecha
@@ -755,9 +760,14 @@ export default function AdminPagosPage() {
                           </div>
                         </td>
                         <td className="px-5 py-4">
-                          <span className="font-mono text-sm text-on-surface">
-                            {pago.referencia}
-                          </span>
+                          <p className="font-sans text-xs font-semibold text-on-surface">
+                            {METODO_LABELS[pago.metodo_pago ?? "pago_movil"]}
+                          </p>
+                          {pago.referencia && (
+                            <span className="font-mono text-sm text-on-surface">
+                              {pago.referencia}
+                            </span>
+                          )}
                           {pago.banco_origen && (
                             <p className="font-sans text-xs text-muted-foreground mt-0.5">
                               {pago.banco_origen}
@@ -766,7 +776,7 @@ export default function AdminPagosPage() {
                         </td>
                         <td className="px-5 py-4 hidden lg:table-cell">
                           <span className="font-sans text-xs text-muted-foreground">
-                            {formatDate(pago.created_at)}
+                            {formatDateTime(pago.created_at)}
                           </span>
                         </td>
                         <td className="px-5 py-4">

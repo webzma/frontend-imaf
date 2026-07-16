@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -285,32 +286,21 @@ export default function EstudianteCursosPage() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-12 md:mb-14">
-          <div className="flex items-center gap-4 mb-4">
-            <BookOpen className="size-6 text-primary/80" />
-            <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
-              Plataforma · Cursos
-            </span>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <h1 className="font-serif font-light text-[2.6rem] md:text-[3.2rem] tight-tracking leading-[1.05] text-on-surface mb-2">
-                Cursos disponibles
-              </h1>
-              <p className="font-sans text-sm md:text-base text-muted-foreground max-w-lg">
-                Explora el catálogo completo de cursos de la plataforma IMAF y
-                revisa el contenido del que ya formas parte.
-              </p>
-            </div>
-            {!loading && cursos.length > 0 && (
+        <PageHeader
+          icon={BookOpen}
+          eyebrow="Plataforma · Cursos"
+          title="Cursos disponibles"
+          subtitle="Explora el catálogo completo de cursos de la plataforma IMAF y revisa el contenido del que ya formas parte."
+          className="mb-12 md:mb-14"
+          actions={
+            !loading && cursos.length > 0 ? (
               <div className="hidden md:flex items-center gap-2 font-sans text-xs text-muted-foreground">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Catálogo actualizado
               </div>
-            )}
-          </div>
-        </div>
+            ) : undefined
+          }
+        />
 
         {/* Featured "Mi curso" */}
         {!loading && miCurso && (

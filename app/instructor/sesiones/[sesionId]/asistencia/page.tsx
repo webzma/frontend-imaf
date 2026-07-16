@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, use, useMemo } from "react";
+import { formatDateFull, formatTime } from "@/lib/format";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -62,11 +63,6 @@ function getInitials(name: string) {
     .map((n) => n[0])
     .join("")
     .toUpperCase();
-}
-
-function formatTime(t: string | null) {
-  if (!t) return "";
-  return t.slice(0, 5);
 }
 
 /* ── Page ── */
@@ -200,10 +196,7 @@ export default function AsistenciaInstructorPage({
     );
   }
 
-  const fechaFmt = new Date(sesion.fecha + "T00:00:00").toLocaleDateString(
-    "es-ES",
-    { weekday: "long", day: "2-digit", month: "long", year: "numeric" },
-  );
+  const fechaFmt = formatDateFull(sesion.fecha);
 
   return (
     <div className="relative min-h-full bg-surface">

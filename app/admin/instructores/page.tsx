@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -434,20 +435,13 @@ export default function InstructoresPage() {
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-10 flex-col md:flex-row md:flex items-end justify-between">
-          <div>
-            <div className="flex items-center gap-4 mb-4">
-              <GraduationCap className="size-6 md:size-7 text-primary/70" />
-              <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
-                Gestión / Instructores
-              </span>
-            </div>
-            <h1 className="font-serif font-light text-[3.2rem] tight-tracking leading-[1.08] text-on-surface mb-2">
-              Instructores
-            </h1>
-            <p className="font-sans text-sm text-muted-foreground max-w-md">
-              Todos los instructores registrados en la plataforma.
-            </p>
-          </div>
+          <PageHeader
+            icon={GraduationCap}
+            eyebrow="Gestión / Instructores"
+            title="Instructores"
+            subtitle="Todos los instructores registrados en la plataforma."
+            className="mb-0 md:mb-0"
+          />
 
           <Dialog
             open={open}

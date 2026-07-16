@@ -1,9 +1,11 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { formatDate } from "@/lib/format";
 import { SOLO_DIGITOS, SOLO_LETRAS } from "@/lib/validators";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -391,20 +393,13 @@ export default function EstudiantesPage() {
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-10 flex-col md:flex-row md:flex items-end justify-between">
-          <div>
-            <div className="flex items-center gap-4 mb-4">
-              <Users className="size-6 md:size-7 text-primary/70" />
-              <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
-                Gestión / Estudiantes
-              </span>
-            </div>
-            <h1 className="font-serif font-light text-[3.2rem] tight-tracking leading-[1.08] text-on-surface mb-2">
-              Estudiantes
-            </h1>
-            <p className="font-sans text-sm text-muted-foreground max-w-md">
-              Todos los estudiantes registrados en la plataforma.
-            </p>
-          </div>
+          <PageHeader
+            icon={Users}
+            eyebrow="Gestión / Estudiantes"
+            title="Estudiantes"
+            subtitle="Todos los estudiantes registrados en la plataforma."
+            className="mb-0 md:mb-0"
+          />
 
           <Dialog
             open={open}
@@ -809,10 +804,7 @@ export default function EstudiantesPage() {
                           )}
                         </td>
                         <td className="px-6 py-4 font-sans text-sm text-muted-foreground whitespace-nowrap">
-                          {new Date(e.fecha_inscripcion).toLocaleDateString(
-                            "es-VE",
-                            { day: "2-digit", month: "short", year: "numeric" },
-                          )}
+                          {formatDate(e.fecha_inscripcion)}
                         </td>
                         <td className="px-6 py-4">
                           <Badge

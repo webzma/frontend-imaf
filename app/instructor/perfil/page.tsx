@@ -1,6 +1,8 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useRef } from "react";
+import { formatDateLong } from "@/lib/format";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,18 +90,6 @@ const tituloLabel: Record<string, string> = {
   maestria: "Maestría",
   doctorado: "Doctorado",
 };
-
-function formatDate(value: string | null | undefined): string {
-  if (!value) return "—";
-  const ymd = value.slice(0, 10);
-  const date = new Date(`${ymd}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString("es-VE", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
 
 /* ── Page ── */
 
@@ -267,18 +257,7 @@ export default function PerfilPage() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-3">
-            <User className="size-6 md:size-7 text-primary/70" />
-            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-medium">
-              Mi Perfil
-            </span>
-          </div>
-          <h1 className="font-serif font-light text-4xl tight-tracking text-on-surface">
-            Mi Perfil
-          </h1>
-        </div>
+        <PageHeader icon={User} eyebrow="Mi perfil" title="Mi Perfil" />
 
         {/* Avatar + identidad */}
         <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 mb-6">
@@ -571,7 +550,7 @@ export default function PerfilPage() {
                   <CalendarDays className="w-3.5 h-3.5 text-on-primary-container" />
                 }
                 label="Fecha de nacimiento"
-                value={formatDate(p.fecha_nacimiento)}
+                value={formatDateLong(p.fecha_nacimiento)}
               />
               <InfoRow
                 icon={
