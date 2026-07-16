@@ -1,6 +1,8 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect } from "react";
+import { LOCALE, formatDate } from "@/lib/format";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -58,16 +60,6 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-function formatDate(value: string | null | undefined): string {
-  if (!value) return "—";
-  const ymd = value.slice(0, 10);
-  return new Date(ymd + "T00:00:00").toLocaleDateString("es-VE", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return "Buenos días";
@@ -93,7 +85,7 @@ export default function EstudianteDashboard() {
   }, []);
 
   const firstName = perfil?.nombre.split(" ")[0] ?? "";
-  const today = new Date().toLocaleDateString("es-VE", {
+  const today = new Date().toLocaleDateString(LOCALE, {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -105,28 +97,25 @@ export default function EstudianteDashboard() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-5xl mx-auto">
-        {/* Page header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <LayoutDashboard className="size-6 text-primary/80" />
-            <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
-              Dashboard · {today}
-            </span>
-          </div>
-          {loading ? (
+        {loading ? (
+          <div className="mb-12">
+            <div className="flex items-center gap-4 mb-4">
+              <LayoutDashboard className="size-6 text-primary/80" />
+              <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
+                Dashboard · {today}
+              </span>
+            </div>
             <Skeleton className="h-14 w-72" />
-          ) : (
-            <>
-              <h1 className="font-serif font-light text-[2.6rem] md:text-[3.2rem] tight-tracking leading-[1.05] text-on-surface mb-2">
-                {getGreeting()}, {firstName}
-              </h1>
-              <p className="font-sans text-sm md:text-base text-muted-foreground max-w-lg">
-                Bienvenido a tu espacio académico. Aquí encontrarás el resumen
-                de tu actividad y tu curso actual.
-              </p>
-            </>
-          )}
-        </div>
+          </div>
+        ) : (
+          <PageHeader
+            icon={LayoutDashboard}
+            eyebrow={`Dashboard · ${today}`}
+            title={`${getGreeting()}, ${firstName}`}
+            subtitle="Bienvenido a tu espacio académico. Aquí encontrarás el resumen de tu actividad y tu curso actual."
+            className="mb-12 md:mb-12"
+          />
+        )}
 
         {/* Summary cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-10">

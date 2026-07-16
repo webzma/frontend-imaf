@@ -1,6 +1,8 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo } from "react";
+import { LOCALE, formatCurrency as fmt } from "@/lib/format";
 import {
   BarChart,
   Bar,
@@ -111,18 +113,10 @@ function getAuthHeaders() {
   };
 }
 
-function fmt(n: number) {
-  return new Intl.NumberFormat("es-VE", {
-    style: "currency",
-    currency: "VES",
-    minimumFractionDigits: 2,
-  }).format(n);
-}
-
 function fmtLabel(label: string, periodo: string) {
   if (periodo === "mensual") {
     const [y, m] = label.split("-");
-    return new Date(Number(y), Number(m) - 1).toLocaleDateString("es-ES", {
+    return new Date(Number(y), Number(m) - 1).toLocaleDateString(LOCALE, {
       month: "short",
       year: "2-digit",
     });
@@ -368,21 +362,12 @@ export default function ReportesPage() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-4 mb-4">
-            <BarChart2 className="size-6 md:size-7 text-primary/70" />
-            <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
-              Analítica / Reportes
-            </span>
-          </div>
-          <h1 className="font-serif font-light text-[3.2rem] tight-tracking leading-[1.08] text-on-surface mb-2">
-            Reportes
-          </h1>
-          <p className="font-sans text-sm text-muted-foreground max-w-md">
-            Métricas y estadísticas generales de la plataforma.
-          </p>
-        </div>
+        <PageHeader
+          icon={BarChart2}
+          eyebrow="Analítica / Reportes"
+          title="Reportes"
+          subtitle="Métricas y estadísticas generales de la plataforma."
+        />
 
         {/* ── General Stat Cards ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 mb-10">
@@ -513,7 +498,7 @@ export default function ReportesPage() {
                     axisLine={false}
                   />
                   <YAxis
-                    tickFormatter={(v) => `Bs.S ${v}`}
+                    tickFormatter={(v) => `Bs. ${v}`}
                     tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
                     tickLine={false}
                     axisLine={false}
@@ -644,7 +629,7 @@ export default function ReportesPage() {
                       axisLine={false}
                     />
                     <YAxis
-                      tickFormatter={(v) => `Bs.S ${v}`}
+                      tickFormatter={(v) => `Bs. ${v}`}
                       tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
                       tickLine={false}
                       axisLine={false}

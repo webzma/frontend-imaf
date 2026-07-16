@@ -1,11 +1,15 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { formatDate, formatPrice } from "@/lib/format";
+import { motivoDiaNoHabil } from "@/lib/dias-habiles";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -89,37 +93,52 @@ function getAuthHeaders() {
   };
 }
 
-function formatDate(dateStr?: string | null): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr + "T00:00:00").toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-const formatPrice = (precio: number): string => {
-  if (precio === 0) return "Gratuito";
-  return new Intl.NumberFormat("es-CR", {
-    style: "decimal",
-    maximumFractionDigits: 0,
-  }).format(precio);
-};
-
 /* ── Zod Schema ── */
 
-const cursoSchema = z.object({
-  nombre: z.string().min(1, "El nombre es obligatorio").max(255),
-  descripcion: z.string().max(1000).optional(),
-  profesor_id: z.string().min(1, "Debes seleccionar un instructor"),
-  limite_cupo: z.number().int().min(1, "Mínimo 1 participante"),
-  fecha_inicio: z.string().optional(),
-  fecha_fin: z.string().optional(),
-  requisitos: z.string().max(2000).optional(),
-  precio: z.number().min(0, "El precio no puede ser negativo"),
-  whatsapp_url: z.string().url("URL inválida").optional().or(z.literal("")),
-  estado: z.enum(["activo", "inactivo"]),
-});
+const cursoSchema = z
+  .object({
+    nombre: z.string().min(1, "El nombre es obligatorio").max(255),
+    descripcion: z.string().max(1000).optional(),
+    profesor_id: z.string().min(1, "Debes seleccionar un instructor"),
+    limite_cupo: z.number().int().min(1, "Mínimo 1 participante"),
+    minimo_estudiantes: z.preprocess(
+      (v) => (typeof v === "number" && Number.isNaN(v) ? undefined : v),
+      z.number().int().min(1, "Mínimo 1 estudiante").optional(),
+    ),
+    fecha_inicio: z
+      .string()
+      .optional()
+      .superRefine((v, ctx) => {
+        if (!v) return;
+        const motivo = motivoDiaNoHabil(v);
+        if (motivo) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: motivo });
+        }
+      }),
+    fecha_fin: z
+      .string()
+      .optional()
+      .superRefine((v, ctx) => {
+        if (!v) return;
+        const motivo = motivoDiaNoHabil(v);
+        if (motivo) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: motivo });
+        }
+      }),
+    requisitos: z.string().max(2000).optional(),
+    precio: z.number().min(0, "El precio no puede ser negativo"),
+    whatsapp_url: z.string().url("URL inválida").optional().or(z.literal("")),
+    estado: z.enum(["activo", "inactivo"]),
+  })
+  .refine(
+    (d) =>
+      d.minimo_estudiantes === undefined ||
+      d.minimo_estudiantes <= d.limite_cupo,
+    {
+      message: "El mínimo no puede superar el límite de cupo",
+      path: ["minimo_estudiantes"],
+    },
+  );
 
 type CursoForm = z.infer<typeof cursoSchema>;
 
@@ -165,15 +184,9 @@ function CursoCard({ curso }: { curso: Curso }) {
           <span className="font-mono text-xs font-bold text-on-primary-container bg-primary-container px-2.5 py-1 rounded-sm">
             {curso.codigo}
           </span>
-          <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full font-sans text-xs font-semibold ${
-              curso.estado === "activo"
-                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
-                : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
-            }`}
-          >
+          <Badge variant={curso.estado}>
             {curso.estado === "activo" ? "Activo" : "Inactivo"}
-          </span>
+          </Badge>
         </div>
 
         {/* Name */}
@@ -309,6 +322,7 @@ export default function CursosPage() {
       descripcion: "",
       profesor_id: "",
       limite_cupo: 30,
+      minimo_estudiantes: undefined,
       fecha_inicio: "",
       fecha_fin: "",
       requisitos: "",
@@ -367,6 +381,7 @@ export default function CursosPage() {
         fecha_fin: data.fecha_fin || null,
         whatsapp_url: data.whatsapp_url || null,
         profesor_id: Number(data.profesor_id),
+        minimo_estudiantes: data.minimo_estudiantes ?? null,
       };
       const res = await fetch(`${process.env.API_URL}api/admin/cursos`, {
         method: "POST",
@@ -429,20 +444,13 @@ export default function CursosPage() {
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-10 flex-col md:flex-row md:flex items-end justify-between">
-          <div>
-            <div className="flex items-center gap-4 mb-4">
-              <BookOpen className="size-6 md:size-7 text-primary/70" />
-              <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
-                Gestión / Cursos
-              </span>
-            </div>
-            <h1 className="font-serif font-light text-[3.2rem] tight-tracking leading-[1.08] text-on-surface mb-2">
-              Cursos
-            </h1>
-            <p className="font-sans text-sm text-muted-foreground max-w-md">
-              Catálogo de cursos disponibles en la plataforma.
-            </p>
-          </div>
+          <PageHeader
+            icon={BookOpen}
+            eyebrow="Gestión / Cursos"
+            title="Cursos"
+            subtitle="Catálogo de cursos disponibles en la plataforma."
+            className="mb-0 md:mb-0"
+          />
 
           <Dialog
             open={open}
@@ -562,6 +570,25 @@ export default function CursosPage() {
                     )}
                   </div>
                   <div className="grid gap-2">
+                    <Label htmlFor="minimo_estudiantes">
+                      Mínimo de estudiantes
+                    </Label>
+                    <Input
+                      id="minimo_estudiantes"
+                      type="number"
+                      min={1}
+                      placeholder="Para aperturar el curso"
+                      {...form.register("minimo_estudiantes", {
+                        valueAsNumber: true,
+                      })}
+                    />
+                    {form.formState.errors.minimo_estudiantes && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.minimo_estudiantes.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
                     <Label htmlFor="precio">Precio *</Label>
                     <Input
                       id="precio"
@@ -586,15 +613,24 @@ export default function CursosPage() {
                     <Input
                       id="fecha_inicio"
                       type="date"
-                      {...form.register("fecha_inicio")}
+                      {...form.register("fecha_inicio", {
+                        onChange: () => form.trigger("fecha_inicio"),
+                      })}
                     />
+                    {form.formState.errors.fecha_inicio && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.fecha_inicio.message}
+                      </p>
+                    )}
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="fecha_fin">Fecha de fin</Label>
                     <Input
                       id="fecha_fin"
                       type="date"
-                      {...form.register("fecha_fin")}
+                      {...form.register("fecha_fin", {
+                        onChange: () => form.trigger("fecha_fin"),
+                      })}
                     />
                     {form.formState.errors.fecha_fin && (
                       <p className="text-sm text-destructive">

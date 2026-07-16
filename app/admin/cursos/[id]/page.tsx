@@ -3,6 +3,7 @@
 import { useState, useEffect, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { formatDate, formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -105,6 +106,7 @@ interface Curso {
   codigo: string;
   descripcion: string | null;
   limite_cupo: number;
+  minimo_estudiantes: number | null;
   cupos_restantes: number;
   fecha_inicio: string | null;
   fecha_fin: string | null;
@@ -202,6 +204,7 @@ export default function CursoDetailPage({
     nombre: "",
     descripcion: "",
     limite_cupo: 30,
+    minimo_estudiantes: "" as string | number,
     fecha_inicio: "",
     fecha_fin: "",
     requisitos: "",
@@ -399,6 +402,7 @@ export default function CursoDetailPage({
       nombre: curso.nombre,
       descripcion: curso.descripcion ?? "",
       limite_cupo: curso.limite_cupo,
+      minimo_estudiantes: curso.minimo_estudiantes ?? "",
       fecha_inicio: curso.fecha_inicio ?? "",
       fecha_fin: curso.fecha_fin ?? "",
       requisitos: curso.requisitos ?? "",
@@ -425,6 +429,10 @@ export default function CursoDetailPage({
             nombre: editForm.nombre,
             descripcion: editForm.descripcion || null,
             limite_cupo: Number(editForm.limite_cupo),
+            minimo_estudiantes:
+              editForm.minimo_estudiantes === ""
+                ? null
+                : Number(editForm.minimo_estudiantes),
             fecha_inicio: editForm.fecha_inicio || null,
             fecha_fin: editForm.fecha_fin || null,
             requisitos: editForm.requisitos || null,
@@ -938,36 +946,15 @@ export default function CursoDetailPage({
               <div className="flex items-center gap-2 text-muted-foreground">
                 <CalendarDays className="w-4 h-4" />
                 <span className="font-sans text-sm">
-                  {curso.fecha_inicio
-                    ? new Date(
-                        curso.fecha_inicio + "T00:00:00",
-                      ).toLocaleDateString("es-ES", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })
-                    : "—"}
-                  {curso.fecha_fin &&
-                    " → " +
-                      new Date(
-                        curso.fecha_fin + "T00:00:00",
-                      ).toLocaleDateString("es-ES", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                  {formatDate(curso.fecha_inicio)}
+                  {curso.fecha_fin && " → " + formatDate(curso.fecha_fin)}
                 </span>
               </div>
             )}
             <div className="flex items-center gap-2 text-muted-foreground">
               <b>Bs.</b>
               <span className="font-sans text-sm font-semibold text-on-surface">
-                {curso.precio === 0
-                  ? "Gratuito"
-                  : new Intl.NumberFormat("es-CR", {
-                      style: "decimal",
-                      maximumFractionDigits: 0,
-                    }).format(curso.precio)}
+                {formatPrice(curso.precio)}
               </span>
             </div>
             {curso.whatsapp_url && (
@@ -1181,14 +1168,7 @@ export default function CursoDetailPage({
                           {e.cedula}
                         </td>
                         <td className="px-6 py-3.5 font-sans text-sm text-muted-foreground whitespace-nowrap">
-                          {new Date(e.fecha_inscripcion).toLocaleDateString(
-                            "es-VE",
-                            {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            },
-                          )}
+                          {formatDate(e.fecha_inscripcion)}
                         </td>
                         <td className="px-6 py-3.5">
                           {statusChanging === e.id ? (
@@ -1393,9 +1373,7 @@ export default function CursoDetailPage({
                   realizada: "realizada" as const,
                   cancelada: "cancelada" as const,
                 }[s.estado];
-                const fechaFmt = new Date(
-                  s.fecha + "T00:00:00",
-                ).toLocaleDateString("es-ES", {
+                const fechaFmt = formatDate(s.fecha, {
                   weekday: "short",
                   day: "2-digit",
                   month: "short",
@@ -1574,6 +1552,24 @@ export default function CursoDetailPage({
                     setEditForm((f) => ({
                       ...f,
                       limite_cupo: Number(e.target.value),
+                    }))
+                  }
+                  className="font-sans text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-sans text-xs font-medium text-on-surface">
+                  Mínimo de estudiantes
+                </label>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Para aperturar el curso"
+                  value={editForm.minimo_estudiantes}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      minimo_estudiantes: e.target.value,
                     }))
                   }
                   className="font-sans text-sm"

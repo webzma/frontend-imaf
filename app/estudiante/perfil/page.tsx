@@ -1,6 +1,8 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useRef } from "react";
+import { formatDateLong } from "@/lib/format";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +32,7 @@ import {
   Camera,
 } from "lucide-react";
 import municipios from "@/data/municipios.json";
+import { sanitizarDigitos } from "@/lib/validators";
 
 interface EstudiantePerfil {
   id: number;
@@ -71,16 +74,6 @@ function getInitials(name: string) {
 function toDateInput(value: string | null | undefined): string {
   if (!value) return "";
   return value.slice(0, 10);
-}
-
-function formatDate(value: string | null | undefined): string {
-  if (!value) return "—";
-  const ymd = value.slice(0, 10);
-  return new Date(ymd + "T00:00:00").toLocaleDateString("es-VE", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
 }
 
 export default function PerfilPage() {
@@ -210,22 +203,12 @@ export default function PerfilPage() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-5xl mx-auto">
-        {/* Page header */}
-        <div className="mb-10 md:mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <User className="size-6 text-primary/80" />
-            <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
-              Mi perfil
-            </span>
-          </div>
-          <h1 className="font-serif font-light text-[2.6rem] md:text-[3.2rem] tight-tracking leading-[1.05] text-on-surface mb-2">
-            Información personal
-          </h1>
-          <p className="font-sans text-sm md:text-base text-muted-foreground max-w-lg">
-            Gestiona tus datos personales y de contacto. Mantén la información
-            al día para una mejor experiencia.
-          </p>
-        </div>
+        <PageHeader
+          icon={User}
+          eyebrow="Mi perfil"
+          title="Información personal"
+          subtitle="Gestiona tus datos personales y de contacto. Mantén la información al día para una mejor experiencia."
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Profile card */}
@@ -385,10 +368,16 @@ export default function PerfilPage() {
                       </Label>
                       <Input
                         id="telefono"
-                        placeholder="0412-1234567"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={20}
+                        placeholder="04121234567"
                         value={form.telefono}
                         onChange={(e) =>
-                          setForm((f) => ({ ...f, telefono: e.target.value }))
+                          setForm((f) => ({
+                            ...f,
+                            telefono: sanitizarDigitos(e.target.value),
+                          }))
                         }
                       />
                     </div>
@@ -504,7 +493,7 @@ export default function PerfilPage() {
                         Fecha de inscripción
                       </p>
                       <p className="font-sans text-sm text-on-surface font-medium">
-                        {formatDate(perfil.fecha_inscripcion)}
+                        {formatDateLong(perfil.fecha_inscripcion)}
                       </p>
                     </div>
                   </div>
@@ -518,7 +507,7 @@ export default function PerfilPage() {
                           Fecha de nacimiento
                         </p>
                         <p className="font-sans text-sm text-on-surface font-medium">
-                          {formatDate(perfil.fecha_nacimiento)}
+                          {formatDateLong(perfil.fecha_nacimiento)}
                         </p>
                       </div>
                     </div>

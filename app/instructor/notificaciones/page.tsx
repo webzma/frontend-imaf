@@ -1,7 +1,9 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { formatRelativeTime } from "@/lib/format";
 import { Bell, Check, Clock, ArrowUpRight, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -119,34 +121,6 @@ export default function InstructorNotificacionesPage() {
       .catch(() => {});
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
-    );
-
-    if (diffInHours < 1) {
-      const diffInMinutes = Math.floor(
-        (now.getTime() - date.getTime()) / (1000 * 60),
-      );
-      if (diffInMinutes < 1) return "Hace un momento";
-      return `Hace ${diffInMinutes} minuto${diffInMinutes !== 1 ? "s" : ""}`;
-    } else if (diffInHours < 24) {
-      return `Hace ${diffInHours} hora${diffInHours !== 1 ? "s" : ""}`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      if (diffInDays < 30) {
-        return `Hace ${diffInDays} día${diffInDays !== 1 ? "s" : ""}`;
-      }
-      return date.toLocaleDateString("es-VE", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-    }
-  };
-
   const unreadCount = notifications.filter((n) => !n.read_at).length;
   const visibleNotifications =
     filter === "unread"
@@ -159,27 +133,16 @@ export default function InstructorNotificacionesPage() {
       <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-4xl mx-auto">
-        {/* Page header */}
-        <div className="mb-10 md:mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <Bell className="size-6 md:size-7 text-primary/80" />
-            <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
-              Notificaciones
-            </span>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <h1 className="font-serif font-light text-[2.6rem] md:text-[3.2rem] tight-tracking leading-[1.05] text-on-surface mb-2">
-                Centro de notificaciones
-              </h1>
-              <p className="font-sans text-sm md:text-base text-muted-foreground max-w-lg">
-                {unreadCount > 0
-                  ? `Tienes ${unreadCount} notificación${unreadCount !== 1 ? "es" : ""} por revisar.`
-                  : "Estás al día con todas tus notificaciones."}
-              </p>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          icon={Bell}
+          eyebrow="Notificaciones"
+          title="Centro de notificaciones"
+          subtitle={
+            unreadCount > 0
+              ? `Tienes ${unreadCount} notificación${unreadCount !== 1 ? "es" : ""} por revisar.`
+              : "Estás al día con todas tus notificaciones."
+          }
+        />
 
         {/* Filters + actions */}
         <div className="flex items-center justify-between gap-3 flex-wrap mb-6">
@@ -332,7 +295,7 @@ export default function InstructorNotificacionesPage() {
                           <div className="flex items-center gap-1.5 text-muted-foreground/60">
                             <Clock className="w-3 h-3" />
                             <span className="font-sans text-[11px]">
-                              {formatDate(notification.created_at)}
+                              {formatRelativeTime(notification.created_at)}
                             </span>
                           </div>
                           <span className="inline-flex items-center gap-1 font-sans text-xs font-medium text-primary/80 group-hover:text-primary group-hover:gap-1.5 transition-all">

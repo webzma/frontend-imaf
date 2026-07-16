@@ -99,7 +99,7 @@ export default function CalendarMonth({
                   {cursosDia.slice(0, 3).map((c) => (
                     <span
                       key={c.id}
-                      title={`${c.codigo} · ${c.nombre}`}
+                      title={`${c.codigo} · ${c.nombre} (${c.estado})`}
                       className={`h-[3px] ${cursoBarColor(c.id)}`}
                     />
                   ))}

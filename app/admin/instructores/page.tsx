@@ -1,9 +1,11 @@
 "use client";
 
+import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { SOLO_DIGITOS, SOLO_LETRAS } from "@/lib/validators";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,11 +102,24 @@ const tituloLabel: Record<string, string> = {
 /* ── Zod Schema ── */
 
 const instructorSchema = z.object({
-  name: z.string().min(1, "El nombre es obligatorio").max(255),
+  name: z
+    .string()
+    .min(1, "El nombre es obligatorio")
+    .max(255)
+    .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
-  cedula: z.string().min(1, "La cédula es obligatoria"),
-  telefono: z.string().max(20).optional(),
+  cedula: z
+    .string()
+    .min(1, "La cédula es obligatoria")
+    .max(15)
+    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  telefono: z
+    .string()
+    .max(20)
+    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .optional()
+    .or(z.literal("")),
   municipio: z.string().max(255).optional(),
   tipo_contrato_id: z.number().optional(),
   fecha_nacimiento: z.string().optional(),
@@ -115,10 +130,23 @@ const instructorSchema = z.object({
 });
 
 const editInstructorSchema = z.object({
-  name: z.string().min(1, "El nombre es obligatorio").max(255),
+  name: z
+    .string()
+    .min(1, "El nombre es obligatorio")
+    .max(255)
+    .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  cedula: z.string().min(1, "La cédula es obligatoria"),
-  telefono: z.string().max(20).optional(),
+  cedula: z
+    .string()
+    .min(1, "La cédula es obligatoria")
+    .max(15)
+    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  telefono: z
+    .string()
+    .max(20)
+    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .optional()
+    .or(z.literal("")),
   municipio: z.string().max(255).optional(),
   tipo_contrato_id: z.number().optional(),
   fecha_nacimiento: z.string().optional(),
@@ -407,20 +435,13 @@ export default function InstructoresPage() {
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-10 flex-col md:flex-row md:flex items-end justify-between">
-          <div>
-            <div className="flex items-center gap-4 mb-4">
-              <GraduationCap className="size-6 md:size-7 text-primary/70" />
-              <span className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/70 font-semibold">
-                Gestión / Instructores
-              </span>
-            </div>
-            <h1 className="font-serif font-light text-[3.2rem] tight-tracking leading-[1.08] text-on-surface mb-2">
-              Instructores
-            </h1>
-            <p className="font-sans text-sm text-muted-foreground max-w-md">
-              Todos los instructores registrados en la plataforma.
-            </p>
-          </div>
+          <PageHeader
+            icon={GraduationCap}
+            eyebrow="Gestión / Instructores"
+            title="Instructores"
+            subtitle="Todos los instructores registrados en la plataforma."
+            className="mb-0 md:mb-0"
+          />
 
           <Dialog
             open={open}
@@ -502,6 +523,7 @@ export default function InstructoresPage() {
                     <Label htmlFor="cedula">Cédula *</Label>
                     <Input
                       id="cedula"
+                      inputMode="numeric"
                       placeholder="V-12345678"
                       {...form.register("cedula")}
                     />
@@ -515,6 +537,7 @@ export default function InstructoresPage() {
                     <Label htmlFor="telefono">Teléfono</Label>
                     <Input
                       id="telefono"
+                      inputMode="numeric"
                       placeholder="0412-1234567"
                       {...form.register("telefono")}
                     />
@@ -1024,6 +1047,7 @@ export default function InstructoresPage() {
                 <Label htmlFor="edit-cedula">Cédula *</Label>
                 <Input
                   id="edit-cedula"
+                  inputMode="numeric"
                   placeholder="V-12345678"
                   {...editForm.register("cedula")}
                 />
@@ -1040,6 +1064,7 @@ export default function InstructoresPage() {
                 <Label htmlFor="edit-telefono">Teléfono</Label>
                 <Input
                   id="edit-telefono"
+                  inputMode="numeric"
                   placeholder="0412-1234567"
                   {...editForm.register("telefono")}
                 />
