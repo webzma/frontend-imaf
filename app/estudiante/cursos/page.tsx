@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/empty-state";
 import {
   BookOpen,
   GraduationCap,
@@ -16,6 +18,7 @@ import {
   Users,
   Sparkles,
   ArrowUpRight,
+  SearchX,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -382,31 +385,26 @@ export default function EstudianteCursosPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filtered.length === 0 ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-24 gap-5 bg-surface-container-low/40 rounded-sm">
-                  <div className="w-16 h-16 rounded-full bg-primary-container/70 flex items-center justify-center">
-                    <BookOpen className="w-7 h-7 text-on-primary-container" />
-                  </div>
-                  <div className="text-center max-w-sm">
-                    <p className="font-serif font-light text-2xl text-on-surface mb-2 tight-tracking">
-                      {hasFilters
-                        ? "Sin resultados"
-                        : "No hay cursos disponibles"}
-                    </p>
-                    <p className="font-sans text-sm text-muted-foreground">
-                      {hasFilters
-                        ? "Ningún curso coincide con los filtros aplicados. Intenta con otros términos."
-                        : "Aún no hay cursos registrados en la plataforma."}
-                    </p>
-                  </div>
-                  {hasFilters && (
-                    <button
-                      onClick={() => setSearch("")}
-                      className="font-sans text-xs font-medium text-primary hover:underline underline-offset-4"
-                    >
-                      Limpiar búsqueda
-                    </button>
-                  )}
-                </div>
+                hasFilters ? (
+                  <EmptyState
+                    className="col-span-full"
+                    icon={SearchX}
+                    title="Sin resultados"
+                    description="Ningún curso coincide con los filtros aplicados. Intenta con otros términos."
+                    action={
+                      <Button variant="outline" onClick={() => setSearch("")}>
+                        Limpiar búsqueda
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <EmptyState
+                    className="col-span-full"
+                    icon={BookOpen}
+                    title="No hay cursos disponibles"
+                    description="Aún no hay cursos publicados. Vuelve pronto: la oferta formativa se actualiza cada periodo."
+                  />
+                )
               ) : (
                 filtered.map((curso) => (
                   <Link

@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { formatDate, formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Pagination } from "@/components/ui/pagination";
+import { EmptyState } from "@/components/empty-state";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -37,8 +39,6 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
-  ChevronLeft,
-  ChevronRight,
   ToggleLeft,
   ToggleRight,
   Mail,
@@ -54,6 +54,7 @@ import {
   Clock,
   CalendarClock,
   ClipboardCheck,
+  SearchX,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -1087,16 +1088,24 @@ export default function CursoDetailPage({
 
           <div className="bg-surface-container-low rounded-sm overflow-hidden ambient-shadow">
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
-                  <Users className="w-5 h-5 text-on-primary-container" />
-                </div>
-                <p className="font-sans text-sm text-muted-foreground text-center">
-                  {search
-                    ? "Sin resultados para tu búsqueda."
-                    : "No hay estudiantes inscritos en este curso."}
-                </p>
-              </div>
+              search ? (
+                <EmptyState
+                  icon={SearchX}
+                  title="Sin resultados"
+                  description={`Ningún estudiante de este curso coincide con "${search}".`}
+                  action={
+                    <Button variant="outline" onClick={() => setSearch("")}>
+                      Limpiar búsqueda
+                    </Button>
+                  }
+                />
+              ) : (
+                <EmptyState
+                  icon={Users}
+                  title="Sin estudiantes inscritos"
+                  description="Inscribe al primer estudiante en este curso para empezar a registrar asistencia."
+                />
+              )
             ) : (
               <>
                 <div className="table-scroll">
@@ -1222,49 +1231,14 @@ export default function CursoDetailPage({
                   </table>
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between px-6 py-3 border-t border-outline-variant">
-                    <p className="font-sans text-xs text-muted-foreground">
-                      {(page - 1) * PAGE_SIZE + 1}–
-                      {Math.min(page * PAGE_SIZE, sorted.length)} de{" "}
-                      {sorted.length}
-                    </p>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container disabled:opacity-40 transition-colors"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (n) => (
-                          <button
-                            key={n}
-                            onClick={() => setPage(n)}
-                            className={`w-7 h-7 rounded-md font-sans text-xs transition-colors ${
-                              n === page
-                                ? "bg-primary text-on-primary font-semibold"
-                                : "text-muted-foreground hover:text-on-surface hover:bg-surface-container"
-                            }`}
-                          >
-                            {n}
-                          </button>
-                        ),
-                      )}
-                      <button
-                        onClick={() =>
-                          setPage((p) => Math.min(totalPages, p + 1))
-                        }
-                        disabled={page === totalPages}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container disabled:opacity-40 transition-colors"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <Pagination
+                  page={page}
+                  totalPages={totalPages}
+                  totalItems={sorted.length}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={setPage}
+                  itemLabel={["estudiante", "estudiantes"]}
+                />
               </>
             )}
           </div>

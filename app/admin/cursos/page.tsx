@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { formatDate, formatPrice } from "@/lib/format";
 import { motivoDiaNoHabil } from "@/lib/dias-habiles";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/empty-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ import {
   CalendarDays,
   MessageCircle,
   UsersRound,
+  SearchX,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -281,26 +283,6 @@ function CursoCard({ curso }: { curso: Curso }) {
 
 /* ── Empty State ── */
 
-function EmptyState({ hasFilters }: { hasFilters: boolean }) {
-  return (
-    <div className="col-span-full flex flex-col items-center justify-center py-24 gap-4">
-      <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center">
-        <BookOpen className="w-6 h-6 text-on-primary-container" />
-      </div>
-      <div className="text-center">
-        <p className="font-serif font-light text-2xl text-on-surface mb-1">
-          {hasFilters ? "Sin resultados" : "Aún no hay cursos"}
-        </p>
-        <p className="font-sans text-sm text-muted-foreground">
-          {hasFilters
-            ? "Ningún curso coincide con los filtros aplicados."
-            : "Crea el primer curso para comenzar."}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 /* ── Page ── */
 
 export default function CursosPage() {
@@ -435,6 +417,12 @@ export default function CursosPage() {
   ).length;
   const hasFilters =
     filterEstado !== "todos" || filterInstructor !== "todos" || search !== "";
+
+  const limpiarFiltros = () => {
+    setSearch("");
+    setFilterEstado("todos");
+    setFilterInstructor("todos");
+  };
 
   return (
     <div className="relative min-h-full bg-surface">
@@ -811,11 +799,7 @@ export default function CursosPage() {
 
             {hasFilters && (
               <button
-                onClick={() => {
-                  setSearch("");
-                  setFilterEstado("todos");
-                  setFilterInstructor("todos");
-                }}
+                onClick={limpiarFiltros}
                 className="font-sans text-xs text-muted-foreground hover:text-on-surface transition-colors underline underline-offset-2"
               >
                 Limpiar
@@ -847,7 +831,32 @@ export default function CursosPage() {
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filtered.length === 0 ? (
-                <EmptyState hasFilters={hasFilters} />
+                hasFilters ? (
+                  <EmptyState
+                    className="col-span-full"
+                    icon={SearchX}
+                    title="Ningún curso coincide"
+                    description="No hay cursos que cumplan los filtros aplicados. Prueba con otros criterios."
+                    action={
+                      <Button variant="outline" onClick={limpiarFiltros}>
+                        Limpiar filtros
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <EmptyState
+                    className="col-span-full"
+                    icon={BookOpen}
+                    title="Aún no hay cursos"
+                    description="Crea el primer curso para poder inscribir estudiantes y asignar instructores."
+                    action={
+                      <Button className="gap-2" onClick={() => setOpen(true)}>
+                        <Plus className="w-4 h-4" />
+                        Nuevo curso
+                      </Button>
+                    }
+                  />
+                )
               ) : (
                 filtered.map((curso) => (
                   <Link key={curso.id} href={`/admin/cursos/${curso.id}`}>

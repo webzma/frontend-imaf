@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/empty-state";
 import {
   ArrowLeft,
   CalendarDays,
@@ -17,6 +18,7 @@ import {
   Save,
   Search,
   CheckCheck,
+  SearchX,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -380,19 +382,25 @@ export default function AsistenciaInstructorPage({
 
           {/* Student list */}
           {total === 0 ? (
-            <div className="bg-surface-container-low rounded-sm ambient-shadow p-10 flex flex-col items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
-                <Users className="w-5 h-5 text-on-primary-container" />
-              </div>
-              <p className="font-sans text-sm text-muted-foreground">
-                No hay estudiantes inscritos en este curso.
-              </p>
+            <div className="bg-surface-container-low rounded-sm ambient-shadow">
+              <EmptyState
+                icon={Users}
+                title="Sin estudiantes inscritos"
+                description="No hay nadie inscrito en este curso, así que no hay asistencia que registrar."
+              />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="bg-surface-container-low rounded-sm ambient-shadow p-10 flex flex-col items-center gap-3">
-              <p className="font-sans text-sm text-muted-foreground">
-                No se encontraron estudiantes con {search}.
-              </p>
+            <div className="bg-surface-container-low rounded-sm ambient-shadow">
+              <EmptyState
+                icon={SearchX}
+                title="Sin resultados"
+                description={`Ningún estudiante coincide con "${search}".`}
+                action={
+                  <Button variant="outline" onClick={() => setSearch("")}>
+                    Limpiar búsqueda
+                  </Button>
+                }
+              />
             </div>
           ) : (
             <div className="space-y-2">

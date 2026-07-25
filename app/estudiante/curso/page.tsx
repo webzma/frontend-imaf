@@ -127,13 +127,11 @@ const estadoConfig: Record<
 
 function StatusRow({ label, estado }: { label: string; estado: EstadoKey }) {
   const cfg = estadoConfig[estado] ?? estadoConfig.pendiente;
-  const Icon = cfg.icon;
 
   return (
     <div className="flex items-center justify-between py-3 border-b border-outline-variant last:border-0">
       <p className="font-sans text-sm text-on-surface font-medium">{label}</p>
       <Badge variant={cfg.variant} className="gap-1.5 px-2.5 py-1">
-        <Icon className="w-3 h-3" />
         {cfg.label}
       </Badge>
     </div>

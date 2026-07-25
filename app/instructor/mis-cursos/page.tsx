@@ -1,6 +1,8 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/empty-state";
 import { useState, useEffect, useMemo } from "react";
 import { formatDate } from "@/lib/format";
 import { useRouter } from "next/navigation";
@@ -12,6 +14,7 @@ import {
   ArrowRight,
   Loader2,
   Search,
+  SearchX,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -176,19 +179,25 @@ export default function MisCursosPage() {
 
         {/* Lista */}
         {cursos.length === 0 ? (
-          <div className="bg-surface-container-low rounded-sm ambient-shadow p-12 flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-on-primary-container" />
-            </div>
-            <p className="font-sans text-sm text-muted-foreground">
-              Aún no tienes cursos asignados.
-            </p>
+          <div className="bg-surface-container-low rounded-sm ambient-shadow">
+            <EmptyState
+              icon={BookOpen}
+              title="Aún no tienes cursos asignados"
+              description="Cuando la coordinación te asigne un curso, aparecerá aquí junto a su horario y su lista de estudiantes."
+            />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="bg-surface-container-low rounded-sm ambient-shadow p-10 text-center">
-            <p className="font-sans text-sm text-muted-foreground">
-              No se encontraron cursos con ese criterio.
-            </p>
+          <div className="bg-surface-container-low rounded-sm ambient-shadow">
+            <EmptyState
+              icon={SearchX}
+              title="Sin resultados"
+              description="Ninguno de tus cursos coincide con esa búsqueda."
+              action={
+                <Button variant="outline" onClick={() => setSearch("")}>
+                  Limpiar búsqueda
+                </Button>
+              }
+            />
           </div>
         ) : (
           <div className="space-y-3">

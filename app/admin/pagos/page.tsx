@@ -9,6 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Pagination } from "@/components/ui/pagination";
+import { EmptyState } from "@/components/empty-state";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardFields,
+  DataCardField,
+  DataCardActions,
+} from "@/components/data-card";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +45,7 @@ import {
   BookOpen,
   Users,
   AlertTriangle,
+  SearchX,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -95,6 +105,8 @@ function getInitials(name: string) {
     .join("")
     .toUpperCase();
 }
+
+const PAGE_SIZE = 10;
 
 const estadoConfig = {
   pendiente: {
@@ -216,7 +228,6 @@ function PagoDetailModal({
   if (!pago) return null;
 
   const cfg = estadoConfig[pago.estado];
-  const Icon = cfg.icon;
   const isPdf = pago.comprobante?.endsWith(".pdf") ?? false;
 
   return (
@@ -287,7 +298,6 @@ function PagoDetailModal({
             variant={cfg.variant}
             className="font-sans text-xs font-semibold px-2.5 py-1"
           >
-            <Icon className="w-3 h-3" />
             {cfg.label}
           </Badge>
           <span className="font-sans text-xs text-muted-foreground">
@@ -474,6 +484,7 @@ export default function AdminPagosPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterEstado, setFilterEstado] = useState("todos");
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Pago | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -566,6 +577,19 @@ export default function AdminPagosPage() {
 
   const hasFilters = search !== "" || filterEstado !== "todos";
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE,
+  );
+
+  const limpiarFiltros = () => {
+    setSearch("");
+    setFilterEstado("todos");
+    setPage(1);
+  };
+
   return (
     <div className="relative min-h-screen bg-surface">
       <div className="relative z-10 px-4 md:px-8 py-10 mx-auto">
@@ -634,13 +658,22 @@ export default function AdminPagosPage() {
             <Input
               placeholder="Buscar por estudiante, referencia, curso..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               className="pl-9 h-10 font-sans text-sm"
             />
           </div>
           <div className="flex items-center gap-2">
             <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-            <Select value={filterEstado} onValueChange={setFilterEstado}>
+            <Select
+              value={filterEstado}
+              onValueChange={(v) => {
+                setFilterEstado(v);
+                setPage(1);
+              }}
+            >
               <SelectTrigger className="h-10 w-44 font-sans text-sm">
                 <SelectValue />
               </SelectTrigger>
@@ -677,26 +710,97 @@ export default function AdminPagosPage() {
             {fetchError}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center">
-              <CreditCard className="w-6 h-6 text-on-primary-container" />
-            </div>
-            <div className="text-center">
-              <p className="font-serif font-light text-2xl text-on-surface mb-1">
-                {hasFilters ? "Sin resultados" : "No hay comprobantes"}
-              </p>
-              <p className="font-sans text-sm text-muted-foreground">
-                {hasFilters
-                  ? "Ningún pago coincide con los filtros aplicados."
-                  : "Aún no se han enviado comprobantes de pago."}
-              </p>
-            </div>
+          <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
+            <div className="h-0.5 gradient-primary" />
+            {hasFilters ? (
+              <EmptyState
+                icon={SearchX}
+                title="Ningún pago coincide"
+                description="No hay comprobantes que cumplan los filtros aplicados. Prueba con otros criterios."
+                action={
+                  <Button variant="outline" onClick={limpiarFiltros}>
+                    Limpiar filtros
+                  </Button>
+                }
+              />
+            ) : (
+              <EmptyState
+                icon={CreditCard}
+                title="Aún no hay comprobantes"
+                description="Cuando un estudiante envíe su comprobante de pago, aparecerá aquí para que lo revises."
+              />
+            )}
           </div>
         ) : (
           <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
             <div className="h-0.5 gradient-primary" />
-            <div className="table-scroll">
-              <table className="w-full table-sticky-first [--table-sticky-bg:var(--surface-container-lowest)]">
+
+            {/* Móvil: una tarjeta por comprobante. */}
+            <ul className="md:hidden">
+              {paginated.map((pago) => {
+                const cfg = estadoConfig[pago.estado];
+                return (
+                  <DataCard key={pago.id}>
+                    <DataCardHeader
+                      aside={
+                        <Badge
+                          variant={cfg.variant}
+                          className="font-sans text-xs font-semibold px-2.5 py-1"
+                        >
+                          {cfg.label}
+                        </Badge>
+                      }
+                    >
+                      <div className="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+                        <span className="font-sans text-[10px] font-bold text-on-secondary-container">
+                          {getInitials(pago.estudiante.nombre)}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-sans text-sm font-medium text-on-surface truncate">
+                          {pago.estudiante.nombre}
+                        </p>
+                        <p className="font-sans text-xs text-muted-foreground">
+                          {pago.estudiante.cedula}
+                        </p>
+                      </div>
+                    </DataCardHeader>
+                    <DataCardFields>
+                      <DataCardField label="Curso">
+                        {pago.curso.nombre}
+                      </DataCardField>
+                      <DataCardField label="Método">
+                        {METODO_LABELS[pago.metodo_pago ?? "pago_movil"]}
+                      </DataCardField>
+                      {pago.referencia && (
+                        <DataCardField label="Referencia">
+                          <span className="font-mono">{pago.referencia}</span>
+                        </DataCardField>
+                      )}
+                      <DataCardField label="Fecha">
+                        {formatDateTime(pago.created_at)}
+                      </DataCardField>
+                    </DataCardFields>
+                    <DataCardActions>
+                      <Button
+                        size="sm"
+                        variant={
+                          pago.estado === "pendiente" ? "default" : "outline"
+                        }
+                        onClick={() => openModal(pago)}
+                        className="h-8 font-sans text-xs gap-1.5"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        {pago.estado === "pendiente" ? "Revisar" : "Ver"}
+                      </Button>
+                    </DataCardActions>
+                  </DataCard>
+                );
+              })}
+            </ul>
+
+            <div className="hidden md:block table-scroll">
+              <table className="w-full">
                 <thead>
                   <tr className="border-b border-outline-variant">
                     <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
@@ -718,9 +822,8 @@ export default function AdminPagosPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((pago) => {
+                  {paginated.map((pago) => {
                     const cfg = estadoConfig[pago.estado];
-                    const Icon = cfg.icon;
                     return (
                       <tr
                         key={pago.id}
@@ -781,7 +884,6 @@ export default function AdminPagosPage() {
                             variant={cfg.variant}
                             className="font-sans text-xs font-semibold px-2.5 py-1"
                           >
-                            <Icon className="w-3 h-3" />
                             {cfg.label}
                           </Badge>
                         </td>
@@ -802,14 +904,25 @@ export default function AdminPagosPage() {
                 </tbody>
               </table>
             </div>
-            <div className="px-5 py-3 border-t border-outline-variant flex items-center gap-2">
-              <Users className="w-3 h-3 text-muted-foreground" />
-              <span className="font-sans text-xs text-muted-foreground">
-                {filtered.length}{" "}
-                {filtered.length === 1 ? "registro" : "registros"}
-                {hasFilters ? " encontrados" : ""}
-              </span>
-            </div>
+            {totalPages > 1 ? (
+              <Pagination
+                page={safePage}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setPage}
+                itemLabel={["pago", "pagos"]}
+              />
+            ) : (
+              <div className="px-5 py-3 border-t border-outline-variant flex items-center gap-2">
+                <Users className="w-3 h-3 text-muted-foreground" />
+                <span className="font-sans text-xs text-muted-foreground">
+                  {filtered.length}{" "}
+                  {filtered.length === 1 ? "registro" : "registros"}
+                  {hasFilters ? " encontrados" : ""}
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>

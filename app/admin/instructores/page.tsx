@@ -12,6 +12,15 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Pagination } from "@/components/ui/pagination";
+import { EmptyState } from "@/components/empty-state";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardFields,
+  DataCardField,
+  DataCardActions,
+} from "@/components/data-card";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +46,7 @@ import {
   Loader2,
   Filter,
   Pencil,
+  SearchX,
 } from "lucide-react";
 import municipios from "@/data/municipios.json";
 
@@ -81,6 +91,8 @@ function getAuthHeaders() {
     "Content-Type": "application/json",
   };
 }
+
+const PAGE_SIZE = 10;
 
 function getInitials(name: string): string {
   return name
@@ -195,6 +207,7 @@ export default function InstructoresPage() {
   const [search, setSearch] = useState("");
   const [filterTitulo, setFilterTitulo] = useState("todos");
   const [filterDepartamento, setFilterDepartamento] = useState("todos");
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingTiposContrato, setLoadingTiposContrato] = useState(true);
   const [error, setError] = useState("");
@@ -426,6 +439,20 @@ export default function InstructoresPage() {
 
   const hasFilters =
     filterTitulo !== "todos" || filterDepartamento !== "todos" || search !== "";
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE,
+  );
+
+  const limpiarFiltros = () => {
+    setSearch("");
+    setFilterTitulo("todos");
+    setFilterDepartamento("todos");
+    setPage(1);
+  };
 
   return (
     <div className="relative min-h-full bg-surface">
@@ -804,14 +831,23 @@ export default function InstructoresPage() {
             <Input
               placeholder="Buscar instructor..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               className="pl-9 h-10 font-sans text-sm"
             />
           </div>
 
           <div className="flex items-center gap-2">
             <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-            <Select value={filterTitulo} onValueChange={setFilterTitulo}>
+            <Select
+              value={filterTitulo}
+              onValueChange={(v) => {
+                setFilterTitulo(v);
+                setPage(1);
+              }}
+            >
               <SelectTrigger className="h-10 w-42 font-sans text-sm">
                 <SelectValue />
               </SelectTrigger>
@@ -825,7 +861,10 @@ export default function InstructoresPage() {
 
             <Select
               value={filterDepartamento}
-              onValueChange={setFilterDepartamento}
+              onValueChange={(v) => {
+                setFilterDepartamento(v);
+                setPage(1);
+              }}
             >
               <SelectTrigger className="h-10 w-44 font-sans text-sm">
                 <SelectValue />
@@ -845,11 +884,7 @@ export default function InstructoresPage() {
 
             {hasFilters && (
               <button
-                onClick={() => {
-                  setSearch("");
-                  setFilterTitulo("todos");
-                  setFilterDepartamento("todos");
-                }}
+                onClick={limpiarFiltros}
                 className="font-sans text-xs text-muted-foreground hover:text-on-surface transition-colors underline underline-offset-2"
               >
                 Limpiar
@@ -876,83 +911,39 @@ export default function InstructoresPage() {
               </p>
             </div>
             {filtered.length === 0 ? (
-              <div className="flex items-center justify-center py-16 font-sans text-sm text-muted-foreground">
-                {hasFilters
-                  ? "No hay instructores con esos filtros."
-                  : "No hay instructores registrados."}
-              </div>
+              hasFilters ? (
+                <EmptyState
+                  icon={SearchX}
+                  title="Ningún instructor coincide"
+                  description="No hay instructores que cumplan los filtros aplicados. Prueba con otros criterios."
+                  action={
+                    <Button variant="outline" onClick={limpiarFiltros}>
+                      Limpiar filtros
+                    </Button>
+                  }
+                />
+              ) : (
+                <EmptyState
+                  icon={GraduationCap}
+                  title="Aún no hay instructores"
+                  description="Registra al primer instructor para poder asignarle cursos y horarios."
+                  action={
+                    <Button className="gap-2" onClick={() => setOpen(true)}>
+                      <Plus className="w-4 h-4" />
+                      Nuevo instructor
+                    </Button>
+                  }
+                />
+              )
             ) : (
-              <div className="table-scroll">
-                <table className="w-full table-sticky-first">
-                  <thead>
-                    <tr className="border-b border-outline-variant">
-                      {[
-                        "Instructor",
-                        "Cédula",
-                        "Especialidad",
-                        "Departamento",
-                        "Título",
-                        "",
-                      ].map((h) => (
-                        <th
-                          key={h}
-                          className="text-left px-6 py-3.5 font-sans text-xs tracking-[0.15em] uppercase text-muted-foreground font-semibold"
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((p, i) => (
-                      <tr
-                        key={p.id}
-                        className={`hover:bg-surface-container transition-colors ${i < filtered.length - 1 ? "border-b border-outline-variant" : ""}`}
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                              <span className="font-sans text-sm font-bold text-on-primary-container">
-                                {getInitials(p.user.name)}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="font-sans font-semibold text-on-surface text-sm">
-                                {p.user.name}
-                              </p>
-                              <p className="font-sans text-xs text-muted-foreground">
-                                {p.user.email}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 font-mono text-sm text-muted-foreground tracking-wide">
-                          {p.cedula}
-                        </td>
-                        <td className="px-6 py-4 font-sans text-sm">
-                          {p.especialidad ? (
-                            <span className="text-on-surface">
-                              {p.especialidad}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground italic text-xs">
-                              Sin especialidad
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 font-sans text-sm">
-                          {p.departamento ? (
-                            <span className="text-on-surface">
-                              {p.departamento}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground italic text-xs">
-                              Sin departamento
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          {p.titulo ? (
+              <>
+                {/* Móvil: una tarjeta por instructor. */}
+                <ul className="md:hidden">
+                  {paginated.map((p) => (
+                    <DataCard key={p.id}>
+                      <DataCardHeader
+                        aside={
+                          p.titulo ? (
                             <Badge
                               variant={
                                 p.titulo as
@@ -960,30 +951,175 @@ export default function InstructoresPage() {
                                   | "maestria"
                                   | "doctorado"
                               }
-                              className="font-sans text-xs font-semibold px-3 py-1"
+                              className="font-sans text-xs font-semibold px-2.5 py-1"
                             >
                               {tituloLabel[p.titulo]}
                             </Badge>
-                          ) : (
-                            <span className="text-muted-foreground font-sans text-sm">
-                              —
+                          ) : null
+                        }
+                      >
+                        <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+                          <span className="font-sans text-sm font-bold text-on-primary-container">
+                            {getInitials(p.user.name)}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-sans font-semibold text-on-surface text-sm truncate">
+                            {p.user.name}
+                          </p>
+                          <p className="font-sans text-xs text-muted-foreground truncate">
+                            {p.user.email}
+                          </p>
+                        </div>
+                      </DataCardHeader>
+                      <DataCardFields>
+                        <DataCardField label="Cédula">
+                          <span className="font-mono tracking-wide">
+                            {p.cedula}
+                          </span>
+                        </DataCardField>
+                        <DataCardField label="Especialidad">
+                          {p.especialidad ?? (
+                            <span className="text-muted-foreground">
+                              Sin especialidad
                             </span>
                           )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => openEdit(p)}
-                            className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
-                            title="Editar instructor"
+                        </DataCardField>
+                        <DataCardField label="Departamento">
+                          {p.departamento ?? (
+                            <span className="text-muted-foreground">
+                              Sin departamento
+                            </span>
+                          )}
+                        </DataCardField>
+                      </DataCardFields>
+                      <DataCardActions>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          onClick={() => openEdit(p)}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          Editar
+                        </Button>
+                      </DataCardActions>
+                    </DataCard>
+                  ))}
+                </ul>
+
+                <div className="hidden md:block table-scroll">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-outline-variant">
+                        {[
+                          "Instructor",
+                          "Cédula",
+                          "Especialidad",
+                          "Departamento",
+                          "Título",
+                          "",
+                        ].map((h) => (
+                          <th
+                            key={h}
+                            className="text-left px-6 py-3.5 font-sans text-xs tracking-[0.15em] uppercase text-muted-foreground font-semibold"
                           >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                        </td>
+                            {h}
+                          </th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {paginated.map((p, i) => (
+                        <tr
+                          key={p.id}
+                          className={`hover:bg-surface-container transition-colors ${i < paginated.length - 1 ? "border-b border-outline-variant" : ""}`}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+                                <span className="font-sans text-sm font-bold text-on-primary-container">
+                                  {getInitials(p.user.name)}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="font-sans font-semibold text-on-surface text-sm">
+                                  {p.user.name}
+                                </p>
+                                <p className="font-sans text-xs text-muted-foreground">
+                                  {p.user.email}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-mono text-sm text-muted-foreground tracking-wide">
+                            {p.cedula}
+                          </td>
+                          <td className="px-6 py-4 font-sans text-sm">
+                            {p.especialidad ? (
+                              <span className="text-on-surface">
+                                {p.especialidad}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground italic text-xs">
+                                Sin especialidad
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 font-sans text-sm">
+                            {p.departamento ? (
+                              <span className="text-on-surface">
+                                {p.departamento}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground italic text-xs">
+                                Sin departamento
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            {p.titulo ? (
+                              <Badge
+                                variant={
+                                  p.titulo as
+                                    | "licenciatura"
+                                    | "maestria"
+                                    | "doctorado"
+                                }
+                                className="font-sans text-xs font-semibold px-3 py-1"
+                              >
+                                {tituloLabel[p.titulo]}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted-foreground font-sans text-sm">
+                                —
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => openEdit(p)}
+                              className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              aria-label={`Editar a ${p.user.name}`}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <Pagination
+                  page={safePage}
+                  totalPages={totalPages}
+                  totalItems={filtered.length}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={setPage}
+                  itemLabel={["instructor", "instructores"]}
+                />
+              </>
             )}
           </div>
         )}
