@@ -152,7 +152,7 @@ function StatCard({
       <p className="font-sans text-3xl font-light tight-tracking text-on-surface tabular-nums mb-1">
         {value}
       </p>
-      <p className="font-sans text-xs tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+      <p className="font-sans text-xs tracking-[0.15em] uppercase text-muted-foreground font-semibold">
         {label}
       </p>
       {sub && (
@@ -358,9 +358,6 @@ export default function ReportesPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         <PageHeader
           icon={BarChart2}
@@ -428,15 +425,15 @@ export default function ReportesPage() {
         {/* Income stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           <div className="bg-surface-container-low rounded-sm p-5 ambient-shadow">
-            <div className="w-10 h-10 rounded-md flex items-center justify-center bg-emerald-100 dark:bg-emerald-500/15 mb-4">
-              <span className="text-emerald-700 dark:text-emerald-400 font-sans text-sm font-semibold">
+            <div className="w-10 h-10 rounded-md flex items-center justify-center bg-success-container mb-4">
+              <span className="text-on-success-container font-sans text-sm font-semibold">
                 Bs.
               </span>
             </div>
             <p className="font-sans text-3xl font-light tight-tracking text-on-surface tabular-nums mb-1">
               {resumen ? fmt(resumen.total_ingresos) : "—"}
             </p>
-            <p className="font-sans text-xs tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+            <p className="font-sans text-xs tracking-[0.15em] uppercase text-muted-foreground font-semibold">
               Total ingresos
             </p>
           </div>
@@ -444,22 +441,22 @@ export default function ReportesPage() {
             label="Pagos aprobados"
             value={resumen?.aprobados ?? "—"}
             icon={CheckCircle}
-            containerClass="bg-emerald-100 dark:bg-emerald-500/15"
-            iconClass="text-emerald-700 dark:text-emerald-400"
+            containerClass="bg-success-container"
+            iconClass="text-on-success-container"
           />
           <StatCard
             label="Pagos pendientes"
             value={resumen?.pendientes ?? "—"}
             icon={Clock}
-            containerClass="bg-amber-100 dark:bg-amber-500/15"
-            iconClass="text-amber-700 dark:text-amber-400"
+            containerClass="bg-warning-container"
+            iconClass="text-on-warning-container"
           />
           <StatCard
             label="Pagos rechazados"
             value={resumen?.rechazados ?? "—"}
             icon={XCircle}
-            containerClass="bg-rose-100 dark:bg-rose-500/15"
-            iconClass="text-rose-700 dark:text-rose-400"
+            containerClass="bg-danger-container"
+            iconClass="text-on-danger-container"
           />
         </div>
 
@@ -511,7 +508,7 @@ export default function ReportesPage() {
                             <span className="font-medium text-on-surface">
                               {props.payload?.label as string}
                             </span>
-                            <span className="text-emerald-600 font-semibold">
+                            <span className="text-success font-semibold">
                               {fmt(Number(value))}
                             </span>
                             <span className="text-muted-foreground text-xs">
@@ -642,7 +639,7 @@ export default function ReportesPage() {
                               <span className="font-medium text-on-surface">
                                 {props.payload?.fullName as string}
                               </span>
-                              <span className="text-emerald-600 font-semibold">
+                              <span className="text-success font-semibold">
                                 {fmt(Number(value))}
                               </span>
                               <span className="text-muted-foreground text-xs">
@@ -785,26 +782,26 @@ export default function ReportesPage() {
               title="Pagos por curso"
               description="Detalle de recaudación y estado de pagos en cada curso"
             >
-              <div className="overflow-x-auto">
-                <table className="w-full font-sans text-sm">
+              <div className="table-scroll">
+                <table className="w-full font-sans text-sm table-sticky-first [--table-sticky-bg:var(--surface-container-lowest)]">
                   <thead>
-                    <tr className="border-b border-outline-variant/40">
-                      <th className="text-left py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                    <tr className="border-b border-outline-variant">
+                      <th className="text-left py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Curso
                       </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Precio
                       </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Aprobados
                       </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Pendientes
                       </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Rechazados
                       </th>
-                      <th className="text-right py-2 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      <th className="text-right py-2 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Recaudado
                       </th>
                     </tr>
@@ -813,7 +810,7 @@ export default function ReportesPage() {
                     {(reporte.pagos_por_curso ?? []).map((c) => (
                       <tr
                         key={c.curso_id}
-                        className="border-b border-outline-variant/20 hover:bg-surface-container-low/50 transition-colors"
+                        className="border-b border-outline-variant hover:bg-surface-container-low/50 transition-colors"
                       >
                         <td className="py-3 pr-4">
                           <span className="font-mono text-xs text-primary/70 mr-2">
@@ -825,17 +822,17 @@ export default function ReportesPage() {
                           {fmt(c.precio)}
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-emerald-600 font-semibold">
+                          <span className="text-success font-semibold">
                             {c.aprobados}
                           </span>
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-amber-600 font-semibold">
+                          <span className="text-warning font-semibold">
                             {c.pendientes}
                           </span>
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-rose-600 font-semibold">
+                          <span className="text-danger font-semibold">
                             {c.rechazados}
                           </span>
                         </td>
@@ -849,7 +846,7 @@ export default function ReportesPage() {
                     <tr>
                       <td
                         colSpan={5}
-                        className="pt-3 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold"
+                        className="pt-3 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold"
                       >
                         Total
                       </td>
@@ -876,26 +873,26 @@ export default function ReportesPage() {
               title="Pagos por usuario"
               description="Historial de pagos y recaudación por cada estudiante"
             >
-              <div className="overflow-x-auto">
-                <table className="w-full font-sans text-sm">
+              <div className="table-scroll">
+                <table className="w-full font-sans text-sm table-sticky-first [--table-sticky-bg:var(--surface-container-lowest)]">
                   <thead>
-                    <tr className="border-b border-outline-variant/40">
-                      <th className="text-left py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                    <tr className="border-b border-outline-variant">
+                      <th className="text-left py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Usuario
                       </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Total pagos
                       </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Aprobados
                       </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Pendientes
                       </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Rechazados
                       </th>
-                      <th className="text-right py-2 text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+                      <th className="text-right py-2 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Ingreso generado
                       </th>
                     </tr>
@@ -904,7 +901,7 @@ export default function ReportesPage() {
                     {(reporte.pagos_por_usuario ?? []).map((u) => (
                       <tr
                         key={u.user_id}
-                        className="border-b border-outline-variant/20 hover:bg-surface-container-low/50 transition-colors"
+                        className="border-b border-outline-variant hover:bg-surface-container-low/50 transition-colors"
                       >
                         <td className="py-3 pr-4 text-on-surface font-medium">
                           {u.nombre}
@@ -913,17 +910,17 @@ export default function ReportesPage() {
                           {u.total_pagos}
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-emerald-600 font-semibold">
+                          <span className="text-success font-semibold">
                             {u.aprobados}
                           </span>
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-amber-600 font-semibold">
+                          <span className="text-warning font-semibold">
                             {u.pendientes}
                           </span>
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-rose-600 font-semibold">
+                          <span className="text-danger font-semibold">
                             {u.rechazados}
                           </span>
                         </td>
@@ -940,7 +937,7 @@ export default function ReportesPage() {
         )}
 
         {/* Footer note */}
-        <div className="mt-8 flex items-center gap-2 text-muted-foreground/50">
+        <div className="mt-8 flex items-center gap-2 text-muted-foreground">
           <TrendingUp className="w-3 h-3" />
           <span className="font-sans text-[10px] tracking-[0.15em] uppercase">
             Datos en tiempo real

@@ -36,7 +36,7 @@ export function PageHeader({
         }
       >
         <div>
-          <h1 className="font-serif font-light text-[2.6rem] md:text-[3.2rem] tight-tracking leading-[1.05] text-on-surface mb-2">
+          <h1 className="font-serif text-[2.4rem] md:text-[3rem] tight-tracking leading-[1.05] text-on-surface mb-2">
             {title}
           </h1>
           {subtitle && (

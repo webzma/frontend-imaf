@@ -164,10 +164,10 @@ type EditInstructorForm = z.infer<typeof editInstructorSchema>;
 function TableSkeleton() {
   return (
     <div className="bg-surface-container-low rounded-sm overflow-hidden ambient-shadow">
-      <div className="px-6 py-3.5 border-b border-outline-variant/50">
+      <div className="px-6 py-3.5 border-b border-outline-variant">
         <Skeleton className="h-3 w-32" />
       </div>
-      <div className="divide-y divide-outline-variant/30">
+      <div className="divide-y divide-outline-variant">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="px-6 py-4 flex items-center gap-4">
             <Skeleton className="w-9 h-9 rounded-full shrink-0" />
@@ -429,9 +429,6 @@ export default function InstructoresPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-10 flex-col md:flex-row md:flex items-end justify-between">
@@ -481,7 +478,7 @@ export default function InstructoresPage() {
                     {...form.register("name")}
                   />
                   {form.formState.errors.name && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-danger">
                       {form.formState.errors.name.message}
                     </p>
                   )}
@@ -497,7 +494,7 @@ export default function InstructoresPage() {
                       {...form.register("email")}
                     />
                     {form.formState.errors.email && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-danger">
                         {form.formState.errors.email.message}
                       </p>
                     )}
@@ -511,7 +508,7 @@ export default function InstructoresPage() {
                       {...form.register("password")}
                     />
                     {form.formState.errors.password && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-danger">
                         {form.formState.errors.password.message}
                       </p>
                     )}
@@ -528,7 +525,7 @@ export default function InstructoresPage() {
                       {...form.register("cedula")}
                     />
                     {form.formState.errors.cedula && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-danger">
                         {form.formState.errors.cedula.message}
                       </p>
                     )}
@@ -697,7 +694,7 @@ export default function InstructoresPage() {
                   <div className="grid gap-2">
                     <Label>Tipo de Contrato</Label>
                     {loadingTiposContrato ? (
-                      <div className="h-10 w-full rounded-sm border border-outline-variant/30 bg-surface-variant/50 animate-pulse" />
+                      <div className="h-10 w-full rounded-sm border border-outline-variant bg-surface-variant/50 animate-pulse" />
                     ) : (
                       <Select
                         value={form.watch("tipo_contrato_id")?.toString() ?? ""}
@@ -727,7 +724,7 @@ export default function InstructoresPage() {
                 </div>
 
                 {submitError && (
-                  <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-4 py-3 rounded-sm">
+                  <div className="bg-danger-container border border-danger/25 text-danger text-sm px-4 py-3 rounded-sm">
                     {submitError}
                   </div>
                 )}
@@ -793,7 +790,7 @@ export default function InstructoresPage() {
                   {s.value}
                 </p>
               )}
-              <p className="font-sans text-xs truncate tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+              <p className="font-sans text-xs truncate tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                 {s.label}
               </p>
             </div>
@@ -803,7 +800,7 @@ export default function InstructoresPage() {
         {/* Filters row */}
         <div className="flex items-center gap-3 mb-6 flex-wrap">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar instructor..."
               value={search}
@@ -813,7 +810,7 @@ export default function InstructoresPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-muted-foreground/60" />
+            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
             <Select value={filterTitulo} onValueChange={setFilterTitulo}>
               <SelectTrigger className="h-10 w-42 font-sans text-sm">
                 <SelectValue />
@@ -865,13 +862,13 @@ export default function InstructoresPage() {
         {loading ? (
           <TableSkeleton />
         ) : error ? (
-          <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-sm font-sans">
+          <div className="bg-danger-container text-on-danger-container text-sm px-4 py-3 rounded-sm font-sans">
             {error}
           </div>
         ) : (
           <div className="bg-surface-container-low rounded-sm overflow-hidden ambient-shadow">
-            <div className="px-6 py-3.5 border-b border-outline-variant/50">
-              <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-on-surface/55 font-medium">
+            <div className="px-6 py-3.5 border-b border-outline-variant">
+              <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-medium">
                 {filtered.length} instructor{filtered.length !== 1 ? "es" : ""}
                 {hasFilters
                   ? " encontrado" + (filtered.length !== 1 ? "s" : "")
@@ -885,10 +882,10 @@ export default function InstructoresPage() {
                   : "No hay instructores registrados."}
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="table-scroll">
+                <table className="w-full table-sticky-first">
                   <thead>
-                    <tr className="border-b border-outline-variant/40">
+                    <tr className="border-b border-outline-variant">
                       {[
                         "Instructor",
                         "Cédula",
@@ -899,7 +896,7 @@ export default function InstructoresPage() {
                       ].map((h) => (
                         <th
                           key={h}
-                          className="text-left px-6 py-3.5 font-sans text-xs tracking-[0.15em] uppercase text-on-surface/55 font-semibold"
+                          className="text-left px-6 py-3.5 font-sans text-xs tracking-[0.15em] uppercase text-muted-foreground font-semibold"
                         >
                           {h}
                         </th>
@@ -910,7 +907,7 @@ export default function InstructoresPage() {
                     {filtered.map((p, i) => (
                       <tr
                         key={p.id}
-                        className={`hover:bg-surface-container transition-colors ${i < filtered.length - 1 ? "border-b border-outline-variant/30" : ""}`}
+                        className={`hover:bg-surface-container transition-colors ${i < filtered.length - 1 ? "border-b border-outline-variant" : ""}`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
@@ -938,7 +935,7 @@ export default function InstructoresPage() {
                               {p.especialidad}
                             </span>
                           ) : (
-                            <span className="text-on-surface/40 italic text-xs">
+                            <span className="text-muted-foreground italic text-xs">
                               Sin especialidad
                             </span>
                           )}
@@ -949,7 +946,7 @@ export default function InstructoresPage() {
                               {p.departamento}
                             </span>
                           ) : (
-                            <span className="text-on-surface/40 italic text-xs">
+                            <span className="text-muted-foreground italic text-xs">
                               Sin departamento
                             </span>
                           )}
@@ -968,7 +965,7 @@ export default function InstructoresPage() {
                               {tituloLabel[p.titulo]}
                             </Badge>
                           ) : (
-                            <span className="text-muted-foreground/50 font-sans text-sm">
+                            <span className="text-muted-foreground font-sans text-sm">
                               —
                             </span>
                           )}
@@ -1022,7 +1019,7 @@ export default function InstructoresPage() {
                 {...editForm.register("name")}
               />
               {editForm.formState.errors.name && (
-                <p className="text-sm text-destructive">
+                <p className="text-sm text-danger">
                   {editForm.formState.errors.name.message}
                 </p>
               )}
@@ -1038,7 +1035,7 @@ export default function InstructoresPage() {
                   {...editForm.register("email")}
                 />
                 {editForm.formState.errors.email && (
-                  <p className="text-sm text-destructive">
+                  <p className="text-sm text-danger">
                     {editForm.formState.errors.email.message}
                   </p>
                 )}
@@ -1052,7 +1049,7 @@ export default function InstructoresPage() {
                   {...editForm.register("cedula")}
                 />
                 {editForm.formState.errors.cedula && (
-                  <p className="text-sm text-destructive">
+                  <p className="text-sm text-danger">
                     {editForm.formState.errors.cedula.message}
                   </p>
                 )}
@@ -1221,7 +1218,7 @@ export default function InstructoresPage() {
               <div className="grid gap-2">
                 <Label>Tipo de Contrato</Label>
                 {loadingTiposContrato ? (
-                  <div className="h-10 w-full rounded-sm border border-outline-variant/30 bg-surface-variant/50 animate-pulse" />
+                  <div className="h-10 w-full rounded-sm border border-outline-variant bg-surface-variant/50 animate-pulse" />
                 ) : (
                   <Select
                     value={editForm.watch("tipo_contrato_id")?.toString() ?? ""}
@@ -1248,7 +1245,7 @@ export default function InstructoresPage() {
             </div>
 
             {editSubmitError && (
-              <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-4 py-3 rounded-sm">
+              <div className="bg-danger-container border border-danger/25 text-danger text-sm px-4 py-3 rounded-sm">
                 {editSubmitError}
               </div>
             )}

@@ -180,7 +180,7 @@ export default function AsistenciaPage({
   if (error || !sesion) {
     return (
       <div className="px-10 py-10">
-        <p className="text-destructive font-sans text-sm">
+        <p className="text-danger font-sans text-sm">
           {error || "Sesión no encontrada."}
         </p>
         <Button
@@ -199,12 +199,9 @@ export default function AsistenciaPage({
   /* ── Render ── */
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10">
         {/* ── Sticky top bar ── */}
-        <div className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md border-b border-outline-variant/20">
+        <div className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md border-b border-outline-variant">
           <div className="px-4 md:px-10 py-3 max-w-4xl mx-auto flex items-center gap-4">
             <button
               onClick={() => router.push(`/admin/cursos/${sesion.curso_id}`)}
@@ -222,18 +219,18 @@ export default function AsistenciaPage({
             {/* Live stats chips */}
             {total > 0 && (
               <div className="hidden md:flex items-center gap-4">
-                <span className="flex items-center gap-1.5 font-sans text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                <span className="flex items-center gap-1.5 font-sans text-xs font-semibold text-success">
                   <Check className="w-3.5 h-3.5" />
                   {presentes} presentes
                 </span>
-                <span className="flex items-center gap-1.5 font-sans text-xs font-semibold text-rose-500 dark:text-rose-400">
+                <span className="flex items-center gap-1.5 font-sans text-xs font-semibold text-danger">
                   <X className="w-3.5 h-3.5" />
                   {total - presentes} ausentes
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-20 h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                      className="h-full bg-success rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -293,22 +290,22 @@ export default function AsistenciaPage({
           {/* ── Stats ── */}
           {total > 0 && (
             <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-sm p-4">
+              <div className="bg-success-container rounded-sm p-4">
                 <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
                   Presentes
                 </p>
-                <p className="font-sans text-3xl font-light text-emerald-700 dark:text-emerald-400">
+                <p className="font-sans text-3xl font-light text-on-success-container">
                   {presentes}
                 </p>
                 <p className="font-sans text-xs text-muted-foreground mt-1">
                   de {total}
                 </p>
               </div>
-              <div className="bg-rose-50 dark:bg-rose-500/10 rounded-sm p-4">
+              <div className="bg-danger-container rounded-sm p-4">
                 <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
                   Ausentes
                 </p>
-                <p className="font-sans text-3xl font-light text-rose-700 dark:text-rose-400">
+                <p className="font-sans text-3xl font-light text-on-danger-container">
                   {total - presentes}
                 </p>
                 <p className="font-sans text-xs text-muted-foreground mt-1">
@@ -324,7 +321,7 @@ export default function AsistenciaPage({
                 </p>
                 <div className="mt-2 h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-primary rounded-full transition-all duration-300"
+                    className="h-full bg-primary rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -336,7 +333,7 @@ export default function AsistenciaPage({
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             <div className="flex items-center gap-2 shrink-0">
               <Users className="w-4 h-4 text-primary/70" />
-              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-on-surface/55 font-medium">
+              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
                 Estudiantes ({total})
               </p>
             </div>
@@ -350,14 +347,14 @@ export default function AsistenciaPage({
                     placeholder="Buscar por nombre o cédula..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/60 font-sans text-xs placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/60 font-sans text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                   />
                 </div>
 
                 <div className="flex items-center gap-1 ml-auto">
                   <button
                     onClick={() => marcarTodos(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-xs font-medium text-on-success-container hover:bg-success-container transition-colors"
                   >
                     <CheckCheck className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Todos presentes</span>
@@ -396,9 +393,9 @@ export default function AsistenciaPage({
               {filtered.map((registro) => (
                 <div
                   key={registro.estudiante_id}
-                  className={`rounded-sm ambient-shadow transition-all duration-200 ${
+                  className={`rounded-sm ambient-shadow transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-200 ${
                     registro.presente
-                      ? "bg-emerald-50/80 dark:bg-emerald-950/40 ring-1 ring-emerald-500/25"
+                      ? "bg-success-container ring-1 ring-success/40"
                       : "bg-surface-container-low"
                   }`}
                 >
@@ -408,14 +405,14 @@ export default function AsistenciaPage({
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                         registro.presente
-                          ? "bg-emerald-100 dark:bg-emerald-500/25"
+                          ? "bg-success-container"
                           : "bg-surface-container"
                       }`}
                     >
                       <span
                         className={`font-sans text-xs font-bold ${
                           registro.presente
-                            ? "text-emerald-800 dark:text-emerald-300"
+                            ? "text-on-success-container"
                             : "text-muted-foreground"
                         }`}
                       >
@@ -434,28 +431,28 @@ export default function AsistenciaPage({
                     </div>
 
                     {/* Toggle pill */}
-                    <div className="flex rounded-lg overflow-hidden border border-outline-variant/50 shrink-0 text-xs font-semibold font-sans">
+                    <div className="flex rounded-lg overflow-hidden border border-outline-variant shrink-0 text-xs font-semibold font-sans">
                       <button
                         onClick={() =>
                           setPresente(registro.estudiante_id, false)
                         }
                         className={`flex items-center gap-1.5 px-4 py-2.5 transition-colors ${
                           !registro.presente
-                            ? "bg-rose-500 text-white"
+                            ? "bg-danger text-white"
                             : "text-muted-foreground hover:bg-surface-container"
                         }`}
                       >
                         <X className="w-3.5 h-3.5" />
                         Ausente
                       </button>
-                      <div className="w-px bg-outline-variant/50" />
+                      <div className="w-px bg-outline-variant" />
                       <button
                         onClick={() =>
                           setPresente(registro.estudiante_id, true)
                         }
                         className={`flex items-center gap-1.5 px-4 py-2.5 transition-colors ${
                           registro.presente
-                            ? "bg-emerald-500 text-white"
+                            ? "bg-success text-white"
                             : "text-muted-foreground hover:bg-surface-container"
                         }`}
                       >
@@ -474,7 +471,7 @@ export default function AsistenciaPage({
                       onChange={(e) =>
                         setObservacion(registro.estudiante_id, e.target.value)
                       }
-                      className="w-full rounded-md border border-input/50 bg-background/50 px-3 py-1.5 font-sans text-xs placeholder:text-muted-foreground/35 focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="w-full rounded-md border border-input/50 bg-background/50 px-3 py-1.5 font-sans text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                   </div>
                 </div>

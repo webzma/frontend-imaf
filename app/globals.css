@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&display=swap");
-
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -13,7 +11,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
-  --font-league-spartan: var(--font-league-spartan);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,6 +36,7 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -47,8 +45,6 @@
   --color-on-primary-container: var(--on-primary-container);
   --color-secondary-container: var(--secondary-container);
   --color-on-secondary-container: var(--on-secondary-container);
-  --color-tertiary: var(--tertiary);
-  --color-tertiary-foreground: var(--tertiary-foreground);
   --color-surface: var(--surface);
   --color-surface-variant: var(--surface-variant);
   --color-surface-container-lowest: var(--surface-container-lowest);
@@ -57,8 +53,25 @@
   --color-surface-container-high: var(--surface-container-high);
   --color-surface-container-highest: var(--surface-container-highest);
   --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
   --color-outline-variant: var(--outline-variant);
-  --radius-sm: calc(var(--radius) * 0.6);
+
+  /* Colores semánticos de estado — 4 significados, no 9 tonos sueltos */
+  --color-success: var(--success);
+  --color-success-container: var(--success-container);
+  --color-on-success-container: var(--on-success-container);
+  --color-warning: var(--warning);
+  --color-warning-container: var(--warning-container);
+  --color-on-warning-container: var(--on-warning-container);
+  --color-danger: var(--danger);
+  --color-danger-container: var(--danger-container);
+  --color-on-danger-container: var(--on-danger-container);
+  --color-info: var(--info);
+  --color-info-container: var(--info-container);
+  --color-on-info-container: var(--on-info-container);
+
+  /* Escala de radios: una sola fuente. sm=4px · md=8px · lg=10px · xl=14px */
+  --radius-sm: calc(var(--radius) * 0.4);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
@@ -68,118 +81,151 @@
 }
 
 :root {
+  /* ── Superficies: escala estrictamente monótona (claro → oscuro) ──
+     lowest #ffffff · surface #faf8f7 · low #f3f0ef · container #ece8e7
+     high #e4dfde · highest #dcd6d4
+     Subir un nivel siempre oscurece. Ese es el único mecanismo de profundidad. */
+  --surface-container-lowest: #ffffff;
+  --surface: #faf8f7;
+  --surface-container-low: #f3f0ef;
+  --surface-container: #ece8e7;
+  --surface-container-high: #e4dfde;
+  --surface-container-highest: #dcd6d4;
+  --surface-variant: #f3f0ef;
+
   --background: #faf8f7;
   --foreground: #1a1817;
   --card: #ffffff;
   --card-foreground: #1a1817;
   --popover: #ffffff;
   --popover-foreground: #1a1817;
-  --primary: #d63384;
+
+  /* Magenta de marca, oscurecido lo justo para pasar AA en ambos sentidos:
+     como texto (5.78:1 sobre crema, 4.63:1 sobre la superficie más oscura en
+     la que cae texto) y con blanco encima (6.12:1). */
+  --primary: #b52569;
+  --primary-hover: #a51f5f;
   --primary-foreground: #ffffff;
-  --primary-container: #ffd9e2;
-  --on-primary-container: #65002f;
+  --primary-container: #fbdde8;
+  --on-primary-container: #7a0f43;
   --secondary: #890f50;
   --secondary-foreground: #ffffff;
   --secondary-container: #ff94bd;
   --on-secondary-container: #65002f;
-  --tertiary: #30a45c;
-  --tertiary-foreground: #ffffff;
-  --tertiary-container: #b3e6c7;
-  --on-tertiary-container: #003115;
-  --muted: #f5f5f4;
-  --muted-foreground: #737373;
-  --accent: #f5f5f4;
+
+  --muted: #f3f0ef;
+  /* Pasa AA (>=4.5) sobre las seis superficies, incluida la más oscura. */
+  --muted-foreground: #5f5b59;
+  --accent: #ece8e7;
   --accent-foreground: #1a1817;
-  --destructive: #dc2626;
-  --border: #e5e5e5;
+  --destructive: #c02626;
+  --border: #ddd8d6;
   --input: #ffffff;
-  --ring: #d63384;
-  --outline-variant: #d4d4d4;
-  --surface: #faf8f7;
-  --surface-variant: #f5f5f4;
-  --surface-container-lowest: #ffffff;
-  --surface-container-low: #f5f5f4;
-  --surface-container: #ffffff;
-  --surface-container-high: #faf8f7;
-  --surface-container-highest: #f0ede9;
+  --ring: #b52569;
+  --outline-variant: #c9c3c1;
   --on-surface: #1a1817;
-  --on-surface-variant: #737373;
-  --chart-1: #d63384;
-  --chart-2: #890f50;
-  --chart-3: #ff94bd;
-  --chart-4: #f5f5f4;
-  --chart-5: #faf8f7;
-  --sidebar: #f5f5f4;
+  --on-surface-variant: #5f5b59;
+
+  /* Estados semánticos */
+  --success: #1a7a4c;
+  --success-container: #dcf3e7;
+  --on-success-container: #0d4a2c;
+  --warning: #8a5a00;
+  --warning-container: #fdefd0;
+  --on-warning-container: #573900;
+  --danger: #c02626;
+  --danger-container: #fbe0e0;
+  --on-danger-container: #7a1414;
+  --info: #1f5fa8;
+  --info-container: #dde9f8;
+  --on-info-container: #123a68;
+
+  /* Paleta categórica: cinco matices realmente distintos, todos >=4:1 sobre blanco */
+  --chart-1: #b52569;
+  --chart-2: #2563a5;
+  --chart-3: #1f8a5f;
+  --chart-4: #b4610a;
+  --chart-5: #6b4bb0;
+
+  --sidebar: #f3f0ef;
   --sidebar-foreground: #1a1817;
-  --sidebar-primary: #d63384;
+  --sidebar-primary: #b52569;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ede4e6d1;
+  --sidebar-accent: #e4dfde;
   --sidebar-accent-foreground: #1a1817;
-  --sidebar-border: #e5e5e5;
-  --sidebar-ring: #d63384;
+  --sidebar-border: #ddd8d6;
+  --sidebar-ring: #b52569;
+
   --radius: 0.625rem;
-  --radius-sm: 0.125rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.625rem;
-  --font-league-spartan: "League-Spartan";
 }
 
 .dark {
+  /* Escala monótona invertida: subir un nivel siempre aclara. */
+  --surface-container-lowest: #0e0e0e;
+  --surface: #131313;
+  --surface-container-low: #1c1b1b;
+  --surface-container: #232222;
+  --surface-container-high: #2c2b2b;
+  --surface-container-highest: #363434;
+  --surface-variant: #1c1b1b;
+
   --background: #131313;
   --foreground: #e5e2e1;
-  --card: #201f1f;
+  --card: #1c1b1b;
   --card-foreground: #e5e2e1;
-  --popover: #201f1f;
+  --popover: #232222;
   --popover-foreground: #e5e2e1;
+
   --primary: #ffb1c5;
-  --primary-foreground: #65002f;
-  --primary-container: #ec5f8f;
-  --on-primary-container: #65002f;
-  --secondary: #890f50;
-  --secondary-foreground: #ff94bd;
-  --secondary-container: #890f50;
-  --on-secondary-container: #ff94bd;
-  --tertiary: #30a45c;
-  --tertiary-foreground: #003115;
-  --tertiary-container: #30a45c;
-  --on-tertiary-container: #003115;
-  --muted: #353534;
+  --primary-hover: #ffc9d7;
+  --primary-foreground: #5c0029;
+  --primary-container: #7a0f43;
+  --on-primary-container: #ffd9e2;
+  --secondary: #ff94bd;
+  --secondary-foreground: #4a0023;
+  --secondary-container: #7a0f43;
+  --on-secondary-container: #ffd9e2;
+
+  --muted: #2c2b2b;
   --muted-foreground: #a8a29e;
-  --accent: #353534;
+  --accent: #2c2b2b;
   --accent-foreground: #e5e2e1;
-  --destructive: #ffb1c5;
-  --border: #5b3f43;
-  --input: #0e0e0e;
+  /* Coral, no rosa: en oscuro el destructivo debe leerse distinto del primario. */
+  --destructive: #ff8a7a;
+  --border: #3a3838;
+  --input: #1c1b1b;
   --ring: #ffb1c5;
-  --outline-variant: #5b3f43;
-  --surface: #131313;
-  --surface-variant: #1c1b1b;
-  --surface-container-lowest: #0e0e0e;
-  --surface-container-low: #1c1b1b;
-  --surface-container: #201f1f;
-  --surface-container-high: #2a2a2a;
-  --surface-container-highest: #353534;
+  --outline-variant: #4a4746;
   --on-surface: #e5e2e1;
   --on-surface-variant: #a8a29e;
+
+  --success: #6fd39b;
+  --success-container: #10402a;
+  --on-success-container: #b8ecd0;
+  --warning: #e8b761;
+  --warning-container: #453005;
+  --on-warning-container: #f8dfae;
+  --danger: #ff8f8f;
+  --danger-container: #4a1616;
+  --on-danger-container: #ffd0d0;
+  --info: #7db4f0;
+  --info-container: #10304f;
+  --on-info-container: #cbe0f8;
+
   --chart-1: #ffb1c5;
-  --chart-2: #890f50;
-  --chart-3: #ec5f8f;
-  --chart-4: #1c1b1b;
-  --chart-5: #131313;
+  --chart-2: #7db4f0;
+  --chart-3: #6fd39b;
+  --chart-4: #e8b761;
+  --chart-5: #b9a3f0;
+
   --sidebar: #1c1b1b;
   --sidebar-foreground: #e5e2e1;
   --sidebar-primary: #ffb1c5;
-  --sidebar-primary-foreground: #65002f;
-  --sidebar-accent: #2a2a2a;
+  --sidebar-primary-foreground: #5c0029;
+  --sidebar-accent: #2c2b2b;
   --sidebar-accent-foreground: #e5e2e1;
-  --sidebar-border: #5d4d4f;
+  --sidebar-border: #3a3838;
   --sidebar-ring: #ffb1c5;
-}
-
-.league-spartan {
-  font-family: "League Spartan", sans-serif;
-  font-weight: 600;
-  font-style: normal;
 }
 
 @layer base {
@@ -193,22 +239,28 @@
     @apply font-sans;
   }
 
+  /* Una sola tipografía display en todo el producto. */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    font-family: "League Spartan", sans-serif;
-    font-weight: 600;
+    font-family: var(--font-serif), Georgia, serif;
+  }
+
+  /* Los anclas de sección no deben quedar bajo la nav sticky. */
+  :target,
+  [id] {
+    scroll-margin-top: 6rem;
   }
 }
 
 @layer utilities {
   .ambient-shadow {
     box-shadow:
-      0 24px 48px rgba(214, 51, 132, 0.08),
-      0 8px 16px rgba(0, 0, 0, 0.04);
+      0 12px 32px rgba(26, 24, 23, 0.06),
+      0 2px 8px rgba(26, 24, 23, 0.04);
   }
 
   .dark .ambient-shadow {
@@ -226,16 +278,61 @@
     background: linear-gradient(
       135deg,
       var(--primary) 0%,
-      var(--primary-container) 100%
+      var(--primary-hover) 100%
     );
-  }
-
-  .editorial-spacing-asymmetric {
-    padding-left: 1.4rem;
-    padding-right: 5.5rem;
   }
 
   .tight-tracking {
     letter-spacing: -0.02em;
+  }
+
+  /* Deja que la barra inferior móvil respete el indicador de home en iOS. */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Tablas anchas en móvil: la columna que identifica la fila (nombre,
+     estudiante, curso) queda fija mientras el resto se desplaza. Sin esto,
+     al hacer scroll horizontal no se sabía a qué fila pertenecía cada dato. */
+  .table-sticky-first {
+    --table-sticky-bg: var(--surface-container-low);
+  }
+
+  @media (max-width: 767px) {
+    .table-sticky-first thead th:first-child,
+    .table-sticky-first tbody td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background-color: var(--table-sticky-bg);
+      box-shadow: 1px 0 0 var(--outline-variant);
+    }
+  }
+
+  /* Pista de que la tabla se desplaza en horizontal. */
+  .table-scroll {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+  }
+}
+
+/* Respeta la preferencia del sistema: sin desplazamientos ni escalados. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Los efectos espaciales se anulan por completo, no solo se aceleran. */
+  .transition-all,
+  [class*="hover:-translate"],
+  [class*="hover:translate"],
+  [class*="hover:scale"] {
+    transform: none !important;
   }
 }

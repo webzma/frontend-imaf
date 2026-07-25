@@ -5,7 +5,6 @@ export default function NotFound() {
   return (
     <div className="relative min-h-screen bg-surface flex items-center justify-center overflow-hidden">
       {/* Background glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/6 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center text-center px-6">
         {/* 404 number */}

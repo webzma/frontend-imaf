@@ -781,7 +781,7 @@ export default function CursoDetailPage({
   if (error || !curso) {
     return (
       <div className="px-10 py-10">
-        <p className="text-destructive font-sans text-sm">
+        <p className="text-danger font-sans text-sm">
           {error || "Curso no encontrado."}
         </p>
         <Button
@@ -798,9 +798,6 @@ export default function CursoDetailPage({
   /* ── Render ── */
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Back */}
         <button
@@ -895,9 +892,9 @@ export default function CursoDetailPage({
                 className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
               >
                 {curso.estado === "activo" ? (
-                  <ToggleRight className="w-5 h-5 text-emerald-600" />
+                  <ToggleRight className="w-5 h-5 text-success" />
                 ) : (
-                  <ToggleLeft className="w-5 h-5 text-amber-500" />
+                  <ToggleLeft className="w-5 h-5 text-warning" />
                 )}
               </button>
               <button
@@ -911,7 +908,7 @@ export default function CursoDetailPage({
           </div>
 
           {/* Meta row */}
-          <div className="flex items-center flex-wrap gap-x-6 gap-y-2 pt-5 border-t border-outline-variant/40">
+          <div className="flex items-center flex-wrap gap-x-6 gap-y-2 pt-5 border-t border-outline-variant">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Hash className="w-4 h-4" />
               <span className="font-mono text-sm font-bold">
@@ -930,10 +927,10 @@ export default function CursoDetailPage({
                 <span
                   className={
                     curso.cupos_restantes <= 0
-                      ? "text-destructive font-semibold"
+                      ? "text-danger font-semibold"
                       : curso.cupos_restantes <= 5
-                        ? "text-amber-600 dark:text-amber-400 font-semibold"
-                        : "text-emerald-600 dark:text-emerald-400 font-semibold"
+                        ? "text-warning font-semibold"
+                        : "text-success font-semibold"
                   }
                 >
                   {curso.cupos_restantes <= 0
@@ -962,7 +959,7 @@ export default function CursoDetailPage({
                 href={curso.whatsapp_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 font-sans text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
+                className="flex items-center gap-1.5 font-sans text-sm text-success hover:underline"
               >
                 <MessageCircle className="w-4 h-4" />
                 Grupo WhatsApp
@@ -971,14 +968,14 @@ export default function CursoDetailPage({
           </div>
 
           {curso.descripcion && (
-            <p className="font-sans text-sm text-muted-foreground mt-4 pt-4 border-t border-outline-variant/40">
+            <p className="font-sans text-sm text-muted-foreground mt-4 pt-4 border-t border-outline-variant">
               {curso.descripcion}
             </p>
           )}
 
           {curso.requisitos && (
-            <div className="mt-4 pt-4 border-t border-outline-variant/40">
-              <p className="flex items-center gap-1.5 font-sans text-xs font-semibold tracking-[0.15em] uppercase text-on-surface/55 mb-1">
+            <div className="mt-4 pt-4 border-t border-outline-variant">
+              <p className="flex items-center gap-1.5 font-sans text-xs font-semibold tracking-[0.15em] uppercase text-muted-foreground mb-1">
                 <ClipboardList className="w-3.5 h-3.5" />
                 Requisitos / Materiales
               </p>
@@ -1000,14 +997,14 @@ export default function CursoDetailPage({
                   : 0;
               const colors = {
                 activo: {
-                  bar: "bg-emerald-500",
-                  text: "text-emerald-700 dark:text-emerald-400",
-                  bg: "bg-emerald-50 dark:bg-emerald-500/10",
+                  bar: "bg-success",
+                  text: "text-on-success-container",
+                  bg: "bg-success-container",
                 },
                 inactivo: {
-                  bar: "bg-amber-400",
-                  text: "text-amber-700 dark:text-amber-400",
-                  bg: "bg-amber-50 dark:bg-amber-500/10",
+                  bar: "bg-warning",
+                  text: "text-on-warning-container",
+                  bg: "bg-warning-container",
                 },
                 graduado: {
                   bar: "bg-primary",
@@ -1025,7 +1022,7 @@ export default function CursoDetailPage({
                   </p>
                   <div className="mt-2 h-1 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                     <div
-                      className={`h-full ${colors.bar} rounded-full transition-all`}
+                      className={`h-full ${colors.bar} rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity]`}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -1041,7 +1038,7 @@ export default function CursoDetailPage({
         {/* ── Estudiantes inscritos ── */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-on-surface/55 font-medium">
+            <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
               Estudiantes inscritos
             </p>
             <div className="flex items-center gap-2">
@@ -1075,7 +1072,7 @@ export default function CursoDetailPage({
           {/* Search */}
           {curso.estudiantes.length > 0 && (
             <div className="relative mb-4 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar en este curso..."
                 value={search}
@@ -1102,130 +1099,132 @@ export default function CursoDetailPage({
               </div>
             ) : (
               <>
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-outline-variant/40">
-                      {(
-                        [
-                          { key: "nombre", label: "Estudiante" },
-                          { key: "cedula", label: "Cédula" },
-                          { key: "fecha_inscripcion", label: "Inscripción" },
-                          { key: "estado", label: "Estado" },
-                        ] as { key: SortKey; label: string }[]
-                      ).map(({ key, label }) => (
-                        <th
-                          key={key}
-                          className="text-left px-6 py-3.5 font-sans text-xs tracking-[0.15em] uppercase text-on-surface/55 font-semibold"
-                        >
-                          <button
-                            onClick={() => handleSort(key)}
-                            className="flex items-center gap-1 hover:text-on-surface transition-colors"
+                <div className="table-scroll">
+                  <table className="w-full table-sticky-first">
+                    <thead>
+                      <tr className="border-b border-outline-variant">
+                        {(
+                          [
+                            { key: "nombre", label: "Estudiante" },
+                            { key: "cedula", label: "Cédula" },
+                            { key: "fecha_inscripcion", label: "Inscripción" },
+                            { key: "estado", label: "Estado" },
+                          ] as { key: SortKey; label: string }[]
+                        ).map(({ key, label }) => (
+                          <th
+                            key={key}
+                            className="text-left px-6 py-3.5 font-sans text-xs tracking-[0.15em] uppercase text-muted-foreground font-semibold"
                           >
-                            {label}
-                            {sortKey === key ? (
-                              sortDir === "asc" ? (
-                                <ChevronUp className="w-3 h-3" />
-                              ) : (
-                                <ChevronDown className="w-3 h-3" />
-                              )
-                            ) : (
-                              <ChevronsUpDown className="w-3 h-3 opacity-40" />
-                            )}
-                          </button>
-                        </th>
-                      ))}
-                      <th className="px-4 py-3.5" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paginated.map((e, i) => (
-                      <tr
-                        key={e.id}
-                        className={`hover:bg-surface-container transition-colors ${
-                          i < paginated.length - 1
-                            ? "border-b border-outline-variant/30"
-                            : ""
-                        }`}
-                      >
-                        <td className="px-6 py-3.5 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                              <span className="font-sans text-xs font-bold text-on-primary-container">
-                                {getInitials(e.nombre)}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="font-sans font-semibold text-on-surface text-sm">
-                                {e.nombre}
-                              </p>
-                              <p className="font-sans text-xs text-muted-foreground">
-                                {e.user.email}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-3.5 font-mono text-sm text-muted-foreground">
-                          {e.cedula}
-                        </td>
-                        <td className="px-6 py-3.5 font-sans text-sm text-muted-foreground whitespace-nowrap">
-                          {formatDate(e.fecha_inscripcion)}
-                        </td>
-                        <td className="px-6 py-3.5">
-                          {statusChanging === e.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                          ) : (
-                            <Select
-                              value={e.estado}
-                              onValueChange={(v) =>
-                                handleStudentStatus(
-                                  e,
-                                  v as "activo" | "inactivo" | "graduado",
-                                )
-                              }
+                            <button
+                              onClick={() => handleSort(key)}
+                              className="flex items-center gap-1 hover:text-on-surface transition-colors"
                             >
-                              <SelectTrigger
-                                className={`w-32 h-7 text-xs font-semibold border-0 px-2.5 rounded-full ${
-                                  e.estado === "activo"
-                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
-                                    : e.estado === "inactivo"
-                                      ? "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400"
-                                      : "bg-primary-container text-on-primary-container"
-                                }`}
-                              >
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="activo">Activo</SelectItem>
-                                <SelectItem value="inactivo">
-                                  Inactivo
-                                </SelectItem>
-                                <SelectItem value="graduado">
-                                  Graduado
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <button
-                            onClick={() => {
-                              setRemoveTarget(e);
-                              setRemoveError("");
-                            }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                          >
-                            <UserMinus className="w-3.5 h-3.5" />
-                            Quitar
-                          </button>
-                        </td>
+                              {label}
+                              {sortKey === key ? (
+                                sortDir === "asc" ? (
+                                  <ChevronUp className="w-3 h-3" />
+                                ) : (
+                                  <ChevronDown className="w-3 h-3" />
+                                )
+                              ) : (
+                                <ChevronsUpDown className="w-3 h-3 opacity-40" />
+                              )}
+                            </button>
+                          </th>
+                        ))}
+                        <th className="px-4 py-3.5" />
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {paginated.map((e, i) => (
+                        <tr
+                          key={e.id}
+                          className={`hover:bg-surface-container transition-colors ${
+                            i < paginated.length - 1
+                              ? "border-b border-outline-variant"
+                              : ""
+                          }`}
+                        >
+                          <td className="px-6 py-3.5 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+                                <span className="font-sans text-xs font-bold text-on-primary-container">
+                                  {getInitials(e.nombre)}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="font-sans font-semibold text-on-surface text-sm">
+                                  {e.nombre}
+                                </p>
+                                <p className="font-sans text-xs text-muted-foreground">
+                                  {e.user.email}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-3.5 font-mono text-sm text-muted-foreground">
+                            {e.cedula}
+                          </td>
+                          <td className="px-6 py-3.5 font-sans text-sm text-muted-foreground whitespace-nowrap">
+                            {formatDate(e.fecha_inscripcion)}
+                          </td>
+                          <td className="px-6 py-3.5">
+                            {statusChanging === e.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                            ) : (
+                              <Select
+                                value={e.estado}
+                                onValueChange={(v) =>
+                                  handleStudentStatus(
+                                    e,
+                                    v as "activo" | "inactivo" | "graduado",
+                                  )
+                                }
+                              >
+                                <SelectTrigger
+                                  className={`w-32 h-7 text-xs font-semibold border-0 px-2.5 rounded-full ${
+                                    e.estado === "activo"
+                                      ? "bg-success-container text-on-success-container dark:bg-success-container dark:text-success"
+                                      : e.estado === "inactivo"
+                                        ? "bg-warning-container text-on-warning-container dark:bg-warning-container dark:text-warning"
+                                        : "bg-primary-container text-on-primary-container"
+                                  }`}
+                                >
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="activo">Activo</SelectItem>
+                                  <SelectItem value="inactivo">
+                                    Inactivo
+                                  </SelectItem>
+                                  <SelectItem value="graduado">
+                                    Graduado
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </td>
+                          <td className="px-4 py-3.5">
+                            <button
+                              onClick={() => {
+                                setRemoveTarget(e);
+                                setRemoveError("");
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
+                            >
+                              <UserMinus className="w-3.5 h-3.5" />
+                              Quitar
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between px-6 py-3 border-t border-outline-variant/40">
+                  <div className="flex items-center justify-between px-6 py-3 border-t border-outline-variant">
                     <p className="font-sans text-xs text-muted-foreground">
                       {(page - 1) * PAGE_SIZE + 1}–
                       {Math.min(page * PAGE_SIZE, sorted.length)} de{" "}
@@ -1276,7 +1275,7 @@ export default function CursoDetailPage({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <ListChecks className="w-4 h-4 text-primary/70" />
-              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-on-surface/55 font-medium">
+              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
                 Temario del curso
               </p>
             </div>
@@ -1302,7 +1301,7 @@ export default function CursoDetailPage({
                   key={t.id}
                   className={`flex items-start gap-4 px-6 py-4 hover:bg-surface-container transition-colors ${
                     i < temario.length - 1
-                      ? "border-b border-outline-variant/30"
+                      ? "border-b border-outline-variant"
                       : ""
                   }`}
                 >
@@ -1330,7 +1329,7 @@ export default function CursoDetailPage({
                     </button>
                     <button
                       onClick={() => setTemarioDeleteTarget(t)}
-                      className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      className="p-1.5 rounded-md text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -1346,7 +1345,7 @@ export default function CursoDetailPage({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <CalendarClock className="w-4 h-4 text-primary/70" />
-              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-on-surface/55 font-medium">
+              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
                 Sesiones / Clases
               </p>
             </div>
@@ -1384,7 +1383,7 @@ export default function CursoDetailPage({
                     key={s.id}
                     className={`flex items-start gap-4 px-6 py-4 hover:bg-surface-container transition-colors ${
                       i < sesiones.length - 1
-                        ? "border-b border-outline-variant/30"
+                        ? "border-b border-outline-variant"
                         : ""
                     }`}
                   >
@@ -1438,7 +1437,7 @@ export default function CursoDetailPage({
                       </button>
                       <button
                         onClick={() => setSesionDeleteTarget(s)}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -1683,7 +1682,7 @@ export default function CursoDetailPage({
             </div>
 
             {editError && (
-              <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-3 py-2 rounded-sm">
+              <div className="bg-danger-container border border-danger/25 text-danger text-sm px-3 py-2 rounded-sm">
                 {editError}
               </div>
             )}
@@ -1776,7 +1775,7 @@ export default function CursoDetailPage({
             </Select>
 
             {addError && (
-              <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-3 py-2 rounded-sm">
+              <div className="bg-danger-container border border-danger/25 text-danger text-sm px-3 py-2 rounded-sm">
                 {addError}
               </div>
             )}
@@ -1815,7 +1814,7 @@ export default function CursoDetailPage({
           </DialogHeader>
 
           {removeError && (
-            <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-3 py-2 rounded-sm">
+            <div className="bg-danger-container border border-danger/25 text-danger text-sm px-3 py-2 rounded-sm">
               {removeError}
             </div>
           )}
@@ -1906,7 +1905,7 @@ export default function CursoDetailPage({
               />
             </div>
             {temarioError && (
-              <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-3 py-2 rounded-sm">
+              <div className="bg-danger-container border border-danger/25 text-danger text-sm px-3 py-2 rounded-sm">
                 {temarioError}
               </div>
             )}
@@ -2095,7 +2094,7 @@ export default function CursoDetailPage({
             </div>
 
             {sesionError && (
-              <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-3 py-2 rounded-sm">
+              <div className="bg-danger-container border border-danger/25 text-danger text-sm px-3 py-2 rounded-sm">
                 {sesionError}
               </div>
             )}

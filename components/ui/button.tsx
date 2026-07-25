@@ -5,20 +5,22 @@ import { Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-sm border-0 font-sans text-sm font-medium whitespace-nowrap transition-all duration-200 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-1 active:translate-y-px disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-md border-0 font-sans text-sm font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-200 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:translate-y-px disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
+        // El hover oscurece en vez de aclarar: si aclarara, el texto blanco
+        // caería por debajo de AA justo en el estado interactivo.
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/85 ambient-shadow hover:shadow-lg",
+          "bg-primary text-primary-foreground hover:bg-primary-hover ambient-shadow hover:shadow-lg",
         outline:
-          "bg-transparent border border-outline-variant text-on-surface hover:bg-surface-container hover:border-primary/30",
+          "bg-transparent border border-outline-variant text-on-surface hover:bg-surface-container hover:border-primary",
         secondary:
           "bg-secondary-container text-on-secondary-container hover:bg-secondary-container/70",
         ghost:
           "hover:bg-surface-container text-muted-foreground hover:text-on-surface",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20",
+          "bg-danger-container text-on-danger-container hover:bg-danger hover:text-white",
         link: "text-primary underline-offset-4 hover:underline p-0 h-auto",
       },
       size: {

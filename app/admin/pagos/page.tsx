@@ -101,19 +101,19 @@ const estadoConfig = {
     label: "Pendiente",
     icon: Clock,
     variant: "pendiente" as const,
-    dot: "bg-amber-500",
+    dot: "bg-warning",
   },
   aprobado: {
     label: "Aprobado",
     icon: CheckCircle2,
     variant: "aprobado" as const,
-    dot: "bg-emerald-500",
+    dot: "bg-success",
   },
   rechazado: {
     label: "Rechazado",
     icon: Ban,
     variant: "rechazado" as const,
-    dot: "bg-red-500",
+    dot: "bg-danger",
   },
 };
 
@@ -234,7 +234,7 @@ function PagoDetailModal({
         {/* Info estudiante / curso */}
         <div className="grid grid-cols-2 gap-3 text-sm font-sans">
           <div className="bg-surface-container-low rounded-sm p-3">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-on-surface/50 font-semibold mb-1">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold mb-1">
               Estudiante
             </p>
             <p className="font-medium text-on-surface">
@@ -245,7 +245,7 @@ function PagoDetailModal({
             </p>
           </div>
           <div className="bg-surface-container-low rounded-sm p-3">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-on-surface/50 font-semibold mb-1">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold mb-1">
               Curso
             </p>
             <p className="font-medium text-on-surface truncate">
@@ -256,7 +256,7 @@ function PagoDetailModal({
             </p>
           </div>
           <div className="bg-surface-container-low rounded-sm p-3">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-on-surface/50 font-semibold mb-1">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold mb-1">
               Método de pago
             </p>
             <p className="font-medium text-on-surface">
@@ -264,7 +264,7 @@ function PagoDetailModal({
             </p>
           </div>
           <div className="bg-surface-container-low rounded-sm p-3">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-on-surface/50 font-semibold mb-1">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold mb-1">
               Referencia
             </p>
             <p className="font-mono font-semibold text-on-surface">
@@ -272,7 +272,7 @@ function PagoDetailModal({
             </p>
           </div>
           <div className="bg-surface-container-low rounded-sm p-3 col-span-2">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-on-surface/50 font-semibold mb-1">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold mb-1">
               Banco origen
             </p>
             <p className="font-medium text-on-surface">
@@ -325,7 +325,7 @@ function PagoDetailModal({
               <img
                 src={pago.comprobante_url}
                 alt="Comprobante"
-                className="w-full max-h-64 object-contain rounded-sm border border-outline-variant/30 hover:opacity-90 transition-opacity cursor-zoom-in"
+                className="w-full max-h-64 object-contain rounded-sm border border-outline-variant hover:opacity-90 transition-opacity cursor-zoom-in"
               />
             </a>
           )}
@@ -361,7 +361,7 @@ function PagoDetailModal({
             <Button
               onClick={() => handleDecision("rechazado")}
               variant="outline"
-              className="flex-1 font-sans text-sm h-10 border-red-200 text-red-700 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+              className="flex-1 font-sans text-sm h-10 border-danger/40 text-on-danger-container hover:bg-danger-container dark:border-danger/40 dark:text-danger dark:hover:bg-danger-container"
               disabled={!!saving}
             >
               {saving === "rechazado" ? (
@@ -399,8 +399,8 @@ function PagoDetailModal({
                 <AlertTriangle
                   className={`w-5 h-5 ${
                     confirmDialog.action === "aprobado"
-                      ? "text-emerald-600"
-                      : "text-red-600"
+                      ? "text-success"
+                      : "text-danger"
                   }`}
                 />
                 {confirmDialog.action === "aprobado"
@@ -417,7 +417,7 @@ function PagoDetailModal({
             {confirmDialog.action === "rechazado" && (
               <div className="mb-4">
                 <Label className="font-sans text-sm font-medium text-on-surface mb-2">
-                  Motivo del rechazo <span className="text-red-600">*</span>
+                  Motivo del rechazo <span className="text-danger">*</span>
                 </Label>
                 <Input
                   value={nota}
@@ -447,7 +447,7 @@ function PagoDetailModal({
                 className={`flex-1 ${
                   confirmDialog.action === "aprobado"
                     ? ""
-                    : "bg-red-600 hover:bg-red-700 text-white"
+                    : "bg-danger hover:bg-danger text-white"
                 }`}
               >
                 {saving ? (
@@ -568,9 +568,6 @@ export default function AdminPagosPage() {
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-8 py-10 mx-auto">
         <PageHeader
           icon={CreditCard}
@@ -598,7 +595,7 @@ export default function AdminPagosPage() {
               label: "Aprobados",
               value: stats.aprobado,
               icon: CheckCircle2,
-              cls: "text-emerald-300",
+              cls: "text-success",
             },
             {
               label: "Rechazados",
@@ -623,7 +620,7 @@ export default function AdminPagosPage() {
                   {s.value}
                 </p>
               )}
-              <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+              <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                 {s.label}
               </p>
             </div>
@@ -633,7 +630,7 @@ export default function AdminPagosPage() {
         {/* Filters */}
         <div className="flex items-center gap-3 mb-8 flex-wrap">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar por estudiante, referencia, curso..."
               value={search}
@@ -642,7 +639,7 @@ export default function AdminPagosPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-muted-foreground/60" />
+            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
             <Select value={filterEstado} onValueChange={setFilterEstado}>
               <SelectTrigger className="h-10 w-44 font-sans text-sm">
                 <SelectValue />
@@ -676,7 +673,7 @@ export default function AdminPagosPage() {
             ))}
           </div>
         ) : fetchError ? (
-          <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-4 py-3 rounded-sm font-sans">
+          <div className="bg-danger-container border border-danger/25 text-danger text-sm px-4 py-3 rounded-sm font-sans">
             {fetchError}
           </div>
         ) : filtered.length === 0 ? (
@@ -698,23 +695,23 @@ export default function AdminPagosPage() {
         ) : (
           <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
             <div className="h-0.5 gradient-primary" />
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="table-scroll">
+              <table className="w-full table-sticky-first [--table-sticky-bg:var(--surface-container-lowest)]">
                 <thead>
-                  <tr className="border-b border-outline-variant/30">
-                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold">
+                  <tr className="border-b border-outline-variant">
+                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
                       Estudiante
                     </th>
-                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold">
+                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
                       Curso
                     </th>
-                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold">
+                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
                       Método / Referencia
                     </th>
-                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold hidden lg:table-cell">
+                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold hidden lg:table-cell">
                       Fecha
                     </th>
-                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/50 font-semibold">
+                    <th className="text-left px-5 py-3.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
                       Estado
                     </th>
                     <th className="px-5 py-3.5" />
@@ -727,7 +724,7 @@ export default function AdminPagosPage() {
                     return (
                       <tr
                         key={pago.id}
-                        className="border-b border-outline-variant/20 last:border-0 hover:bg-surface-container-low/50 transition-colors"
+                        className="border-b border-outline-variant last:border-0 hover:bg-surface-container-low/50 transition-colors"
                       >
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
@@ -748,7 +745,7 @@ export default function AdminPagosPage() {
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-2 min-w-0">
-                            <BookOpen className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0 hidden md:flex" />
+                            <BookOpen className="w-3.5 h-3.5 text-muted-foreground shrink-0 hidden md:flex" />
                             <div className="min-w-0">
                               <p className="font-sans text-sm text-on-surface truncate max-w-[160px]">
                                 {pago.curso.nombre}
@@ -805,8 +802,8 @@ export default function AdminPagosPage() {
                 </tbody>
               </table>
             </div>
-            <div className="px-5 py-3 border-t border-outline-variant/20 flex items-center gap-2">
-              <Users className="w-3 h-3 text-muted-foreground/50" />
+            <div className="px-5 py-3 border-t border-outline-variant flex items-center gap-2">
+              <Users className="w-3 h-3 text-muted-foreground" />
               <span className="font-sans text-xs text-muted-foreground">
                 {filtered.length}{" "}
                 {filtered.length === 1 ? "registro" : "registros"}

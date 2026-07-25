@@ -229,7 +229,7 @@ export default function SesionDialog({
               </SelectContent>
             </Select>
             {form.formState.errors.curso_id && (
-              <p className="text-sm text-destructive">
+              <p className="text-sm text-danger">
                 {form.formState.errors.curso_id.message}
               </p>
             )}
@@ -243,7 +243,7 @@ export default function SesionDialog({
               {...form.register("titulo")}
             />
             {form.formState.errors.titulo && (
-              <p className="text-sm text-destructive">
+              <p className="text-sm text-danger">
                 {form.formState.errors.titulo.message}
               </p>
             )}
@@ -254,7 +254,7 @@ export default function SesionDialog({
               <Label htmlFor="fecha">Fecha *</Label>
               <Input id="fecha" type="date" {...form.register("fecha")} />
               {form.formState.errors.fecha && (
-                <p className="text-sm text-destructive">
+                <p className="text-sm text-danger">
                   {form.formState.errors.fecha.message}
                 </p>
               )}
@@ -292,7 +292,7 @@ export default function SesionDialog({
               <Label htmlFor="hora_fin">Hora fin</Label>
               <Input id="hora_fin" type="time" {...form.register("hora_fin")} />
               {form.formState.errors.hora_fin && (
-                <p className="text-sm text-destructive">
+                <p className="text-sm text-danger">
                   {form.formState.errors.hora_fin.message}
                 </p>
               )}
@@ -302,7 +302,7 @@ export default function SesionDialog({
           <div className="grid gap-2">
             <Label htmlFor="descripcion">
               Descripción{" "}
-              <span className="text-muted-foreground/60 font-normal ml-1">
+              <span className="text-muted-foreground font-normal ml-1">
                 (opcional)
               </span>
             </Label>
@@ -310,13 +310,13 @@ export default function SesionDialog({
               id="descripcion"
               rows={3}
               placeholder="Notas, temas a cubrir, materiales..."
-              className="w-full rounded-sm border-0 border-b border-b-outline-variant bg-surface-variant px-3 py-2 font-sans text-sm text-on-surface shadow-none transition-[background-color,border-color] outline-none placeholder:text-muted-foreground/50 focus-visible:bg-surface-container-high focus-visible:border-b-primary resize-none"
+              className="w-full rounded-sm border-0 border-b border-b-outline-variant bg-surface-variant px-3 py-2 font-sans text-sm text-on-surface shadow-none transition-[background-color,border-color] outline-none placeholder:text-muted-foreground focus-visible:bg-surface-container-high focus-visible:border-b-primary resize-none"
               {...form.register("descripcion")}
             />
           </div>
 
           {submitError && (
-            <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-4 py-3 rounded-sm">
+            <div className="bg-danger-container border border-danger/25 text-danger text-sm px-4 py-3 rounded-sm">
               {submitError}
             </div>
           )}
@@ -328,7 +328,7 @@ export default function SesionDialog({
                 variant="outline"
                 onClick={onDelete}
                 disabled={deleting || submitting}
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+                className="text-danger hover:bg-danger-container hover:text-danger border-danger/30"
               >
                 {deleting ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />

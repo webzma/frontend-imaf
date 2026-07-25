@@ -216,15 +216,15 @@ export function estadoColor(estado: string): {
   switch (estado) {
     case "realizada":
       return {
-        bg: "bg-emerald-100 dark:bg-emerald-500/15",
-        text: "text-emerald-800 dark:text-emerald-400",
-        dot: "bg-emerald-500",
+        bg: "bg-success-container",
+        text: "text-on-success-container",
+        dot: "bg-success",
       };
     case "cancelada":
       return {
-        bg: "bg-rose-100 dark:bg-rose-500/15",
-        text: "text-rose-800 dark:text-rose-400",
-        dot: "bg-rose-500",
+        bg: "bg-danger-container",
+        text: "text-on-danger-container",
+        dot: "bg-danger",
       };
     case "programada":
     default:

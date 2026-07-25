@@ -73,7 +73,7 @@ export default function CalendarDay({
 
   return (
     <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
-      <div className="px-6 py-4 bg-surface-container-low border-b border-outline-variant/30">
+      <div className="px-6 py-4 bg-surface-container-low border-b border-outline-variant">
         <p className="font-serif text-2xl font-light tight-tracking text-on-surface capitalize">
           {formatLongDate(current)}
         </p>
@@ -85,7 +85,7 @@ export default function CalendarDay({
       </div>
 
       {cursosDia.length > 0 && (
-        <div className="px-6 py-3 flex flex-wrap gap-2 bg-secondary-container/30 border-b border-outline-variant/20">
+        <div className="px-6 py-3 flex flex-wrap gap-2 bg-secondary-container/30 border-b border-outline-variant">
           {cursosDia.map((c) => (
             <span
               key={c.id}
@@ -103,8 +103,8 @@ export default function CalendarDay({
       )}
 
       {allDay.length > 0 && (
-        <div className="px-6 py-3 border-b border-outline-variant/20 flex flex-wrap gap-2 bg-surface-container-low/40">
-          <span className="font-sans text-[10px] uppercase tracking-[0.15em] text-on-surface/55 font-semibold self-center">
+        <div className="px-6 py-3 border-b border-outline-variant flex flex-wrap gap-2 bg-surface-container-low/40">
+          <span className="font-sans text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold self-center">
             Todo el día
           </span>
           {allDay.map((s) => {
@@ -147,20 +147,20 @@ export default function CalendarDay({
             <div
               key={h}
               style={{ height: HOUR_PX }}
-              className="font-sans text-[11px] text-on-surface/45 tabular-nums text-right pr-3 pt-1 border-b border-outline-variant/15"
+              className="font-sans text-[11px] text-muted-foreground tabular-nums text-right pr-3 pt-1 border-b border-outline-variant"
             >
               {String(h).padStart(2, "0")}:00
             </div>
           ))}
         </div>
 
-        <div className="relative border-l border-outline-variant/20">
+        <div className="relative border-l border-outline-variant">
           {hours.map((h) => (
             <button
               key={h}
               onClick={() => onCreate(iso, `${String(h).padStart(2, "0")}:00`)}
               style={{ height: HOUR_PX }}
-              className="block w-full border-b border-outline-variant/15 hover:bg-primary/5 transition-colors cursor-pointer"
+              className="block w-full border-b border-outline-variant hover:bg-primary/5 transition-colors cursor-pointer"
               aria-label={`Crear sesión a las ${h}:00`}
             />
           ))}

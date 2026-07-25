@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -32,6 +32,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useTheme } from "@/hooks/use-theme";
 import logoImaf from "@/public/logo-imaf.webp";
 import Image from "next/image";
 
@@ -120,9 +121,9 @@ async function fetchNotificationCount(): Promise<number> {
 export default function AppSidebar() {
   const pathname = usePathname();
   const { push } = useRouter();
-  const { toggleSidebar, state } = useSidebar();
+  const { toggleSidebar, state, isMobile } = useSidebar();
   const collapsed = state === "collapsed";
-  const [dark, setDark] = useState(false);
+  const { dark, toggle: toggleDark } = useTheme();
   const queryClient = useQueryClient();
 
   const { data: unreadCount = 0 } = useQuery({
@@ -130,16 +131,6 @@ export default function AppSidebar() {
     queryFn: fetchNotificationCount,
     refetchInterval: 30000, // Poll every 30 seconds
   });
-
-  // Initialize theme from storage / system preference
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const isDark =
-      stored === "dark" ||
-      (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    setDark(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
-  }, []);
 
   // Sync the unread count when a notification is read elsewhere
   useEffect(() => {
@@ -159,13 +150,6 @@ export default function AppSidebar() {
       );
     };
   }, [queryClient]);
-
-  const toggleDark = () => {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-  };
 
   const isActive = (href: string, exact: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
@@ -188,11 +172,7 @@ export default function AppSidebar() {
 
   const handleLinkClick = () => {
     // Close sidebar only on mobile when clicking a link
-    if (
-      typeof window !== "undefined" &&
-      window.innerWidth < 768 &&
-      state === "expanded"
-    ) {
+    if (isMobile && state === "expanded") {
       // Small delay to ensure navigation starts first
       setTimeout(() => {
         toggleSidebar();
@@ -218,31 +198,29 @@ export default function AppSidebar() {
               <span className="font-sans font-semibold text-sidebar-foreground tracking-tight">
                 IMAF
               </span>
-              <p className="font-sans text-[10px] text-sidebar-foreground/60 -mt-0.5 tracking-[0.2em] uppercase">
+              <p className="font-sans text-[10px] text-sidebar-foreground/70 -mt-0.5 tracking-[0.2em] uppercase">
                 Admin
               </p>
             </div>
           )}
         </div>
         {/* Close button for mobile */}
-        {typeof window !== "undefined" &&
-          window.innerWidth < 768 &&
-          state === "expanded" && (
-            <button
-              onClick={toggleSidebar}
-              className="absolute top-5 right-5 p-1.5 rounded-sm hover:bg-sidebar-accent/50 transition-colors md:hidden"
-              aria-label="Cerrar sidebar"
-            >
-              <X className="size-4 text-sidebar-foreground" />
-            </button>
-          )}
+        {isMobile && state === "expanded" && (
+          <button
+            onClick={toggleSidebar}
+            className="absolute top-5 right-5 p-1.5 rounded-sm hover:bg-sidebar-accent/50 transition-colors md:hidden"
+            aria-label="Cerrar sidebar"
+          >
+            <X className="size-4 text-sidebar-foreground" />
+          </button>
+        )}
       </SidebarHeader>
 
       {/* Navigation */}
       <SidebarContent>
         {navItems.map((group) => (
           <SidebarGroup key={group.section}>
-            <SidebarGroupLabel className="font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-sidebar-foreground/55">
+            <SidebarGroupLabel className="font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-sidebar-foreground/70">
               {group.section}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -258,7 +236,7 @@ export default function AppSidebar() {
                         <item.icon />
                         <span>{item.label}</span>
                         {item.label === "Notificaciones" && unreadCount > 0 && (
-                          <span className="size-2 bg-pink-500 rounded-full ml-auto" />
+                          <span className="size-2 bg-primary rounded-full ml-auto" />
                         )}
                       </Link>
                     </SidebarMenuButton>
@@ -281,7 +259,7 @@ export default function AppSidebar() {
               <p className="font-sans text-xs font-semibold text-sidebar-foreground truncate">
                 Administrador
               </p>
-              <p className="font-sans text-[10px] text-sidebar-foreground/40 truncate">
+              <p className="font-sans text-[10px] text-sidebar-foreground/70 truncate">
                 admin
               </p>
             </div>
@@ -302,7 +280,7 @@ export default function AppSidebar() {
             <SidebarMenuButton
               onClick={handleLogout}
               tooltip="Cerrar sesión"
-              className="text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10"
+              className="text-sidebar-foreground/50 hover:text-danger hover:bg-danger-container"
             >
               <LogOut />
               <span>Cerrar sesión</span>

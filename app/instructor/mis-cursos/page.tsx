@@ -94,16 +94,13 @@ export default function MisCursosPage() {
   if (error) {
     return (
       <div className="px-10 py-10">
-        <p className="font-sans text-sm text-destructive">{error}</p>
+        <p className="font-sans text-sm text-danger">{error}</p>
       </div>
     );
   }
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         <PageHeader
           icon={BookOpen}
@@ -116,11 +113,11 @@ export default function MisCursosPage() {
         {/* Stats rápidas */}
         {cursos.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-            <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-sm p-4">
+            <div className="bg-success-container rounded-sm p-4">
               <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
                 Activos
               </p>
-              <p className="font-sans text-3xl font-light text-emerald-700 dark:text-emerald-400">
+              <p className="font-sans text-3xl font-light text-on-success-container">
                 {cursos.filter((c) => c.estado === "activo").length}
               </p>
             </div>
@@ -156,7 +153,7 @@ export default function MisCursosPage() {
                 placeholder="Buscar curso..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/60 font-sans text-xs placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/60 font-sans text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
             <div className="flex items-center gap-1">
@@ -252,12 +249,12 @@ export default function MisCursosPage() {
                           ocupado
                         </p>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground/40" />
+                      <ArrowRight className="w-4 h-4 text-muted-foreground" />
                     </div>
                   </div>
                   <div className="mt-3 h-1 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-primary rounded-full transition-all duration-300"
+                      className="h-full bg-primary rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300"
                       style={{ width: `${pct}%` }}
                     />
                   </div>

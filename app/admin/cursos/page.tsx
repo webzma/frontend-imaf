@@ -157,7 +157,7 @@ function CardSkeleton() {
         <Skeleton className="h-3 w-28" />
         <Skeleton className="h-3 w-full" />
         <Skeleton className="h-3 w-2/3" />
-        <div className="flex items-center justify-between pt-4 border-t border-outline-variant/40 mt-auto">
+        <div className="flex items-center justify-between pt-4 border-t border-outline-variant mt-auto">
           <Skeleton className="h-3.5 w-24" />
           <Skeleton className="h-3.5 w-16" />
         </div>
@@ -176,7 +176,7 @@ function CursoCard({ curso }: { curso: Curso }) {
   const sinCupo = cuposRestantes <= 0;
 
   return (
-    <div className="group bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 flex flex-col">
+    <div className="group bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-0.5 hover:shadow-lg transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-200 flex flex-col">
       <div className="h-1 gradient-primary" />
       <div className="p-6 flex flex-col flex-1">
         {/* Header row */}
@@ -205,7 +205,7 @@ function CursoCard({ curso }: { curso: Curso }) {
         {/* Descripción */}
         <p className="font-sans text-sm text-muted-foreground line-clamp-2 flex-1 mb-4">
           {curso.descripcion || (
-            <span className="italic text-muted-foreground/50">
+            <span className="italic text-muted-foreground">
               Sin descripción
             </span>
           )}
@@ -238,23 +238,23 @@ function CursoCard({ curso }: { curso: Curso }) {
             <span
               className={`font-sans text-xs font-semibold ${
                 sinCupo
-                  ? "text-destructive"
+                  ? "text-danger"
                   : cuposRestantes <= 5
-                    ? "text-amber-600 dark:text-amber-400"
-                    : "text-emerald-600 dark:text-emerald-400"
+                    ? "text-warning"
+                    : "text-success"
               }`}
             >
               {sinCupo ? "Sin cupo" : `${cuposRestantes} disponibles`}
             </span>
           </div>
-          <div className="h-1.5 bg-outline-variant/30 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-outline-variant rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${
+              className={`h-full rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity] ${
                 sinCupo
-                  ? "bg-destructive"
+                  ? "bg-danger"
                   : cuposPct >= 80
-                    ? "bg-amber-500"
-                    : "bg-emerald-500"
+                    ? "bg-warning"
+                    : "bg-success"
               }`}
               style={{ width: `${Math.min(100, cuposPct)}%` }}
             />
@@ -262,13 +262,13 @@ function CursoCard({ curso }: { curso: Curso }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-outline-variant/40">
+        <div className="flex items-center justify-between pt-4 border-t border-outline-variant">
           <div className="flex items-center gap-1 font-sans text-sm font-semibold text-muted-foreground">
             <b>Bs.</b>
             {formatPrice(curso.precio)}
           </div>
           {curso.whatsapp_url && (
-            <div className="flex items-center gap-1 font-sans text-xs text-emerald-600 dark:text-emerald-400">
+            <div className="flex items-center gap-1 font-sans text-xs text-success">
               <MessageCircle className="w-3 h-3" />
               WhatsApp
             </div>
@@ -438,9 +438,6 @@ export default function CursosPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Header */}
         <div className="mb-10 flex-col md:flex-row md:flex items-end justify-between">
@@ -492,7 +489,7 @@ export default function CursosPage() {
                     {...form.register("nombre")}
                   />
                   {form.formState.errors.nombre && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-danger">
                       {form.formState.errors.nombre.message}
                     </p>
                   )}
@@ -528,7 +525,7 @@ export default function CursosPage() {
                       </SelectContent>
                     </Select>
                     {form.formState.errors.profesor_id && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-danger">
                         {form.formState.errors.profesor_id.message}
                       </p>
                     )}
@@ -564,7 +561,7 @@ export default function CursosPage() {
                       {...form.register("limite_cupo", { valueAsNumber: true })}
                     />
                     {form.formState.errors.limite_cupo && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-danger">
                         {form.formState.errors.limite_cupo.message}
                       </p>
                     )}
@@ -583,7 +580,7 @@ export default function CursosPage() {
                       })}
                     />
                     {form.formState.errors.minimo_estudiantes && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-danger">
                         {form.formState.errors.minimo_estudiantes.message}
                       </p>
                     )}
@@ -599,7 +596,7 @@ export default function CursosPage() {
                       {...form.register("precio", { valueAsNumber: true })}
                     />
                     {form.formState.errors.precio && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-danger">
                         {form.formState.errors.precio.message}
                       </p>
                     )}
@@ -618,7 +615,7 @@ export default function CursosPage() {
                       })}
                     />
                     {form.formState.errors.fecha_inicio && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-danger">
                         {form.formState.errors.fecha_inicio.message}
                       </p>
                     )}
@@ -633,7 +630,7 @@ export default function CursosPage() {
                       })}
                     />
                     {form.formState.errors.fecha_fin && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-danger">
                         {form.formState.errors.fecha_fin.message}
                       </p>
                     )}
@@ -644,7 +641,7 @@ export default function CursosPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="whatsapp_url">
                     Enlace grupo WhatsApp{" "}
-                    <span className="text-muted-foreground/60 font-normal ml-1">
+                    <span className="text-muted-foreground font-normal ml-1">
                       (opcional)
                     </span>
                   </Label>
@@ -655,7 +652,7 @@ export default function CursosPage() {
                     {...form.register("whatsapp_url")}
                   />
                   {form.formState.errors.whatsapp_url && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-danger">
                       {form.formState.errors.whatsapp_url.message}
                     </p>
                   )}
@@ -665,7 +662,7 @@ export default function CursosPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="descripcion">
                     Descripción{" "}
-                    <span className="text-muted-foreground/60 font-normal ml-1">
+                    <span className="text-muted-foreground font-normal ml-1">
                       (opcional)
                     </span>
                   </Label>
@@ -673,7 +670,7 @@ export default function CursosPage() {
                     id="descripcion"
                     rows={3}
                     placeholder="Breve descripción del contenido del curso..."
-                    className="w-full rounded-sm border-0 border-b border-b-outline-variant bg-surface-variant px-3 py-2 font-sans text-sm text-on-surface shadow-none transition-[background-color,border-color] outline-none placeholder:text-muted-foreground/50 focus-visible:bg-surface-container-high focus-visible:border-b-primary resize-none"
+                    className="w-full rounded-sm border-0 border-b border-b-outline-variant bg-surface-variant px-3 py-2 font-sans text-sm text-on-surface shadow-none transition-[background-color,border-color] outline-none placeholder:text-muted-foreground focus-visible:bg-surface-container-high focus-visible:border-b-primary resize-none"
                     {...form.register("descripcion")}
                   />
                 </div>
@@ -682,7 +679,7 @@ export default function CursosPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="requisitos">
                     Requisitos / Materiales{" "}
-                    <span className="text-muted-foreground/60 font-normal ml-1">
+                    <span className="text-muted-foreground font-normal ml-1">
                       (opcional)
                     </span>
                   </Label>
@@ -690,13 +687,13 @@ export default function CursosPage() {
                     id="requisitos"
                     rows={3}
                     placeholder="Ej: Cuaderno, lápices de colores, cámara..."
-                    className="w-full rounded-sm border-0 border-b border-b-outline-variant bg-surface-variant px-3 py-2 font-sans text-sm text-on-surface shadow-none transition-[background-color,border-color] outline-none placeholder:text-muted-foreground/50 focus-visible:bg-surface-container-high focus-visible:border-b-primary resize-none"
+                    className="w-full rounded-sm border-0 border-b border-b-outline-variant bg-surface-variant px-3 py-2 font-sans text-sm text-on-surface shadow-none transition-[background-color,border-color] outline-none placeholder:text-muted-foreground focus-visible:bg-surface-container-high focus-visible:border-b-primary resize-none"
                     {...form.register("requisitos")}
                   />
                 </div>
 
                 {submitError && (
-                  <div className="bg-destructive/10 border border-destructive/25 text-destructive text-sm px-4 py-3 rounded-sm">
+                  <div className="bg-danger-container border border-danger/25 text-danger text-sm px-4 py-3 rounded-sm">
                     {submitError}
                   </div>
                 )}
@@ -762,7 +759,7 @@ export default function CursosPage() {
                   {s.value}
                 </p>
               )}
-              <p className="font-sans text-xs truncate tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+              <p className="font-sans text-xs truncate tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                 {s.label}
               </p>
             </div>
@@ -772,7 +769,7 @@ export default function CursosPage() {
         {/* Filters */}
         <div className="flex items-center gap-3 mb-8 flex-wrap">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar por nombre, código o instructor..."
               value={search}
@@ -782,7 +779,7 @@ export default function CursosPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-muted-foreground/60" />
+            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
             <Select value={filterEstado} onValueChange={setFilterEstado}>
               <SelectTrigger className="h-10 w-42 font-sans text-sm">
                 <SelectValue />
@@ -835,13 +832,13 @@ export default function CursosPage() {
             ))}
           </div>
         ) : error ? (
-          <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-sm font-sans">
+          <div className="bg-danger-container text-on-danger-container text-sm px-4 py-3 rounded-sm font-sans">
             {error}
           </div>
         ) : (
           <>
             {filtered.length > 0 && (
-              <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-on-surface/55 font-medium mb-5">
+              <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-medium mb-5">
                 {filtered.length} curso{filtered.length !== 1 ? "s" : ""}
                 {hasFilters
                   ? ` encontrado${filtered.length !== 1 ? "s" : ""}`

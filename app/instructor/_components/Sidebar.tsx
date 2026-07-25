@@ -29,6 +29,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useTheme } from "@/hooks/use-theme";
 import logoImaf from "@/public/logo-imaf.webp";
 import Image from "next/image";
 
@@ -119,8 +120,8 @@ async function fetchNotificationCount(): Promise<number> {
 export default function InstructorSidebar() {
   const pathname = usePathname();
   const { push } = useRouter();
-  const { toggleSidebar, state } = useSidebar();
-  const [dark, setDark] = useState(false);
+  const { toggleSidebar, state, isMobile } = useSidebar();
+  const { dark, toggle: toggleDark } = useTheme();
 
   const { data: profile } = useQuery({
     queryKey: PROFILE_KEY,
@@ -169,23 +170,6 @@ export default function InstructorSidebar() {
     };
   }, []);
 
-  // Initialize theme from storage / system preference
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const isDark =
-      stored === "dark" ||
-      (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    setDark(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
-  }, []);
-
-  const toggleDark = () => {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-  };
-
   const isActive = (href: string, exact: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
 
@@ -214,11 +198,7 @@ export default function InstructorSidebar() {
   };
 
   const handleLinkClick = () => {
-    if (
-      typeof window !== "undefined" &&
-      window.innerWidth < 768 &&
-      state === "expanded"
-    ) {
+    if (isMobile && state === "expanded") {
       setTimeout(() => toggleSidebar(), 50);
     }
   };
@@ -240,30 +220,28 @@ export default function InstructorSidebar() {
               <span className="font-sans font-semibold text-sidebar-foreground tracking-tight">
                 IMAF
               </span>
-              <p className="font-sans text-[10px] text-sidebar-foreground/60 -mt-0.5 tracking-[0.2em] uppercase">
+              <p className="font-sans text-[10px] text-sidebar-foreground/70 -mt-0.5 tracking-[0.2em] uppercase">
                 Instructor
               </p>
             </div>
           )}
         </div>
-        {typeof window !== "undefined" &&
-          window.innerWidth < 768 &&
-          state === "expanded" && (
-            <button
-              onClick={toggleSidebar}
-              className="absolute top-5 right-5 p-1.5 rounded-sm hover:bg-sidebar-accent/50 transition-colors md:hidden"
-              aria-label="Cerrar sidebar"
-            >
-              <X className="size-4 text-sidebar-foreground" />
-            </button>
-          )}
+        {isMobile && state === "expanded" && (
+          <button
+            onClick={toggleSidebar}
+            className="absolute top-5 right-5 p-1.5 rounded-sm hover:bg-sidebar-accent/50 transition-colors md:hidden"
+            aria-label="Cerrar sidebar"
+          >
+            <X className="size-4 text-sidebar-foreground" />
+          </button>
+        )}
       </SidebarHeader>
 
       <SidebarContent className="flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto">
           {navItems.map((group) => (
             <SidebarGroup key={group.section}>
-              <SidebarGroupLabel className="font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-sidebar-foreground/55">
+              <SidebarGroupLabel className="font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-sidebar-foreground/70">
                 {group.section}
               </SidebarGroupLabel>
               <SidebarGroupContent>
@@ -280,7 +258,7 @@ export default function InstructorSidebar() {
                           <span>{item.label}</span>
                           {item.label === "Notificaciones" &&
                             unreadCount > 0 && (
-                              <span className="size-2 bg-pink-500 rounded-full ml-auto" />
+                              <span className="size-2 bg-primary rounded-full ml-auto" />
                             )}
                         </Link>
                       </SidebarMenuButton>
@@ -305,7 +283,7 @@ export default function InstructorSidebar() {
               <p className="font-sans text-xs font-semibold text-sidebar-foreground truncate">
                 {nombre}
               </p>
-              <p className="font-sans text-[10px] text-sidebar-foreground/40 truncate">
+              <p className="font-sans text-[10px] text-sidebar-foreground/70 truncate">
                 {email ?? "instructor"}
               </p>
             </div>
@@ -326,7 +304,7 @@ export default function InstructorSidebar() {
             <SidebarMenuButton
               onClick={handleLogout}
               tooltip="Cerrar sesión"
-              className="text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10"
+              className="text-sidebar-foreground/50 hover:text-danger hover:bg-danger-container"
             >
               <LogOut />
               <span>Cerrar sesión</span>

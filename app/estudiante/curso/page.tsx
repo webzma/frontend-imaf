@@ -130,7 +130,7 @@ function StatusRow({ label, estado }: { label: string; estado: EstadoKey }) {
   const Icon = cfg.icon;
 
   return (
-    <div className="flex items-center justify-between py-3 border-b border-outline-variant/20 last:border-0">
+    <div className="flex items-center justify-between py-3 border-b border-outline-variant last:border-0">
       <p className="font-sans text-sm text-on-surface font-medium">{label}</p>
       <Badge variant={cfg.variant} className="gap-1.5 px-2.5 py-1">
         <Icon className="w-3 h-3" />
@@ -217,9 +217,6 @@ export default function CursoPage() {
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-5xl mx-auto">
         <PageHeader
           icon={BookOpen}
@@ -235,7 +232,7 @@ export default function CursoPage() {
               <Skeleton className="h-5 w-32 mb-6" />
               <Skeleton className="h-4 w-full mb-2" />
               <Skeleton className="h-4 w-3/4 mb-8" />
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-outline-variant/30">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-outline-variant">
                 {[...Array(4)].map((_, i) => (
                   <Skeleton key={i} className="h-12 w-full" />
                 ))}
@@ -272,7 +269,7 @@ export default function CursoPage() {
                   >
                     {curso.estado === "activo" ? (
                       <>
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-success dark:bg-success" />
                         Activo
                       </>
                     ) : (
@@ -294,13 +291,13 @@ export default function CursoPage() {
                 )}
 
                 {/* Meta grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-outline-variant/30">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-outline-variant">
                   <div className="flex items-start gap-2.5">
                     <div className="w-8 h-8 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0">
                       <Calendar className="w-3.5 h-3.5 text-on-primary-container" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Inicio
                       </p>
                       <p className="font-sans text-sm font-semibold text-on-surface mt-0.5">
@@ -313,7 +310,7 @@ export default function CursoPage() {
                       <CalendarCheck className="w-3.5 h-3.5 text-on-primary-container" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Finalización
                       </p>
                       <p className="font-sans text-sm font-semibold text-on-surface mt-0.5">
@@ -326,7 +323,7 @@ export default function CursoPage() {
                       <DollarSign className="w-3.5 h-3.5 text-on-primary-container" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Precio
                       </p>
                       <p className="font-sans text-sm font-semibold text-on-surface mt-0.5 tabular-nums">
@@ -339,7 +336,7 @@ export default function CursoPage() {
                       <Users className="w-3.5 h-3.5 text-on-primary-container" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Cupos
                       </p>
                       <p className="font-sans text-sm font-semibold text-on-surface mt-0.5 tabular-nums">
@@ -422,12 +419,12 @@ export default function CursoPage() {
             </div>
 
             {canDownloadCertificate && (
-              <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-sm ambient-shadow px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="bg-success-container rounded-sm ambient-shadow px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <p className="font-sans text-sm font-semibold text-emerald-800 dark:text-emerald-400">
+                  <p className="font-sans text-sm font-semibold text-on-success-container">
                     Tu certificado está disponible
                   </p>
-                  <p className="font-sans text-xs text-emerald-700/70 dark:text-emerald-500/70 mt-0.5">
+                  <p className="font-sans text-xs text-on-success-container dark:text-success mt-0.5">
                     Descárgalo en PDF para guardarlo o imprimirlo.
                   </p>
                 </div>
@@ -466,7 +463,7 @@ export default function CursoPage() {
                     .map((item, idx) => (
                       <li
                         key={item.id}
-                        className="group flex gap-4 py-3 border-b border-outline-variant/20 last:border-0 hover:bg-surface-container-low/30 -mx-2 px-2 rounded-sm transition-colors"
+                        className="group flex gap-4 py-3 border-b border-outline-variant last:border-0 hover:bg-surface-container-low/30 -mx-2 px-2 rounded-sm transition-colors"
                       >
                         <span className="shrink-0 w-7 h-7 rounded-full bg-primary-container flex items-center justify-center font-mono text-xs font-bold text-on-primary-container mt-0.5 group-hover:scale-105 transition-transform">
                           {idx + 1}
@@ -509,17 +506,17 @@ export default function CursoPage() {
                       programada: {
                         label: "Programada",
                         variant: "programada",
-                        dot: "bg-sky-500",
+                        dot: "bg-info",
                       },
                       realizada: {
                         label: "Realizada",
                         variant: "realizada",
-                        dot: "bg-emerald-500",
+                        dot: "bg-success",
                       },
                       cancelada: {
                         label: "Cancelada",
                         variant: "cancelada",
-                        dot: "bg-rose-500",
+                        dot: "bg-danger",
                       },
                     };
                     const cfg =
@@ -527,11 +524,11 @@ export default function CursoPage() {
                     return (
                       <div
                         key={sesion.id}
-                        className="flex flex-col sm:flex-row sm:items-start gap-3 py-3.5 border-b border-outline-variant/20 last:border-0"
+                        className="flex flex-col sm:flex-row sm:items-start gap-3 py-3.5 border-b border-outline-variant last:border-0"
                       >
                         <div className="sm:w-44 shrink-0">
                           <div className="flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                            <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                             <p className="font-sans text-xs font-semibold text-on-surface">
                               {formatDateLong(sesion.fecha)}
                             </p>
@@ -587,26 +584,26 @@ export default function CursoPage() {
                 href={curso.whatsapp_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-sm px-5 py-4 hover:bg-emerald-100 dark:hover:bg-emerald-500/15 transition-colors ambient-shadow"
+                className="group flex items-center gap-4 bg-success-container rounded-sm px-5 py-4 hover:bg-success-container dark:hover:bg-success-container transition-colors ambient-shadow"
               >
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 dark:bg-emerald-500/20 flex items-center justify-center shrink-0">
-                  <MessageCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <div className="w-10 h-10 rounded-full bg-success-container dark:bg-success-container flex items-center justify-center shrink-0">
+                  <MessageCircle className="w-5 h-5 text-success" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-sans text-sm font-semibold text-emerald-800 dark:text-emerald-400">
+                  <p className="font-sans text-sm font-semibold text-on-success-container">
                     Grupo de WhatsApp del curso
                   </p>
-                  <p className="font-sans text-xs text-emerald-700/70 dark:text-emerald-500/70 mt-0.5">
+                  <p className="font-sans text-xs text-on-success-container dark:text-success mt-0.5">
                     Únete para recibir información y actualizaciones
                   </p>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+                <ArrowUpRight className="w-4 h-4 text-success group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
               </a>
             )}
 
             {/* Info note */}
             <div className="flex items-start gap-3 bg-secondary-container/30 rounded-sm px-5 py-4">
-              <Info className="w-4 h-4 text-on-surface/50 shrink-0 mt-0.5" />
+              <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
               <p className="font-sans text-sm text-muted-foreground leading-relaxed">
                 Si necesitas cambiar de curso o tienes alguna consulta sobre tu
                 inscripción, comunícate con la administración.
@@ -633,7 +630,7 @@ export default function CursoPage() {
               </div>
               <Link
                 href="/estudiante/cursos"
-                className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary hover:gap-2 transition-all"
+                className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary hover:gap-2 transition-[background-color,border-color,color,box-shadow,transform,opacity]"
               >
                 Explorar catálogo
                 <ArrowUpRight className="w-3.5 h-3.5" />

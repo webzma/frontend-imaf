@@ -120,9 +120,6 @@ export default function AdminNotificacionesPage() {
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-4xl mx-auto">
         <PageHeader
           icon={Bell}
@@ -140,7 +137,7 @@ export default function AdminNotificacionesPage() {
           <div className="inline-flex items-center gap-1 bg-surface-container-low rounded-full p-1">
             <button
               onClick={() => setFilter("all")}
-              className={`font-sans text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all ${
+              className={`font-sans text-xs font-semibold px-3.5 py-1.5 rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity] ${
                 filter === "all"
                   ? "bg-surface-container-lowest text-on-surface ambient-shadow"
                   : "text-muted-foreground hover:text-on-surface"
@@ -153,7 +150,7 @@ export default function AdminNotificacionesPage() {
             </button>
             <button
               onClick={() => setFilter("unread")}
-              className={`font-sans text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all ${
+              className={`font-sans text-xs font-semibold px-3.5 py-1.5 rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity] ${
                 filter === "unread"
                   ? "bg-surface-container-lowest text-on-surface ambient-shadow"
                   : "text-muted-foreground hover:text-on-surface"
@@ -234,7 +231,7 @@ export default function AdminNotificacionesPage() {
                   onClick={() =>
                     markAsRead(notification.id, notification.data.url)
                   }
-                  className={`group relative bg-surface-container-lowest rounded-sm overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-0.5 ${
+                  className={`group relative bg-surface-container-lowest rounded-sm overflow-hidden cursor-pointer transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-200 hover:-translate-y-0.5 ${
                     isUnread
                       ? "ambient-shadow ring-1 ring-primary/20"
                       : "shadow-sm hover:shadow-md"
@@ -257,7 +254,7 @@ export default function AdminNotificacionesPage() {
                           className={`w-4 h-4 ${
                             isUnread
                               ? "text-on-primary-container"
-                              : "text-muted-foreground/70"
+                              : "text-muted-foreground"
                           }`}
                         />
                       </div>
@@ -283,13 +280,13 @@ export default function AdminNotificacionesPage() {
                           {notification.data.mensaje}
                         </p>
                         <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-1.5 text-muted-foreground/60">
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
                             <Clock className="w-3 h-3" />
                             <span className="font-sans text-[11px]">
                               {formatRelativeTime(notification.created_at)}
                             </span>
                           </div>
-                          <span className="inline-flex items-center gap-1 font-sans text-xs font-medium text-primary/80 group-hover:text-primary group-hover:gap-1.5 transition-all">
+                          <span className="inline-flex items-center gap-1 font-sans text-xs font-medium text-primary/80 group-hover:text-primary group-hover:gap-1.5 transition-[background-color,border-color,color,box-shadow,transform,opacity]">
                             Abrir
                             <ArrowUpRight className="w-3 h-3" />
                           </span>

@@ -175,7 +175,7 @@ export default function CursoDetailPage({
   if (error || !curso) {
     return (
       <div className="px-10 py-10">
-        <p className="font-sans text-sm text-destructive">
+        <p className="font-sans text-sm text-danger">
           {error || "Curso no encontrado."}
         </p>
         <button
@@ -195,9 +195,6 @@ export default function CursoDetailPage({
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         {/* Back */}
         <button
@@ -260,7 +257,7 @@ export default function CursoDetailPage({
           <div
             className={`rounded-sm p-4 ${
               pendientesAprobacion > 0
-                ? "bg-amber-50 dark:bg-amber-500/10"
+                ? "bg-warning-container"
                 : "bg-surface-container-low ambient-shadow"
             }`}
           >
@@ -270,7 +267,7 @@ export default function CursoDetailPage({
             <p
               className={`font-sans text-3xl font-light ${
                 pendientesAprobacion > 0
-                  ? "text-amber-700 dark:text-amber-400"
+                  ? "text-on-warning-container"
                   : "text-on-surface"
               }`}
             >
@@ -280,11 +277,11 @@ export default function CursoDetailPage({
               de aprobación
             </p>
           </div>
-          <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-sm p-4">
+          <div className="bg-success-container rounded-sm p-4">
             <p className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-medium mb-1">
               Aprobados
             </p>
-            <p className="font-sans text-3xl font-light text-emerald-700 dark:text-emerald-400">
+            <p className="font-sans text-3xl font-light text-on-success-container">
               {
                 curso.estudiantes.filter(
                   (e) => e.estado_aprobacion_curso === "aprobado",
@@ -298,7 +295,7 @@ export default function CursoDetailPage({
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 mb-5 border-b border-outline-variant/30">
+        <div className="flex items-center gap-1 mb-5 border-b border-outline-variant">
           <button
             onClick={() => setActiveTab("estudiantes")}
             className={`flex items-center gap-2 px-4 py-2 font-sans text-sm font-medium border-b-2 transition-colors -mb-px ${
@@ -334,7 +331,7 @@ export default function CursoDetailPage({
                   placeholder="Buscar por nombre o cédula..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/60 font-sans text-xs placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/60 font-sans text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                 />
               </div>
             )}
@@ -408,7 +405,7 @@ export default function CursoDetailPage({
                       <span className="font-sans text-xs text-muted-foreground mr-1">
                         Aprobación del curso:
                       </span>
-                      <div className="flex rounded-lg overflow-hidden border border-outline-variant/50 text-xs font-semibold font-sans">
+                      <div className="flex rounded-lg overflow-hidden border border-outline-variant text-xs font-semibold font-sans">
                         <button
                           disabled={
                             approving === est.id ||
@@ -417,14 +414,14 @@ export default function CursoDetailPage({
                           onClick={() => handleAprobacion(est.id, "reprobado")}
                           className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
                             est.estado_aprobacion_curso === "reprobado"
-                              ? "bg-rose-500 text-white"
+                              ? "bg-danger text-white"
                               : "text-muted-foreground hover:bg-surface-container"
                           }`}
                         >
                           <X className="w-3 h-3" />
                           Reprobado
                         </button>
-                        <div className="w-px bg-outline-variant/50" />
+                        <div className="w-px bg-outline-variant" />
                         <button
                           disabled={
                             approving === est.id ||
@@ -433,7 +430,7 @@ export default function CursoDetailPage({
                           onClick={() => handleAprobacion(est.id, "pendiente")}
                           className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
                             est.estado_aprobacion_curso === "pendiente"
-                              ? "bg-amber-400 text-white"
+                              ? "bg-warning text-white"
                               : "text-muted-foreground hover:bg-surface-container"
                           }`}
                         >
@@ -442,7 +439,7 @@ export default function CursoDetailPage({
                           ) : null}
                           Pendiente
                         </button>
-                        <div className="w-px bg-outline-variant/50" />
+                        <div className="w-px bg-outline-variant" />
                         <button
                           disabled={
                             approving === est.id ||
@@ -451,7 +448,7 @@ export default function CursoDetailPage({
                           onClick={() => handleAprobacion(est.id, "aprobado")}
                           className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
                             est.estado_aprobacion_curso === "aprobado"
-                              ? "bg-emerald-500 text-white"
+                              ? "bg-success text-white"
                               : "text-muted-foreground hover:bg-surface-container"
                           }`}
                         >

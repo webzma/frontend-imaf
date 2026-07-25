@@ -96,7 +96,6 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-surface">
       {/* ── Banda superior editorial ── */}
       <div className="bg-surface-container-low px-8 py-6 relative overflow-hidden">
-        <div className="absolute -top-10 right-0 w-[360px] h-[180px] rounded-full bg-primary/8 blur-[60px] pointer-events-none" />
         <div className="max-w-2xl mx-auto flex items-center justify-between relative z-10">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 flex items-center justify-center ambient-shadow shrink-0">
@@ -130,11 +129,13 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {error && (
-          <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-sm mb-8 font-sans">
-            {error}
-          </div>
-        )}
+        <div role="alert" aria-live="assertive">
+          {error && (
+            <div className="bg-danger-container text-on-danger-container text-sm px-4 py-3 rounded-sm mb-8 font-sans">
+              {error}
+            </div>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Fila 1 */}
@@ -144,6 +145,7 @@ export default function RegisterPage() {
               id="name"
               name="name"
               type="text"
+              autoComplete="name"
               placeholder="Juan Pérez"
               value={form.name}
               onChange={handleChange}
@@ -157,6 +159,7 @@ export default function RegisterPage() {
               id="email"
               name="email"
               type="email"
+              autoComplete="email"
               placeholder="tu@correo.com"
               value={form.email}
               onChange={handleChange}
@@ -186,6 +189,7 @@ export default function RegisterPage() {
               <Input
                 id="telefono"
                 name="telefono"
+                autoComplete="tel"
                 type="tel"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -261,6 +265,7 @@ export default function RegisterPage() {
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
                   placeholder="••••••••"
                   value={form.password}
                   onChange={handleChange}
@@ -271,7 +276,11 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors"
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
+                  aria-pressed={showPassword}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm text-muted-foreground hover:text-on-surface transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -289,6 +298,7 @@ export default function RegisterPage() {
                 id="password_confirmation"
                 name="password_confirmation"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 value={form.password_confirmation}
                 onChange={handleChange}
@@ -333,7 +343,7 @@ export default function RegisterPage() {
               Iniciar sesión
             </Link>
           </p>
-          <div className="ml-auto flex gap-5 text-xs text-muted-foreground/50">
+          <div className="ml-auto flex gap-5 text-xs text-muted-foreground">
             <span className="hover:text-muted-foreground cursor-pointer transition-colors">
               Soporte
             </span>

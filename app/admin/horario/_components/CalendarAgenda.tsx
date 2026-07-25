@@ -64,14 +64,14 @@ export default function CalendarAgenda({ current, sesiones, onEdit }: Props) {
   }
 
   return (
-    <div className="bg-surface-container-lowest rounded-sm ambient-shadow divide-y divide-outline-variant/20">
+    <div className="bg-surface-container-lowest rounded-sm ambient-shadow divide-y divide-outline-variant">
       {grouped.map(([date, dayItems]) => (
         <div key={date} className="px-6 py-5">
           <div className="flex items-baseline gap-3 mb-3">
             <p className="font-serif font-light text-xl text-on-surface capitalize">
               {formatLongDate(parseISODate(date))}
             </p>
-            <span className="font-sans text-xs text-on-surface/45">
+            <span className="font-sans text-xs text-muted-foreground">
               {dayItems.length} sesi{dayItems.length === 1 ? "ón" : "ones"}
             </span>
           </div>
@@ -86,7 +86,7 @@ export default function CalendarAgenda({ current, sesiones, onEdit }: Props) {
                   className="group flex flex-col md:flex-row md:items-center gap-2 md:gap-4 px-4 py-3 rounded-sm bg-surface-container-low/50 hover:bg-surface-container transition-colors text-left"
                 >
                   <div className="flex items-center gap-2 md:min-w-[150px]">
-                    <Clock className="w-3.5 h-3.5 text-on-surface/40" />
+                    <Clock className="w-3.5 h-3.5 text-muted-foreground" />
                     <span className="font-sans text-sm font-medium text-on-surface tabular-nums">
                       {s.hora_inicio
                         ? formatHour(s.hora_inicio)

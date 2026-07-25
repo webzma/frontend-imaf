@@ -44,7 +44,7 @@ function FeaturedCursoCard({ curso }: { curso: Curso }) {
   return (
     <Link
       href={`/estudiante/cursos/${curso.id}`}
-      className="group relative block bg-surface-container-lowest rounded-md overflow-hidden ambient-shadow hover:-translate-y-0.5 transition-all duration-300"
+      className="group relative block bg-surface-container-lowest rounded-md overflow-hidden ambient-shadow hover:-translate-y-0.5 transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300"
     >
       <div className="absolute inset-0 gradient-primary opacity-[0.06] group-hover:opacity-[0.10] transition-opacity" />
       <div className="absolute top-0 left-0 right-0 h-[2px] gradient-primary" />
@@ -84,7 +84,7 @@ function FeaturedCursoCard({ curso }: { curso: Curso }) {
         </div>
 
         <div className="flex items-center gap-3 md:flex-col md:items-end md:gap-4">
-          <div className="flex items-center gap-2 text-muted-foreground/70">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="w-3.5 h-3.5" />
             <span className="font-sans text-xs tabular-nums">
               {curso.estudiantes?.length ?? 0}{" "}
@@ -93,7 +93,7 @@ function FeaturedCursoCard({ curso }: { curso: Curso }) {
                 : "estudiantes"}
             </span>
           </div>
-          <span className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary group-hover:gap-2.5 transition-all">
+          <span className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary group-hover:gap-2.5 transition-[background-color,border-color,color,box-shadow,transform,opacity]">
             Continuar
             <ArrowUpRight className="w-3.5 h-3.5" />
           </span>
@@ -117,12 +117,12 @@ function CursoCard({
 
   return (
     <div
-      className={`group relative bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col h-full ${
+      className={`group relative bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-1 hover:shadow-xl transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300 flex flex-col h-full ${
         esMiCurso ? "ring-1 ring-primary/50" : ""
       }`}
     >
       <div
-        className={`h-[2px] ${esMiCurso ? "gradient-primary" : "bg-outline-variant/40 group-hover:gradient-primary group-hover:bg-transparent transition-colors"}`}
+        className={`h-[2px] ${esMiCurso ? "gradient-primary" : "bg-outline-variant group-hover:gradient-primary group-hover:bg-transparent transition-colors"}`}
       />
 
       {esMiCurso && (
@@ -139,7 +139,7 @@ function CursoCard({
             {curso.codigo}
           </span>
           <Badge variant="activo" className="gap-1 px-2 py-0.5 text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-success dark:bg-success" />
             Activo
           </Badge>
         </div>
@@ -149,32 +149,32 @@ function CursoCard({
         </h3>
 
         {curso.instructor ? (
-          <p className="font-sans text-xs text-on-surface/60 font-medium mb-3 flex items-center gap-1.5">
+          <p className="font-sans text-xs text-muted-foreground font-medium mb-3 flex items-center gap-1.5">
             <GraduationCap className="w-3 h-3 text-primary/70" />
             {curso.instructor.name}
           </p>
         ) : (
-          <p className="font-sans text-xs text-muted-foreground/50 italic mb-3">
+          <p className="font-sans text-xs text-muted-foreground italic mb-3">
             Sin instructor asignado
           </p>
         )}
 
         <p className="font-sans text-sm text-muted-foreground line-clamp-2 flex-1 mb-5">
           {curso.descripcion || (
-            <span className="italic text-muted-foreground/50">
+            <span className="italic text-muted-foreground">
               Sin descripción disponible.
             </span>
           )}
         </p>
 
-        <div className="flex items-center justify-between pt-4 border-t border-outline-variant/30">
-          <div className="flex items-center gap-1.5 text-muted-foreground/70">
+        <div className="flex items-center justify-between pt-4 border-t border-outline-variant">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
             <Users className="w-3.5 h-3.5" />
             <span className="font-sans text-xs tabular-nums">
               {studentCount} {studentCount === 1 ? "estudiante" : "estudiantes"}
             </span>
           </div>
-          <span className="inline-flex items-center gap-1 font-sans text-xs font-medium text-primary/80 group-hover:text-primary group-hover:gap-1.5 transition-all">
+          <span className="inline-flex items-center gap-1 font-sans text-xs font-medium text-primary/80 group-hover:text-primary group-hover:gap-1.5 transition-[background-color,border-color,color,box-shadow,transform,opacity]">
             Ver detalle
             <ArrowUpRight className="w-3 h-3" />
           </span>
@@ -199,7 +199,7 @@ function CardSkeleton() {
         <Skeleton className="h-3 w-28" />
         <Skeleton className="h-3 w-full" />
         <Skeleton className="h-3 w-2/3" />
-        <div className="flex items-center justify-between pt-4 border-t border-outline-variant/30 mt-auto">
+        <div className="flex items-center justify-between pt-4 border-t border-outline-variant mt-auto">
           <Skeleton className="h-3.5 w-24" />
           <Skeleton className="h-3.5 w-16" />
         </div>
@@ -281,10 +281,6 @@ export default function EstudianteCursosPage() {
 
   return (
     <div className="relative min-h-screen bg-surface">
-      {/* Decorative blooms */}
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-6xl mx-auto">
         <PageHeader
           icon={BookOpen}
@@ -295,7 +291,7 @@ export default function EstudianteCursosPage() {
           actions={
             !loading && cursos.length > 0 ? (
               <div className="hidden md:flex items-center gap-2 font-sans text-xs text-muted-foreground">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                 Catálogo actualizado
               </div>
             ) : undefined
@@ -330,10 +326,10 @@ export default function EstudianteCursosPage() {
                 </p>
               )}
               <div className="flex items-baseline gap-2">
-                <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/60 font-semibold">
+                <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
                   {s.label}
                 </p>
-                <span className="hidden sm:inline font-sans text-[10px] text-muted-foreground/60 truncate">
+                <span className="hidden sm:inline font-sans text-[10px] text-muted-foreground truncate">
                   · {s.hint}
                 </span>
               </div>
@@ -344,7 +340,7 @@ export default function EstudianteCursosPage() {
         {/* Filters */}
         <div className="flex items-center gap-3 mb-6 flex-wrap">
           <div className="relative flex-1 min-w-[240px] max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
               placeholder="Buscar por nombre, código o instructor..."
               value={search}
@@ -372,14 +368,14 @@ export default function EstudianteCursosPage() {
         ) : (
           <>
             <div className="flex items-center justify-between mb-5">
-              <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-on-surface/60 font-semibold">
+              <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-semibold">
                 {filtered.length} curso{filtered.length !== 1 ? "s" : ""}
                 {hasFilters
                   ? ` encontrado${filtered.length !== 1 ? "s" : ""}`
                   : ""}
               </p>
               {hasFilters && filtered.length !== cursos.length && (
-                <p className="font-sans text-[10px] text-muted-foreground/60">
+                <p className="font-sans text-[10px] text-muted-foreground">
                   de {cursos.length} totales
                 </p>
               )}

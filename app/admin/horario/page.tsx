@@ -309,9 +309,6 @@ export default function HorarioPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         <PageHeader
           icon={CalendarDays}
@@ -348,8 +345,8 @@ export default function HorarioPage() {
             {
               label: "Realizadas",
               value: totalRealizadas,
-              glow: "bg-emerald-100 dark:bg-emerald-500/15",
-              color: "text-emerald-800 dark:text-emerald-400",
+              glow: "bg-success-container",
+              color: "text-on-success-container",
             },
           ].map((s) => (
             <div
@@ -364,7 +361,7 @@ export default function HorarioPage() {
               <p className="font-sans text-2xl md:text-4xl font-light tight-tracking text-on-surface tabular-nums mb-1">
                 {s.value}
               </p>
-              <p className="font-sans text-xs truncate tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+              <p className="font-sans text-xs truncate tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                 {s.label}
               </p>
             </div>
@@ -404,8 +401,8 @@ export default function HorarioPage() {
                 onClick={() => setView(v)}
                 className={`px-3 py-1.5 rounded-sm font-sans text-xs font-semibold transition-colors ${
                   view === v
-                    ? "bg-primary text-surface"
-                    : "text-on-surface/60 hover:text-on-surface"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-on-surface"
                 }`}
               >
                 {VIEW_LABELS[v]}
@@ -417,7 +414,7 @@ export default function HorarioPage() {
         {/* Filtros */}
         <div className="flex items-center gap-3 mb-6 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap">
-            <Filter className="w-3.5 h-3.5 text-muted-foreground/60" />
+            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
             <Select value={filterCurso} onValueChange={setFilterCurso}>
               <SelectTrigger className="h-9 w-48 font-sans text-sm">
                 <SelectValue />
@@ -494,7 +491,7 @@ export default function HorarioPage() {
 
         {/* Aviso cuando el rango visible no tiene sesiones */}
         {!loading && sesionesEnRango.length === 0 && (
-          <div className="flex flex-wrap items-center gap-3 bg-secondary-container/40 border border-outline-variant/30 rounded-sm px-4 py-3 mb-6">
+          <div className="flex flex-wrap items-center gap-3 bg-secondary-container/40 border border-outline-variant rounded-sm px-4 py-3 mb-6">
             <p className="font-sans text-sm text-on-surface/75">
               {sesiones.length === 0 ? (
                 <>

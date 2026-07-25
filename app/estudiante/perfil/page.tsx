@@ -199,9 +199,6 @@ export default function PerfilPage() {
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-5xl mx-auto">
         <PageHeader
           icon={User}
@@ -282,11 +279,11 @@ export default function PerfilPage() {
                         perfil.estado.slice(1)}
                     </Badge>
 
-                    <div className="w-full pt-5 mt-2 border-t border-outline-variant/30 space-y-3 text-left">
+                    <div className="w-full pt-5 mt-2 border-t border-outline-variant space-y-3 text-left">
                       <div className="flex items-center gap-2.5">
-                        <Hash className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                        <Hash className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                          <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                             Cédula
                           </p>
                           <p className="font-mono text-sm text-on-surface tabular-nums">
@@ -296,9 +293,9 @@ export default function PerfilPage() {
                       </div>
                       {perfil.telefono && (
                         <div className="flex items-center gap-2.5">
-                          <Phone className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                          <Phone className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                            <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                               Teléfono
                             </p>
                             <p className="font-sans text-sm text-on-surface">
@@ -309,9 +306,9 @@ export default function PerfilPage() {
                       )}
                       {perfil.municipio && (
                         <div className="flex items-center gap-2.5">
-                          <MapPin className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                          <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                            <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                               Municipio
                             </p>
                             <p className="font-sans text-sm text-on-surface">
@@ -489,7 +486,7 @@ export default function PerfilPage() {
                       <CalendarDays className="w-3.5 h-3.5 text-on-primary-container" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold mb-1">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold mb-1">
                         Fecha de inscripción
                       </p>
                       <p className="font-sans text-sm text-on-surface font-medium">
@@ -503,7 +500,7 @@ export default function PerfilPage() {
                         <Sparkles className="w-3.5 h-3.5 text-on-primary-container" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold mb-1">
+                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold mb-1">
                           Fecha de nacimiento
                         </p>
                         <p className="font-sans text-sm text-on-surface font-medium">
@@ -518,7 +515,7 @@ export default function PerfilPage() {
                         <User className="w-3.5 h-3.5 text-on-primary-container" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold mb-1">
+                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold mb-1">
                           Género
                         </p>
                         <p className="font-sans text-sm text-on-surface font-medium capitalize">
@@ -532,7 +529,7 @@ export default function PerfilPage() {
                       <IdCard className="w-3.5 h-3.5 text-on-primary-container" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold mb-1">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold mb-1">
                         Cédula
                       </p>
                       <p className="font-mono text-sm text-on-surface font-medium tabular-nums">
@@ -555,7 +552,7 @@ export default function PerfilPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold mb-1.5">
+                    <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold mb-1.5">
                       Nombre de usuario
                     </p>
                     <p className="font-sans text-sm text-on-surface font-medium">
@@ -563,7 +560,7 @@ export default function PerfilPage() {
                     </p>
                   </div>
                   <div className="min-w-0">
-                    <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold mb-1.5">
+                    <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold mb-1.5">
                       Correo electrónico
                     </p>
                     <p className="font-sans text-sm text-on-surface font-medium break-all">

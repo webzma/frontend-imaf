@@ -44,7 +44,7 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex w-fit items-center justify-between gap-1.5 rounded-sm border-0 border-b border-b-outline-variant bg-surface-variant px-3 py-1.5 text-sm whitespace-nowrap font-sans text-on-surface shadow-none transition-[background-color,border-color,color] outline-none focus-visible:bg-surface-container-high focus-visible:border-b-primary disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-b-destructive aria-invalid:bg-destructive/5 data-placeholder:text-muted-foreground/50 data-[size=default]:h-10 data-[size=sm]:h-9 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "flex w-fit items-center justify-between gap-1.5 rounded-sm border-0 border-b-2 border-b-outline-variant bg-surface-variant px-3 py-1.5 text-sm whitespace-nowrap font-sans text-on-surface shadow-none transition-[background-color,border-color,color] outline-none focus-visible:bg-surface-container-lowest focus-visible:border-b-primary focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-b-danger aria-invalid:bg-danger-container/40 data-placeholder:text-muted-foreground data-[size=default]:h-10 data-[size=sm]:h-9 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}

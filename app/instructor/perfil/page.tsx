@@ -244,7 +244,7 @@ export default function PerfilPage() {
   if (error || !me) {
     return (
       <div className="px-10 py-10">
-        <p className="font-sans text-sm text-destructive">{error}</p>
+        <p className="font-sans text-sm text-danger">{error}</p>
       </div>
     );
   }
@@ -253,9 +253,6 @@ export default function PerfilPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         <PageHeader icon={User} eyebrow="Mi perfil" title="Mi Perfil" />
 
@@ -337,7 +334,7 @@ export default function PerfilPage() {
         {editing ? (
           /* ── Edit form ── */
           <div className="bg-surface-container-low rounded-sm ambient-shadow p-6">
-            <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-on-surface/55 font-semibold mb-5">
+            <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-semibold mb-5">
               Editar información
             </h3>
             <div className="grid gap-4">
@@ -586,14 +583,14 @@ function InfoRow({
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold mb-1">
+        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold mb-1">
           {label}
         </p>
         <p className="font-sans text-sm text-on-surface font-medium">
           {value && value !== "—" ? (
             value
           ) : (
-            <span className="text-muted-foreground/50 italic font-normal">
+            <span className="text-muted-foreground italic font-normal">
               Sin especificar
             </span>
           )}

@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import logoImaf from "@/public/logo-imaf.webp";
 
 export default function LoginPage() {
@@ -56,10 +56,6 @@ export default function LoginPage() {
     <div className="min-h-screen grid lg:grid-cols-[1fr_1fr] bg-surface">
       {/* ── Panel izquierdo: editorial branding ── */}
       <div className="hidden lg:flex flex-col justify-between px-14 py-14 bg-surface-container-low relative overflow-hidden">
-        {/* Blobs decorativos */}
-        <div className="absolute -top-24 -right-24 w-[480px] h-[480px] rounded-full bg-primary/10 blur-[90px] pointer-events-none" />
-        <div className="absolute -bottom-16 -left-12 w-[320px] h-[320px] rounded-full bg-secondary-container/50 blur-[70px] pointer-events-none" />
-
         {/* Logotipo */}
         <div className="flex items-center relative z-10">
           <div className="w-9 h-9 rounded-lg flex items-center justify-center ambient-shadow shrink-0">
@@ -69,13 +65,15 @@ export default function LoginPage() {
 
         {/* Headline editorial */}
         <div className="relative z-10">
-          <span className="font-sans text-xl tracking-[0.25em] uppercase text-primary/60 font-medium mb-5 block">
+          <span className="font-sans text-sm tracking-[0.25em] uppercase text-primary font-semibold mb-5 block">
             Plataforma Educativa
           </span>
-          <h1 className="font-serif font-bold text-[7.5rem] leading-[0.9] tight-tracking text-on-surface mb-6">
+          {/* clamp(): con 7.5rem fijos "Aprende" se desbordaba de la columna
+              en el propio breakpoint lg (~512px de ancho). */}
+          <h1 className="font-serif font-bold text-[clamp(3.5rem,7vw,7.5rem)] leading-[0.9] tight-tracking text-on-surface mb-6">
             Aprende
             <br />
-            sin <em className="text-primary">límites.</em>
+            sin <span className="text-primary">límites.</span>
           </h1>
           <p className="font-sans text-base text-muted-foreground leading-relaxed max-w-[18rem]">
             Accede a tu contenido, sigue tu progreso y conecta con tus
@@ -84,10 +82,10 @@ export default function LoginPage() {
         </div>
 
         {/* Cita al pie */}
-        <p className="font-serif italic text-2xl text-primary/80 leading-relaxed relative z-10 max-w-120">
+        <blockquote className="font-serif text-2xl text-on-surface leading-relaxed relative z-10 max-w-120">
           &ldquo;La educación es el arma más poderosa que puedes usar para
           cambiar el mundo.&rdquo;
-        </p>
+        </blockquote>
       </div>
 
       {/* ── Panel derecho: formulario ── */}
@@ -110,11 +108,15 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {error && (
-            <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-sm mb-6 font-sans">
-              {error}
-            </div>
-          )}
+          {/* role="alert" para que un lector de pantalla anuncie el fallo de
+              login. Antes el error aparecía en silencio. */}
+          <div role="alert" aria-live="assertive">
+            {error && (
+              <div className="bg-danger-container text-on-danger-container text-sm px-4 py-3 rounded-sm mb-6 font-sans">
+                {error}
+              </div>
+            )}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-7">
             <div className="space-y-2">
@@ -128,6 +130,7 @@ export default function LoginPage() {
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="email"
                 placeholder="tu@correo.com"
                 value={form.email}
                 onChange={handleChange}
@@ -147,6 +150,7 @@ export default function LoginPage() {
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   value={form.password}
                   onChange={handleChange}
@@ -156,7 +160,11 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors"
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
+                  aria-pressed={showPassword}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm text-muted-foreground hover:text-on-surface transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -167,20 +175,37 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {/* El icono no desaparece al cargar: se sustituye por el spinner,
+                así el botón no cambia de ancho a mitad del envío. */}
             <Button
               type="submit"
               className="w-full h-11 mt-1 font-sans font-semibold tracking-wide"
               disabled={loading}
             >
-              {loading ? (
-                "Ingresando..."
-              ) : (
-                <span className="flex items-center gap-2">
-                  Ingresar <ArrowRight className="w-4 h-4" />
-                </span>
-              )}
+              <span className="flex items-center gap-2">
+                {loading ? "Ingresando..." : "Ingresar"}
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ArrowRight className="w-4 h-4" />
+                )}
+              </span>
             </Button>
           </form>
+
+          {/* No existe endpoint de reseteo, así que la vía de recuperación real
+              es el canal de soporte de la institución. Mejor eso que un enlace
+              a una ruta inexistente — o que no ofrecer ninguna salida. */}
+          <p className="font-sans text-sm text-muted-foreground mt-6 text-center">
+            <a
+              href="https://wa.me/584121512141?text=Hola%2C%20necesito%20recuperar%20el%20acceso%20a%20mi%20cuenta%20IMAF"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:text-primary-hover font-medium transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              ¿Olvidaste tu contraseña?
+            </a>
+          </p>
 
           <p className="font-sans text-sm text-muted-foreground mt-10 text-center">
             ¿No tienes una cuenta?{" "}
@@ -193,16 +218,17 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <footer className="absolute bottom-8 flex gap-6 text-xs text-muted-foreground/50">
-          <span className="hover:text-muted-foreground cursor-pointer transition-colors">
-            Soporte
-          </span>
-          <span className="hover:text-muted-foreground cursor-pointer transition-colors">
-            Privacidad
-          </span>
-          <span className="hover:text-muted-foreground cursor-pointer transition-colors">
-            Términos
-          </span>
+        {/* Antes eran tres <span> con cursor-pointer que no llevaban a ningún
+            sitio ni recibían foco. Ahora es un solo enlace real. */}
+        <footer className="absolute bottom-8 text-xs text-muted-foreground">
+          <a
+            href="https://wa.me/584121512141"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-on-surface transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            Soporte por WhatsApp
+          </a>
         </footer>
       </div>
     </div>

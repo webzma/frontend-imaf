@@ -1,306 +1,193 @@
-# Design System: Editorial Rose
+# Design System — IMAF
 
-## Creative North Star: "The Modern Muse"
+> **Fuente de verdad: [`app/globals.css`](app/globals.css).** Este documento
+> describe lo que hay en el código. Si los dos discrepan, gana `globals.css` y
+> este archivo está desactualizado.
 
-Este sistema de diseño rechaza la naturaleza "encajonada" de las grillas web tradicionales en favor de una experiencia editorial de alta gama. Está diseñado para sentirse como una monografía digital premium—respirando con espacios en blanco intencionales, profundidad tonal rica y una paleta sofisticada de rosa empolvado y cremas cálidos.
-
-Logramos un aspecto "característico" al romper la plantilla a través de **Asimetría Intencional**. Los elementos rara vez deben estar perfectamente centrados; en su lugar, usa la escala de espaciado para crear diseños desplazados donde las imágenes y la tipografía se superponen, creando una sensación de capas físicas y movimiento curado.
+Plataforma del Instituto de la Mujer, Atención a la Familia y Formación para el
+Trabajo (Municipio Independencia, Yaracuy). Es una web institucional pública
+más un panel de gestión: el sistema prioriza **legibilidad y accesibilidad**
+sobre efectismo. Buena parte del público entra desde teléfonos de gama baja y
+con conexiones lentas.
 
 ---
 
-## Paleta de Colores
+## Principios
 
-### Lógica Tonal
+1. **Todo color pasa por un token.** Nunca `bg-emerald-500` ni un hex suelto en
+   un componente. Si falta un color, se añade al token block de `globals.css`.
+2. **Contraste verificado, no estimado.** Todo par texto/fondo del sistema
+   cumple WCAG AA (≥4.5:1 en texto normal, ≥3:1 en bordes de foco).
+3. **El color nunca es el único canal.** Todo estado lleva además un icono o
+   una etiqueta.
+4. **Sin opacidad sobre texto.** `text-*/40` produce contrastes imposibles de
+   auditar. Se usan tokens sólidos.
 
-La paleta es una transición de tonos pesados de terracota a un espectro refinado de cuarzo rosa empolvado y crema cálido.
+---
 
-#### Primary (Principal)
+## Color
 
-- **HEX**: `#7d5050`
-- **OKLCH**: `oklch(0.48 0.05 15)`
-- **Uso**: Rosa sofisticado y apagado. Úsalo para momentos clave de marca y llamadas a la acción.
+### Superficies
 
-#### Primary Container
+Escala **estrictamente monótona**: subir un nivel siempre oscurece (y en modo
+oscuro, siempre aclara). Ese es el único mecanismo de profundidad del sistema.
 
-- **OKLCH**: `oklch(0.55 0.06 15)`
-- **Uso**: Variante para gradientes y estados hover
+| Token                       | Claro     | Oscuro    | Uso                                    |
+| --------------------------- | --------- | --------- | -------------------------------------- |
+| `surface-container-lowest`  | `#ffffff` | `#0e0e0e` | Tarjetas elevadas, elementos flotantes |
+| `surface`                   | `#faf8f7` | `#131313` | Fondo de página                        |
+| `surface-container-low`     | `#f3f0ef` | `#1c1b1b` | Secciones alternas, paneles            |
+| `surface-container`         | `#ece8e7` | `#232222` | Hover de tarjetas y filas              |
+| `surface-container-high`    | `#e4dfde` | `#2c2b2b` | Elementos elevados                     |
+| `surface-container-highest` | `#dcd6d4` | `#363434` | Máxima elevación (sin texto encima)    |
 
-#### Surface & Background
+### Marca
 
-- **HEX**: `#fcf9f4`
-- **OKLCH**: `oklch(0.98 0.008 35)`
-- **Uso**: Crema cálido y lechoso que proporciona una sensación más suave y "costosa" que el blanco puro.
+| Token                  | Claro     | Oscuro    | Notas                                                    |
+| ---------------------- | --------- | --------- | -------------------------------------------------------- |
+| `primary`              | `#b52569` | `#ffb1c5` | 5.78:1 como texto sobre crema · 6.12:1 con blanco encima |
+| `primary-hover`        | `#a51f5f` | `#ffc9d7` | El hover **oscurece**; aclarar rompía AA                 |
+| `primary-container`    | `#fbdde8` | `#7a0f43` | Fondos suaves de marca                                   |
+| `on-primary-container` | `#7a0f43` | `#ffd9e2` | Texto sobre `primary-container`                          |
 
-#### Secondary
+### Texto
 
-- **HEX**: `#685b5b`
-- **OKLCH**: `oklch(0.42 0.02 15)`
-- **Uso**: Ancla "empolvada" que asegura que el sistema se sienta fundamentado y maduro.
+| Token              | Claro     | Oscuro    | Uso                                                      |
+| ------------------ | --------- | --------- | -------------------------------------------------------- |
+| `on-surface`       | `#1a1817` | `#e5e2e1` | Texto principal. Nunca negro puro                        |
+| `muted-foreground` | `#5f5b59` | `#a8a29e` | Texto secundario. Pasa AA sobre **las seis** superficies |
 
-#### Secondary Container
+### Estados semánticos
 
-- **HEX**: `#f0dede`
-- **OKLCH**: `oklch(0.90 0.02 15)`
-- **Uso**: Fondos secundarios, elementos de soporte
+Cuatro significados, no nueve tonos sueltos. Cada uno con su `container` y su
+`on-container`.
 
-#### Tertiary
+| Familia   | `--x` claro | `--x` oscuro | Significado                     |
+| --------- | ----------- | ------------ | ------------------------------- |
+| `success` | `#1a7a4c`   | `#6fd39b`    | Activo, aprobado, realizada     |
+| `warning` | `#8a5a00`   | `#e8b761`    | Pendiente                       |
+| `danger`  | `#c02626`   | `#ff8f8f`    | Rechazado, cancelada, reprobado |
+| `info`    | `#1f5fa8`   | `#7db4f0`    | Programada                      |
 
-- **HEX**: `#785253`
-- **OKLCH**: `oklch(0.50 0.04 15)`
-- **Uso**: Proporciona el ancla "empolvada" adicional
+`destructive` es independiente de `primary` en ambos modos — en oscuro eran el
+mismo rosa y el botón de eliminar se confundía con el de guardar.
 
-#### On Surface (Texto)
+### Gráficas
 
-- **HEX**: `#1c1c19`
-- **OKLCH**: `oklch(0.15 0.005 35)`
-- **Uso**: **Nunca uses negro puro**. Usa este color para todo el texto para mantener la atmósfera "rosa empolvado" cohesiva.
-
-### Sistema de Superficies
-
-El sistema utiliza capas tonales para crear profundidad:
-
-- **surface-container-lowest**: `oklch(1 0 0)` - Blanco puro para elementos flotantes
-- **surface-container-low**: `oklch(0.97 0.007 35)` - Para secciones
-- **surface**: `oklch(0.98 0.008 35)` - Base principal
-- **surface-container**: `oklch(0.96 0.006 35)` - Contenedores estándar
-- **surface-container-high**: `oklch(0.95 0.006 35)` - Elementos elevados
-- **surface-container-highest**: `oklch(0.94 0.006 35)` - Máxima elevación
-
-### Regla "Sin Líneas"
-
-**Instrucción Explícita:** Los bordes sólidos de 1px están estrictamente prohibidos para seccionar. Para definir límites entre áreas de contenido, usa cambios de color de fondo. Una sección que use `surface-container-low` debe estar directamente contra un fondo `surface`. La transición de tono es el divisor.
-
-### Regla "Vidrio y Gradiente"
-
-Para agregar "alma" a la UI, los CTAs principales y fondos Hero deben utilizar gradientes lineales sutiles moviéndose de `primary` a `primary-container`. Para overlays flotantes (menús, modales), usa **Glassmorphism**: aplica un `surface-container` semi-transparente con un `blur` de `20px` para permitir que los tonos rosa y crema se filtren.
+`chart-1…5` son cinco **matices distintos** (magenta, azul, verde, naranja,
+morado), todos ≥4:1 sobre tarjeta blanca. No son cinco tintes del mismo rosa.
 
 ---
 
 ## Tipografía
 
-La voz tipográfica es un diálogo entre la elegancia dramática de **Cormorant Garamond** y la eficiencia limpia y moderna de **Manrope**.
+Dos familias, ambas por `next/font` (sin `@import` a CDNs externos).
 
-### Fuentes
+- **Display — Cormorant Garamond** (`font-serif`): titulares, `h1`–`h6`.
+  Aplicada por defecto a todos los encabezados desde `@layer base`.
+- **Texto — Manrope** (`font-sans`): cuerpo, etiquetas, UI. Es la fuente por
+  defecto de `<html>`.
 
-- **Display & Headline**: **Cormorant Garamond** - "Anclas Editoriales"
-- **Body & Labels**: **Manrope** - "Caballo de Batalla"
-
-### Jerarquía
-
-- **Display Large**: `3.5rem` (56px) para momentos hero
-- **Headlines**: Fomenta `letter-spacing: -0.02em` en encabezados grandes para crear una sensación densa y premium
-- **Body Text**: Debe permanecer estrictamente alineado a un ritmo de espaciado de `1.4rem` o `1.7rem` para asegurar legibilidad
-
-### Objetivo de Jerarquía
-
-Los encabezados grandes y expresivos deben superponerse frecuentemente a contenedores de fondo o imágenes, mientras que el texto del cuerpo permanece estrictamente alineado.
-
-### Uso en Código
+**Sin itálicas en encabezados.** El énfasis dentro de un titular se carga con
+color (`text-primary`) o peso, nunca con `italic`.
 
 ```tsx
-// Headline editorial
-<h1 className="font-serif text-6xl tight-tracking">Título Principal</h1>
-
-// Body text
-<p className="font-sans text-base text-on-surface">Contenido del cuerpo</p>
-
-// Label
-<span className="font-sans text-sm uppercase">Etiqueta</span>
+<h1 className="text-5xl tight-tracking">
+  Inscríbete en línea.{" "}
+  <span className="text-primary">Aprende presencialmente.</span>
+</h1>
 ```
 
 ---
 
-## Elevación y Profundidad
+## Forma
 
-En este sistema, la profundidad es biológica y tonal, no mecánica.
+Una sola escala de radios, derivada de `--radius: 0.625rem`:
 
-### Principio de Capas
+| Clase        | Valor | Uso                                |
+| ------------ | ----- | ---------------------------------- |
+| `rounded-sm` | 4px   | Inputs, badges, elementos pequeños |
+| `rounded-md` | 8px   | Botones                            |
+| `rounded-lg` | 10px  | Tarjetas, paneles                  |
+| `rounded-xl` | 14px  | Contenedores grandes               |
 
-La profundidad se logra "apilando" niveles de superficie:
+---
 
-1. **Base**: `surface` (#fcf9f4)
-2. **Secciones**: `surface-container-low` (#f6f3ee)
-3. **Elementos Flotantes**: `surface-container-lowest` (#ffffff)
+## Elevación
 
-### Sombras Ambientales (Ambient Bloom)
+`ambient-shadow` — sombra neutra y suave (no un halo rosa):
 
-**Evita las "drop shadows" estándar.** Cuando un elemento debe flotar (ej. botón primario o modal), usa un **Ambient Bloom**:
-
-- **Y-Offset**: 12px
-- **Blur**: 32px
-- **Color**: `on-surface` (#1c1c19) al 5% de opacidad
-
-Esto imita la luz natural golpeando papel fino en lugar de un "brillo" digital.
-
-```tsx
-<div className="ambient-shadow bg-surface-container-lowest rounded-md p-6">
-  Contenido flotante
-</div>
+```css
+box-shadow:
+  0 12px 32px rgba(26, 24, 23, 0.06),
+  0 2px 8px rgba(26, 24, 23, 0.04);
 ```
 
-### Borde "Fantasma" de Respaldo
-
-Si se requiere un borde para accesibilidad, usa el token `outline-variant` al **15% de opacidad**. Nunca uses líneas opacas al 100%.
-
-```tsx
-<div className="border border-outline-variant">Contenido</div>
-```
+La profundidad se construye **apilando niveles de superficie**; la sombra solo
+despega el elemento del plano.
 
 ---
 
 ## Componentes
 
-### Botones
+### Botones ([`components/ui/button.tsx`](components/ui/button.tsx))
 
-#### Primary Button
+`default` (primario) · `outline` · `secondary` · `ghost` · `destructive` · `link`.
+
+Una sola acción primaria por bloque. Tres botones primarios juntos no son una
+jerarquía.
+
+### Inputs ([`components/ui/input.tsx`](components/ui/input.tsx))
+
+Fondo `surface-variant` con borde inferior de 2px. Al foco: el fondo pasa a
+blanco y el borde inferior a `primary` (5.39:1 contra el campo), más un anillo.
+Estado inválido vía `aria-invalid`.
+
+### Badges de estado ([`components/ui/badge.tsx`](components/ui/badge.tsx))
+
+Cada variante de estado mapea a una familia semántica **y trae su propio
+icono**, inyectado automáticamente. Dos estados que comparten color se
+distinguen por el icono (WCAG 1.4.1).
 
 ```tsx
-<button className="bg-primary text-primary-foreground rounded-md px-6 py-3 ambient-shadow">
-  Acción Principal
-</button>
+<Badge variant="pendiente">Pendiente</Badge>   {/* warning + reloj */}
+<Badge variant="aprobado">Aprobado</Badge>     {/* success + check */}
 ```
 
-- Fondo: `bg-primary` (#7d5050)
-- Texto: `text-primary-foreground` (blanco)
-- Forma: `rounded-md` (0.375rem)
-- Sombra: `ambient-shadow`
+### Tablas
 
-#### Secondary Button
-
-```tsx
-<button className="bg-secondary-container text-on-secondary-container rounded-md px-6 py-3">
-  Acción Secundaria
-</button>
-```
-
-- Fondo: `bg-secondary-container` (#f0dede)
-- Sin borde
-
-#### Tertiary Button (Solo Texto)
+Por encima de `md` son tablas normales. Por debajo, `.table-scroll` +
+`.table-sticky-first`: la primera columna (la que identifica la fila) queda
+fija mientras el resto se desplaza en horizontal.
 
 ```tsx
-<button className="text-primary underline-offset-4 hover:underline">
-  Acción Terciaria
-</button>
-```
-
-- Solo texto usando color `primary`
-- Subrayado sutil que aparece solo en hover
-
-### Input Fields
-
-**Estilo**: Abandona el aspecto de "caja". Usa un fondo `surface-variant` con un borde redondeado `sm` (0.125rem) en el borde inferior.
-
-```tsx
-<input
-  className="bg-surface-variant rounded-b-sm px-4 py-3 w-full focus:bg-surface-container-high focus:text-primary outline-none transition-colors"
-  placeholder="Texto de ejemplo"
-/>
-```
-
-**Estado Activo**: Transición del fondo a `surface-container-high` y cambio del color de la etiqueta a `primary`.
-
-### Cards
-
-**Construcción**: Absolutamente sin bordes. Usa `surface-container-low` para el cuerpo de la tarjeta.
-
-```tsx
-<div className="bg-surface-container-low rounded-sm p-8">
-  <img src="..." className="rounded-sm mb-4" />
-  <h3 className="font-serif text-2xl mb-2">Título de Card</h3>
-  <p className="text-muted-foreground">Descripción</p>
+<div className="table-scroll">
+  <table className="w-full table-sticky-first">…</table>
 </div>
 ```
 
-- **Padding**: Usa un mínimo de `2rem` (32px) para que el contenido "respire"
-- **Imágenes**: Las imágenes dentro de las tarjetas deben tener un radio `sm` para sentirse integradas pero nítidas
+---
 
-### Modales y Overlays (Glassmorphism)
+## Accesibilidad — mínimos no negociables
 
-```tsx
-<div className="glass bg-surface-container/80 rounded-lg p-8 ambient-shadow">
-  <h2 className="font-serif text-3xl mb-4">Modal Title</h2>
-  <p>Contenido del modal</p>
-</div>
-```
-
-### Listas Editoriales
-
-**Reglas**: Prohíbe el uso de líneas divisorias. Separa elementos usando `0.85rem` de espacio en blanco vertical.
-
-```tsx
-<ul className="space-y-3.5">
-  <li>
-    <span className="font-sans text-sm text-muted-foreground uppercase">
-      Metadata
-    </span>
-    <h4 className="font-sans text-lg font-medium">Nombre del Item</h4>
-  </li>
-</ul>
-```
+- **Foco visible siempre**: `focus-visible:ring-2 focus-visible:ring-ring
+focus-visible:ring-offset-2`. El anillo es opaco; nunca `ring-ring/40`.
+- **Formularios**: `autoComplete` en todo campo de identidad o credencial.
+- **Errores**: dentro de un contenedor con `role="alert"` para que se anuncien.
+- **Iconos sin texto**: `aria-label`. Textos `sr-only` en español.
+- **Movimiento**: `globals.css` anula transformaciones y acorta transiciones
+  bajo `prefers-reduced-motion: reduce`.
 
 ---
 
-## Espaciado Asimétrico
+## Qué no hacer
 
-### Uso de Espaciado Asimétrico
-
-Alinea un encabezado a la izquierda, pero desplaza el texto del cuerpo a la derecha usando tokens de espaciado grandes.
-
-```tsx
-<section className="editorial-spacing-asymmetric py-16">
-  <h2 className="font-serif text-5xl tight-tracking mb-8">Título</h2>
-  <p className="text-base">Contenido del cuerpo...</p>
-</section>
-```
-
----
-
-## Do's and Don'ts
-
-### ✅ Do:
-
-- **Usa Espaciado Asimétrico**: Alinea un encabezado a la izquierda, pero desplaza el texto del cuerpo a la derecha usando el token de espaciado `16` (5.5rem)
-- **Abraza las Capas Tonales**: Coloca elementos `surface-container-highest` dentro de secciones `surface-container-low` para crear puntos focales
-- **Mezcla Pesos**: Empareja un `display-lg` (Serif) con un `label-sm` (Sans-serif) en mayúsculas para un ambiente editorial de alta moda
-- **Usa Gradientes**: Aplica `gradient-primary` a CTAs y heros para agregar profundidad
-- **Usa Glassmorphism**: Aplica la clase `glass` a overlays flotantes
-
-### ❌ Don't:
-
-- **No uses líneas de 1px**: Las líneas se sienten como un diseño "bootstrap" predeterminado. Definimos espacio a través de color y padding
-- **No uses negro puro**: Usa `on-surface` (#1c1c19) para todo el texto para mantener la atmósfera "rosa empolvado" cohesiva
-- **No llenes los bordes**: Si un componente se siente "pegado" al lado de la pantalla, aumenta el margen usando los tokens de espaciado `10` (3.5rem) o `12` (4rem)
-- **No centres todo**: La asimetría es clave para el aspecto editorial
-
----
-
-## Clases de Utilidad Personalizadas
-
-### Sombras
-
-- `ambient-shadow`: Sombra ambient bloom (12px offset, 32px blur, 5% opacity)
-
-### Efectos
-
-- `glass`: Glassmorphism con backdrop-blur de 20px
-- `gradient-primary`: Gradiente lineal de primary a primary-container
-
-### Espaciado
-
-- `editorial-spacing-asymmetric`: Padding asimétrico (1.4rem izq, 5.5rem der)
-
-### Tipografía
-
-- `tight-tracking`: Letter-spacing de -0.02em para headlines grandes
-
----
-
-## Modo Oscuro
-
-El sistema incluye soporte completo para modo oscuro con variantes automáticas de todos los colores, manteniendo la misma paleta base pero con valores de luminosidad ajustados para mantener la atmósfera editorial.
-
-```tsx
-// El modo oscuro se activa automáticamente con la clase .dark en el html
-<html className="dark">
-```
+- ❌ Colores crudos de Tailwind (`bg-emerald-500`, `text-rose-700`). Usa tokens.
+- ❌ Opacidad sobre texto (`text-on-surface/40`).
+- ❌ Itálicas en encabezados.
+- ❌ Blobs decorativos con `blur-[120px]`. Costaban composición en gama baja y
+  no aportaban jerarquía.
+- ❌ Métricas inventadas. Si no hay dato confirmado, no se publica número.
+- ❌ Fotos de stock genéricas. Mejor tipografía que una imagen que no es del
+  instituto.
+- ❌ `transition-all` — anima propiedades de layout. Enumera las propiedades.

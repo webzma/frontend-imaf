@@ -93,9 +93,6 @@ export default function EstudianteDashboard() {
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-14 max-w-5xl mx-auto">
         {loading ? (
           <div className="mb-12">
@@ -126,7 +123,7 @@ export default function EstudianteDashboard() {
               <div className="w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 mb-3">
                 <Sparkles className="w-4 h-4 text-on-primary-container" />
               </div>
-              <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/60 font-semibold mb-2">
+              <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold mb-2">
                 Estado
               </p>
               {loading ? (
@@ -157,7 +154,7 @@ export default function EstudianteDashboard() {
               <div className="w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 mb-3">
                 <Hash className="w-4 h-4 text-on-primary-container" />
               </div>
-              <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/60 font-semibold mb-2">
+              <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold mb-2">
                 Cédula
               </p>
               {loading ? (
@@ -177,7 +174,7 @@ export default function EstudianteDashboard() {
               <div className="w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 mb-3">
                 <CalendarDays className="w-4 h-4 text-on-primary-container" />
               </div>
-              <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/60 font-semibold mb-2">
+              <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold mb-2">
                 Inscripción
               </p>
               {loading ? (
@@ -196,7 +193,7 @@ export default function EstudianteDashboard() {
           {/* Mi Curso (featured) */}
           <Link
             href="/estudiante/curso"
-            className="lg:col-span-3 group relative block bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-0.5 transition-all duration-300"
+            className="lg:col-span-3 group relative block bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-0.5 transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300"
           >
             <div className="absolute inset-0 gradient-primary opacity-[0.04] group-hover:opacity-[0.08] transition-opacity" />
             <div className="absolute top-0 left-0 right-0 h-[2px] gradient-primary" />
@@ -210,7 +207,7 @@ export default function EstudianteDashboard() {
                     Mi Curso
                   </h3>
                 </div>
-                <span className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-primary group-hover:gap-1.5 transition-all">
+                <span className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-primary group-hover:gap-1.5 transition-[background-color,border-color,color,box-shadow,transform,opacity]">
                   Ver detalle
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </span>
@@ -238,7 +235,7 @@ export default function EstudianteDashboard() {
                       {perfil.curso.descripcion}
                     </p>
                   )}
-                  <div className="mt-auto pt-4 border-t border-outline-variant/30 flex items-center gap-2">
+                  <div className="mt-auto pt-4 border-t border-outline-variant flex items-center gap-2">
                     <GraduationCap className="w-3.5 h-3.5 text-primary/70" />
                     <span className="font-sans text-xs text-muted-foreground">
                       Impartido por{" "}
@@ -275,7 +272,7 @@ export default function EstudianteDashboard() {
           {/* Mi Perfil */}
           <Link
             href="/estudiante/perfil"
-            className="lg:col-span-2 group bg-surface-container-lowest rounded-sm ambient-shadow p-6 hover:-translate-y-0.5 transition-all duration-300 block"
+            className="lg:col-span-2 group bg-surface-container-lowest rounded-sm ambient-shadow p-6 hover:-translate-y-0.5 transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300 block"
           >
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
@@ -284,7 +281,7 @@ export default function EstudianteDashboard() {
                   Mi Perfil
                 </h3>
               </div>
-              <span className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-primary group-hover:gap-1.5 transition-all">
+              <span className="inline-flex items-center gap-1 font-sans text-xs font-semibold text-primary group-hover:gap-1.5 transition-[background-color,border-color,color,box-shadow,transform,opacity]">
                 Editar
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </span>
@@ -314,10 +311,10 @@ export default function EstudianteDashboard() {
                     {perfil.user.email}
                   </p>
                 </div>
-                <div className="w-full pt-4 border-t border-outline-variant/30 space-y-2.5 text-left">
+                <div className="w-full pt-4 border-t border-outline-variant space-y-2.5 text-left">
                   {perfil.telefono && (
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold flex items-center gap-1.5">
+                      <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold flex items-center gap-1.5">
                         <Phone className="w-3 h-3" />
                         Teléfono
                       </span>
@@ -328,7 +325,7 @@ export default function EstudianteDashboard() {
                   )}
                   {perfil.genero && (
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                      <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Género
                       </span>
                       <span className="font-sans text-xs text-on-surface capitalize">
@@ -338,7 +335,7 @@ export default function EstudianteDashboard() {
                   )}
                   {perfil.fecha_nacimiento && (
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                      <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Nacimiento
                       </span>
                       <span className="font-sans text-xs text-on-surface">
@@ -347,7 +344,7 @@ export default function EstudianteDashboard() {
                     </div>
                   )}
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold flex items-center gap-1.5">
+                    <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold flex items-center gap-1.5">
                       <Mail className="w-3 h-3" />
                       Usuario
                     </span>

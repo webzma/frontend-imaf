@@ -142,26 +142,26 @@ const pagoEstadoConfig = {
     description:
       "Tu inscripción quedará confirmada cuando la administración verifique tu pago.",
     icon: Clock,
-    cls: "bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20",
-    titleCls: "text-amber-800 dark:text-amber-400",
-    iconCls: "text-amber-600",
+    cls: "bg-warning-container border-warning/40 dark:bg-warning-container dark:border-warning/40",
+    titleCls: "text-on-warning-container",
+    iconCls: "text-warning",
   },
   aprobado: {
     label: "Inscripción aprobada",
     description: "Tu pago fue aprobado. ¡Bienvenido al curso!",
     icon: CheckCircle2,
-    cls: "bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20",
-    titleCls: "text-emerald-800 dark:text-emerald-400",
-    iconCls: "text-emerald-600",
+    cls: "bg-success-container border-success/40 dark:bg-success-container dark:border-success/40",
+    titleCls: "text-on-success-container",
+    iconCls: "text-success",
   },
   rechazado: {
     label: "Pago rechazado",
     description:
       "Tu comprobante fue rechazado. Puedes enviar un nuevo pago a continuación.",
     icon: Ban,
-    cls: "bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/20",
-    titleCls: "text-red-800 dark:text-red-400",
-    iconCls: "text-red-600",
+    cls: "bg-danger-container border-danger/40 dark:bg-danger-container dark:border-danger/40",
+    titleCls: "text-on-danger-container dark:text-danger",
+    iconCls: "text-danger",
   },
 };
 
@@ -329,7 +329,7 @@ function PagoModal({
                 <button
                   key={opt.id}
                   onClick={() => setMetodo(opt.id)}
-                  className="group flex items-center gap-4 text-left bg-surface-container-low hover:bg-primary-container/40 border border-outline-variant/30 hover:border-primary/40 rounded-sm px-4 py-3.5 transition-colors"
+                  className="group flex items-center gap-4 text-left bg-surface-container-low hover:bg-primary-container/40 border border-outline-variant hover:border-primary/40 rounded-sm px-4 py-3.5 transition-colors"
                 >
                   <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shrink-0">
                     <Icon className="w-4.5 h-4.5 text-on-primary-container" />
@@ -342,7 +342,7 @@ function PagoModal({
                       {opt.desc}
                     </p>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-[background-color,border-color,color,box-shadow,transform,opacity] shrink-0" />
                 </button>
               );
             })}
@@ -496,7 +496,7 @@ function PagoModal({
                     </Label>
                     <div
                       onClick={() => fileRef.current?.click()}
-                      className="cursor-pointer border-2 border-dashed border-outline-variant/50 hover:border-primary/50 hover:bg-primary/2 rounded-sm transition-colors"
+                      className="cursor-pointer border-2 border-dashed border-outline-variant hover:border-primary/50 hover:bg-primary/2 rounded-sm transition-colors"
                     >
                       {preview ? (
                         <div className="relative">
@@ -632,9 +632,6 @@ export default function CursoDetallePage({
 
   return (
     <div className="relative min-h-screen bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-8 py-10 md:py-12 max-w-5xl mx-auto">
         {/* Back */}
         <Link
@@ -683,7 +680,7 @@ export default function CursoDetallePage({
                   >
                     {curso.estado === "activo" ? (
                       <>
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-success dark:bg-success" />
                         Activo
                       </>
                     ) : (
@@ -704,14 +701,14 @@ export default function CursoDetallePage({
                   </p>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-outline-variant/30">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-outline-variant">
                   {curso.instructor && (
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0">
                         <GraduationCap className="w-4 h-4 text-on-primary-container" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                           Instructor
                         </p>
                         <p className="font-sans text-sm font-semibold text-on-surface truncate">
@@ -727,7 +724,7 @@ export default function CursoDetallePage({
                       <Users className="w-4 h-4 text-on-primary-container" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground/70 font-semibold">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                         Estudiantes inscritos
                       </p>
                       <p className="font-sans text-sm font-semibold text-on-surface tabular-nums">
@@ -741,15 +738,15 @@ export default function CursoDetallePage({
 
             {/* Sección de inscripción / estado de pago — destacado arriba */}
             {esMiCurso ? (
-              <div className="flex items-start gap-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-sm px-5 py-4 ambient-shadow">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="flex items-start gap-4 bg-success-container rounded-sm px-5 py-4 ambient-shadow">
+                <div className="w-10 h-10 rounded-full bg-success-container flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-5 h-5 text-success" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-sans text-sm font-semibold text-emerald-800 dark:text-emerald-400">
+                  <p className="font-sans text-sm font-semibold text-on-success-container">
                     Ya estás inscrito en este curso
                   </p>
-                  <p className="font-sans text-xs text-emerald-700/70 dark:text-emerald-500/70 mt-0.5">
+                  <p className="font-sans text-xs text-on-success-container dark:text-success mt-0.5">
                     Este es tu curso activo.
                   </p>
                 </div>
@@ -868,7 +865,7 @@ export default function CursoDetallePage({
                         {curso.instructor.user.name ?? "Sin nombre"}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1.5">
-                        <Mail className="w-3 h-3 text-muted-foreground/60" />
+                        <Mail className="w-3 h-3 text-muted-foreground" />
                         <p className="font-sans text-xs text-muted-foreground truncate">
                           {curso.instructor.user.email ?? ""}
                         </p>
@@ -930,7 +927,7 @@ export default function CursoDetallePage({
                     {curso.estudiantes.map((est) => (
                       <div
                         key={est.id}
-                        className="flex items-center gap-3 py-2 border-b border-outline-variant/20 last:border-0"
+                        className="flex items-center gap-3 py-2 border-b border-outline-variant last:border-0"
                       >
                         <div className="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
                           <span className="font-sans text-[10px] font-bold text-on-secondary-container">
@@ -973,7 +970,7 @@ export default function CursoDetallePage({
                     .map((item, idx) => (
                       <li
                         key={item.id}
-                        className="group flex gap-4 py-3 border-b border-outline-variant/20 last:border-0 hover:bg-surface-container-low/30 -mx-2 px-2 rounded-sm transition-colors"
+                        className="group flex gap-4 py-3 border-b border-outline-variant last:border-0 hover:bg-surface-container-low/30 -mx-2 px-2 rounded-sm transition-colors"
                       >
                         <span className="shrink-0 w-7 h-7 rounded-full bg-primary-container flex items-center justify-center font-mono text-xs font-bold text-on-primary-container mt-0.5 group-hover:scale-105 transition-transform">
                           {idx + 1}
@@ -1016,17 +1013,17 @@ export default function CursoDetallePage({
                       programada: {
                         label: "Programada",
                         variant: "programada",
-                        dot: "bg-sky-500",
+                        dot: "bg-info",
                       },
                       realizada: {
                         label: "Realizada",
                         variant: "realizada",
-                        dot: "bg-emerald-500",
+                        dot: "bg-success",
                       },
                       cancelada: {
                         label: "Cancelada",
                         variant: "cancelada",
-                        dot: "bg-rose-500",
+                        dot: "bg-danger",
                       },
                     };
                     const cfg =
@@ -1034,11 +1031,11 @@ export default function CursoDetallePage({
                     return (
                       <div
                         key={sesion.id}
-                        className="flex flex-col sm:flex-row sm:items-start gap-3 py-3.5 border-b border-outline-variant/20 last:border-0"
+                        className="flex flex-col sm:flex-row sm:items-start gap-3 py-3.5 border-b border-outline-variant last:border-0"
                       >
                         <div className="sm:w-44 shrink-0">
                           <div className="flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                            <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                             <p className="font-sans text-xs font-semibold text-on-surface">
                               {formatDateLong(sesion.fecha)}
                             </p>
@@ -1092,7 +1089,7 @@ export default function CursoDetallePage({
               </div>
               <Link
                 href="/estudiante/cursos"
-                className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary hover:gap-2 transition-all"
+                className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary hover:gap-2 transition-[background-color,border-color,color,box-shadow,transform,opacity]"
               >
                 Volver al catálogo
                 <ArrowUpRight className="w-3.5 h-3.5" />

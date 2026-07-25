@@ -85,7 +85,7 @@ export default function InstructorDashboard() {
   if (error || !me) {
     return (
       <div className="px-10 py-10">
-        <p className="font-sans text-sm text-destructive">{error}</p>
+        <p className="font-sans text-sm text-danger">{error}</p>
       </div>
     );
   }
@@ -101,9 +101,6 @@ export default function InstructorDashboard() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[520px] h-[320px] rounded-full bg-primary/[0.07] blur-[120px] pointer-events-none" />
-      <div className="absolute top-40 left-0 w-[380px] h-[260px] rounded-full bg-secondary-container/40 blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         <PageHeader
           icon={GraduationCap}
@@ -165,7 +162,7 @@ export default function InstructorDashboard() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-primary/70" />
-              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-on-surface/55 font-medium">
+              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
                 Mis cursos
               </p>
             </div>
@@ -199,7 +196,7 @@ export default function InstructorDashboard() {
                     }
                     className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-surface-container transition-colors ${
                       i < Math.min(cursos.length, 5) - 1
-                        ? "border-b border-outline-variant/30"
+                        ? "border-b border-outline-variant"
                         : ""
                     }`}
                   >
@@ -232,7 +229,7 @@ export default function InstructorDashboard() {
                       >
                         {curso.estado}
                       </Badge>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground/40" />
+                      <ArrowRight className="w-4 h-4 text-muted-foreground" />
                     </div>
                   </button>
                 );

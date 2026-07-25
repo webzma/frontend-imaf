@@ -189,8 +189,6 @@ export default function InstructorHorarioPage() {
 
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="absolute top-0 right-0 w-[480px] h-[280px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
-
       <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
         <PageHeader
           icon={CalendarDays}
@@ -218,8 +216,8 @@ export default function InstructorHorarioPage() {
             {
               label: "Realizadas",
               value: totalRealizadas,
-              glow: "bg-emerald-100 dark:bg-emerald-500/15",
-              color: "text-emerald-800 dark:text-emerald-400",
+              glow: "bg-success-container",
+              color: "text-on-success-container",
             },
           ].map((s) => (
             <div
@@ -234,7 +232,7 @@ export default function InstructorHorarioPage() {
               <p className="font-sans text-2xl md:text-4xl font-light tight-tracking text-on-surface tabular-nums mb-1">
                 {s.value}
               </p>
-              <p className="font-sans text-xs truncate tracking-[0.15em] uppercase text-on-surface/55 font-semibold">
+              <p className="font-sans text-xs truncate tracking-[0.15em] uppercase text-muted-foreground font-semibold">
                 {s.label}
               </p>
             </div>
@@ -275,7 +273,7 @@ export default function InstructorHorarioPage() {
                 className={`px-3 py-1.5 rounded-sm font-sans text-xs font-semibold transition-colors ${
                   view === v
                     ? "bg-primary text-on-primary"
-                    : "text-on-surface/60 hover:text-on-surface"
+                    : "text-muted-foreground hover:text-on-surface"
                 }`}
               >
                 {VIEW_LABELS[v]}
@@ -286,7 +284,7 @@ export default function InstructorHorarioPage() {
 
         {/* Filtros */}
         <div className="flex items-center gap-3 mb-6 flex-wrap">
-          <Filter className="w-3.5 h-3.5 text-muted-foreground/60" />
+          <Filter className="w-3.5 h-3.5 text-muted-foreground" />
           <Select value={filterCurso} onValueChange={setFilterCurso}>
             <SelectTrigger className="h-9 w-56 font-sans text-sm">
               <SelectValue />
@@ -383,14 +381,14 @@ export default function InstructorHorarioPage() {
                 )}
 
                 <div className="flex items-center gap-2 text-sm text-on-surface">
-                  <CalendarDays className="w-4 h-4 text-on-surface/45" />
+                  <CalendarDays className="w-4 h-4 text-muted-foreground" />
                   <span className="capitalize">
                     {formatLongDate(parseISODate(normalizeDate(detail.fecha)))}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 text-sm text-on-surface">
-                  <Clock className="w-4 h-4 text-on-surface/45" />
+                  <Clock className="w-4 h-4 text-muted-foreground" />
                   <span className="tabular-nums">
                     {detail.hora_inicio
                       ? formatHour(detail.hora_inicio)
@@ -403,7 +401,7 @@ export default function InstructorHorarioPage() {
 
                 {detail.curso && (
                   <div className="flex items-start gap-2 text-sm text-on-surface">
-                    <BookOpen className="w-4 h-4 text-on-surface/45 mt-0.5" />
+                    <BookOpen className="w-4 h-4 text-muted-foreground mt-0.5" />
                     <span>
                       <span className="font-mono font-semibold text-primary/70">
                         {detail.curso.codigo}
@@ -415,13 +413,13 @@ export default function InstructorHorarioPage() {
 
                 {detail.curso?.instructor?.user?.name && (
                   <div className="flex items-center gap-2 text-sm text-on-surface">
-                    <GraduationCap className="w-4 h-4 text-on-surface/45" />
+                    <GraduationCap className="w-4 h-4 text-muted-foreground" />
                     <span>{detail.curso.instructor.user.name}</span>
                   </div>
                 )}
 
                 {detail.descripcion && (
-                  <p className="font-sans text-sm text-muted-foreground border-t border-outline-variant/30 pt-3">
+                  <p className="font-sans text-sm text-muted-foreground border-t border-outline-variant pt-3">
                     {detail.descripcion}
                   </p>
                 )}

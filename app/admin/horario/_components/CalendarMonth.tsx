@@ -25,12 +25,12 @@ interface Props {
 
 // Genera un color sutil estable por curso id, en tonos rosa/cream/sage.
 const CURSO_BAR_PALETTE = [
-  "bg-rose-300/70 dark:bg-rose-400/40",
-  "bg-amber-300/70 dark:bg-amber-400/40",
-  "bg-emerald-300/70 dark:bg-emerald-400/40",
-  "bg-sky-300/70 dark:bg-sky-400/40",
-  "bg-violet-300/70 dark:bg-violet-400/40",
-  "bg-orange-300/70 dark:bg-orange-400/40",
+  "bg-danger dark:bg-danger/40",
+  "bg-warning dark:bg-warning/40",
+  "bg-success dark:bg-success/40",
+  "bg-info dark:bg-info/40",
+  "bg-chart-5 dark:bg-chart-5/40",
+  "bg-chart-4 dark:bg-chart-4/40",
 ];
 
 function cursoBarColor(id: number) {
@@ -51,11 +51,11 @@ export default function CalendarMonth({
 
   return (
     <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
-      <div className="grid grid-cols-7 bg-surface-container-low border-b border-outline-variant/30">
+      <div className="grid grid-cols-7 bg-surface-container-low border-b border-outline-variant">
         {WEEKDAY_LABELS.map((d) => (
           <div
             key={d}
-            className="px-3 py-2.5 font-sans text-[10px] tracking-[0.18em] uppercase text-on-surface/55 font-semibold text-center"
+            className="px-3 py-2.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold text-center"
           >
             {d}
           </div>
@@ -89,7 +89,7 @@ export default function CalendarMonth({
                 const id = Number(e.dataTransfer.getData("text/plain"));
                 if (id) onMove(id, iso);
               }}
-              className={`group relative min-h-[120px] border-b border-r border-outline-variant/20 transition-colors ${
+              className={`group relative min-h-[120px] border-b border-r border-outline-variant transition-colors ${
                 inMonth ? "bg-surface-container-lowest" : "bg-surface/40"
               } hover:bg-surface-container-low/60`}
             >
@@ -111,10 +111,10 @@ export default function CalendarMonth({
                   <span
                     className={`inline-flex items-center justify-center text-xs font-sans tabular-nums ${
                       today
-                        ? "bg-primary text-surface font-semibold w-6 h-6 rounded-full"
+                        ? "bg-primary text-primary-foreground font-semibold w-6 h-6 rounded-full"
                         : inMonth
                           ? "text-on-surface font-medium"
-                          : "text-on-surface/30"
+                          : "text-muted-foreground"
                     }`}
                   >
                     {day.getDate()}
@@ -140,7 +140,7 @@ export default function CalendarMonth({
                           e.dataTransfer.effectAllowed = "move";
                         }}
                         onClick={() => onEdit(s)}
-                        className={`text-left rounded-sm px-1.5 py-0.5 text-[11px] font-sans font-medium truncate transition-all ${color.bg} ${color.text} hover:brightness-95 cursor-pointer`}
+                        className={`text-left rounded-sm px-1.5 py-0.5 text-[11px] font-sans font-medium truncate transition-[background-color,border-color,color,box-shadow,transform,opacity] ${color.bg} ${color.text} hover:brightness-95 cursor-pointer`}
                       >
                         {s.hora_inicio && (
                           <span className="font-semibold mr-1 tabular-nums">
@@ -154,13 +154,13 @@ export default function CalendarMonth({
                   {extra > 0 && (
                     <button
                       onClick={() => onCreate(iso)}
-                      className="text-[10px] text-on-surface/55 px-1.5 font-sans hover:text-primary text-left"
+                      className="text-[10px] text-muted-foreground px-1.5 font-sans hover:text-primary text-left"
                     >
                       +{extra} más
                     </button>
                   )}
                   {cursosDia.length > 3 && (
-                    <span className="text-[9px] text-on-surface/40 px-1.5 font-sans">
+                    <span className="text-[9px] text-muted-foreground px-1.5 font-sans">
                       +{cursosDia.length - 3} curso(s) activo(s)
                     </span>
                   )}
