@@ -16,6 +16,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/empty-state";
 import {
+  DetailHeader,
+  DetailSection,
+  DetailField,
+} from "@/components/detail-fields";
+import {
   DataCard,
   DataCardHeader,
   DataCardFields,
@@ -48,6 +53,7 @@ import {
   Filter,
   Pencil,
   SearchX,
+  Eye,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -103,6 +109,12 @@ function getInitials(name: string): string {
 }
 
 /* ── Labels ── */
+
+const generoLabel: Record<string, string> = {
+  masculino: "Masculino",
+  femenino: "Femenino",
+  otro: "Otro",
+};
 
 const estadoLabel: Record<string, string> = {
   activo: "Activo",
@@ -215,6 +227,7 @@ export default function EstudiantesPage() {
   const [submitError, setSubmitError] = useState("");
 
   // Edit
+  const [viewTarget, setViewTarget] = useState<Estudiante | null>(null);
   const [editTarget, setEditTarget] = useState<Estudiante | null>(null);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
@@ -310,6 +323,7 @@ export default function EstudiantesPage() {
   };
 
   const openEdit = (e: Estudiante) => {
+    setViewTarget(null);
     setEditTarget(e);
     setEditError("");
     editForm.reset({
@@ -856,6 +870,15 @@ export default function EstudiantesPage() {
                           variant="outline"
                           size="sm"
                           className="gap-1.5"
+                          onClick={() => setViewTarget(e)}
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          Ver
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
                           onClick={() => openEdit(e)}
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -938,13 +961,22 @@ export default function EstudiantesPage() {
                             </Badge>
                           </td>
                           <td className="px-4 py-4">
-                            <button
-                              onClick={() => openEdit(e)}
-                              className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              aria-label={`Editar a ${e.user.name}`}
-                            >
-                              <Pencil className="w-3.5 h-3.5" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => setViewTarget(e)}
+                                className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                aria-label={`Ver ficha de ${e.user.name}`}
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => openEdit(e)}
+                                className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                aria-label={`Editar a ${e.user.name}`}
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1151,6 +1183,94 @@ export default function EstudiantesPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Ficha de solo lectura ── */}
+      <Dialog
+        open={viewTarget !== null}
+        onOpenChange={(v) => !v && setViewTarget(null)}
+      >
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl text-on-surface">
+              Ficha del estudiante
+            </DialogTitle>
+            <DialogDescription className="font-sans text-sm text-muted-foreground">
+              Datos registrados. Para cambiarlos, usa «Editar».
+            </DialogDescription>
+          </DialogHeader>
+
+          {viewTarget && (
+            <div className="space-y-6">
+              <DetailHeader
+                initials={getInitials(viewTarget.user.name)}
+                name={viewTarget.user.name}
+                email={viewTarget.user.email}
+                badge={
+                  <Badge
+                    variant={
+                      viewTarget.estado as "activo" | "inactivo" | "graduado"
+                    }
+                    className="font-sans px-2.5 py-1"
+                  >
+                    {estadoLabel[viewTarget.estado]}
+                  </Badge>
+                }
+              />
+
+              <DetailSection title="Datos personales">
+                <DetailField label="Cédula">
+                  <span className="font-mono tracking-wide">
+                    {viewTarget.cedula}
+                  </span>
+                </DetailField>
+                <DetailField label="Teléfono">
+                  {viewTarget.telefono && (
+                    <span className="font-mono tracking-wide">
+                      {viewTarget.telefono}
+                    </span>
+                  )}
+                </DetailField>
+                <DetailField label="Fecha de nacimiento">
+                  {viewTarget.fecha_nacimiento &&
+                    formatDate(viewTarget.fecha_nacimiento)}
+                </DetailField>
+                <DetailField label="Género">
+                  {viewTarget.genero && generoLabel[viewTarget.genero]}
+                </DetailField>
+              </DetailSection>
+
+              <DetailSection title="Formación">
+                <DetailField label="Curso" empty="Sin curso asignado">
+                  {viewTarget.curso?.nombre}
+                </DetailField>
+                <DetailField label="Código del curso">
+                  {viewTarget.curso && (
+                    <span className="font-mono tracking-wide">
+                      {viewTarget.curso.codigo}
+                    </span>
+                  )}
+                </DetailField>
+                <DetailField label="Fecha de inscripción">
+                  {formatDate(viewTarget.fecha_inscripcion)}
+                </DetailField>
+              </DetailSection>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewTarget(null)}>
+              Cerrar
+            </Button>
+            <Button
+              className="gap-2"
+              onClick={() => viewTarget && openEdit(viewTarget)}
+            >
+              <Pencil className="w-4 h-4" />
+              Editar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

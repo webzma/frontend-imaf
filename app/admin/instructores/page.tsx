@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { formatDate } from "@/lib/format";
 import { SOLO_DIGITOS, SOLO_LETRAS } from "@/lib/validators";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,11 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/empty-state";
+import {
+  DetailHeader,
+  DetailSection,
+  DetailField,
+} from "@/components/detail-fields";
 import {
   DataCard,
   DataCardHeader,
@@ -47,6 +53,7 @@ import {
   Filter,
   Pencil,
   SearchX,
+  Eye,
 } from "lucide-react";
 import municipios from "@/data/municipios.json";
 
@@ -104,6 +111,12 @@ function getInitials(name: string): string {
 }
 
 /* ── Styles ── */
+
+const generoLabel: Record<string, string> = {
+  masculino: "Masculino",
+  femenino: "Femenino",
+  otro: "Otro",
+};
 
 const tituloLabel: Record<string, string> = {
   licenciatura: "Licenciatura",
@@ -214,6 +227,7 @@ export default function InstructoresPage() {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [viewTarget, setViewTarget] = useState<Instructor | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editingInstructor, setEditingInstructor] = useState<Instructor | null>(
     null,
@@ -292,6 +306,7 @@ export default function InstructoresPage() {
   };
 
   const openEdit = (instructor: Instructor) => {
+    setViewTarget(null);
     setEditingInstructor(instructor);
     setEditSubmitError("");
     editForm.reset({
@@ -998,6 +1013,15 @@ export default function InstructoresPage() {
                           variant="outline"
                           size="sm"
                           className="gap-1.5"
+                          onClick={() => setViewTarget(p)}
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          Ver
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
                           onClick={() => openEdit(p)}
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -1097,13 +1121,22 @@ export default function InstructoresPage() {
                             )}
                           </td>
                           <td className="px-6 py-4">
-                            <button
-                              onClick={() => openEdit(p)}
-                              className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              aria-label={`Editar a ${p.user.name}`}
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => setViewTarget(p)}
+                                className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                aria-label={`Ver ficha de ${p.user.name}`}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => openEdit(p)}
+                                className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                aria-label={`Editar a ${p.user.name}`}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1402,6 +1435,101 @@ export default function InstructoresPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Ficha de solo lectura ── */}
+      <Dialog
+        open={viewTarget !== null}
+        onOpenChange={(v) => !v && setViewTarget(null)}
+      >
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl text-on-surface">
+              Ficha del instructor
+            </DialogTitle>
+            <DialogDescription className="font-sans text-sm text-muted-foreground">
+              Datos registrados. Para cambiarlos, usa «Editar».
+            </DialogDescription>
+          </DialogHeader>
+
+          {viewTarget && (
+            <div className="space-y-6">
+              <DetailHeader
+                initials={getInitials(viewTarget.user.name)}
+                name={viewTarget.user.name}
+                email={viewTarget.user.email}
+                badge={
+                  viewTarget.titulo ? (
+                    <Badge
+                      variant={
+                        viewTarget.titulo as
+                          | "licenciatura"
+                          | "maestria"
+                          | "doctorado"
+                      }
+                      className="font-sans px-2.5 py-1"
+                    >
+                      {tituloLabel[viewTarget.titulo]}
+                    </Badge>
+                  ) : null
+                }
+              />
+
+              <DetailSection title="Datos personales">
+                <DetailField label="Cédula">
+                  <span className="font-mono tracking-wide">
+                    {viewTarget.cedula}
+                  </span>
+                </DetailField>
+                <DetailField label="Teléfono">
+                  {viewTarget.telefono && (
+                    <span className="font-mono tracking-wide">
+                      {viewTarget.telefono}
+                    </span>
+                  )}
+                </DetailField>
+                <DetailField label="Fecha de nacimiento">
+                  {viewTarget.fecha_nacimiento &&
+                    formatDate(viewTarget.fecha_nacimiento)}
+                </DetailField>
+                <DetailField label="Género">
+                  {viewTarget.genero && generoLabel[viewTarget.genero]}
+                </DetailField>
+                <DetailField label="Municipio">
+                  {viewTarget.municipio}
+                </DetailField>
+              </DetailSection>
+
+              <DetailSection title="Datos profesionales">
+                <DetailField label="Especialidad">
+                  {viewTarget.especialidad}
+                </DetailField>
+                <DetailField label="Departamento">
+                  {viewTarget.departamento}
+                </DetailField>
+                <DetailField label="Título">
+                  {viewTarget.titulo && tituloLabel[viewTarget.titulo]}
+                </DetailField>
+                <DetailField label="Tipo de contrato">
+                  {viewTarget.tipo_contrato?.nombre}
+                </DetailField>
+              </DetailSection>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewTarget(null)}>
+              Cerrar
+            </Button>
+            <Button
+              className="gap-2"
+              onClick={() => viewTarget && openEdit(viewTarget)}
+            >
+              <Pencil className="w-4 h-4" />
+              Editar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
