@@ -3,7 +3,7 @@
 import { useState, useEffect, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatDate, formatPrice, formatTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
@@ -46,7 +46,6 @@ import {
   Building2,
   CalendarDays,
   MessageCircle,
-  UsersRound,
   ClipboardList,
   Plus,
   Trash2,
@@ -176,6 +175,61 @@ interface Sesion {
 type SortKey = "nombre" | "cedula" | "estado" | "fecha_inscripcion";
 
 const PAGE_SIZE = 8;
+
+/**
+ * Anillo de ocupación del curso. Sustituye a las tres tarjetas gigantes de
+ * estado que ocupaban toda una franja para mostrar tres cifras (dos de ellas
+ * casi siempre 0). Aquí la relación inscritos/cupo se lee de un vistazo.
+ */
+function OcupacionRing({
+  inscritos,
+  limite,
+}: {
+  inscritos: number;
+  limite: number;
+}) {
+  const pct = limite > 0 ? Math.min(100, (inscritos / limite) * 100) : 0;
+  const r = 30;
+  const circ = 2 * Math.PI * r;
+  const tono =
+    pct >= 100 ? "text-danger" : pct >= 85 ? "text-warning" : "text-success";
+
+  return (
+    <div className="relative shrink-0">
+      <svg
+        width="76"
+        height="76"
+        viewBox="0 0 76 76"
+        role="img"
+        aria-label={`${Math.round(pct)}% del cupo ocupado`}
+      >
+        <circle
+          cx="38"
+          cy="38"
+          r={r}
+          fill="none"
+          strokeWidth="7"
+          className="stroke-surface-container-high"
+        />
+        <circle
+          cx="38"
+          cy="38"
+          r={r}
+          fill="none"
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          strokeDashoffset={circ - (pct / 100) * circ}
+          transform="rotate(-90 38 38)"
+          className={`stroke-current ${tono} transition-[stroke-dashoffset] duration-500`}
+        />
+      </svg>
+      <span className="absolute inset-0 flex items-center justify-center font-sans text-sm font-semibold text-on-surface tabular-nums">
+        {Math.round(pct)}%
+      </span>
+    </div>
+  );
+}
 
 /* ── Page ── */
 
@@ -799,7 +853,7 @@ export default function CursoDetailPage({
   /* ── Render ── */
   return (
     <div className="relative min-h-full bg-surface">
-      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
+      <div className="relative z-10 mx-auto max-w-8xl px-4 md:px-10 py-10">
         {/* Back */}
         <button
           onClick={() => router.back()}
@@ -809,618 +863,754 @@ export default function CursoDetailPage({
           Volver a cursos
         </button>
 
-        {/* ── Course header ── */}
-        <div className="bg-surface-container-low rounded-sm p-8 ambient-shadow mb-6">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex-1 min-w-0">
-              {/* Breadcrumb */}
-              <div className="hidden md:flex items-center gap-2 mb-3">
-                <BookOpen className="w-3 h-3 text-primary/70" />
-                <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary/70 font-medium">
-                  Gestión / Cursos / Detalle
-                </span>
+        {/* ── Hero del curso ──
+            Antes el encabezado ocupaba todo el ancho con la mitad derecha
+            vacía, y descripción/requisitos quedaban enterrados debajo. Ahora la
+            identidad del curso vive aquí y el detalle pasa a la columna lateral. */}
+        <div className="bg-surface-container-low rounded-lg ambient-shadow overflow-hidden mb-6">
+          <div className="p-6 md:p-8">
+            <div className="flex items-start justify-between gap-6">
+              <div className="min-w-0">
+                <div className="hidden sm:flex items-center gap-2 mb-3">
+                  <BookOpen className="w-3 h-3 text-primary" />
+                  <span className="font-sans text-[10px] tracking-[0.22em] uppercase text-primary font-semibold whitespace-nowrap">
+                    Gestión / Cursos / Detalle
+                  </span>
+                </div>
+                <h1 className="font-serif text-4xl md:text-[2.8rem] tight-tracking leading-[1.08] text-on-surface">
+                  {curso.nombre}
+                </h1>
+
+                {/* Meta esencial en una sola línea, bajo el título */}
+                <div className="flex items-center flex-wrap gap-x-5 gap-y-2 mt-4">
+                  <span className="flex items-center gap-1.5 font-mono text-sm font-bold text-muted-foreground">
+                    <Hash className="w-3.5 h-3.5" />
+                    {curso.codigo}
+                  </span>
+                  {(curso.fecha_inicio || curso.fecha_fin) && (
+                    <span className="flex items-center gap-1.5 font-sans text-sm text-muted-foreground">
+                      <CalendarDays className="w-3.5 h-3.5" />
+                      {formatDate(curso.fecha_inicio)}
+                      {curso.fecha_fin && ` → ${formatDate(curso.fecha_fin)}`}
+                    </span>
+                  )}
+                  <span className="font-sans text-sm font-semibold text-on-surface">
+                    {curso.precio === 0
+                      ? "Gratuito"
+                      : `Bs. ${formatPrice(curso.precio)}`}
+                  </span>
+                </div>
               </div>
 
-              {/* Name */}
-              <h1 className="font-serif font-light text-4xl md:text-[2.8rem] tight-tracking leading-[1.08] text-on-surface mb-2">
-                {curso.nombre}
-              </h1>
+              <div className="flex items-center gap-2 shrink-0">
+                <Badge
+                  variant={curso.estado === "activo" ? "activo" : "inactivo"}
+                  className="font-sans text-sm font-semibold px-3 py-1"
+                >
+                  {curso.estado === "activo" ? "Activo" : "Inactivo"}
+                </Badge>
+                <button
+                  onClick={() => setToggleOpen(true)}
+                  aria-label={
+                    curso.estado === "activo"
+                      ? "Desactivar curso"
+                      : "Activar curso"
+                  }
+                  className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {curso.estado === "activo" ? (
+                    <ToggleRight className="w-5 h-5 text-success" />
+                  ) : (
+                    <ToggleLeft className="w-5 h-5 text-warning" />
+                  )}
+                </button>
+                <button
+                  onClick={openEdit}
+                  aria-label="Editar curso"
+                  className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
 
-              {/* Instructor */}
-              {curso.instructor?.user && (
-                <div className="flex items-center gap-3 mt-3">
-                  <div className="w-9 h-9 rounded-full bg-secondary-container md:flex items-center justify-center shrink-0 hidden">
-                    <span className="font-sans text-xs font-bold text-on-secondary-container">
-                      {getInitials(curso.instructor.user.name)}
+          {/* Franja del instructor: banda propia para que no compita con el título */}
+          <div className="border-t border-outline-variant bg-surface-container px-6 md:px-8 py-4">
+            {curso.instructor?.user ? (
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+                  <span className="font-sans text-xs font-bold text-on-secondary-container">
+                    {getInitials(curso.instructor.user.name)}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <p className="font-sans text-sm font-semibold text-on-surface flex items-center gap-2 flex-wrap">
+                    {curso.instructor.user.name}
+                    {instructorFull?.titulo && (
+                      <Badge
+                        variant={
+                          instructorFull.titulo as
+                            | "licenciatura"
+                            | "maestria"
+                            | "doctorado"
+                        }
+                        className="font-sans text-[10px] px-1.5 py-0 capitalize"
+                      >
+                        {instructorFull.titulo}
+                      </Badge>
+                    )}
+                  </p>
+                  <div className="flex items-center gap-x-4 gap-y-1 mt-0.5 flex-wrap">
+                    <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
+                      <Mail className="w-3 h-3" />
+                      {curso.instructor.user.email}
                     </span>
-                  </div>
-                  <div>
-                    <p className="font-sans text-sm font-semibold text-on-surface flex items-center gap-1.5">
-                      <GraduationCap className="w-4 h-4 text-primary/70" />
-                      {curso.instructor.user.name}
-                      {instructorFull?.titulo && (
-                        <Badge
-                          variant={
-                            instructorFull.titulo as
-                              | "licenciatura"
-                              | "maestria"
-                              | "doctorado"
-                          }
-                          className="font-sans text-[10px] px-1.5 py-0 capitalize"
-                        >
-                          {instructorFull.titulo}
-                        </Badge>
-                      )}
-                    </p>
-                    <div className="flex items-center gap-3 mt-2 flex-wrap">
+                    {instructorFull?.especialidad && (
                       <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
-                        <Mail className="w-3 h-3" />
-                        {curso.instructor.user.email}
+                        <BadgeCheck className="w-3 h-3" />
+                        {instructorFull.especialidad}
                       </span>
-                      {instructorFull?.especialidad && (
-                        <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
-                          <BadgeCheck className="w-3 h-3" />
-                          {instructorFull.especialidad}
-                        </span>
-                      )}
-                      {instructorFull?.departamento && (
-                        <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
-                          <Building2 className="w-3 h-3" />
-                          {instructorFull.departamento}
-                        </span>
-                      )}
-                    </div>
+                    )}
+                    {instructorFull?.departamento && (
+                      <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
+                        <Building2 className="w-3 h-3" />
+                        {instructorFull.departamento}
+                      </span>
+                    )}
                   </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <span className="flex items-center gap-2 font-sans text-sm text-muted-foreground">
+                  <GraduationCap className="w-4 h-4" />
+                  Sin instructor asignado
+                </span>
+                <Button size="sm" variant="outline" onClick={openEdit}>
+                  Asignar instructor
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Cuerpo: trabajo a la izquierda, contexto del curso a la derecha.
+            Antes todo se apilaba a lo ancho y sobraba muchísimo espacio lateral. */}
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="min-w-0 space-y-8">
+            {/* ── Estudiantes inscritos ── */}
+            <div>
+              <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+                <div className="flex items-center gap-4 flex-wrap">
+                  <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
+                    Estudiantes inscritos
+                  </p>
+                  {/* Desglose compacto: la misma información que ocupaba tres
+                  bloques enormes, ahora en una línea junto al título. */}
+                  {curso.estudiantes.length > 0 && (
+                    <div className="flex items-center gap-3">
+                      {(
+                        [
+                          ["activo", "Activo", "Activos", "bg-success"],
+                          ["inactivo", "Inactivo", "Inactivos", "bg-warning"],
+                          ["graduado", "Graduado", "Graduados", "bg-primary"],
+                        ] as const
+                      ).map(([key, singular, plural, dot]) => (
+                        <span
+                          key={key}
+                          className="flex items-center gap-1.5 font-sans text-xs text-muted-foreground"
+                        >
+                          <span className={`size-1.5 rounded-full ${dot}`} />
+                          <strong className="text-on-surface tabular-nums">
+                            {stats[key]}
+                          </strong>
+                          {stats[key] === 1 ? singular : plural}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {curso.estudiantes.length > 0 && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-2"
+                      onClick={handleExportCSV}
+                    >
+                      <Download className="w-4 h-4" />
+                      Exportar CSV
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => {
+                      setAddOpen(true);
+                      setAddError("");
+                      setSelectedId("");
+                    }}
+                    disabled={sinCurso.length === 0}
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Añadir estudiante
+                  </Button>
+                </div>
+              </div>
+
+              {/* Search */}
+              {curso.estudiantes.length > 0 && (
+                <div className="relative mb-4 max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar en este curso..."
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    className="pl-9 h-9 font-sans text-sm"
+                  />
+                </div>
+              )}
+
+              <div className="bg-surface-container-low rounded-lg overflow-hidden ambient-shadow">
+                {filtered.length === 0 ? (
+                  search ? (
+                    <EmptyState
+                      icon={SearchX}
+                      title="Sin resultados"
+                      description={`Ningún estudiante de este curso coincide con "${search}".`}
+                      action={
+                        <Button variant="outline" onClick={() => setSearch("")}>
+                          Limpiar búsqueda
+                        </Button>
+                      }
+                    />
+                  ) : (
+                    <EmptyState
+                      icon={Users}
+                      title="Sin estudiantes inscritos"
+                      description="Inscribe al primer estudiante en este curso para empezar a registrar asistencia."
+                      action={
+                        <Button
+                          className="gap-2"
+                          disabled={sinCurso.length === 0}
+                          onClick={() => {
+                            setAddOpen(true);
+                            setAddError("");
+                            setSelectedId("");
+                          }}
+                        >
+                          <UserPlus className="w-4 h-4" />
+                          {sinCurso.length === 0
+                            ? "No hay estudiantes sin curso"
+                            : "Inscribir estudiante"}
+                        </Button>
+                      }
+                    />
+                  )
+                ) : (
+                  <>
+                    <div className="table-scroll">
+                      <table className="w-full table-sticky-first">
+                        <thead>
+                          <tr className="border-b border-outline-variant">
+                            {(
+                              [
+                                { key: "nombre", label: "Estudiante" },
+                                { key: "cedula", label: "Cédula" },
+                                {
+                                  key: "fecha_inscripcion",
+                                  label: "Inscripción",
+                                },
+                                { key: "estado", label: "Estado" },
+                              ] as { key: SortKey; label: string }[]
+                            ).map(({ key, label }) => (
+                              <th
+                                key={key}
+                                className="text-left px-6 py-3.5 font-sans text-xs tracking-[0.15em] uppercase text-muted-foreground font-semibold"
+                              >
+                                <button
+                                  onClick={() => handleSort(key)}
+                                  className="flex items-center gap-1 hover:text-on-surface transition-colors"
+                                >
+                                  {label}
+                                  {sortKey === key ? (
+                                    sortDir === "asc" ? (
+                                      <ChevronUp className="w-3 h-3" />
+                                    ) : (
+                                      <ChevronDown className="w-3 h-3" />
+                                    )
+                                  ) : (
+                                    <ChevronsUpDown className="w-3 h-3 opacity-40" />
+                                  )}
+                                </button>
+                              </th>
+                            ))}
+                            <th className="px-4 py-3.5" />
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {paginated.map((e, i) => (
+                            <tr
+                              key={e.id}
+                              className={`hover:bg-surface-container transition-colors ${
+                                i < paginated.length - 1
+                                  ? "border-b border-outline-variant"
+                                  : ""
+                              }`}
+                            >
+                              <td className="px-6 py-3.5 whitespace-nowrap">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+                                    <span className="font-sans text-xs font-bold text-on-primary-container">
+                                      {getInitials(e.nombre)}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <p className="font-sans font-semibold text-on-surface text-sm">
+                                      {e.nombre}
+                                    </p>
+                                    <p className="font-sans text-xs text-muted-foreground">
+                                      {e.user.email}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-3.5 font-mono text-sm text-muted-foreground">
+                                {e.cedula}
+                              </td>
+                              <td className="px-6 py-3.5 font-sans text-sm text-muted-foreground whitespace-nowrap">
+                                {formatDate(e.fecha_inscripcion)}
+                              </td>
+                              <td className="px-6 py-3.5">
+                                {statusChanging === e.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                                ) : (
+                                  <Select
+                                    value={e.estado}
+                                    onValueChange={(v) =>
+                                      handleStudentStatus(
+                                        e,
+                                        v as "activo" | "inactivo" | "graduado",
+                                      )
+                                    }
+                                  >
+                                    <SelectTrigger
+                                      className={`w-32 h-7 text-xs font-semibold border-0 px-2.5 rounded-full ${
+                                        e.estado === "activo"
+                                          ? "bg-success-container text-on-success-container dark:bg-success-container dark:text-success"
+                                          : e.estado === "inactivo"
+                                            ? "bg-warning-container text-on-warning-container dark:bg-warning-container dark:text-warning"
+                                            : "bg-primary-container text-on-primary-container"
+                                      }`}
+                                    >
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="activo">
+                                        Activo
+                                      </SelectItem>
+                                      <SelectItem value="inactivo">
+                                        Inactivo
+                                      </SelectItem>
+                                      <SelectItem value="graduado">
+                                        Graduado
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                )}
+                              </td>
+                              <td className="px-4 py-3.5">
+                                <button
+                                  onClick={() => {
+                                    setRemoveTarget(e);
+                                    setRemoveError("");
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
+                                >
+                                  <UserMinus className="w-3.5 h-3.5" />
+                                  Quitar
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <Pagination
+                      page={page}
+                      totalPages={totalPages}
+                      totalItems={sorted.length}
+                      pageSize={PAGE_SIZE}
+                      onPageChange={setPage}
+                      itemLabel={["estudiante", "estudiantes"]}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* ── Temario ── */}
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <ListChecks className="w-4 h-4 text-primary" />
+                  <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
+                    Temario del curso
+                  </p>
+                  {temario.length > 0 && (
+                    <span className="font-sans text-[10px] font-semibold text-muted-foreground tabular-nums">
+                      · {temario.length}
+                    </span>
+                  )}
+                </div>
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={openTemarioCreate}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Agregar tema
+                </Button>
+              </div>
+
+              {temario.length === 0 ? (
+                <div className="bg-surface-container-low rounded-lg ambient-shadow">
+                  <EmptyState
+                    icon={ListChecks}
+                    title="Temario vacío"
+                    description="Divide el curso en temas para que instructor y estudiantes sepan qué se cubre en cada clase."
+                    action={
+                      <Button className="gap-1.5" onClick={openTemarioCreate}>
+                        <Plus className="w-4 h-4" />
+                        Agregar el primer tema
+                      </Button>
+                    }
+                  />
+                </div>
+              ) : (
+                <div className="bg-surface-container-low rounded-lg ambient-shadow overflow-hidden">
+                  {temario.map((t, i) => (
+                    <div
+                      key={t.id}
+                      className={`flex items-start gap-4 px-6 py-4 hover:bg-surface-container transition-colors ${
+                        i < temario.length - 1
+                          ? "border-b border-outline-variant"
+                          : ""
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="w-8 shrink-0 pt-0.5 text-right font-mono text-sm font-bold text-muted-foreground tabular-nums"
+                      >
+                        {String(t.orden).padStart(2, "0")}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-sans text-sm font-semibold text-on-surface">
+                          {t.titulo}
+                        </p>
+                        {t.descripcion && (
+                          <p className="font-sans text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                            {t.descripcion}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => openTemarioEdit(t)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setTemarioDeleteTarget(t)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2 ml-4 shrink-0">
-              <Badge
-                variant={curso.estado === "activo" ? "activo" : "inactivo"}
-                className="font-sans text-sm font-semibold px-3 py-1"
-              >
-                {curso.estado === "activo" ? "Activo" : "Inactivo"}
-              </Badge>
-              <button
-                onClick={() => setToggleOpen(true)}
-                title={
-                  curso.estado === "activo"
-                    ? "Desactivar curso"
-                    : "Activar curso"
-                }
-                className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
-              >
-                {curso.estado === "activo" ? (
-                  <ToggleRight className="w-5 h-5 text-success" />
-                ) : (
-                  <ToggleLeft className="w-5 h-5 text-warning" />
-                )}
-              </button>
-              <button
-                onClick={openEdit}
-                title="Editar curso"
-                className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
-              >
-                <Pencil className="w-4 h-4" />
-              </button>
+            {/* ── Sesiones ── */}
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <CalendarClock className="w-4 h-4 text-primary" />
+                  <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
+                    Sesiones / Clases
+                  </p>
+                  {sesiones.length > 0 && (
+                    <span className="font-sans text-[10px] font-semibold text-muted-foreground tabular-nums">
+                      · {sesiones.length}
+                    </span>
+                  )}
+                </div>
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={openSesionCreate}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Agregar sesión
+                </Button>
+              </div>
+
+              {sesiones.length === 0 ? (
+                <div className="bg-surface-container-low rounded-lg ambient-shadow">
+                  <EmptyState
+                    icon={CalendarClock}
+                    title="Sin sesiones programadas"
+                    description="Programa las clases del curso para poder pasar asistencia en cada una."
+                    action={
+                      <Button className="gap-1.5" onClick={openSesionCreate}>
+                        <Plus className="w-4 h-4" />
+                        Programar la primera clase
+                      </Button>
+                    }
+                  />
+                </div>
+              ) : (
+                <div className="bg-surface-container-low rounded-lg ambient-shadow overflow-hidden">
+                  {sesiones.map((s, i) => {
+                    const sesionEstadoVariant = {
+                      programada: "programada" as const,
+                      realizada: "realizada" as const,
+                      cancelada: "cancelada" as const,
+                    }[s.estado];
+                    const fechaFmt = formatDate(s.fecha, {
+                      weekday: "short",
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    });
+                    return (
+                      <div
+                        key={s.id}
+                        className={`flex items-start gap-4 px-6 py-4 hover:bg-surface-container transition-colors ${
+                          i < sesiones.length - 1
+                            ? "border-b border-outline-variant"
+                            : ""
+                        }`}
+                      >
+                        <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
+                          <CalendarDays className="w-4 h-4 text-primary/60" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span className="font-sans text-xs text-muted-foreground font-medium">
+                              {fechaFmt}
+                            </span>
+                            {(s.hora_inicio || s.hora_fin) && (
+                              <span className="flex items-center gap-1 font-sans text-xs text-muted-foreground">
+                                <Clock className="w-3 h-3" />
+                                {formatTime(s.hora_inicio)}
+                                {s.hora_fin && ` – ${formatTime(s.hora_fin)}`}
+                              </span>
+                            )}
+                            <Badge
+                              variant={sesionEstadoVariant}
+                              className="font-sans text-[10px] font-semibold capitalize px-1.5 py-0"
+                            >
+                              {s.estado}
+                            </Badge>
+                          </div>
+                          <p className="font-sans text-sm font-semibold text-on-surface">
+                            {s.titulo}
+                          </p>
+                          {s.descripcion && (
+                            <p className="font-sans text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                              {s.descripcion}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() =>
+                              router.push(`/admin/sesiones/${s.id}/asistencia`)
+                            }
+                            title="Tomar asistencia"
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-primary hover:bg-primary/10 transition-colors"
+                          >
+                            <ClipboardCheck className="w-3.5 h-3.5" />
+                            Asistencia
+                          </button>
+                          <button
+                            onClick={() => openSesionEdit(s)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setSesionDeleteTarget(s)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Meta row */}
-          <div className="flex items-center flex-wrap gap-x-6 gap-y-2 pt-5 border-t border-outline-variant">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Hash className="w-4 h-4" />
-              <span className="font-mono text-sm font-bold">
-                {curso.codigo}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <UsersRound className="w-4 h-4" />
-              <span className="font-sans text-sm">
-                <strong className="text-on-surface">
-                  {curso.estudiantes.length}
-                </strong>
-                {" / "}
-                {curso.limite_cupo} participantes
-                {" · "}
-                <span
-                  className={
-                    curso.cupos_restantes <= 0
-                      ? "text-danger font-semibold"
-                      : curso.cupos_restantes <= 5
-                        ? "text-warning font-semibold"
-                        : "text-success font-semibold"
-                  }
-                >
-                  {curso.cupos_restantes <= 0
-                    ? "Sin cupo"
-                    : `${curso.cupos_restantes} disponibles`}
-                </span>
-              </span>
-            </div>
-            {(curso.fecha_inicio || curso.fecha_fin) && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <CalendarDays className="w-4 h-4" />
-                <span className="font-sans text-sm">
-                  {formatDate(curso.fecha_inicio)}
-                  {curso.fecha_fin && " → " + formatDate(curso.fecha_fin)}
-                </span>
+          {/* ── Columna de contexto ── */}
+          <aside className="space-y-4 lg:sticky lg:top-6">
+            {/* Ocupación: el dato que decide si el curso se abre o no */}
+            <div className="bg-surface-container-low rounded-lg ambient-shadow p-5">
+              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-semibold mb-4">
+                Ocupación
+              </p>
+              <div className="flex items-center gap-4">
+                <OcupacionRing
+                  inscritos={curso.estudiantes.length}
+                  limite={curso.limite_cupo}
+                />
+                <div className="min-w-0">
+                  <p className="font-sans text-sm text-on-surface">
+                    <strong className="text-lg">
+                      {curso.estudiantes.length}
+                    </strong>
+                    <span className="text-muted-foreground">
+                      {" "}
+                      de {curso.limite_cupo}
+                    </span>
+                  </p>
+                  <p
+                    className={`font-sans text-sm font-semibold ${
+                      curso.cupos_restantes <= 0
+                        ? "text-danger"
+                        : curso.cupos_restantes <= 5
+                          ? "text-warning"
+                          : "text-success"
+                    }`}
+                  >
+                    {curso.cupos_restantes <= 0
+                      ? "Sin cupo"
+                      : `${curso.cupos_restantes} disponibles`}
+                  </p>
+                </div>
               </div>
-            )}
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <b>Bs.</b>
-              <span className="font-sans text-sm font-semibold text-on-surface">
-                {formatPrice(curso.precio)}
-              </span>
+
+              {/* Mínimo para aperturar: dato que existía y no se mostraba */}
+              {curso.minimo_estudiantes != null && (
+                <div className="mt-4 pt-4 border-t border-outline-variant">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-sans text-xs text-muted-foreground">
+                      Mínimo para aperturar
+                    </span>
+                    <span className="font-sans text-xs font-semibold text-on-surface tabular-nums">
+                      {curso.minimo_estudiantes}
+                    </span>
+                  </div>
+                  {curso.estudiantes.length < curso.minimo_estudiantes && (
+                    <p className="mt-2 font-sans text-xs text-warning">
+                      Faltan{" "}
+                      {curso.minimo_estudiantes - curso.estudiantes.length} para
+                      alcanzar el mínimo.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
+
+            {/* Sobre el curso */}
+            <div className="bg-surface-container-low rounded-lg ambient-shadow p-5">
+              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-semibold mb-3">
+                Sobre el curso
+              </p>
+              {curso.descripcion ? (
+                <p className="font-sans text-sm leading-relaxed text-on-surface whitespace-pre-line">
+                  {curso.descripcion}
+                </p>
+              ) : (
+                <button
+                  onClick={openEdit}
+                  className="font-sans text-sm text-muted-foreground hover:text-primary transition-colors text-left rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Sin descripción. <span className="underline">Añadir una</span>
+                </button>
+              )}
+            </div>
+
+            {/* Requisitos / materiales */}
+            <div className="bg-surface-container-low rounded-lg ambient-shadow p-5">
+              <p className="flex items-center gap-1.5 font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-semibold mb-3">
+                <ClipboardList className="w-3.5 h-3.5" />
+                Requisitos y materiales
+              </p>
+              {curso.requisitos ? (
+                <p className="font-sans text-sm leading-relaxed text-on-surface whitespace-pre-line">
+                  {curso.requisitos}
+                </p>
+              ) : (
+                <button
+                  onClick={openEdit}
+                  className="font-sans text-sm text-muted-foreground hover:text-primary transition-colors text-left rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Sin requisitos. <span className="underline">Añadir</span>
+                </button>
+              )}
+            </div>
+
+            {/* Contenido: resumen numérico de temario y sesiones */}
+            <div className="bg-surface-container-low rounded-lg ambient-shadow p-5">
+              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-semibold mb-3">
+                Contenido
+              </p>
+              <dl className="divide-y divide-outline-variant">
+                <div className="flex items-center justify-between gap-3 py-2">
+                  <dt className="flex items-center gap-2 font-sans text-sm text-muted-foreground">
+                    <ListChecks className="w-3.5 h-3.5" />
+                    Temas
+                  </dt>
+                  <dd className="font-sans text-sm font-semibold text-on-surface tabular-nums">
+                    {temario.length}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-3 py-2">
+                  <dt className="flex items-center gap-2 font-sans text-sm text-muted-foreground">
+                    <CalendarClock className="w-3.5 h-3.5" />
+                    Sesiones
+                  </dt>
+                  <dd className="font-sans text-sm font-semibold text-on-surface tabular-nums">
+                    {sesiones.length}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-3 py-2">
+                  <dt className="flex items-center gap-2 font-sans text-sm text-muted-foreground">
+                    <ClipboardCheck className="w-3.5 h-3.5" />
+                    Realizadas
+                  </dt>
+                  <dd className="font-sans text-sm font-semibold text-on-surface tabular-nums">
+                    {sesiones.filter((s) => s.estado === "realizada").length}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            {/* Canal del curso */}
             {curso.whatsapp_url && (
               <a
                 href={curso.whatsapp_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 font-sans text-sm text-success hover:underline"
+                className="flex items-center justify-center gap-2 rounded-lg bg-success-container px-4 py-3 font-sans text-sm font-semibold text-on-success-container transition-colors hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <MessageCircle className="w-4 h-4" />
-                Grupo WhatsApp
+                Grupo de WhatsApp
               </a>
             )}
-          </div>
-
-          {curso.descripcion && (
-            <p className="font-sans text-sm text-muted-foreground mt-4 pt-4 border-t border-outline-variant">
-              {curso.descripcion}
-            </p>
-          )}
-
-          {curso.requisitos && (
-            <div className="mt-4 pt-4 border-t border-outline-variant">
-              <p className="flex items-center gap-1.5 font-sans text-xs font-semibold tracking-[0.15em] uppercase text-muted-foreground mb-1">
-                <ClipboardList className="w-3.5 h-3.5" />
-                Requisitos / Materiales
-              </p>
-              <p className="font-sans text-sm text-muted-foreground whitespace-pre-line">
-                {curso.requisitos}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* ── Stats bar ── */}
-        {curso.estudiantes.length > 0 && (
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {(["activo", "inactivo", "graduado"] as const).map((est) => {
-              const count = stats[est];
-              const pct =
-                curso.estudiantes.length > 0
-                  ? Math.round((count / curso.estudiantes.length) * 100)
-                  : 0;
-              const colors = {
-                activo: {
-                  bar: "bg-success",
-                  text: "text-on-success-container",
-                  bg: "bg-success-container",
-                },
-                inactivo: {
-                  bar: "bg-warning",
-                  text: "text-on-warning-container",
-                  bg: "bg-warning-container",
-                },
-                graduado: {
-                  bar: "bg-primary",
-                  text: "text-primary",
-                  bg: "bg-primary/5",
-                },
-              }[est];
-              return (
-                <div key={est} className={`${colors.bg} rounded-sm p-4`}>
-                  <p className="font-sans text-sm tracking-[0.24em] text-muted-foreground font-medium mb-1 capitalize">
-                    {est}
-                  </p>
-                  <p className={`font-sans text-3xl font-light ${colors.text}`}>
-                    {count}
-                  </p>
-                  <div className="mt-2 h-1 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${colors.bar} rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity]`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <p className="font-sans text-xs text-muted-foreground mt-1">
-                    {pct}%
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* ── Estudiantes inscritos ── */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
-              Estudiantes inscritos
-            </p>
-            <div className="flex items-center gap-2">
-              {curso.estudiantes.length > 0 && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-2"
-                  onClick={handleExportCSV}
-                >
-                  <Download className="w-4 h-4" />
-                  Exportar CSV
-                </Button>
-              )}
-              <Button
-                size="sm"
-                className="gap-2"
-                onClick={() => {
-                  setAddOpen(true);
-                  setAddError("");
-                  setSelectedId("");
-                }}
-                disabled={sinCurso.length === 0}
-              >
-                <UserPlus className="w-4 h-4" />
-                Añadir estudiante
-              </Button>
-            </div>
-          </div>
-
-          {/* Search */}
-          {curso.estudiantes.length > 0 && (
-            <div className="relative mb-4 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar en este curso..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="pl-9 h-9 font-sans text-sm"
-              />
-            </div>
-          )}
-
-          <div className="bg-surface-container-low rounded-sm overflow-hidden ambient-shadow">
-            {filtered.length === 0 ? (
-              search ? (
-                <EmptyState
-                  icon={SearchX}
-                  title="Sin resultados"
-                  description={`Ningún estudiante de este curso coincide con "${search}".`}
-                  action={
-                    <Button variant="outline" onClick={() => setSearch("")}>
-                      Limpiar búsqueda
-                    </Button>
-                  }
-                />
-              ) : (
-                <EmptyState
-                  icon={Users}
-                  title="Sin estudiantes inscritos"
-                  description="Inscribe al primer estudiante en este curso para empezar a registrar asistencia."
-                />
-              )
-            ) : (
-              <>
-                <div className="table-scroll">
-                  <table className="w-full table-sticky-first">
-                    <thead>
-                      <tr className="border-b border-outline-variant">
-                        {(
-                          [
-                            { key: "nombre", label: "Estudiante" },
-                            { key: "cedula", label: "Cédula" },
-                            { key: "fecha_inscripcion", label: "Inscripción" },
-                            { key: "estado", label: "Estado" },
-                          ] as { key: SortKey; label: string }[]
-                        ).map(({ key, label }) => (
-                          <th
-                            key={key}
-                            className="text-left px-6 py-3.5 font-sans text-xs tracking-[0.15em] uppercase text-muted-foreground font-semibold"
-                          >
-                            <button
-                              onClick={() => handleSort(key)}
-                              className="flex items-center gap-1 hover:text-on-surface transition-colors"
-                            >
-                              {label}
-                              {sortKey === key ? (
-                                sortDir === "asc" ? (
-                                  <ChevronUp className="w-3 h-3" />
-                                ) : (
-                                  <ChevronDown className="w-3 h-3" />
-                                )
-                              ) : (
-                                <ChevronsUpDown className="w-3 h-3 opacity-40" />
-                              )}
-                            </button>
-                          </th>
-                        ))}
-                        <th className="px-4 py-3.5" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paginated.map((e, i) => (
-                        <tr
-                          key={e.id}
-                          className={`hover:bg-surface-container transition-colors ${
-                            i < paginated.length - 1
-                              ? "border-b border-outline-variant"
-                              : ""
-                          }`}
-                        >
-                          <td className="px-6 py-3.5 whitespace-nowrap">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                                <span className="font-sans text-xs font-bold text-on-primary-container">
-                                  {getInitials(e.nombre)}
-                                </span>
-                              </div>
-                              <div>
-                                <p className="font-sans font-semibold text-on-surface text-sm">
-                                  {e.nombre}
-                                </p>
-                                <p className="font-sans text-xs text-muted-foreground">
-                                  {e.user.email}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-3.5 font-mono text-sm text-muted-foreground">
-                            {e.cedula}
-                          </td>
-                          <td className="px-6 py-3.5 font-sans text-sm text-muted-foreground whitespace-nowrap">
-                            {formatDate(e.fecha_inscripcion)}
-                          </td>
-                          <td className="px-6 py-3.5">
-                            {statusChanging === e.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                            ) : (
-                              <Select
-                                value={e.estado}
-                                onValueChange={(v) =>
-                                  handleStudentStatus(
-                                    e,
-                                    v as "activo" | "inactivo" | "graduado",
-                                  )
-                                }
-                              >
-                                <SelectTrigger
-                                  className={`w-32 h-7 text-xs font-semibold border-0 px-2.5 rounded-full ${
-                                    e.estado === "activo"
-                                      ? "bg-success-container text-on-success-container dark:bg-success-container dark:text-success"
-                                      : e.estado === "inactivo"
-                                        ? "bg-warning-container text-on-warning-container dark:bg-warning-container dark:text-warning"
-                                        : "bg-primary-container text-on-primary-container"
-                                  }`}
-                                >
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="activo">Activo</SelectItem>
-                                  <SelectItem value="inactivo">
-                                    Inactivo
-                                  </SelectItem>
-                                  <SelectItem value="graduado">
-                                    Graduado
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                            )}
-                          </td>
-                          <td className="px-4 py-3.5">
-                            <button
-                              onClick={() => {
-                                setRemoveTarget(e);
-                                setRemoveError("");
-                              }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
-                            >
-                              <UserMinus className="w-3.5 h-3.5" />
-                              Quitar
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <Pagination
-                  page={page}
-                  totalPages={totalPages}
-                  totalItems={sorted.length}
-                  pageSize={PAGE_SIZE}
-                  onPageChange={setPage}
-                  itemLabel={["estudiante", "estudiantes"]}
-                />
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* ── Temario ── */}
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <ListChecks className="w-4 h-4 text-primary/70" />
-              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
-                Temario del curso
-              </p>
-            </div>
-            <Button size="sm" className="gap-1.5" onClick={openTemarioCreate}>
-              <Plus className="w-3.5 h-3.5" />
-              Agregar tema
-            </Button>
-          </div>
-
-          {temario.length === 0 ? (
-            <div className="bg-surface-container-low rounded-sm p-8 ambient-shadow flex flex-col items-center gap-3 text-center">
-              <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
-                <ListChecks className="w-5 h-5 text-on-primary-container" />
-              </div>
-              <p className="font-sans text-sm text-muted-foreground">
-                No hay temas en el temario. Agrega el primero.
-              </p>
-            </div>
-          ) : (
-            <div className="bg-surface-container-low rounded-sm ambient-shadow overflow-hidden">
-              {temario.map((t, i) => (
-                <div
-                  key={t.id}
-                  className={`flex items-start gap-4 px-6 py-4 hover:bg-surface-container transition-colors ${
-                    i < temario.length - 1
-                      ? "border-b border-outline-variant"
-                      : ""
-                  }`}
-                >
-                  <span className="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="font-mono text-xs font-bold text-on-primary-container">
-                      {t.orden}
-                    </span>
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-sans text-sm font-semibold text-on-surface">
-                      {t.titulo}
-                    </p>
-                    {t.descripcion && (
-                      <p className="font-sans text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                        {t.descripcion}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      onClick={() => openTemarioEdit(t)}
-                      className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setTemarioDeleteTarget(t)}
-                      className="p-1.5 rounded-md text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* ── Sesiones ── */}
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <CalendarClock className="w-4 h-4 text-primary/70" />
-              <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium">
-                Sesiones / Clases
-              </p>
-            </div>
-            <Button size="sm" className="gap-1.5" onClick={openSesionCreate}>
-              <Plus className="w-3.5 h-3.5" />
-              Agregar sesión
-            </Button>
-          </div>
-
-          {sesiones.length === 0 ? (
-            <div className="bg-surface-container-low rounded-sm p-8 ambient-shadow flex flex-col items-center gap-3 text-center">
-              <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
-                <CalendarClock className="w-5 h-5 text-on-primary-container" />
-              </div>
-              <p className="font-sans text-sm text-muted-foreground">
-                No hay sesiones programadas. Agrega la primera clase.
-              </p>
-            </div>
-          ) : (
-            <div className="bg-surface-container-low rounded-sm ambient-shadow overflow-hidden">
-              {sesiones.map((s, i) => {
-                const sesionEstadoVariant = {
-                  programada: "programada" as const,
-                  realizada: "realizada" as const,
-                  cancelada: "cancelada" as const,
-                }[s.estado];
-                const fechaFmt = formatDate(s.fecha, {
-                  weekday: "short",
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                });
-                return (
-                  <div
-                    key={s.id}
-                    className={`flex items-start gap-4 px-6 py-4 hover:bg-surface-container transition-colors ${
-                      i < sesiones.length - 1
-                        ? "border-b border-outline-variant"
-                        : ""
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
-                      <CalendarDays className="w-4 h-4 text-primary/60" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="font-sans text-xs text-muted-foreground font-medium">
-                          {fechaFmt}
-                        </span>
-                        {(s.hora_inicio || s.hora_fin) && (
-                          <span className="flex items-center gap-1 font-sans text-xs text-muted-foreground">
-                            <Clock className="w-3 h-3" />
-                            {s.hora_inicio ?? ""}
-                            {s.hora_fin && ` – ${s.hora_fin}`}
-                          </span>
-                        )}
-                        <Badge
-                          variant={sesionEstadoVariant}
-                          className="font-sans text-[10px] font-semibold capitalize px-1.5 py-0"
-                        >
-                          {s.estado}
-                        </Badge>
-                      </div>
-                      <p className="font-sans text-sm font-semibold text-on-surface">
-                        {s.titulo}
-                      </p>
-                      {s.descripcion && (
-                        <p className="font-sans text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                          {s.descripcion}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        onClick={() =>
-                          router.push(`/admin/sesiones/${s.id}/asistencia`)
-                        }
-                        title="Tomar asistencia"
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-primary hover:bg-primary/10 transition-colors"
-                      >
-                        <ClipboardCheck className="w-3.5 h-3.5" />
-                        Asistencia
-                      </button>
-                      <button
-                        onClick={() => openSesionEdit(s)}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => setSesionDeleteTarget(s)}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          </aside>
         </div>
       </div>
 
