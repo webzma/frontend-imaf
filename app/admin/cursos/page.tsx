@@ -310,7 +310,7 @@ export default function CursosPage() {
       requisitos: "",
       precio: 0,
       whatsapp_url: "",
-      estado: "activo",
+      estado: "inactivo",
     },
   });
 
@@ -530,8 +530,8 @@ export default function CursosPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="activo">Activo</SelectItem>
                         <SelectItem value="inactivo">Inactivo</SelectItem>
+                        <SelectItem value="activo">Activo</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
