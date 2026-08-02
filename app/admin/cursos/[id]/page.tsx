@@ -509,9 +509,7 @@ export default function CursoDetailPage({
             precio: Number(data.precio),
             whatsapp_url: data.whatsapp_url || null,
             estado: data.estado,
-            profesor_id: data.profesor_id
-              ? Number(data.profesor_id)
-              : null,
+            profesor_id: data.profesor_id ? Number(data.profesor_id) : null,
           }),
         },
       );

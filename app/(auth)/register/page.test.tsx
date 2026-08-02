@@ -26,7 +26,12 @@ vi.mock("next/image", () => ({
     height?: number;
   }) => (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={props.src} alt={props.alt} width={props.width} height={props.height} />
+    <img
+      src={props.src}
+      alt={props.alt}
+      width={props.width}
+      height={props.height}
+    />
   ),
 }));
 
@@ -142,7 +147,10 @@ describe("Página de registro", () => {
 
     await llenarDatosValidos(user);
     await user.type(screen.getByLabelText("Contraseña"), "clave12345");
-    await user.type(screen.getByLabelText("Confirmar contraseña"), "clave12345");
+    await user.type(
+      screen.getByLabelText("Confirmar contraseña"),
+      "clave12345",
+    );
 
     await user.click(screen.getByRole("button", { name: /crear cuenta/i }));
 

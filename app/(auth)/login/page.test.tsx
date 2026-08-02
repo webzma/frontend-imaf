@@ -25,7 +25,12 @@ vi.mock("next/image", () => ({
     height?: number;
   }) => (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={props.src} alt={props.alt} width={props.width} height={props.height} />
+    <img
+      src={props.src}
+      alt={props.alt}
+      width={props.width}
+      height={props.height}
+    />
   ),
 }));
 
@@ -117,28 +122,25 @@ describe("Página de login", () => {
     ["admin", "/admin"],
     ["profesor", "/instructor"],
     ["estudiante", "/estudiante"],
-  ])(
-    "redirige al panel de %s tras iniciar sesión",
-    async (role, ruta) => {
-      fetchMock.mockResolvedValue({
-        ok: true,
-        json: async () => ({ user: { role }, token: "tok-123" }),
-      });
-      const user = userEvent.setup();
-      render(<LoginPage />);
+  ])("redirige al panel de %s tras iniciar sesión", async (role, ruta) => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ user: { role }, token: "tok-123" }),
+    });
+    const user = userEvent.setup();
+    render(<LoginPage />);
 
-      await llenarCredenciales(user, credencialesValidas);
-      await user.click(screen.getByRole("button", { name: /ingresar/i }));
+    await llenarCredenciales(user, credencialesValidas);
+    await user.click(screen.getByRole("button", { name: /ingresar/i }));
 
-      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
 
-      const [url, init] = fetchMock.mock.calls[0];
-      expect(String(url)).toContain("/api/login");
-      expect((init as RequestInit).method).toBe("POST");
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toContain("/api/login");
+    expect((init as RequestInit).method).toBe("POST");
 
-      await waitFor(() => expect(pushMock).toHaveBeenCalledWith(ruta));
-    },
-  );
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith(ruta));
+  });
 
   it("muestra el mensaje del servidor cuando las credenciales son incorrectas", async () => {
     fetchMock.mockResolvedValue({

@@ -38,7 +38,10 @@ describe("loginSchema", () => {
   });
 
   it("rechaza un correo sin formato válido", () => {
-    const r = loginSchema.safeParse({ email: "correo-invalido", password: "clave12345" });
+    const r = loginSchema.safeParse({
+      email: "correo-invalido",
+      password: "clave12345",
+    });
     expect(mensajeDe(r, "email")).toBe("Correo inválido");
   });
 
@@ -70,7 +73,10 @@ describe("registroSchema", () => {
   });
 
   it("rechaza contraseñas que no coinciden", () => {
-    const r = registroSchema.safeParse({ ...valido, password_confirmation: "otra12345" });
+    const r = registroSchema.safeParse({
+      ...valido,
+      password_confirmation: "otra12345",
+    });
     expect(mensajeDe(r, "password_confirmation")).toBe(
       "Las contraseñas no coinciden",
     );
@@ -84,7 +90,11 @@ describe("registroSchema", () => {
   });
 
   it("exige seleccionar género y municipio", () => {
-    const r = registroSchema.safeParse({ ...valido, genero: "", municipio: "" });
+    const r = registroSchema.safeParse({
+      ...valido,
+      genero: "",
+      municipio: "",
+    });
     expect(mensajeDe(r, "genero")).toBe("Selecciona un género");
     expect(mensajeDe(r, "municipio")).toBe("Selecciona un municipio");
   });
@@ -98,7 +108,9 @@ describe("registroSchema", () => {
 
   it("rechaza cédulas con letras", () => {
     const r = registroSchema.safeParse({ ...valido, cedula: "12ab34" });
-    expect(mensajeDe(r, "cedula")).toBe("La cédula solo puede contener dígitos");
+    expect(mensajeDe(r, "cedula")).toBe(
+      "La cédula solo puede contener dígitos",
+    );
   });
 
   it("rechaza correos inválidos", () => {
@@ -182,9 +194,7 @@ describe("cursoSchema", () => {
 
   it("exige seleccionar un instructor", () => {
     const r = cursoSchema.safeParse({ ...valido, profesor_id: "" });
-    expect(mensajeDe(r, "profesor_id")).toBe(
-      "Debes seleccionar un instructor",
-    );
+    expect(mensajeDe(r, "profesor_id")).toBe("Debes seleccionar un instructor");
   });
 });
 

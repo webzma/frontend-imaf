@@ -226,9 +226,7 @@ function PagoModal({
     e.target.value = "";
     if (!f) return;
     if (!TIPOS_PERMITIDOS.includes(f.type)) {
-      setFormError(
-        "Formato no permitido. Usa JPG, PNG, WEBP o PDF.",
-      );
+      setFormError("Formato no permitido. Usa JPG, PNG, WEBP o PDF.");
       setArchivo(null);
       setPreview(null);
       return;

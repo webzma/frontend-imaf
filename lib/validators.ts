@@ -12,8 +12,7 @@ export const SOLO_LETRAS = /^[\p{L}\p{M}\s'.-]+$/u;
  * común, pero bloquea caracteres de riesgo de inyección: () [] {} = < >
  * comillas, punto y coma, backslash y backtick.
  */
-export const SOLO_TEXTO_SEGURO =
-  /^[\p{L}\p{M}\p{N}\p{Pd}\s.,:!?@#$%&*+/_]+$/u;
+export const SOLO_TEXTO_SEGURO = /^[\p{L}\p{M}\p{N}\p{Pd}\s.,:!?@#$%&*+/_]+$/u;
 
 /**
  * Para campos de texto largo (descripciones, requisitos, notas): bloquea solo

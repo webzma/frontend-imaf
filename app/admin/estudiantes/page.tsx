@@ -525,7 +525,10 @@ export default function EstudiantesPage() {
                       placeholder="12345678"
                       {...form.register("cedula", {
                         onChange: (e) =>
-                          form.setValue("cedula", sanitizarDigitos(e.target.value)),
+                          form.setValue(
+                            "cedula",
+                            sanitizarDigitos(e.target.value),
+                          ),
                       })}
                     />
                     {form.formState.errors.cedula && (

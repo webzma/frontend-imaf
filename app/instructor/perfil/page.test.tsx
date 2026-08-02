@@ -93,7 +93,9 @@ describe("Perfil de instructor", () => {
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
 
     expect(
-      await screen.findByText("La especialidad contiene caracteres no permitidos"),
+      await screen.findByText(
+        "La especialidad contiene caracteres no permitidos",
+      ),
     ).toBeInTheDocument();
     // La validación falló antes de llegar al servidor.
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -140,7 +142,9 @@ describe("Perfil de instructor", () => {
 
     // Vuelve al modo vista (botón "Editar").
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Editar" })).toBeInTheDocument(),
+      expect(
+        screen.getByRole("button", { name: "Editar" }),
+      ).toBeInTheDocument(),
     );
   });
 });

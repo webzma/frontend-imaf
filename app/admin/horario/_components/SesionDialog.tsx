@@ -23,10 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  sesionHorarioSchema,
-  type SesionHorarioForm,
-} from "@/lib/schemas";
+import { sesionHorarioSchema, type SesionHorarioForm } from "@/lib/schemas";
 import type { CursoRef, Sesion } from "./types";
 import { normalizeDate, normalizeTime } from "./utils";
 

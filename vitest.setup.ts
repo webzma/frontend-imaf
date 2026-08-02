@@ -20,7 +20,8 @@ class ResizeObserverStub {
 }
 
 if (!globalThis.ResizeObserver) {
-  globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
+  globalThis.ResizeObserver =
+    ResizeObserverStub as unknown as typeof ResizeObserver;
 }
 
 // scrollIntoView: jsdom no lo implementa y Radix lo llama al abrir un Select

@@ -378,7 +378,8 @@ export default function PerfilPage() {
                   <Input
                     id="telefono"
                     inputMode="numeric"
-                    pattern="[0-9]*"                    maxLength={20}
+                    pattern="[0-9]*"
+                    maxLength={20}
                     placeholder="Ej: 04120000000"
                     {...form.register("telefono", {
                       onChange: (e) =>
@@ -386,7 +387,7 @@ export default function PerfilPage() {
                           "telefono",
                           sanitizarDigitos(e.target.value),
                         ),
-                      })}
+                    })}
                   />
                   {form.formState.errors.telefono && (
                     <p className="text-xs text-danger">

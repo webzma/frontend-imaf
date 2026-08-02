@@ -28,9 +28,7 @@ const fechaOpcional = z
 /** Mínimo de estudiantes: opcional, entero ≥ 1 (NaN/"" → undefined). */
 const minimoEstudiantes = z.preprocess(
   (v) =>
-    (typeof v === "number" && Number.isNaN(v)) || v === ""
-      ? undefined
-      : v,
+    (typeof v === "number" && Number.isNaN(v)) || v === "" ? undefined : v,
   z.number().int().min(1, "Mínimo 1 estudiante").optional(),
 );
 
@@ -68,8 +66,7 @@ const refineMinimoCupo = (d: {
   minimo_estudiantes?: number;
   limite_cupo: number;
 }) =>
-  d.minimo_estudiantes === undefined ||
-  d.minimo_estudiantes <= d.limite_cupo;
+  d.minimo_estudiantes === undefined || d.minimo_estudiantes <= d.limite_cupo;
 
 /** Esquema de creación de curso (usado en app/admin/cursos/page.tsx). */
 export const cursoSchema = z
@@ -144,12 +141,10 @@ const refineHorasSesion = (d: { hora_inicio?: string; hora_fin?: string }) =>
   !d.hora_inicio || !d.hora_fin || d.hora_fin > d.hora_inicio;
 
 /** Esquema del formulario de sesión dentro de un curso (sin curso_id). */
-export const sesionSchema = z
-  .object(camposSesion)
-  .refine(refineHorasSesion, {
-    message: "La hora fin debe ser posterior",
-    path: ["hora_fin"],
-  });
+export const sesionSchema = z.object(camposSesion).refine(refineHorasSesion, {
+  message: "La hora fin debe ser posterior",
+  path: ["hora_fin"],
+});
 
 export type SesionForm = z.infer<typeof sesionSchema>;
 
