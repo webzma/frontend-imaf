@@ -2,6 +2,8 @@
 
 import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { formatDateLong } from "@/lib/format";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -33,6 +35,10 @@ import {
 } from "lucide-react";
 import municipios from "@/data/municipios.json";
 import { sanitizarDigitos } from "@/lib/validators";
+import {
+  perfilEstudianteSchema,
+  type PerfilEstudianteForm,
+} from "@/lib/schemas";
 
 interface EstudiantePerfil {
   id: number;
@@ -84,11 +90,14 @@ export default function PerfilPage() {
   const [uploadingFoto, setUploadingFoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [form, setForm] = useState({
-    telefono: "",
-    municipio: "",
-    fecha_nacimiento: "",
-    genero: "",
+  const form = useForm<PerfilEstudianteForm>({
+    resolver: zodResolver(perfilEstudianteSchema),
+    defaultValues: {
+      telefono: "",
+      municipio: "",
+      fecha_nacimiento: "",
+      genero: undefined,
+    },
   });
 
   useEffect(() => {
@@ -98,15 +107,17 @@ export default function PerfilPage() {
       .then((r) => r.json())
       .then((data) => {
         setPerfil(data);
-        setForm({
+        form.reset({
           telefono: data.telefono ?? "",
           municipio: data.municipio ?? "",
           fecha_nacimiento: toDateInput(data.fecha_nacimiento),
-          genero: data.genero ?? "",
+          genero: (data.genero as PerfilEstudianteForm["genero"]) ?? undefined,
         });
       })
       .catch(() => toast.error("Error al cargar el perfil"))
       .finally(() => setLoading(false));
+    // form es una referencia estable de react-hook-form (no cambia entre renders)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,7 +163,7 @@ export default function PerfilPage() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (data: PerfilEstudianteForm) => {
     if (!perfil) return;
     setSaving(true);
     try {
@@ -160,10 +171,10 @@ export default function PerfilPage() {
         method: "PUT",
         headers: getAuthHeaders(),
         body: JSON.stringify({
-          telefono: form.telefono || null,
-          municipio: form.municipio || null,
-          fecha_nacimiento: form.fecha_nacimiento || null,
-          genero: form.genero || null,
+          telefono: data.telefono || null,
+          municipio: data.municipio || null,
+          fecha_nacimiento: data.fecha_nacimiento || null,
+          genero: data.genero || null,
         }),
       });
 
@@ -182,11 +193,11 @@ export default function PerfilPage() {
       }
 
       setPerfil(body);
-      setForm({
+      form.reset({
         telefono: body.telefono ?? "",
         municipio: body.municipio ?? "",
         fecha_nacimiento: toDateInput(body.fecha_nacimiento),
-        genero: body.genero ?? "",
+        genero: (body.genero as PerfilEstudianteForm["genero"]) ?? undefined,
       });
       setEditing(false);
       toast.success("Perfil actualizado correctamente");
@@ -369,14 +380,19 @@ export default function PerfilPage() {
                         pattern="[0-9]*"
                         maxLength={20}
                         placeholder="04121234567"
-                        value={form.telefono}
-                        onChange={(e) =>
-                          setForm((f) => ({
-                            ...f,
-                            telefono: sanitizarDigitos(e.target.value),
-                          }))
-                        }
+                        {...form.register("telefono", {
+                          onChange: (e) =>
+                            form.setValue(
+                              "telefono",
+                              sanitizarDigitos(e.target.value),
+                            ),
+                        })}
                       />
+                      {form.formState.errors.telefono && (
+                        <p className="text-xs text-danger">
+                          {form.formState.errors.telefono.message}
+                        </p>
+                      )}
                     </div>
                     <div className="grid gap-2">
                       <Label
@@ -388,13 +404,7 @@ export default function PerfilPage() {
                       <Input
                         id="fecha_nacimiento"
                         type="date"
-                        value={form.fecha_nacimiento}
-                        onChange={(e) =>
-                          setForm((f) => ({
-                            ...f,
-                            fecha_nacimiento: e.target.value,
-                          }))
-                        }
+                        {...form.register("fecha_nacimiento")}
                       />
                     </div>
                   </div>
@@ -403,9 +413,13 @@ export default function PerfilPage() {
                       Género
                     </Label>
                     <Select
-                      value={form.genero || undefined}
+                      value={form.watch("genero") || undefined}
                       onValueChange={(value) =>
-                        setForm((f) => ({ ...f, genero: value }))
+                        form.setValue(
+                          "genero",
+                          value as PerfilEstudianteForm["genero"],
+                          { shouldValidate: true },
+                        )
                       }
                     >
                       <SelectTrigger className="w-full">
@@ -426,9 +440,11 @@ export default function PerfilPage() {
                       Municipio
                     </Label>
                     <Select
-                      value={form.municipio || undefined}
+                      value={form.watch("municipio") || undefined}
                       onValueChange={(value) =>
-                        setForm((f) => ({ ...f, municipio: value }))
+                        form.setValue("municipio", value, {
+                          shouldValidate: true,
+                        })
                       }
                     >
                       <SelectTrigger className="w-full">
@@ -455,7 +471,7 @@ export default function PerfilPage() {
                     </Button>
                     <Button
                       size="sm"
-                      onClick={handleSave}
+                      onClick={() => form.handleSubmit(handleSave)()}
                       disabled={saving}
                       className="gap-1.5"
                     >

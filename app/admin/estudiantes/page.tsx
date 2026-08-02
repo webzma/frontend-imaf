@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { formatDate } from "@/lib/format";
-import { SOLO_DIGITOS, SOLO_LETRAS } from "@/lib/validators";
+import { sanitizarDigitos, SOLO_DIGITOS, SOLO_LETRAS } from "@/lib/validators";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -521,8 +521,12 @@ export default function EstudiantesPage() {
                     <Input
                       id="cedula"
                       inputMode="numeric"
-                      placeholder="V-12345678"
-                      {...form.register("cedula")}
+                      pattern="[0-9]*"
+                      placeholder="12345678"
+                      {...form.register("cedula", {
+                        onChange: (e) =>
+                          form.setValue("cedula", sanitizarDigitos(e.target.value)),
+                      })}
                     />
                     {form.formState.errors.cedula && (
                       <p className="text-sm text-danger">
@@ -535,8 +539,15 @@ export default function EstudiantesPage() {
                     <Input
                       id="telefono"
                       inputMode="numeric"
-                      placeholder="0412-1234567"
-                      {...form.register("telefono")}
+                      pattern="[0-9]*"
+                      placeholder="04121234567"
+                      {...form.register("telefono", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "telefono",
+                            sanitizarDigitos(e.target.value),
+                          ),
+                      })}
                     />
                   </div>
                 </div>
@@ -1045,7 +1056,15 @@ export default function EstudiantesPage() {
                 <Input
                   id="edit-cedula"
                   inputMode="numeric"
-                  {...editForm.register("cedula")}
+                  pattern="[0-9]*"
+                  placeholder="12345678"
+                  {...editForm.register("cedula", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "cedula",
+                        sanitizarDigitos(e.target.value),
+                      ),
+                  })}
                 />
                 {editForm.formState.errors.cedula && (
                   <p className="text-sm text-danger">
@@ -1061,8 +1080,15 @@ export default function EstudiantesPage() {
                 <Input
                   id="edit-telefono"
                   inputMode="numeric"
-                  placeholder="0412-1234567"
-                  {...editForm.register("telefono")}
+                  pattern="[0-9]*"
+                  placeholder="04121234567"
+                  {...editForm.register("telefono", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "telefono",
+                        sanitizarDigitos(e.target.value),
+                      ),
+                  })}
                 />
               </div>
               <div className="grid gap-2">

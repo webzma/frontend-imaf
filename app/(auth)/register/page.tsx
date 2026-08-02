@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -15,40 +17,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
-import { sanitizarDigitos, sanitizarLetras } from "@/lib/validators";
+import { sanitizarDigitos } from "@/lib/validators";
+import { registroSchema, type RegistroForm } from "@/lib/schemas";
 import logoImaf from "@/public/logo-imaf.webp";
 import municipios from "@/data/municipios.json";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    cedula: "",
-    telefono: "",
-    fecha_nacimiento: "",
-    genero: "",
-    municipio: "",
-    password: "",
-    password_confirmation: "",
-  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    const sanitizado =
-      name === "cedula" || name === "telefono"
-        ? sanitizarDigitos(value)
-        : name === "name"
-          ? sanitizarLetras(value)
-          : value;
-    setForm({ ...form, [name]: sanitizado });
-  };
+  const form = useForm<RegistroForm>({
+    resolver: zodResolver(registroSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      cedula: "",
+      telefono: "",
+      fecha_nacimiento: "",
+      genero: "",
+      municipio: "",
+      password: "",
+      password_confirmation: "",
+    },
+  });
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async (data: RegistroForm) => {
     setError("");
     setLoading(true);
 
@@ -59,22 +54,22 @@ export default function RegisterPage() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(data),
       });
 
-      const data = await res.json();
+      const body = await res.json();
 
       if (!res.ok) {
-        const messages = data.errors
-          ? Object.values(data.errors).flat().join(" ")
-          : data.message;
+        const messages = body.errors
+          ? Object.values(body.errors).flat().join(" ")
+          : body.message;
         setError(messages || "Error al registrar.");
         return;
       }
 
-      const role = data.user.role;
+      const role = body.user.role;
       document.cookie = `role=${role}; path=/; SameSite=Lax`;
-      document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+      document.cookie = `token=${body.token}; path=/; SameSite=Lax`;
 
       if (role === "admin") router.push("/admin");
       else if (role === "profesor") router.push("/instructor");
@@ -137,34 +132,41 @@ export default function RegisterPage() {
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          noValidate
+          className="space-y-6"
+        >
           {/* Fila 1 */}
           <div className="space-y-2">
             <Label htmlFor="name">{fieldLabel("Nombre completo")}</Label>
             <Input
               id="name"
-              name="name"
-              type="text"
               autoComplete="name"
               placeholder="Juan Pérez"
-              value={form.name}
-              onChange={handleChange}
-              required
+              {...form.register("name")}
             />
+            {form.formState.errors.name && (
+              <p className="text-sm text-danger">
+                {form.formState.errors.name.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">{fieldLabel("Correo electrónico")}</Label>
             <Input
               id="email"
-              name="email"
               type="email"
               autoComplete="email"
               placeholder="tu@correo.com"
-              value={form.email}
-              onChange={handleChange}
-              required
+              {...form.register("email")}
             />
+            {form.formState.errors.email && (
+              <p className="text-sm text-danger">
+                {form.formState.errors.email.message}
+              </p>
+            )}
           </div>
 
           {/* Fila 2 */}
@@ -173,32 +175,42 @@ export default function RegisterPage() {
               <Label htmlFor="cedula">{fieldLabel("Cédula")}</Label>
               <Input
                 id="cedula"
-                name="cedula"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 placeholder="0000000000"
-                value={form.cedula}
-                onChange={handleChange}
-                required
                 maxLength={15}
+                {...form.register("cedula", {
+                  onChange: (e) =>
+                    form.setValue("cedula", sanitizarDigitos(e.target.value)),
+                })}
               />
+              {form.formState.errors.cedula && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.cedula.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="telefono">{fieldLabel("Teléfono")}</Label>
               <Input
                 id="telefono"
-                name="telefono"
                 autoComplete="tel"
                 type="tel"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 placeholder="0999999999"
-                value={form.telefono}
-                onChange={handleChange}
-                required
                 maxLength={20}
+                {...form.register("telefono", {
+                  onChange: (e) =>
+                    form.setValue("telefono", sanitizarDigitos(e.target.value)),
+                })}
               />
+              {form.formState.errors.telefono && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.telefono.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -210,19 +222,22 @@ export default function RegisterPage() {
               </Label>
               <Input
                 id="fecha_nacimiento"
-                name="fecha_nacimiento"
                 type="date"
-                value={form.fecha_nacimiento}
-                onChange={handleChange}
-                required
+                {...form.register("fecha_nacimiento")}
               />
+              {form.formState.errors.fecha_nacimiento && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.fecha_nacimiento.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="genero">{fieldLabel("Género")}</Label>
               <Select
-                value={form.genero}
-                onValueChange={(value) => setForm({ ...form, genero: value })}
-                required
+                value={form.watch("genero") || undefined}
+                onValueChange={(value) =>
+                  form.setValue("genero", value, { shouldValidate: true })
+                }
               >
                 <SelectTrigger id="genero">
                   <SelectValue placeholder="Seleccionar" />
@@ -232,6 +247,11 @@ export default function RegisterPage() {
                   <SelectItem value="femenino">Femenino</SelectItem>
                 </SelectContent>
               </Select>
+              {form.formState.errors.genero && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.genero.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -239,9 +259,10 @@ export default function RegisterPage() {
           <div className="space-y-2">
             <Label htmlFor="municipio">{fieldLabel("Municipio")}</Label>
             <Select
-              value={form.municipio}
-              onValueChange={(value) => setForm({ ...form, municipio: value })}
-              required
+              value={form.watch("municipio") || undefined}
+              onValueChange={(value) =>
+                form.setValue("municipio", value, { shouldValidate: true })
+              }
             >
               <SelectTrigger id="municipio">
                 <SelectValue placeholder="Seleccionar municipio" />
@@ -254,6 +275,11 @@ export default function RegisterPage() {
                 ))}
               </SelectContent>
             </Select>
+            {form.formState.errors.municipio && (
+              <p className="text-sm text-danger">
+                {form.formState.errors.municipio.message}
+              </p>
+            )}
           </div>
 
           {/* Contraseñas */}
@@ -263,15 +289,11 @@ export default function RegisterPage() {
               <div className="relative">
                 <Input
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="••••••••"
-                  value={form.password}
-                  onChange={handleChange}
-                  required
-                  minLength={8}
                   className="pr-10"
+                  {...form.register("password")}
                 />
                 <button
                   type="button"
@@ -289,6 +311,11 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
+              {form.formState.errors.password && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.password.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password_confirmation">
@@ -296,14 +323,16 @@ export default function RegisterPage() {
               </Label>
               <Input
                 id="password_confirmation"
-                name="password_confirmation"
                 type="password"
                 autoComplete="new-password"
                 placeholder="••••••••"
-                value={form.password_confirmation}
-                onChange={handleChange}
-                required
+                {...form.register("password_confirmation")}
               />
+              {form.formState.errors.password_confirmation && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.password_confirmation.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -317,17 +346,7 @@ export default function RegisterPage() {
               {loading ? (
                 "Registrando..."
               ) : (
-                <span className="flex items-center gap-2">
-                  Crear cuenta
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </span>
+                <span className="flex items-center gap-2">Crear cuenta</span>
               )}
             </Button>
           </div>

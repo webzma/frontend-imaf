@@ -6,6 +6,22 @@
 export const SOLO_DIGITOS = /^\d+$/;
 export const SOLO_LETRAS = /^[\p{L}\p{M}\s'.-]+$/u;
 
+/**
+ * Texto general seguro para títulos/nombres de entidades (cursos, sesiones,
+ * temario). Permite letras (con acentos), números, espacios y puntuación
+ * común, pero bloquea caracteres de riesgo de inyección: () [] {} = < >
+ * comillas, punto y coma, backslash y backtick.
+ */
+export const SOLO_TEXTO_SEGURO =
+  /^[\p{L}\p{M}\p{N}\p{Pd}\s.,:!?@#$%&*+/_]+$/u;
+
+/**
+ * Para campos de texto largo (descripciones, requisitos, notas): bloquea solo
+ * los caracteres de inyección SQL reales (comillas, punto y coma, backtick,
+ * backslash) sin prohibir puntuación legítima como paréntesis.
+ */
+export const SIN_INYECCION = /^[^'"`;\\]+$/u;
+
 /** Elimina todo carácter que no sea un dígito. */
 export const sanitizarDigitos = (valor: string) => valor.replace(/\D/g, "");
 

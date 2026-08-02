@@ -2,6 +2,8 @@
 
 import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { formatDateLong } from "@/lib/format";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,6 +18,10 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { sanitizarDigitos } from "@/lib/validators";
+import {
+  perfilInstructorSchema,
+  type PerfilInstructorForm,
+} from "@/lib/schemas";
 import {
   GraduationCap,
   Mail,
@@ -102,15 +108,18 @@ export default function PerfilPage() {
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [form, setForm] = useState({
-    cedula: "",
-    telefono: "",
-    municipio: "",
-    especialidad: "",
-    titulo: "",
-    departamento: "",
-    fecha_nacimiento: "",
-    genero: "",
+  const form = useForm<PerfilInstructorForm>({
+    resolver: zodResolver(perfilInstructorSchema),
+    defaultValues: {
+      cedula: "",
+      telefono: "",
+      municipio: "",
+      especialidad: "",
+      titulo: undefined,
+      departamento: "",
+      fecha_nacimiento: "",
+      genero: undefined,
+    },
   });
 
   useEffect(() => {
@@ -124,18 +133,21 @@ export default function PerfilPage() {
       })
       .catch(() => setError("Error al cargar el perfil."))
       .finally(() => setLoading(false));
+    // populateForm usa form.reset (referencia estable de react-hook-form);
+    // el efecto solo debe correr una vez al montar el perfil.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const populateForm = (p: Profesor) => {
-    setForm({
+    form.reset({
       cedula: p.cedula ?? "",
       telefono: p.telefono ?? "",
       municipio: p.municipio ?? "",
       especialidad: p.especialidad ?? "",
-      titulo: p.titulo ?? "",
+      titulo: (p.titulo as PerfilInstructorForm["titulo"]) ?? undefined,
       departamento: p.departamento ?? "",
       fecha_nacimiento: toDateInput(p.fecha_nacimiento),
-      genero: p.genero ?? "",
+      genero: (p.genero as PerfilInstructorForm["genero"]) ?? undefined,
     });
   };
 
@@ -189,19 +201,19 @@ export default function PerfilPage() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (data: PerfilInstructorForm) => {
     if (!me) return;
     setSaving(true);
     try {
       const body = {
-        cedula: form.cedula || null,
-        telefono: form.telefono || null,
-        municipio: form.municipio || null,
-        especialidad: form.especialidad || null,
-        titulo: form.titulo || null,
-        departamento: form.departamento || null,
-        fecha_nacimiento: form.fecha_nacimiento || null,
-        genero: form.genero || null,
+        cedula: data.cedula || null,
+        telefono: data.telefono || null,
+        municipio: data.municipio || null,
+        especialidad: data.especialidad || null,
+        titulo: data.titulo || null,
+        departamento: data.departamento || null,
+        fecha_nacimiento: data.fecha_nacimiento || null,
+        genero: data.genero || null,
       };
       const res = await fetch(
         `${process.env.API_URL}api/profesor/perfil/${me.profesor.id}`,
@@ -346,32 +358,41 @@ export default function PerfilPage() {
                     inputMode="numeric"
                     pattern="[0-9]*"
                     maxLength={15}
-                    value={form.cedula}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        cedula: sanitizarDigitos(e.target.value),
-                      }))
-                    }
                     placeholder="Ej: 12345678"
+                    {...form.register("cedula", {
+                      onChange: (e) =>
+                        form.setValue(
+                          "cedula",
+                          sanitizarDigitos(e.target.value),
+                        ),
+                    })}
                   />
+                  {form.formState.errors.cedula && (
+                    <p className="text-xs text-danger">
+                      {form.formState.errors.cedula.message}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="telefono">Teléfono</Label>
                   <Input
                     id="telefono"
                     inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={20}
-                    value={form.telefono}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        telefono: sanitizarDigitos(e.target.value),
-                      }))
-                    }
+                    pattern="[0-9]*"                    maxLength={20}
                     placeholder="Ej: 04120000000"
+                    {...form.register("telefono", {
+                      onChange: (e) =>
+                        form.setValue(
+                          "telefono",
+                          sanitizarDigitos(e.target.value),
+                        ),
+                      })}
                   />
+                  {form.formState.errors.telefono && (
+                    <p className="text-xs text-danger">
+                      {form.formState.errors.telefono.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -380,26 +401,27 @@ export default function PerfilPage() {
                   <Label htmlFor="municipio">Municipio</Label>
                   <Input
                     id="municipio"
-                    value={form.municipio}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, municipio: e.target.value }))
-                    }
                     placeholder="Ej: Caracas"
+                    {...form.register("municipio")}
                   />
+                  {form.formState.errors.municipio && (
+                    <p className="text-xs text-danger">
+                      {form.formState.errors.municipio.message}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="departamento">Departamento</Label>
                   <Input
                     id="departamento"
-                    value={form.departamento}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        departamento: e.target.value,
-                      }))
-                    }
                     placeholder="Ej: Artes Visuales"
+                    {...form.register("departamento")}
                   />
+                  {form.formState.errors.departamento && (
+                    <p className="text-xs text-danger">
+                      {form.formState.errors.departamento.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -407,20 +429,28 @@ export default function PerfilPage() {
                 <Label htmlFor="especialidad">Especialidad</Label>
                 <Input
                   id="especialidad"
-                  value={form.especialidad}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, especialidad: e.target.value }))
-                  }
                   placeholder="Ej: Fotografía Digital"
+                  {...form.register("especialidad")}
                 />
+                {form.formState.errors.especialidad && (
+                  <p className="text-xs text-danger">
+                    {form.formState.errors.especialidad.message}
+                  </p>
+                )}
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label>Título académico</Label>
                   <Select
-                    value={form.titulo}
-                    onValueChange={(v) => setForm((f) => ({ ...f, titulo: v }))}
+                    value={form.watch("titulo") || undefined}
+                    onValueChange={(v) =>
+                      form.setValue(
+                        "titulo",
+                        v as PerfilInstructorForm["titulo"],
+                        { shouldValidate: true },
+                      )
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Sin título" />
@@ -435,8 +465,14 @@ export default function PerfilPage() {
                 <div className="grid gap-2">
                   <Label>Género</Label>
                   <Select
-                    value={form.genero}
-                    onValueChange={(v) => setForm((f) => ({ ...f, genero: v }))}
+                    value={form.watch("genero") || undefined}
+                    onValueChange={(v) =>
+                      form.setValue(
+                        "genero",
+                        v as PerfilInstructorForm["genero"],
+                        { shouldValidate: true },
+                      )
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="No especificado" />
@@ -455,13 +491,7 @@ export default function PerfilPage() {
                 <Input
                   id="fecha_nacimiento"
                   type="date"
-                  value={form.fecha_nacimiento}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      fecha_nacimiento: e.target.value,
-                    }))
-                  }
+                  {...form.register("fecha_nacimiento")}
                 />
               </div>
 
@@ -476,7 +506,7 @@ export default function PerfilPage() {
                   Cancelar
                 </Button>
                 <Button
-                  onClick={handleSave}
+                  onClick={() => form.handleSubmit(handleSave)()}
                   disabled={saving}
                   className="gap-2"
                 >
