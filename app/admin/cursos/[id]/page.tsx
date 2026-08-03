@@ -2,8 +2,18 @@
 
 import { useState, useEffect, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { formatDate, formatPrice, formatTime } from "@/lib/format";
+import {
+  editCursoSchema,
+  temarioSchema,
+  sesionSchema,
+  type EditCursoForm,
+  type TemarioForm,
+  type SesionForm,
+} from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
@@ -255,18 +265,21 @@ export default function CursoDetailPage({
 
   // Edit course dialog
   const [editOpen, setEditOpen] = useState(false);
-  const [editForm, setEditForm] = useState({
-    nombre: "",
-    descripcion: "",
-    limite_cupo: 30,
-    minimo_estudiantes: "" as string | number,
-    fecha_inicio: "",
-    fecha_fin: "",
-    requisitos: "",
-    precio: 0,
-    whatsapp_url: "",
-    estado: "activo" as "activo" | "inactivo",
-    profesor_id: "",
+  const editForm = useForm<EditCursoForm>({
+    resolver: zodResolver(editCursoSchema),
+    defaultValues: {
+      nombre: "",
+      descripcion: "",
+      limite_cupo: 30,
+      minimo_estudiantes: undefined,
+      fecha_inicio: "",
+      fecha_fin: "",
+      requisitos: "",
+      precio: 0,
+      whatsapp_url: "",
+      estado: "activo",
+      profesor_id: "",
+    },
   });
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
@@ -295,10 +308,9 @@ export default function CursoDetailPage({
   const [temario, setTemario] = useState<Temario[]>([]);
   const [temarioOpen, setTemarioOpen] = useState(false);
   const [temarioEdit, setTemarioEdit] = useState<Temario | null>(null);
-  const [temarioForm, setTemarioForm] = useState({
-    titulo: "",
-    descripcion: "",
-    orden: 0,
+  const temarioForm = useForm<TemarioForm>({
+    resolver: zodResolver(temarioSchema),
+    defaultValues: { titulo: "", descripcion: "", orden: 0 },
   });
   const [temarioSubmitting, setTemarioSubmitting] = useState(false);
   const [temarioError, setTemarioError] = useState("");
@@ -310,13 +322,16 @@ export default function CursoDetailPage({
   const [sesiones, setSesiones] = useState<Sesion[]>([]);
   const [sesionOpen, setSesionOpen] = useState(false);
   const [sesionEdit, setSesionEdit] = useState<Sesion | null>(null);
-  const [sesionForm, setSesionForm] = useState({
-    titulo: "",
-    descripcion: "",
-    fecha: "",
-    hora_inicio: "",
-    hora_fin: "",
-    estado: "programada" as Sesion["estado"],
+  const sesionForm = useForm<SesionForm>({
+    resolver: zodResolver(sesionSchema),
+    defaultValues: {
+      titulo: "",
+      descripcion: "",
+      fecha: "",
+      hora_inicio: "",
+      hora_fin: "",
+      estado: "programada",
+    },
   });
   const [sesionSubmitting, setSesionSubmitting] = useState(false);
   const [sesionError, setSesionError] = useState("");
@@ -453,11 +468,11 @@ export default function CursoDetailPage({
 
   const openEdit = () => {
     if (!curso) return;
-    setEditForm({
+    editForm.reset({
       nombre: curso.nombre,
       descripcion: curso.descripcion ?? "",
       limite_cupo: curso.limite_cupo,
-      minimo_estudiantes: curso.minimo_estudiantes ?? "",
+      minimo_estudiantes: curso.minimo_estudiantes ?? undefined,
       fecha_inicio: curso.fecha_inicio ?? "",
       fecha_fin: curso.fecha_fin ?? "",
       requisitos: curso.requisitos ?? "",
@@ -470,7 +485,7 @@ export default function CursoDetailPage({
     setEditOpen(true);
   };
 
-  const handleEdit = async () => {
+  const handleEdit = async (data: EditCursoForm) => {
     if (!curso) return;
     setEditSubmitting(true);
     setEditError("");
@@ -481,22 +496,20 @@ export default function CursoDetailPage({
           method: "PUT",
           headers: getAuthHeaders(),
           body: JSON.stringify({
-            nombre: editForm.nombre,
-            descripcion: editForm.descripcion || null,
-            limite_cupo: Number(editForm.limite_cupo),
+            nombre: data.nombre,
+            descripcion: data.descripcion || null,
+            limite_cupo: Number(data.limite_cupo),
             minimo_estudiantes:
-              editForm.minimo_estudiantes === ""
+              data.minimo_estudiantes === undefined
                 ? null
-                : Number(editForm.minimo_estudiantes),
-            fecha_inicio: editForm.fecha_inicio || null,
-            fecha_fin: editForm.fecha_fin || null,
-            requisitos: editForm.requisitos || null,
-            precio: Number(editForm.precio),
-            whatsapp_url: editForm.whatsapp_url || null,
-            estado: editForm.estado,
-            profesor_id: editForm.profesor_id
-              ? Number(editForm.profesor_id)
-              : null,
+                : Number(data.minimo_estudiantes),
+            fecha_inicio: data.fecha_inicio || null,
+            fecha_fin: data.fecha_fin || null,
+            requisitos: data.requisitos || null,
+            precio: Number(data.precio),
+            whatsapp_url: data.whatsapp_url || null,
+            estado: data.estado,
+            profesor_id: data.profesor_id ? Number(data.profesor_id) : null,
           }),
         },
       );
@@ -647,14 +660,14 @@ export default function CursoDetailPage({
 
   const openTemarioCreate = () => {
     setTemarioEdit(null);
-    setTemarioForm({ titulo: "", descripcion: "", orden: temario.length });
+    temarioForm.reset({ titulo: "", descripcion: "", orden: temario.length });
     setTemarioError("");
     setTemarioOpen(true);
   };
 
   const openTemarioEdit = (t: Temario) => {
     setTemarioEdit(t);
-    setTemarioForm({
+    temarioForm.reset({
       titulo: t.titulo,
       descripcion: t.descripcion ?? "",
       orden: t.orden,
@@ -663,11 +676,7 @@ export default function CursoDetailPage({
     setTemarioOpen(true);
   };
 
-  const handleTemarioSubmit = async () => {
-    if (!temarioForm.titulo.trim()) {
-      setTemarioError("El título es obligatorio.");
-      return;
-    }
+  const handleTemarioSubmit = async (data: TemarioForm) => {
     setTemarioSubmitting(true);
     setTemarioError("");
     try {
@@ -678,9 +687,9 @@ export default function CursoDetailPage({
         method: temarioEdit ? "PUT" : "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({
-          titulo: temarioForm.titulo,
-          descripcion: temarioForm.descripcion || null,
-          orden: Number(temarioForm.orden),
+          titulo: data.titulo.trim(),
+          descripcion: data.descripcion || null,
+          orden: Number(data.orden),
         }),
       });
       if (!res.ok) {
@@ -727,7 +736,7 @@ export default function CursoDetailPage({
 
   const openSesionCreate = () => {
     setSesionEdit(null);
-    setSesionForm({
+    sesionForm.reset({
       titulo: "",
       descripcion: "",
       fecha: "",
@@ -741,7 +750,7 @@ export default function CursoDetailPage({
 
   const openSesionEdit = (s: Sesion) => {
     setSesionEdit(s);
-    setSesionForm({
+    sesionForm.reset({
       titulo: s.titulo,
       descripcion: s.descripcion ?? "",
       fecha: s.fecha,
@@ -753,15 +762,7 @@ export default function CursoDetailPage({
     setSesionOpen(true);
   };
 
-  const handleSesionSubmit = async () => {
-    if (!sesionForm.titulo.trim()) {
-      setSesionError("El título es obligatorio.");
-      return;
-    }
-    if (!sesionForm.fecha) {
-      setSesionError("La fecha es obligatoria.");
-      return;
-    }
+  const handleSesionSubmit = async (data: SesionForm) => {
     setSesionSubmitting(true);
     setSesionError("");
     try {
@@ -772,12 +773,12 @@ export default function CursoDetailPage({
         method: sesionEdit ? "PUT" : "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({
-          titulo: sesionForm.titulo,
-          descripcion: sesionForm.descripcion || null,
-          fecha: sesionForm.fecha,
-          hora_inicio: sesionForm.hora_inicio || null,
-          hora_fin: sesionForm.hora_fin || null,
-          estado: sesionForm.estado,
+          titulo: data.titulo.trim(),
+          descripcion: data.descripcion || null,
+          fecha: data.fecha,
+          hora_inicio: data.hora_inicio || null,
+          hora_fin: data.hora_fin || null,
+          estado: data.estado,
         }),
       });
       if (!res.ok) {
@@ -1631,19 +1632,25 @@ export default function CursoDetailPage({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-2">
+          <form
+            onSubmit={editForm.handleSubmit(handleEdit)}
+            className="grid gap-4 py-2"
+          >
             {/* Nombre */}
             <div className="flex flex-col gap-1.5">
               <label className="font-sans text-xs font-medium text-on-surface">
                 Nombre
               </label>
               <Input
-                value={editForm.nombre}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, nombre: e.target.value }))
-                }
+                placeholder="Ej: Fotografía Básica"
+                {...editForm.register("nombre")}
                 className="font-sans text-sm"
               />
+              {editForm.formState.errors.nombre && (
+                <p className="text-xs text-danger">
+                  {editForm.formState.errors.nombre.message}
+                </p>
+              )}
             </div>
 
             {/* Instructor + Estado */}
@@ -1653,9 +1660,11 @@ export default function CursoDetailPage({
                   Instructor
                 </label>
                 <Select
-                  value={editForm.profesor_id}
+                  value={editForm.watch("profesor_id") ?? ""}
                   onValueChange={(v) =>
-                    setEditForm((f) => ({ ...f, profesor_id: v }))
+                    editForm.setValue("profesor_id", v, {
+                      shouldValidate: true,
+                    })
                   }
                 >
                   <SelectTrigger className="w-full">
@@ -1682,12 +1691,9 @@ export default function CursoDetailPage({
                   Estado
                 </label>
                 <Select
-                  value={editForm.estado}
+                  value={editForm.watch("estado")}
                   onValueChange={(v) =>
-                    setEditForm((f) => ({
-                      ...f,
-                      estado: v as "activo" | "inactivo",
-                    }))
+                    editForm.setValue("estado", v as EditCursoForm["estado"])
                   }
                 >
                   <SelectTrigger className="w-full">
@@ -1710,15 +1716,14 @@ export default function CursoDetailPage({
                 <Input
                   type="number"
                   min={1}
-                  value={editForm.limite_cupo}
-                  onChange={(e) =>
-                    setEditForm((f) => ({
-                      ...f,
-                      limite_cupo: Number(e.target.value),
-                    }))
-                  }
+                  {...editForm.register("limite_cupo", { valueAsNumber: true })}
                   className="font-sans text-sm"
                 />
+                {editForm.formState.errors.limite_cupo && (
+                  <p className="text-xs text-danger">
+                    {editForm.formState.errors.limite_cupo.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="font-sans text-xs font-medium text-on-surface">
@@ -1728,15 +1733,16 @@ export default function CursoDetailPage({
                   type="number"
                   min={1}
                   placeholder="Para aperturar el curso"
-                  value={editForm.minimo_estudiantes}
-                  onChange={(e) =>
-                    setEditForm((f) => ({
-                      ...f,
-                      minimo_estudiantes: e.target.value,
-                    }))
-                  }
+                  {...editForm.register("minimo_estudiantes", {
+                    valueAsNumber: true,
+                  })}
                   className="font-sans text-sm"
                 />
+                {editForm.formState.errors.minimo_estudiantes && (
+                  <p className="text-xs text-danger">
+                    {editForm.formState.errors.minimo_estudiantes.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="font-sans text-xs font-medium text-on-surface">
@@ -1746,15 +1752,14 @@ export default function CursoDetailPage({
                   type="number"
                   min={0}
                   step="0.01"
-                  value={editForm.precio}
-                  onChange={(e) =>
-                    setEditForm((f) => ({
-                      ...f,
-                      precio: Number(e.target.value),
-                    }))
-                  }
+                  {...editForm.register("precio", { valueAsNumber: true })}
                   className="font-sans text-sm"
                 />
+                {editForm.formState.errors.precio && (
+                  <p className="text-xs text-danger">
+                    {editForm.formState.errors.precio.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -1766,12 +1771,16 @@ export default function CursoDetailPage({
                 </label>
                 <Input
                   type="date"
-                  value={editForm.fecha_inicio}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, fecha_inicio: e.target.value }))
-                  }
+                  {...editForm.register("fecha_inicio", {
+                    onChange: () => editForm.trigger("fecha_inicio"),
+                  })}
                   className="font-sans text-sm"
                 />
+                {editForm.formState.errors.fecha_inicio && (
+                  <p className="text-xs text-danger">
+                    {editForm.formState.errors.fecha_inicio.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="font-sans text-xs font-medium text-on-surface">
@@ -1779,12 +1788,16 @@ export default function CursoDetailPage({
                 </label>
                 <Input
                   type="date"
-                  value={editForm.fecha_fin}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, fecha_fin: e.target.value }))
-                  }
+                  {...editForm.register("fecha_fin", {
+                    onChange: () => editForm.trigger("fecha_fin"),
+                  })}
                   className="font-sans text-sm"
                 />
+                {editForm.formState.errors.fecha_fin && (
+                  <p className="text-xs text-danger">
+                    {editForm.formState.errors.fecha_fin.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -1799,12 +1812,14 @@ export default function CursoDetailPage({
               <Input
                 type="url"
                 placeholder="https://chat.whatsapp.com/..."
-                value={editForm.whatsapp_url}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, whatsapp_url: e.target.value }))
-                }
+                {...editForm.register("whatsapp_url")}
                 className="font-sans text-sm"
               />
+              {editForm.formState.errors.whatsapp_url && (
+                <p className="text-xs text-danger">
+                  {editForm.formState.errors.whatsapp_url.message}
+                </p>
+              )}
             </div>
 
             {/* Descripción */}
@@ -1816,14 +1831,16 @@ export default function CursoDetailPage({
                 </span>
               </label>
               <textarea
-                value={editForm.descripcion}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, descripcion: e.target.value }))
-                }
                 rows={3}
                 placeholder="Descripción del curso..."
                 className="w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                {...editForm.register("descripcion")}
               />
+              {editForm.formState.errors.descripcion && (
+                <p className="text-xs text-danger">
+                  {editForm.formState.errors.descripcion.message}
+                </p>
+              )}
             </div>
 
             {/* Requisitos */}
@@ -1835,14 +1852,16 @@ export default function CursoDetailPage({
                 </span>
               </label>
               <textarea
-                value={editForm.requisitos}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, requisitos: e.target.value }))
-                }
                 rows={3}
                 placeholder="Ej: Cuaderno, lápices de colores..."
                 className="w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                {...editForm.register("requisitos")}
               />
+              {editForm.formState.errors.requisitos && (
+                <p className="text-xs text-danger">
+                  {editForm.formState.errors.requisitos.message}
+                </p>
+              )}
             </div>
 
             {editError && (
@@ -1850,13 +1869,16 @@ export default function CursoDetailPage({
                 {editError}
               </div>
             )}
-          </div>
+          </form>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleEdit} disabled={editSubmitting}>
+            <Button
+              onClick={() => editForm.handleSubmit(handleEdit)()}
+              disabled={editSubmitting}
+            >
               {editSubmitting && (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               )}
@@ -2027,12 +2049,14 @@ export default function CursoDetailPage({
               </label>
               <Input
                 placeholder="Ej: Introducción al curso"
-                value={temarioForm.titulo}
-                onChange={(e) =>
-                  setTemarioForm((f) => ({ ...f, titulo: e.target.value }))
-                }
+                {...temarioForm.register("titulo")}
                 className="font-sans text-sm"
               />
+              {temarioForm.formState.errors.titulo && (
+                <p className="text-xs text-danger">
+                  {temarioForm.formState.errors.titulo.message}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="font-sans text-xs font-medium text-on-surface">
@@ -2044,12 +2068,14 @@ export default function CursoDetailPage({
               <textarea
                 rows={3}
                 placeholder="Contenido o descripción del tema..."
-                value={temarioForm.descripcion}
-                onChange={(e) =>
-                  setTemarioForm((f) => ({ ...f, descripcion: e.target.value }))
-                }
                 className="w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                {...temarioForm.register("descripcion")}
               />
+              {temarioForm.formState.errors.descripcion && (
+                <p className="text-xs text-danger">
+                  {temarioForm.formState.errors.descripcion.message}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="font-sans text-xs font-medium text-on-surface">
@@ -2058,15 +2084,14 @@ export default function CursoDetailPage({
               <Input
                 type="number"
                 min={0}
-                value={temarioForm.orden}
-                onChange={(e) =>
-                  setTemarioForm((f) => ({
-                    ...f,
-                    orden: Number(e.target.value),
-                  }))
-                }
+                {...temarioForm.register("orden", { valueAsNumber: true })}
                 className="font-sans text-sm w-24"
               />
+              {temarioForm.formState.errors.orden && (
+                <p className="text-xs text-danger">
+                  {temarioForm.formState.errors.orden.message}
+                </p>
+              )}
             </div>
             {temarioError && (
               <div className="bg-danger-container border border-danger/25 text-danger text-sm px-3 py-2 rounded-sm">
@@ -2079,7 +2104,10 @@ export default function CursoDetailPage({
             <Button variant="outline" onClick={() => setTemarioOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleTemarioSubmit} disabled={temarioSubmitting}>
+            <Button
+              onClick={() => temarioForm.handleSubmit(handleTemarioSubmit)()}
+              disabled={temarioSubmitting}
+            >
               {temarioSubmitting && (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               )}
@@ -2154,12 +2182,14 @@ export default function CursoDetailPage({
               </label>
               <Input
                 placeholder="Ej: Clase 1 – Introducción"
-                value={sesionForm.titulo}
-                onChange={(e) =>
-                  setSesionForm((f) => ({ ...f, titulo: e.target.value }))
-                }
+                {...sesionForm.register("titulo")}
                 className="font-sans text-sm"
               />
+              {sesionForm.formState.errors.titulo && (
+                <p className="text-xs text-danger">
+                  {sesionForm.formState.errors.titulo.message}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -2169,24 +2199,23 @@ export default function CursoDetailPage({
                 </label>
                 <Input
                   type="date"
-                  value={sesionForm.fecha}
-                  onChange={(e) =>
-                    setSesionForm((f) => ({ ...f, fecha: e.target.value }))
-                  }
+                  {...sesionForm.register("fecha")}
                   className="font-sans text-sm"
                 />
+                {sesionForm.formState.errors.fecha && (
+                  <p className="text-xs text-danger">
+                    {sesionForm.formState.errors.fecha.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="font-sans text-xs font-medium text-on-surface">
                   Estado
                 </label>
                 <Select
-                  value={sesionForm.estado}
+                  value={sesionForm.watch("estado")}
                   onValueChange={(v) =>
-                    setSesionForm((f) => ({
-                      ...f,
-                      estado: v as Sesion["estado"],
-                    }))
+                    sesionForm.setValue("estado", v as SesionForm["estado"])
                   }
                 >
                   <SelectTrigger className="w-full font-sans text-sm">
@@ -2211,13 +2240,7 @@ export default function CursoDetailPage({
                 </label>
                 <Input
                   type="time"
-                  value={sesionForm.hora_inicio}
-                  onChange={(e) =>
-                    setSesionForm((f) => ({
-                      ...f,
-                      hora_inicio: e.target.value,
-                    }))
-                  }
+                  {...sesionForm.register("hora_inicio")}
                   className="font-sans text-sm"
                 />
               </div>
@@ -2230,12 +2253,14 @@ export default function CursoDetailPage({
                 </label>
                 <Input
                   type="time"
-                  value={sesionForm.hora_fin}
-                  onChange={(e) =>
-                    setSesionForm((f) => ({ ...f, hora_fin: e.target.value }))
-                  }
+                  {...sesionForm.register("hora_fin")}
                   className="font-sans text-sm"
                 />
+                {sesionForm.formState.errors.hora_fin && (
+                  <p className="text-xs text-danger">
+                    {sesionForm.formState.errors.hora_fin.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -2249,12 +2274,14 @@ export default function CursoDetailPage({
               <textarea
                 rows={3}
                 placeholder="Temas a tratar, materiales necesarios..."
-                value={sesionForm.descripcion}
-                onChange={(e) =>
-                  setSesionForm((f) => ({ ...f, descripcion: e.target.value }))
-                }
                 className="w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                {...sesionForm.register("descripcion")}
               />
+              {sesionForm.formState.errors.descripcion && (
+                <p className="text-xs text-danger">
+                  {sesionForm.formState.errors.descripcion.message}
+                </p>
+              )}
             </div>
 
             {sesionError && (
@@ -2268,7 +2295,10 @@ export default function CursoDetailPage({
             <Button variant="outline" onClick={() => setSesionOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSesionSubmit} disabled={sesionSubmitting}>
+            <Button
+              onClick={() => sesionForm.handleSubmit(handleSesionSubmit)()}
+              disabled={sesionSubmitting}
+            >
               {sesionSubmitting && (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               )}

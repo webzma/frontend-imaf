@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,25 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { sesionHorarioSchema, type SesionHorarioForm } from "@/lib/schemas";
 import type { CursoRef, Sesion } from "./types";
 import { normalizeDate, normalizeTime } from "./utils";
-
-const schema = z
-  .object({
-    curso_id: z.string().min(1, "Selecciona un curso"),
-    titulo: z.string().min(1, "El título es obligatorio").max(255),
-    descripcion: z.string().max(2000).optional(),
-    fecha: z.string().min(1, "La fecha es obligatoria"),
-    hora_inicio: z.string().optional(),
-    hora_fin: z.string().optional(),
-    estado: z.enum(["programada", "realizada", "cancelada"]),
-  })
-  .refine((d) => !d.hora_inicio || !d.hora_fin || d.hora_fin > d.hora_inicio, {
-    message: "La hora fin debe ser posterior",
-    path: ["hora_fin"],
-  });
-
-type FormValues = z.infer<typeof schema>;
 
 interface Props {
   open: boolean;
@@ -74,8 +57,8 @@ export default function SesionDialog({
   const [deleting, setDeleting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  const form = useForm<SesionHorarioForm>({
+    resolver: zodResolver(sesionHorarioSchema),
     defaultValues: {
       curso_id: "",
       titulo: "",
@@ -121,7 +104,7 @@ export default function SesionDialog({
     }
   }, [open, initial, defaultDate, defaultHora, form]);
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: SesionHorarioForm) => {
     setSubmitting(true);
     setSubmitError("");
     try {
@@ -264,7 +247,7 @@ export default function SesionDialog({
               <Select
                 value={form.watch("estado")}
                 onValueChange={(v) =>
-                  form.setValue("estado", v as FormValues["estado"])
+                  form.setValue("estado", v as SesionHorarioForm["estado"])
                 }
               >
                 <SelectTrigger className="w-full">
@@ -313,6 +296,11 @@ export default function SesionDialog({
               className="w-full rounded-sm border-0 border-b border-b-outline-variant bg-surface-variant px-3 py-2 font-sans text-sm text-on-surface shadow-none transition-[background-color,border-color] outline-none placeholder:text-muted-foreground focus-visible:bg-surface-container-high focus-visible:border-b-primary resize-none"
               {...form.register("descripcion")}
             />
+            {form.formState.errors.descripcion && (
+              <p className="text-sm text-danger">
+                {form.formState.errors.descripcion.message}
+              </p>
+            )}
           </div>
 
           {submitError && (
