@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/empty-state";
+import { SIN_INYECCION } from "@/lib/validators";
 import {
   DataCard,
   DataCardHeader,
@@ -154,10 +155,22 @@ function PagoDetailModal({
   }, [pago]);
 
   const handleDecision = async (estado: "aprobado" | "rechazado") => {
-    // Validar que se ingrese motivo para rechazo
-    if (estado === "rechazado" && !nota.trim()) {
-      toast.error("Debes ingresar un motivo para el rechazo del pago.");
-      return;
+    if (estado === "rechazado") {
+      // Validar que se ingrese motivo para rechazo
+      if (!nota.trim()) {
+        toast.error("Debes ingresar un motivo para el rechazo del pago.");
+        return;
+      }
+      if (nota.trim().length > 500) {
+        toast.error("La nota no puede superar 500 caracteres.");
+        return;
+      }
+      if (!SIN_INYECCION.test(nota.trim())) {
+        toast.error(
+          "La nota contiene caracteres no permitidos (evita comillas, punto y coma o backslash).",
+        );
+        return;
+      }
     }
 
     setConfirmDialog({ action: estado, open: true });
@@ -350,6 +363,7 @@ function PagoDetailModal({
             <Input
               value={nota}
               onChange={(e) => setNota(e.target.value)}
+              maxLength={500}
               placeholder="Motivo del rechazo, observaciones..."
               className="font-sans text-sm h-10"
             />
@@ -432,6 +446,7 @@ function PagoDetailModal({
                 <Input
                   value={nota}
                   onChange={(e) => setNota(e.target.value)}
+                  maxLength={500}
                   placeholder="Escribe el motivo por el cual se rechaza el pago..."
                   className="font-sans text-sm"
                 />

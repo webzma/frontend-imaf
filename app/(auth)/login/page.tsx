@@ -2,27 +2,29 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
+import { loginSchema, type LoginForm } from "@/lib/schemas";
 import logoImaf from "@/public/logo-imaf.webp";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const form = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (data: LoginForm) => {
     setError("");
     setLoading(true);
     try {
@@ -32,16 +34,16 @@ export default function LoginPage() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(data),
       });
-      const data = await res.json();
+      const body = await res.json();
       if (!res.ok) {
-        setError(data.message || "Credenciales incorrectas.");
+        setError(body.message || "Credenciales incorrectas.");
         return;
       }
-      const role = data.user.role;
+      const role = body.user.role;
       document.cookie = `role=${role}; path=/; SameSite=Lax`;
-      document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+      document.cookie = `token=${body.token}; path=/; SameSite=Lax`;
       if (role === "admin") router.push("/admin");
       else if (role === "profesor") router.push("/instructor");
       else router.push("/estudiante");
@@ -118,7 +120,11 @@ export default function LoginPage() {
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-7">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            noValidate
+            className="space-y-7"
+          >
             <div className="space-y-2">
               <Label
                 htmlFor="email"
@@ -128,14 +134,16 @@ export default function LoginPage() {
               </Label>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 autoComplete="email"
                 placeholder="tu@correo.com"
-                value={form.email}
-                onChange={handleChange}
-                required
+                {...form.register("email")}
               />
+              {form.formState.errors.email && (
+                <p className="font-sans text-xs text-danger">
+                  {form.formState.errors.email.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -148,14 +156,11 @@ export default function LoginPage() {
               <div className="relative">
                 <Input
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  value={form.password}
-                  onChange={handleChange}
-                  required
                   className="pr-10"
+                  {...form.register("password")}
                 />
                 <button
                   type="button"
@@ -173,6 +178,11 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
+              {form.formState.errors.password && (
+                <p className="font-sans text-xs text-danger">
+                  {form.formState.errors.password.message}
+                </p>
+              )}
             </div>
 
             {/* El icono no desaparece al cargar: se sustituye por el spinner,

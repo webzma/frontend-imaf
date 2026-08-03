@@ -5,10 +5,9 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import { formatDate, formatPrice } from "@/lib/format";
-import { motivoDiaNoHabil } from "@/lib/dias-habiles";
+import { cursoSchema, type CursoForm } from "@/lib/schemas";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
 import { Input } from "@/components/ui/input";
@@ -95,54 +94,9 @@ function getAuthHeaders() {
   };
 }
 
-/* ── Zod Schema ── */
-
-const cursoSchema = z
-  .object({
-    nombre: z.string().min(1, "El nombre es obligatorio").max(255),
-    descripcion: z.string().max(1000).optional(),
-    profesor_id: z.string().min(1, "Debes seleccionar un instructor"),
-    limite_cupo: z.number().int().min(1, "Mínimo 1 participante"),
-    minimo_estudiantes: z.preprocess(
-      (v) => (typeof v === "number" && Number.isNaN(v) ? undefined : v),
-      z.number().int().min(1, "Mínimo 1 estudiante").optional(),
-    ),
-    fecha_inicio: z
-      .string()
-      .optional()
-      .superRefine((v, ctx) => {
-        if (!v) return;
-        const motivo = motivoDiaNoHabil(v);
-        if (motivo) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: motivo });
-        }
-      }),
-    fecha_fin: z
-      .string()
-      .optional()
-      .superRefine((v, ctx) => {
-        if (!v) return;
-        const motivo = motivoDiaNoHabil(v);
-        if (motivo) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: motivo });
-        }
-      }),
-    requisitos: z.string().max(2000).optional(),
-    precio: z.number().min(0, "El precio no puede ser negativo"),
-    whatsapp_url: z.string().url("URL inválida").optional().or(z.literal("")),
-    estado: z.enum(["activo", "inactivo"]),
-  })
-  .refine(
-    (d) =>
-      d.minimo_estudiantes === undefined ||
-      d.minimo_estudiantes <= d.limite_cupo,
-    {
-      message: "El mínimo no puede superar el límite de cupo",
-      path: ["minimo_estudiantes"],
-    },
-  );
-
-type CursoForm = z.infer<typeof cursoSchema>;
+/* ── Zod Schema ──
+   El esquema vive en lib/schemas.ts para compartirlo con la edición de
+   curso en app/admin/cursos/[id]/page.tsx y no duplicar validaciones. */
 
 /* ── Skeletons ── */
 

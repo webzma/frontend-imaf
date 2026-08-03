@@ -210,11 +210,34 @@ function PagoModal({
   const [archivo, setArchivo] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const MAX_ARCHIVO = 5 * 1024 * 1024; // 5 MB
+  const TIPOS_PERMITIDOS = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf",
+  ];
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
+    e.target.value = "";
     if (!f) return;
+    if (!TIPOS_PERMITIDOS.includes(f.type)) {
+      setFormError("Formato no permitido. Usa JPG, PNG, WEBP o PDF.");
+      setArchivo(null);
+      setPreview(null);
+      return;
+    }
+    if (f.size > MAX_ARCHIVO) {
+      setFormError("El comprobante no debe superar los 5 MB.");
+      setArchivo(null);
+      setPreview(null);
+      return;
+    }
+    setFormError("");
     setArchivo(f);
     const url = URL.createObjectURL(f);
     setPreview(url);
@@ -222,18 +245,27 @@ function PagoModal({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!metodo) return;
+    setFormError("");
+    if (!metodo) return; // el formulario solo se renderiza con un método elegido
     if (metodo !== "efectivo") {
       if (!archivo) {
-        toast.error("Debes adjuntar el comprobante de pago.");
+        setFormError("Debes adjuntar el comprobante de pago.");
         return;
       }
       if (!referencia.trim()) {
-        toast.error("Ingresa el número de referencia.");
+        setFormError("Ingresa el número de referencia.");
+        return;
+      }
+      if (referencia.trim().length > 30) {
+        setFormError("El número de referencia no puede superar 30 dígitos.");
         return;
       }
       if (!/^\d+$/.test(referencia.trim())) {
-        toast.error("El número de referencia solo puede contener dígitos.");
+        setFormError("El número de referencia solo puede contener dígitos.");
+        return;
+      }
+      if (bancoOrigen.trim().length > 100) {
+        setFormError("El banco de origen no puede superar 100 caracteres.");
         return;
       }
     }
@@ -299,6 +331,7 @@ function PagoModal({
       setBancoOrigen("");
       setArchivo(null);
       setPreview(null);
+      setFormError("");
     }
   }, [open]);
 
@@ -328,7 +361,10 @@ function PagoModal({
               return (
                 <button
                   key={opt.id}
-                  onClick={() => setMetodo(opt.id)}
+                  onClick={() => {
+                    setMetodo(opt.id);
+                    setFormError("");
+                  }}
                   className="group flex items-center gap-4 text-left bg-surface-container-low hover:bg-primary-container/40 border border-outline-variant hover:border-primary/40 rounded-sm px-4 py-3.5 transition-colors"
                 >
                   <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shrink-0">
@@ -352,7 +388,10 @@ function PagoModal({
         {metodo !== null && (
           <>
             <button
-              onClick={() => setMetodo(null)}
+              onClick={() => {
+                setMetodo(null);
+                setFormError("");
+              }}
               className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary hover:opacity-70 transition-opacity self-start"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -451,6 +490,14 @@ function PagoModal({
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4 mt-1">
+              {formError && (
+                <div
+                  role="alert"
+                  className="bg-danger-container border border-danger/25 text-danger text-sm px-4 py-3 rounded-sm font-sans"
+                >
+                  {formError}
+                </div>
+              )}
               {metodo !== "efectivo" && (
                 <>
                   <div className="space-y-1.5">
@@ -468,6 +515,7 @@ function PagoModal({
                       }
                       inputMode="numeric"
                       pattern="[0-9]*"
+                      maxLength={30}
                       placeholder="Ej: 1234567890"
                       className="font-sans text-sm h-10"
                       required
@@ -485,6 +533,7 @@ function PagoModal({
                       id="banco"
                       value={bancoOrigen}
                       onChange={(e) => setBancoOrigen(e.target.value)}
+                      maxLength={100}
                       placeholder="Ej: Banesco"
                       className="font-sans text-sm h-10"
                     />

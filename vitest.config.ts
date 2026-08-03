@@ -12,5 +12,8 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     include: ["**/*.{test,spec}.{ts,tsx}"],
     exclude: ["node_modules", ".next", "e2e"],
+    // Los tests de componentes (React + Radix UI en jsdom) tardan más que
+    // los 5s por defecto al correr la suite completa en paralelo.
+    testTimeout: 15000,
   },
 });
