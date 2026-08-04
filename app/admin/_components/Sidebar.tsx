@@ -41,7 +41,7 @@ const navItems = [
     section: "General",
     items: [
       {
-        label: "Dashboard",
+        label: "Inicio",
         href: "/admin",
         icon: LayoutDashboard,
         exact: true,

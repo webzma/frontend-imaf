@@ -10,7 +10,7 @@ import {
 import { MobileNavbar, type MobileNavItem } from "@/components/mobile-navbar";
 
 const items: MobileNavItem[] = [
-  { label: "Panel", href: "/instructor", icon: LayoutDashboard, exact: true },
+  { label: "Inicio", href: "/instructor", icon: LayoutDashboard, exact: true },
   { label: "Cursos", href: "/instructor/mis-cursos", icon: BookOpen },
   { label: "Horario", href: "/instructor/horario", icon: CalendarDays },
   { label: "Perfil", href: "/instructor/perfil", icon: User },

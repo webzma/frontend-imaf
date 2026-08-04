@@ -99,7 +99,7 @@ export default function EstudianteDashboard() {
             <div className="flex items-center gap-4 mb-4">
               <LayoutDashboard className="size-6 text-primary/80" />
               <span className="font-sans text-[11px] tracking-[0.24em] uppercase text-primary/80 font-semibold">
-                Dashboard · {today}
+                Inicio · {today}
               </span>
             </div>
             <Skeleton className="h-14 w-72" />
@@ -107,7 +107,7 @@ export default function EstudianteDashboard() {
         ) : (
           <PageHeader
             icon={LayoutDashboard}
-            eyebrow={`Dashboard · ${today}`}
+            eyebrow={`Inicio · ${today}`}
             title={`${getGreeting()}, ${firstName}`}
             subtitle="Bienvenido a tu espacio académico. Aquí encontrarás el resumen de tu actividad y tu curso actual."
             className="mb-12 md:mb-12"

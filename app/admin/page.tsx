@@ -110,7 +110,7 @@ export default function AdminDashboard() {
         <PageHeader
           icon={TrendingUp}
           eyebrow="Resumen general"
-          title="Bienvenido al Panel"
+          title="Bienvenido al panel de administrador"
           subtitle="Aquí tienes un resumen del estado actual de la plataforma."
         />
 
