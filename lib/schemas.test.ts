@@ -151,16 +151,12 @@ describe("registroSchema", () => {
 
   it("rechaza cédulas de menos de 7 dígitos", () => {
     const r = registroSchema.safeParse({ ...valido, cedula: "123456" });
-    expect(mensajeDe(r, "cedula")).toBe(
-      "La cédula debe tener 7 u 8 dígitos",
-    );
+    expect(mensajeDe(r, "cedula")).toBe("La cédula debe tener 7 u 8 dígitos");
   });
 
   it("rechaza cédulas de más de 8 dígitos", () => {
     const r = registroSchema.safeParse({ ...valido, cedula: "123456789" });
-    expect(mensajeDe(r, "cedula")).toBe(
-      "La cédula debe tener 7 u 8 dígitos",
-    );
+    expect(mensajeDe(r, "cedula")).toBe("La cédula debe tener 7 u 8 dígitos");
   });
 
   it("acepta una cédula de 7 dígitos", () => {
@@ -580,15 +576,13 @@ describe("perfilInstructorSchema", () => {
 
   it("rechaza cédulas de menos de 7 dígitos en el perfil", () => {
     const r = perfilInstructorSchema.safeParse({ cedula: "123456" });
-    expect(mensajeDe(r, "cedula")).toBe(
-      "La cédula debe tener 7 u 8 dígitos",
-    );
+    expect(mensajeDe(r, "cedula")).toBe("La cédula debe tener 7 u 8 dígitos");
   });
 
   it("acepta una cédula de 8 dígitos en el perfil", () => {
-    expect(perfilInstructorSchema.safeParse({ cedula: "12345678" }).success).toBe(
-      true,
-    );
+    expect(
+      perfilInstructorSchema.safeParse({ cedula: "12345678" }).success,
+    ).toBe(true);
   });
 
   it("rechaza especialidades con punto y coma (inyección)", () => {
