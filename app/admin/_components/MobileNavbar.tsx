@@ -15,7 +15,7 @@ import { MobileNavbar, type MobileNavItem } from "@/components/mobile-navbar";
  * botón de la cabecera.
  */
 const items: MobileNavItem[] = [
-  { label: "Panel", href: "/admin", icon: LayoutDashboard, exact: true },
+  { label: "Inicio", href: "/admin", icon: LayoutDashboard, exact: true },
   { label: "Estudiantes", href: "/admin/estudiantes", icon: Users },
   { label: "Cursos", href: "/admin/cursos", icon: BookOpen },
   { label: "Pagos", href: "/admin/pagos", icon: CreditCard },
