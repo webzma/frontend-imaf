@@ -587,6 +587,7 @@ export default function InstructoresPage() {
                       id="cedula"
                       inputMode="numeric"
                       pattern="[0-9]*"
+                      maxLength={8}
                       placeholder="12345678"
                       {...form.register("cedula", {
                         onChange: (e) =>
@@ -1319,6 +1320,7 @@ export default function InstructoresPage() {
                   id="edit-cedula"
                   inputMode="numeric"
                   pattern="[0-9]*"
+                  maxLength={8}
                   placeholder="12345678"
                   {...editForm.register("cedula", {
                     onChange: (e) =>

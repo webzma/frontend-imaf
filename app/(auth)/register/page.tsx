@@ -265,8 +265,8 @@ export default function RegisterPage() {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder="0000000000"
-                maxLength={15}
+                placeholder="00000000"
+                maxLength={8}
                 {...form.register("cedula", {
                   onChange: (e) =>
                     form.setValue("cedula", sanitizarDigitos(e.target.value)),

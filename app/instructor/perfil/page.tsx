@@ -357,7 +357,7 @@ export default function PerfilPage() {
                     id="cedula"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    maxLength={15}
+                    maxLength={8}
                     placeholder="Ej: 12345678"
                     {...form.register("cedula", {
                       onChange: (e) =>

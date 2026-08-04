@@ -185,7 +185,10 @@ export const camposNombre = {
     .string()
     .min(1, "El primer nombre es obligatorio")
     .max(100)
-    .regex(SOLO_LETRAS, "El primer nombre solo puede contener letras y espacios"),
+    .regex(
+      SOLO_LETRAS,
+      "El primer nombre solo puede contener letras y espacios",
+    ),
   segundo_nombre: z
     .string()
     .max(100)
@@ -213,6 +216,25 @@ export const camposNombre = {
     ),
 } as const;
 
+/* ── Cédula: 7 u 8 dígitos ── */
+
+/** Cédula obligatoria: solo dígitos y de 7 u 8 caracteres. */
+const cedulaObligatoria = z
+  .string()
+  .min(1, "La cédula es obligatoria")
+  .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos")
+  .max(8, "La cédula debe tener 7 u 8 dígitos")
+  .min(7, "La cédula debe tener 7 u 8 dígitos");
+
+/** Cédula opcional (perfil): vacía o de 7 u 8 dígitos. */
+const cedulaOpcional = z
+  .string()
+  .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos")
+  .max(8, "La cédula debe tener 7 u 8 dígitos")
+  .min(7, "La cédula debe tener 7 u 8 dígitos")
+  .optional()
+  .or(z.literal(""));
+
 /* ── Auth: registro ── */
 
 export const registroSchema = z
@@ -222,11 +244,7 @@ export const registroSchema = z
       .string()
       .min(1, "El correo es obligatorio")
       .email("Correo inválido"),
-    cedula: z
-      .string()
-      .min(1, "La cédula es obligatoria")
-      .max(15)
-      .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+    cedula: cedulaObligatoria,
     telefono: z
       .string()
       .min(1, "El teléfono es obligatorio")
@@ -273,12 +291,7 @@ export type PerfilEstudianteForm = z.infer<typeof perfilEstudianteSchema>;
 /* ── Perfil instructor ── */
 
 export const perfilInstructorSchema = z.object({
-  cedula: z
-    .string()
-    .max(15, "La cédula no puede superar 15 dígitos")
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos")
-    .optional()
-    .or(z.literal("")),
+  cedula: cedulaOpcional,
   telefono: z
     .string()
     .max(20, "El teléfono no puede superar 20 dígitos")
@@ -316,11 +329,7 @@ export const estudianteSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
-  cedula: z
-    .string()
-    .min(1, "La cédula es obligatoria")
-    .max(15)
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  cedula: cedulaObligatoria,
   telefono: z
     .string()
     .max(20)
@@ -341,11 +350,7 @@ export type EstudianteForm = z.infer<typeof estudianteSchema>;
 export const editEstudianteSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  cedula: z
-    .string()
-    .min(1, "La cédula es obligatoria")
-    .max(15)
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  cedula: cedulaObligatoria,
   telefono: z
     .string()
     .max(20)
@@ -369,11 +374,7 @@ export const instructorSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
-  cedula: z
-    .string()
-    .min(1, "La cédula es obligatoria")
-    .max(15)
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  cedula: cedulaObligatoria,
   telefono: z
     .string()
     .max(20)
@@ -394,11 +395,7 @@ export type InstructorForm = z.infer<typeof instructorSchema>;
 export const editInstructorSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  cedula: z
-    .string()
-    .min(1, "La cédula es obligatoria")
-    .max(15)
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  cedula: cedulaObligatoria,
   telefono: z
     .string()
     .max(20)

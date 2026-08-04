@@ -545,6 +545,7 @@ export default function EstudiantesPage() {
                       id="cedula"
                       inputMode="numeric"
                       pattern="[0-9]*"
+                      maxLength={8}
                       placeholder="12345678"
                       {...form.register("cedula", {
                         onChange: (e) =>
@@ -1152,6 +1153,7 @@ export default function EstudiantesPage() {
                   id="edit-cedula"
                   inputMode="numeric"
                   pattern="[0-9]*"
+                  maxLength={8}
                   placeholder="12345678"
                   {...editForm.register("cedula", {
                     onChange: (e) =>
@@ -1216,7 +1218,6 @@ export default function EstudiantesPage() {
                   <SelectContent>
                     <SelectItem value="masculino">Masculino</SelectItem>
                     <SelectItem value="femenino">Femenino</SelectItem>
-                    <SelectItem value="otro">Otro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
