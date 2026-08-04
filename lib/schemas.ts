@@ -173,15 +173,51 @@ export const loginSchema = z.object({
 
 export type LoginForm = z.infer<typeof loginSchema>;
 
+/* ── Campos de identidad (nombre dividido en 4) ── */
+
+/**
+ * Nombre estructurado: primer nombre y apellidos (obligatorios) + segundo
+ * nombre (opcional). El backend guarda `users.name` sincronizado a partir
+ * de estos campos, por eso el frontend ya no envía `name`.
+ */
+export const camposNombre = {
+  primer_nombre: z
+    .string()
+    .min(1, "El primer nombre es obligatorio")
+    .max(100)
+    .regex(SOLO_LETRAS, "El primer nombre solo puede contener letras y espacios"),
+  segundo_nombre: z
+    .string()
+    .max(100)
+    .regex(
+      SOLO_LETRAS,
+      "El segundo nombre solo puede contener letras y espacios",
+    )
+    .optional()
+    .or(z.literal("")),
+  primer_apellido: z
+    .string()
+    .min(1, "El primer apellido es obligatorio")
+    .max(100)
+    .regex(
+      SOLO_LETRAS,
+      "El primer apellido solo puede contener letras y espacios",
+    ),
+  segundo_apellido: z
+    .string()
+    .min(1, "El segundo apellido es obligatorio")
+    .max(100)
+    .regex(
+      SOLO_LETRAS,
+      "El segundo apellido solo puede contener letras y espacios",
+    ),
+} as const;
+
 /* ── Auth: registro ── */
 
 export const registroSchema = z
   .object({
-    name: z
-      .string()
-      .min(1, "El nombre es obligatorio")
-      .max(255)
-      .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
+    ...camposNombre,
     email: z
       .string()
       .min(1, "El correo es obligatorio")
@@ -273,3 +309,109 @@ export const perfilInstructorSchema = z.object({
 });
 
 export type PerfilInstructorForm = z.infer<typeof perfilInstructorSchema>;
+
+/* ── Admin: crear/editar estudiante ── */
+
+export const estudianteSchema = z.object({
+  ...camposNombre,
+  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
+  password: z.string().min(8, "Mínimo 8 caracteres"),
+  cedula: z
+    .string()
+    .min(1, "La cédula es obligatoria")
+    .max(15)
+    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  telefono: z
+    .string()
+    .max(20)
+    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .optional()
+    .or(z.literal("")),
+  fecha_nacimiento: z.string().optional(),
+  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
+  curso_id: z.string().optional(),
+  fecha_inscripcion: z
+    .string()
+    .min(1, "La fecha de inscripción es obligatoria"),
+  estado: z.enum(["activo", "inactivo", "graduado"]),
+});
+
+export type EstudianteForm = z.infer<typeof estudianteSchema>;
+
+export const editEstudianteSchema = z.object({
+  ...camposNombre,
+  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
+  cedula: z
+    .string()
+    .min(1, "La cédula es obligatoria")
+    .max(15)
+    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  telefono: z
+    .string()
+    .max(20)
+    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .optional()
+    .or(z.literal("")),
+  fecha_nacimiento: z.string().optional(),
+  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
+  curso_id: z.string().optional(),
+  fecha_inscripcion: z
+    .string()
+    .min(1, "La fecha de inscripción es obligatoria"),
+  estado: z.enum(["activo", "inactivo", "graduado"]),
+});
+
+export type EditEstudianteForm = z.infer<typeof editEstudianteSchema>;
+
+/* ── Admin: crear/editar instructor ── */
+
+export const instructorSchema = z.object({
+  ...camposNombre,
+  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
+  password: z.string().min(8, "Mínimo 8 caracteres"),
+  cedula: z
+    .string()
+    .min(1, "La cédula es obligatoria")
+    .max(15)
+    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  telefono: z
+    .string()
+    .max(20)
+    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .optional()
+    .or(z.literal("")),
+  municipio: z.string().max(255).optional(),
+  tipo_contrato_id: z.number().optional(),
+  fecha_nacimiento: z.string().optional(),
+  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
+  especialidad: z.string().max(255).optional(),
+  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
+  departamento: z.string().max(255).optional(),
+});
+
+export type InstructorForm = z.infer<typeof instructorSchema>;
+
+export const editInstructorSchema = z.object({
+  ...camposNombre,
+  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
+  cedula: z
+    .string()
+    .min(1, "La cédula es obligatoria")
+    .max(15)
+    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
+  telefono: z
+    .string()
+    .max(20)
+    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .optional()
+    .or(z.literal("")),
+  municipio: z.string().max(255).optional(),
+  tipo_contrato_id: z.number().optional(),
+  fecha_nacimiento: z.string().optional(),
+  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
+  especialidad: z.string().max(255).optional(),
+  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
+  departamento: z.string().max(255).optional(),
+});
+
+export type EditInstructorForm = z.infer<typeof editInstructorSchema>;

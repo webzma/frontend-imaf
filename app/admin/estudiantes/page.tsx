@@ -4,9 +4,14 @@ import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { formatDate } from "@/lib/format";
-import { sanitizarDigitos, SOLO_DIGITOS, SOLO_LETRAS } from "@/lib/validators";
+import { sanitizarDigitos, sanitizarLetras } from "@/lib/validators";
+import {
+  estudianteSchema,
+  editEstudianteSchema,
+  type EstudianteForm,
+  type EditEstudianteForm,
+} from "@/lib/schemas";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,6 +72,10 @@ interface Curso {
 interface User {
   name: string;
   email: string;
+  primer_nombre?: string | null;
+  segundo_nombre?: string | null;
+  primer_apellido?: string | null;
+  segundo_apellido?: string | null;
 }
 
 interface Estudiante {
@@ -121,67 +130,6 @@ const estadoLabel: Record<string, string> = {
   inactivo: "Inactivo",
   graduado: "Graduado",
 };
-
-/* ── Zod Schema ── */
-
-const editEstudianteSchema = z.object({
-  name: z
-    .string()
-    .min(1, "El nombre es obligatorio")
-    .max(255)
-    .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
-  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  cedula: z
-    .string()
-    .min(1, "La cédula es obligatoria")
-    .max(15)
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
-  telefono: z
-    .string()
-    .max(20)
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
-    .optional()
-    .or(z.literal("")),
-  fecha_nacimiento: z.string().optional(),
-  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
-  curso_id: z.string().optional(),
-  fecha_inscripcion: z
-    .string()
-    .min(1, "La fecha de inscripción es obligatoria"),
-  estado: z.enum(["activo", "inactivo", "graduado"]),
-});
-
-type EditEstudianteForm = z.infer<typeof editEstudianteSchema>;
-
-const estudianteSchema = z.object({
-  name: z
-    .string()
-    .min(1, "El nombre es obligatorio")
-    .max(255)
-    .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
-  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  password: z.string().min(8, "Mínimo 8 caracteres"),
-  cedula: z
-    .string()
-    .min(1, "La cédula es obligatoria")
-    .max(15)
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
-  telefono: z
-    .string()
-    .max(20)
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
-    .optional()
-    .or(z.literal("")),
-  fecha_nacimiento: z.string().optional(),
-  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
-  curso_id: z.string().optional(),
-  fecha_inscripcion: z
-    .string()
-    .min(1, "La fecha de inscripción es obligatoria"),
-  estado: z.enum(["activo", "inactivo", "graduado"]),
-});
-
-type EstudianteForm = z.infer<typeof estudianteSchema>;
 
 /* ── Table Skeleton ── */
 
@@ -239,7 +187,10 @@ export default function EstudiantesPage() {
   const form = useForm<EstudianteForm>({
     resolver: zodResolver(estudianteSchema),
     defaultValues: {
-      name: "",
+      primer_nombre: "",
+      segundo_nombre: "",
+      primer_apellido: "",
+      segundo_apellido: "",
       email: "",
       password: "",
       cedula: "",
@@ -292,6 +243,7 @@ export default function EstudiantesPage() {
     try {
       const body: Record<string, unknown> = {
         ...data,
+        segundo_nombre: data.segundo_nombre || null,
         telefono: data.telefono || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
@@ -327,7 +279,10 @@ export default function EstudiantesPage() {
     setEditTarget(e);
     setEditError("");
     editForm.reset({
-      name: e.user.name,
+      primer_nombre: e.user.primer_nombre ?? "",
+      segundo_nombre: e.user.segundo_nombre ?? "",
+      primer_apellido: e.user.primer_apellido ?? "",
+      segundo_apellido: e.user.segundo_apellido ?? "",
       email: e.user.email,
       cedula: e.cedula,
       telefono: e.telefono ?? "",
@@ -345,7 +300,10 @@ export default function EstudiantesPage() {
     setEditError("");
     try {
       const body: Record<string, unknown> = {
-        name: data.name,
+        primer_nombre: data.primer_nombre,
+        segundo_nombre: data.segundo_nombre || null,
+        primer_apellido: data.primer_apellido,
+        segundo_apellido: data.segundo_apellido,
         email: data.email,
         cedula: data.cedula,
         telefono: data.telefono || null,
@@ -470,18 +428,83 @@ export default function EstudiantesPage() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="grid gap-4"
               >
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Nombre completo *</Label>
-                  <Input
-                    id="name"
-                    placeholder="Ej: Juan Pérez"
-                    {...form.register("name")}
-                  />
-                  {form.formState.errors.name && (
-                    <p className="text-sm text-danger">
-                      {form.formState.errors.name.message}
-                    </p>
-                  )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="primer_nombre">Primer nombre *</Label>
+                    <Input
+                      id="primer_nombre"
+                      placeholder="Juan"
+                      {...form.register("primer_nombre", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "primer_nombre",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.primer_nombre && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.primer_nombre.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="segundo_nombre">
+                      Segundo nombre (opcional)
+                    </Label>
+                    <Input
+                      id="segundo_nombre"
+                      placeholder="Pablo"
+                      {...form.register("segundo_nombre", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "segundo_nombre",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="primer_apellido">Primer apellido *</Label>
+                    <Input
+                      id="primer_apellido"
+                      placeholder="Pérez"
+                      {...form.register("primer_apellido", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "primer_apellido",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.primer_apellido && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.primer_apellido.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="segundo_apellido">Segundo apellido *</Label>
+                    <Input
+                      id="segundo_apellido"
+                      placeholder="Gómez"
+                      {...form.register("segundo_apellido", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "segundo_apellido",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.segundo_apellido && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.segundo_apellido.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -1030,14 +1053,83 @@ export default function EstudiantesPage() {
           </DialogHeader>
 
           <form onSubmit={editForm.handleSubmit(onEdit)} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-name">Nombre completo *</Label>
-              <Input id="edit-name" {...editForm.register("name")} />
-              {editForm.formState.errors.name && (
-                <p className="text-sm text-danger">
-                  {editForm.formState.errors.name.message}
-                </p>
-              )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-primer_nombre">Primer nombre *</Label>
+                <Input
+                  id="edit-primer_nombre"
+                  placeholder="Juan"
+                  {...editForm.register("primer_nombre", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "primer_nombre",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.primer_nombre && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.primer_nombre.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-segundo_nombre">Segundo nombre</Label>
+                <Input
+                  id="edit-segundo_nombre"
+                  placeholder="Pablo"
+                  {...editForm.register("segundo_nombre", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "segundo_nombre",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-primer_apellido">Primer apellido *</Label>
+                <Input
+                  id="edit-primer_apellido"
+                  placeholder="Pérez"
+                  {...editForm.register("primer_apellido", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "primer_apellido",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.primer_apellido && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.primer_apellido.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-segundo_apellido">
+                  Segundo apellido *
+                </Label>
+                <Input
+                  id="edit-segundo_apellido"
+                  placeholder="Gómez"
+                  {...editForm.register("segundo_apellido", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "segundo_apellido",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.segundo_apellido && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.segundo_apellido.message}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
