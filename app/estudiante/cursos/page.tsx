@@ -1,7 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { fetchPage, PAGE_SIZE } from "@/lib/api";
 import {
   BookOpen,
   GraduationCap,
@@ -31,6 +33,19 @@ interface Curso {
   estado: "activo" | "inactivo";
   instructor?: { id: number; name: string } | null;
   estudiantes?: { id: number }[];
+}
+
+/* Curso anidado en el perfil del estudiante (api/estudiante/perfil). */
+interface PerfilCurso {
+  id: number;
+  nombre: string;
+  codigo: string;
+  descripcion: string | null;
+  estado: string;
+  instructor?: {
+    id: number;
+    user?: { name: string } | null;
+  } | null;
 }
 
 /* ── Helpers ── */
@@ -216,8 +231,38 @@ function CardSkeleton() {
 export default function EstudianteCursosPage() {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [miCursoId, setMiCursoId] = useState<number | null>(null);
+  const [perfilCurso, setPerfilCurso] = useState<PerfilCurso | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalCursos, setTotalCursos] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+
+  // Guarda contra respuestas fuera de orden al navegar rápido entre páginas.
+  const latestPageRef = useRef(1);
+
+  const loadCursos = async (pageNum: number, background = false) => {
+    latestPageRef.current = pageNum;
+    if (!background) setLoading(true);
+    try {
+      const result = await fetchPage<Curso>(
+        `${process.env.API_URL}api/estudiante/cursos`,
+        pageNum,
+        {
+          Authorization: `Bearer ${getCookie("token")}`,
+          Accept: "application/json",
+        },
+      );
+      if (latestPageRef.current !== pageNum) return; // respuesta obsoleta
+      setCursos(result.items);
+      setTotalCursos(result.total);
+      setTotalPages(result.totalPages);
+    } catch {
+      toast.error("Error al cargar los cursos");
+    } finally {
+      if (!background) setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const headers = {
@@ -226,25 +271,40 @@ export default function EstudianteCursosPage() {
     };
 
     Promise.all([
-      fetch(`${process.env.API_URL}api/estudiante/cursos`, { headers }).then(
-        (r) => r.json(),
-      ),
+      loadCursos(1, true),
       fetch(`${process.env.API_URL}api/estudiante/perfil`, { headers }).then(
         (r) => r.json(),
       ),
     ])
-      .then(([cursosData, perfil]) => {
-        setCursos(Array.isArray(cursosData) ? cursosData : []);
+      .then(([, perfil]) => {
         setMiCursoId(perfil?.curso?.id ?? null);
+        setPerfilCurso(perfil?.curso ?? null);
       })
       .catch(() => toast.error("Error al cargar los cursos"))
       .finally(() => setLoading(false));
   }, []);
 
-  const miCurso = useMemo(
-    () => cursos.find((c) => c.id === miCursoId) ?? null,
-    [cursos, miCursoId],
-  );
+  // La tarjeta destacada «Mi curso» sale del perfil (perfil.curso), así sigue
+  // visible aunque el curso no esté en la página actual del catálogo.
+  const miCurso = useMemo(() => {
+    const fromList = cursos.find((c) => c.id === miCursoId);
+    if (fromList) return fromList;
+    if (!perfilCurso || perfilCurso.id !== miCursoId) return null;
+    return {
+      id: perfilCurso.id,
+      nombre: perfilCurso.nombre,
+      codigo: perfilCurso.codigo,
+      descripcion: perfilCurso.descripcion,
+      estado: perfilCurso.estado as Curso["estado"],
+      instructor: perfilCurso.instructor
+        ? {
+            id: perfilCurso.instructor.id,
+            name: perfilCurso.instructor.user?.name ?? "Instructor",
+          }
+        : null,
+      estudiantes: [],
+    } satisfies Curso;
+  }, [cursos, miCursoId, perfilCurso]);
 
   const filtered = useMemo(() => {
     return cursos.filter((c) => {
@@ -260,11 +320,12 @@ export default function EstudianteCursosPage() {
 
   const hasFilters = search !== "";
   const activos = cursos.filter((c) => c.estado === "activo").length;
+  const safePage = Math.min(page, totalPages);
 
   const stats = [
     {
       label: "Total",
-      value: cursos.length,
+      value: totalCursos,
       icon: BookOpen,
       hint: "en catálogo",
     },
@@ -347,7 +408,13 @@ export default function EstudianteCursosPage() {
             <Input
               placeholder="Buscar por nombre, código o instructor..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                if (page !== 1) {
+                  setPage(1);
+                  loadCursos(1, true);
+                }
+              }}
               className="pl-9 h-11 font-sans text-sm bg-surface-container-low border-transparent focus-visible:bg-surface-container-lowest"
             />
           </div>
@@ -417,6 +484,22 @@ export default function EstudianteCursosPage() {
                 ))
               )}
             </div>
+
+            {filtered.length > 0 && totalPages > 1 && (
+              <div className="mt-6 bg-surface-container-low rounded-sm overflow-hidden ambient-shadow">
+                <Pagination
+                  page={safePage}
+                  totalPages={totalPages}
+                  totalItems={totalCursos}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={(p) => {
+                    setPage(p);
+                    loadCursos(p);
+                  }}
+                  itemLabel={["curso", "cursos"]}
+                />
+              </div>
+            )}
           </>
         )}
       </div>
