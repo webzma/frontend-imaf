@@ -5,7 +5,12 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatDate } from "@/lib/format";
-import { sanitizarDigitos, sanitizarLetras } from "@/lib/validators";
+import {
+  sanitizarDigitos,
+  sanitizarLetras,
+  sanitizarTexto,
+} from "@/lib/validators";
+import municipios from "@/data/municipios.json";
 import {
   estudianteSchema,
   editEstudianteSchema,
@@ -85,6 +90,8 @@ interface Estudiante {
   telefono: string | null;
   fecha_nacimiento: string | null;
   genero: string | null;
+  municipio: string | null;
+  direccion: string | null;
   fecha_inscripcion: string;
   estado: "activo" | "inactivo" | "graduado";
   user: User;
@@ -198,6 +205,8 @@ export default function EstudiantesPage() {
       telefono: "",
       fecha_nacimiento: "",
       genero: undefined,
+      municipio: "",
+      direccion: "",
       curso_id: undefined,
       fecha_inscripcion: new Date().toISOString().split("T")[0],
       estado: "activo",
@@ -294,6 +303,8 @@ export default function EstudiantesPage() {
       telefono: e.telefono ?? "",
       fecha_nacimiento: e.fecha_nacimiento ?? "",
       genero: (e.genero as EditEstudianteForm["genero"]) ?? undefined,
+      municipio: e.municipio ?? "",
+      direccion: e.direccion ?? "",
       curso_id: e.curso ? String(e.curso.id) : "",
       fecha_inscripcion: e.fecha_inscripcion,
       estado: e.estado,
@@ -315,6 +326,8 @@ export default function EstudiantesPage() {
         telefono: data.telefono || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
+        municipio: data.municipio,
+        direccion: data.direccion,
         curso_id: data.curso_id ? Number(data.curso_id) : null,
         fecha_inscripcion: data.fecha_inscripcion,
         estado: data.estado,
@@ -611,6 +624,56 @@ export default function EstudiantesPage() {
                         <SelectItem value="otro">Otro</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Municipio *</Label>
+                    <Select
+                      value={form.watch("municipio") || undefined}
+                      onValueChange={(v) =>
+                        form.setValue("municipio", v, { shouldValidate: true })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar municipio" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {municipios.map((municipio) => (
+                          <SelectItem key={municipio} value={municipio}>
+                            {municipio}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {form.formState.errors.municipio && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.municipio.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="direccion">
+                      Dirección de habitación *
+                    </Label>
+                    <Input
+                      id="direccion"
+                      placeholder="Av. Principal, casa N° 5"
+                      maxLength={255}
+                      {...form.register("direccion", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "direccion",
+                            sanitizarTexto(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.direccion && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.direccion.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -1262,6 +1325,58 @@ export default function EstudiantesPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
+                <Label>Municipio *</Label>
+                <Select
+                  value={editForm.watch("municipio") || undefined}
+                  onValueChange={(v) =>
+                    editForm.setValue("municipio", v, {
+                      shouldValidate: true,
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar municipio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {municipios.map((municipio) => (
+                      <SelectItem key={municipio} value={municipio}>
+                        {municipio}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {editForm.formState.errors.municipio && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.municipio.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-direccion">
+                  Dirección de habitación *
+                </Label>
+                <Input
+                  id="edit-direccion"
+                  placeholder="Av. Principal, casa N° 5"
+                  maxLength={255}
+                  {...editForm.register("direccion", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "direccion",
+                        sanitizarTexto(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.direccion && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.direccion.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
                 <Label>Curso</Label>
                 <Select
                   value={editForm.watch("curso_id") || "none"}
@@ -1376,6 +1491,12 @@ export default function EstudiantesPage() {
                 </DetailField>
                 <DetailField label="Género">
                   {viewTarget.genero && generoLabel[viewTarget.genero]}
+                </DetailField>
+                <DetailField label="Municipio">
+                  {viewTarget.municipio}
+                </DetailField>
+                <DetailField label="Dirección de habitación">
+                  {viewTarget.direccion}
                 </DetailField>
               </DetailSection>
 

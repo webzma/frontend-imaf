@@ -4,6 +4,7 @@ import {
   SIN_INYECCION,
   sanitizarDigitos,
   sanitizarLetras,
+  sanitizarTexto,
   esSoloDigitos,
   esSoloLetras,
 } from "@/lib/validators";
@@ -29,6 +30,22 @@ describe("sanitizarLetras", () => {
 
   it("conserva letras, espacios, apóstrofes, puntos y guiones", () => {
     expect(sanitizarLetras("María José-O'Neil")).toBe("María José-O'Neil");
+  });
+});
+
+describe("sanitizarTexto", () => {
+  it("elimina comillas, punto y coma, backtick y backslash", () => {
+    expect(sanitizarTexto("Casa 5'; DROP TABLE users;--")).toBe(
+      "Casa 5 DROP TABLE users--",
+    );
+    expect(sanitizarTexto('dijo "hola"')).toBe("dijo hola");
+    expect(sanitizarTexto("a`b\\c")).toBe("abc");
+  });
+
+  it("conserva letras, números, #, puntos y guiones (texto libre)", () => {
+    expect(sanitizarTexto("Av. Principal, casa N° 5")).toBe(
+      "Av. Principal, casa N° 5",
+    );
   });
 });
 
