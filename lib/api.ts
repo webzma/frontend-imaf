@@ -55,11 +55,11 @@ export async function fetchPage<T>(
     per_page?: number;
   };
   const items = record.data ?? [];
-  const total = record.total ?? items.length;  return {
+  const total = record.total ?? items.length;
+  return {
     items,
     total,
     page: record.current_page ?? page,
-    totalPages:
-      record.last_page ?? Math.max(1, Math.ceil(total / pageSize)),
+    totalPages: record.last_page ?? Math.max(1, Math.ceil(total / pageSize)),
   };
 }
