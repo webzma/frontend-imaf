@@ -71,6 +71,7 @@ describe("registroSchema", () => {
     fecha_nacimiento: "2000-01-01",
     genero: "masculino",
     municipio: "San Felipe",
+    direccion: "Av. Principal, casa N° 5",
     password: "clave12345",
     password_confirmation: "clave12345",
   };
@@ -130,6 +131,21 @@ describe("registroSchema", () => {
     });
     expect(mensajeDe(r, "genero")).toBe("Selecciona un género");
     expect(mensajeDe(r, "municipio")).toBe("Selecciona un municipio");
+  });
+
+  it("exige la dirección de habitación", () => {
+    const r = registroSchema.safeParse({ ...valido, direccion: "" });
+    expect(mensajeDe(r, "direccion")).toBe("La dirección es obligatoria");
+  });
+
+  it("rechaza direcciones con caracteres de inyección", () => {
+    const r = registroSchema.safeParse({
+      ...valido,
+      direccion: "Casa 5'; DROP TABLE users;--",
+    });
+    expect(mensajeDe(r, "direccion")).toBe(
+      "La dirección contiene caracteres no permitidos",
+    );
   });
 
   it("rechaza nombres con paréntesis o signo igual", () => {
@@ -377,6 +393,8 @@ describe("estudianteSchema", () => {
     telefono: "",
     fecha_nacimiento: "",
     genero: undefined,
+    municipio: "San Felipe",
+    direccion: "Av. Principal, casa N° 5",
     curso_id: undefined,
     fecha_inscripcion: "2026-08-01",
     estado: "activo",
@@ -415,6 +433,26 @@ describe("estudianteSchema", () => {
     const r = estudianteSchema.safeParse({ ...valido, password: "1234567" });
     expect(mensajeDe(r, "password")).toBe("Mínimo 8 caracteres");
   });
+
+  it("exige seleccionar municipio y dirección al crear", () => {
+    const r = estudianteSchema.safeParse({
+      ...valido,
+      municipio: "",
+      direccion: "",
+    });
+    expect(mensajeDe(r, "municipio")).toBe("Selecciona un municipio");
+    expect(mensajeDe(r, "direccion")).toBe("La dirección es obligatoria");
+  });
+
+  it("rechaza una dirección con comillas en la creación", () => {
+    const r = estudianteSchema.safeParse({
+      ...valido,
+      direccion: "Av. O'Brien 5",
+    });
+    expect(mensajeDe(r, "direccion")).toBe(
+      "La dirección contiene caracteres no permitidos",
+    );
+  });
 });
 
 describe("editEstudianteSchema", () => {
@@ -428,6 +466,8 @@ describe("editEstudianteSchema", () => {
     telefono: "",
     fecha_nacimiento: "",
     genero: undefined,
+    municipio: "San Felipe",
+    direccion: "Av. Principal, casa N° 5",
     curso_id: undefined,
     fecha_inscripcion: "2026-08-01",
     estado: "inactivo",
@@ -441,6 +481,26 @@ describe("editEstudianteSchema", () => {
     const r = editEstudianteSchema.safeParse({ ...valido, primer_nombre: "" });
     expect(mensajeDe(r, "primer_nombre")).toBe(
       "El primer nombre es obligatorio",
+    );
+  });
+
+  it("exige municipio y dirección al editar", () => {
+    const r = editEstudianteSchema.safeParse({
+      ...valido,
+      municipio: "",
+      direccion: "",
+    });
+    expect(mensajeDe(r, "municipio")).toBe("Selecciona un municipio");
+    expect(mensajeDe(r, "direccion")).toBe("La dirección es obligatoria");
+  });
+
+  it("rechaza una dirección con comillas al editar", () => {
+    const r = editEstudianteSchema.safeParse({
+      ...valido,
+      direccion: "Av. O'Brien 5",
+    });
+    expect(mensajeDe(r, "direccion")).toBe(
+      "La dirección contiene caracteres no permitidos",
     );
   });
 });

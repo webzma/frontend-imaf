@@ -17,7 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
-import { sanitizarDigitos, sanitizarLetras } from "@/lib/validators";
+import {
+  sanitizarDigitos,
+  sanitizarLetras,
+  sanitizarTexto,
+} from "@/lib/validators";
 import { registroSchema, type RegistroForm } from "@/lib/schemas";
 import logoImaf from "@/public/logo-imaf.webp";
 import municipios from "@/data/municipios.json";
@@ -41,6 +45,7 @@ export default function RegisterPage() {
       fecha_nacimiento: "",
       genero: "",
       municipio: "",
+      direccion: "",
       password: "",
       password_confirmation: "",
     },
@@ -342,31 +347,53 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Fila 4 - Municipio */}
-          <div className="space-y-2">
-            <Label htmlFor="municipio">{fieldLabel("Municipio")}</Label>
-            <Select
-              value={form.watch("municipio") || undefined}
-              onValueChange={(value) =>
-                form.setValue("municipio", value, { shouldValidate: true })
-              }
-            >
-              <SelectTrigger id="municipio">
-                <SelectValue placeholder="Seleccionar municipio" />
-              </SelectTrigger>
-              <SelectContent>
-                {municipios.map((municipio) => (
-                  <SelectItem key={municipio} value={municipio}>
-                    {municipio}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {form.formState.errors.municipio && (
-              <p className="text-sm text-danger">
-                {form.formState.errors.municipio.message}
-              </p>
-            )}
+          {/* Fila 4 - Municipio y dirección */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="municipio">{fieldLabel("Municipio")}</Label>
+              <Select
+                value={form.watch("municipio") || undefined}
+                onValueChange={(value) =>
+                  form.setValue("municipio", value, { shouldValidate: true })
+                }
+              >
+                <SelectTrigger id="municipio">
+                  <SelectValue placeholder="Seleccionar municipio" />
+                </SelectTrigger>
+                <SelectContent>
+                  {municipios.map((municipio) => (
+                    <SelectItem key={municipio} value={municipio}>
+                      {municipio}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.municipio && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.municipio.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="direccion">
+                {fieldLabel("Dirección de habitación")}
+              </Label>
+              <Input
+                id="direccion"
+                autoComplete="street-address"
+                placeholder="Av. Principal, casa N° 5"
+                maxLength={255}
+                {...form.register("direccion", {
+                  onChange: (e) =>
+                    form.setValue("direccion", sanitizarTexto(e.target.value)),
+                })}
+              />
+              {form.formState.errors.direccion && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.direccion.message}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Contraseñas */}

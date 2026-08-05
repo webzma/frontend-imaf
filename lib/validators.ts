@@ -28,5 +28,11 @@ export const sanitizarDigitos = (valor: string) => valor.replace(/\D/g, "");
 export const sanitizarLetras = (valor: string) =>
   valor.replace(/[^\p{L}\p{M}\s'.-]/gu, "");
 
+/**
+ * Elimina los caracteres de riesgo de inyección: comillas simples y dobles,
+ * punto y coma, backtick y backslash (los mismos que bloquea SIN_INYECCION).
+ */
+export const sanitizarTexto = (valor: string) => valor.replace(/['"`;\\]/g, "");
+
 export const esSoloDigitos = (valor: string) => SOLO_DIGITOS.test(valor);
 export const esSoloLetras = (valor: string) => SOLO_LETRAS.test(valor);

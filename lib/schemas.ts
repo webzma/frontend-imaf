@@ -235,6 +235,18 @@ const cedulaOpcional = z
   .optional()
   .or(z.literal(""));
 
+/* ── Dirección de habitación: texto libre con protección anti-inyección ── */
+
+/**
+ * Dirección obligatoria: admite texto libre (letras, números, #, ., -, etc.)
+ * pero bloquea los caracteres de riesgo de inyección SQL.
+ */
+const direccionObligatoria = z
+  .string()
+  .min(1, "La dirección es obligatoria")
+  .max(255, "La dirección no puede superar 255 caracteres")
+  .regex(SIN_INYECCION, "La dirección contiene caracteres no permitidos");
+
 /* ── Auth: registro ── */
 
 export const registroSchema = z
@@ -255,6 +267,7 @@ export const registroSchema = z
       .min(1, "La fecha de nacimiento es obligatoria"),
     genero: z.string().min(1, "Selecciona un género"),
     municipio: z.string().min(1, "Selecciona un municipio"),
+    direccion: direccionObligatoria,
     password: z
       .string()
       .min(8, "La contraseña debe tener al menos 8 caracteres"),
@@ -338,6 +351,8 @@ export const estudianteSchema = z.object({
     .or(z.literal("")),
   fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
+  municipio: z.string().min(1, "Selecciona un municipio"),
+  direccion: direccionObligatoria,
   curso_id: z.string().optional(),
   fecha_inscripcion: z
     .string()
@@ -359,6 +374,8 @@ export const editEstudianteSchema = z.object({
     .or(z.literal("")),
   fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
+  municipio: z.string().min(1, "Selecciona un municipio"),
+  direccion: direccionObligatoria,
   curso_id: z.string().optional(),
   fecha_inscripcion: z
     .string()

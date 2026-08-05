@@ -82,6 +82,11 @@ async function llenarDatosValidos(user: ReturnType<typeof userEvent.setup>) {
 
   await user.click(screen.getByRole("combobox", { name: "Municipio" }));
   await user.click(await screen.findByRole("option", { name: "San Felipe" }));
+
+  await user.type(
+    screen.getByLabelText("Dirección de habitación"),
+    "Av. Principal, casa N° 5",
+  );
 }
 
 /* ── Tests ── */
@@ -110,6 +115,7 @@ describe("Página de registro", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Selecciona un género")).toBeInTheDocument();
     expect(screen.getByText("Selecciona un municipio")).toBeInTheDocument();
+    expect(screen.getByText("La dirección es obligatoria")).toBeInTheDocument();
     expect(
       screen.getByText("La contraseña debe tener al menos 8 caracteres"),
     ).toBeInTheDocument();
@@ -180,6 +186,7 @@ describe("Página de registro", () => {
       telefono: "04121234567",
       genero: "masculino",
       municipio: "San Felipe",
+      direccion: "Av. Principal, casa N° 5",
     });
 
     await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/estudiante"));
