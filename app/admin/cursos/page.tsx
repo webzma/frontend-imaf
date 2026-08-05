@@ -1,7 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,8 @@ import { formatDate, formatPrice } from "@/lib/format";
 import { cursoSchema, type CursoForm } from "@/lib/schemas";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { fetchPage, PAGE_SIZE } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -245,6 +247,9 @@ export default function CursosPage() {
   const [search, setSearch] = useState("");
   const [filterEstado, setFilterEstado] = useState("todos");
   const [filterInstructor, setFilterInstructor] = useState("todos");
+  const [page, setPage] = useState(1);
+  const [totalCursos, setTotalCursos] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
@@ -268,19 +273,24 @@ export default function CursosPage() {
     },
   });
 
-  const fetchCursos = async () => {
+  // Guarda contra respuestas fuera de orden al navegar rápido entre páginas.
+  const latestPageRef = useRef(1);
+
+  const fetchCursos = async (pageNum = 1) => {
+    latestPageRef.current = pageNum;
     try {
-      const res = await fetch(`${process.env.API_URL}api/admin/cursos`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) {
-        setError("No se pudo cargar la lista de cursos.");
-        return;
-      }
-      const data = await res.json();
-      setCursos(Array.isArray(data) ? data : (data.data ?? []));
+      const result = await fetchPage<Curso>(
+        `${process.env.API_URL}api/admin/cursos`,
+        pageNum,
+        getAuthHeaders(),
+      );
+      if (latestPageRef.current !== pageNum) return; // respuesta obsoleta
+      setCursos(result.items);
+      setTotalCursos(result.total);
+      setTotalPages(result.totalPages);
+      setError("");
     } catch {
-      setError("Error al conectar con el servidor.");
+      setError("No se pudo cargar la lista de cursos.");
     } finally {
       setLoading(false);
     }
@@ -301,7 +311,7 @@ export default function CursosPage() {
   };
 
   useEffect(() => {
-    fetchCursos();
+    fetchCursos(1);
     fetchInstructores();
   }, []);
 
@@ -332,10 +342,10 @@ export default function CursosPage() {
         setSubmitError(messages as string);
         return;
       }
-      const created = await res.json();
-      setCursos((prev) => [...prev, created]);
       form.reset();
       setOpen(false);
+      setPage(1);
+      fetchCursos(1);
       toast.success("Curso creado correctamente");
     } catch {
       setSubmitError("Error al conectar con el servidor.");
@@ -372,10 +382,18 @@ export default function CursosPage() {
   const hasFilters =
     filterEstado !== "todos" || filterInstructor !== "todos" || search !== "";
 
+  // Los filtros se aplican solo a lo cargado; si se está en otra página se
+  // vuelve a la primera para no mostrar el número de página desincronizado.
+  const safePage = Math.min(page, totalPages);
+
   const limpiarFiltros = () => {
     setSearch("");
     setFilterEstado("todos");
     setFilterInstructor("todos");
+    if (page !== 1) {
+      setPage(1);
+      fetchCursos(1);
+    }
   };
 
   return (
@@ -665,7 +683,7 @@ export default function CursosPage() {
           {[
             {
               label: "Total",
-              value: cursos.length,
+              value: totalCursos,
               icon: BookOpen,
               color: "text-on-primary-container",
               glow: "bg-primary-container",
@@ -715,14 +733,29 @@ export default function CursosPage() {
             <Input
               placeholder="Buscar por nombre, código o instructor..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchCursos(1);
+                }
+              }}
               className="pl-9 h-10 font-sans text-sm"
             />
           </div>
 
           <div className="flex items-center gap-2">
             <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-            <Select value={filterEstado} onValueChange={setFilterEstado}>
+            <Select
+              value={filterEstado}
+              onValueChange={(v) => {
+                setFilterEstado(v);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchCursos(1);
+                }
+              }}
+            >
               <SelectTrigger className="h-10 w-42 font-sans text-sm">
                 <SelectValue />
               </SelectTrigger>
@@ -735,7 +768,13 @@ export default function CursosPage() {
 
             <Select
               value={filterInstructor}
-              onValueChange={setFilterInstructor}
+              onValueChange={(v) => {
+                setFilterInstructor(v);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchCursos(1);
+                }
+              }}
             >
               <SelectTrigger className="h-10 w-44 font-sans text-sm">
                 <SelectValue />
@@ -819,6 +858,22 @@ export default function CursosPage() {
                 ))
               )}
             </div>
+
+            {filtered.length > 0 && totalPages > 1 && (
+              <div className="mt-6 bg-surface-container-low rounded-sm overflow-hidden ambient-shadow">
+                <Pagination
+                  page={safePage}
+                  totalPages={totalPages}
+                  totalItems={totalCursos}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={(p) => {
+                    setPage(p);
+                    fetchCursos(p);
+                  }}
+                  itemLabel={["curso", "cursos"]}
+                />
+              </div>
+            )}
           </>
         )}
       </div>

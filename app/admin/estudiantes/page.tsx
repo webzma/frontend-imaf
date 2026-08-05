@@ -1,7 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatDate } from "@/lib/format";
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/pagination";
+import { fetchPage, PAGE_SIZE } from "@/lib/api";
 import { EmptyState } from "@/components/empty-state";
 import {
   DetailHeader,
@@ -106,8 +107,6 @@ function getAuthHeaders() {
   };
 }
 
-const PAGE_SIZE = 10;
-
 function getInitials(name: string): string {
   return name
     .split(" ")
@@ -168,6 +167,8 @@ export default function EstudiantesPage() {
   const [filterEstado, setFilterEstado] = useState("todos");
   const [filterCurso, setFilterCurso] = useState("todos");
   const [page, setPage] = useState(1);
+  const [totalEstudiantes, setTotalEstudiantes] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
@@ -203,19 +204,24 @@ export default function EstudiantesPage() {
     },
   });
 
-  const fetchEstudiantes = async () => {
+  // Guarda contra respuestas fuera de orden al navegar rápido entre páginas.
+  const latestPageRef = useRef(1);
+
+  const fetchEstudiantes = async (pageNum = 1) => {
+    latestPageRef.current = pageNum;
     try {
-      const res = await fetch(`${process.env.API_URL}api/admin/estudiantes`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) {
-        setError("No se pudo cargar la lista de estudiantes.");
-        return;
-      }
-      const data = await res.json();
-      setEstudiantes(Array.isArray(data) ? data : (data.data ?? []));
+      const result = await fetchPage<Estudiante>(
+        `${process.env.API_URL}api/admin/estudiantes`,
+        pageNum,
+        getAuthHeaders(),
+      );
+      if (latestPageRef.current !== pageNum) return; // respuesta obsoleta
+      setEstudiantes(result.items);
+      setTotalEstudiantes(result.total);
+      setTotalPages(result.totalPages);
+      setError("");
     } catch {
-      setError("Error al conectar con el servidor.");
+      setError("No se pudo cargar la lista de estudiantes.");
     } finally {
       setLoading(false);
     }
@@ -233,7 +239,7 @@ export default function EstudiantesPage() {
   };
 
   useEffect(() => {
-    fetchEstudiantes();
+    fetchEstudiantes(1);
     fetchCursos();
   }, []);
 
@@ -262,10 +268,10 @@ export default function EstudiantesPage() {
         setSubmitError(messages as string);
         return;
       }
-      const created = await res.json();
-      setEstudiantes((prev) => [...prev, created]);
       form.reset();
       setOpen(false);
+      setPage(1);
+      fetchEstudiantes(1);
       toast.success("Estudiante registrado correctamente");
     } catch {
       setSubmitError("Error al conectar con el servidor.");
@@ -361,7 +367,7 @@ export default function EstudiantesPage() {
   }, [estudiantes, search, filterEstado, filterCurso]);
 
   const counts = {
-    total: estudiantes.length,
+    total: totalEstudiantes,
     activos: estudiantes.filter((e) => e.estado === "activo").length,
     graduados: estudiantes.filter((e) => e.estado === "graduado").length,
   };
@@ -369,20 +375,18 @@ export default function EstudiantesPage() {
   const hasFilters =
     filterEstado !== "todos" || filterCurso !== "todos" || search !== "";
 
-  // Volver a la página 1 al cambiar un filtro; y si aun así la página queda
-  // fuera de rango (la lista encogió), se acota aquí en render.
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  // Los filtros se aplican solo a lo cargado; si se está en otra página se
+  // vuelve a la primera para no mostrar el número de página desincronizado.
   const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  );
 
   const limpiarFiltros = () => {
     setSearch("");
     setFilterEstado("todos");
     setFilterCurso("todos");
-    setPage(1);
+    if (page !== 1) {
+      setPage(1);
+      fetchEstudiantes(1);
+    }
   };
 
   return (
@@ -751,7 +755,10 @@ export default function EstudiantesPage() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
-                setPage(1);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchEstudiantes(1);
+                }
               }}
               className="pl-9 h-10 font-sans text-sm"
             />
@@ -763,7 +770,10 @@ export default function EstudiantesPage() {
               value={filterEstado}
               onValueChange={(v) => {
                 setFilterEstado(v);
-                setPage(1);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchEstudiantes(1);
+                }
               }}
             >
               <SelectTrigger className="h-10 w-42 font-sans text-sm">
@@ -781,7 +791,10 @@ export default function EstudiantesPage() {
               value={filterCurso}
               onValueChange={(v) => {
                 setFilterCurso(v);
-                setPage(1);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchEstudiantes(1);
+                }
               }}
             >
               <SelectTrigger className="h-10 w-44 font-sans text-sm">
@@ -856,7 +869,7 @@ export default function EstudiantesPage() {
                 {/* Móvil: una tarjeta por estudiante. La tabla de 6 columnas
                     obligaba a desplazarse en horizontal para leer un registro. */}
                 <ul className="md:hidden">
-                  {paginated.map((e) => (
+                  {filtered.map((e) => (
                     <DataCard key={e.id}>
                       <DataCardHeader
                         aside={
@@ -949,10 +962,10 @@ export default function EstudiantesPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {paginated.map((e, i) => (
+                      {filtered.map((e, i) => (
                         <tr
                           key={e.id}
-                          className={`hover:bg-surface-container transition-colors ${i < paginated.length - 1 ? "border-b border-outline-variant" : ""}`}
+                          className={`hover:bg-surface-container transition-colors ${i < filtered.length - 1 ? "border-b border-outline-variant" : ""}`}
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
@@ -1025,9 +1038,12 @@ export default function EstudiantesPage() {
                 <Pagination
                   page={safePage}
                   totalPages={totalPages}
-                  totalItems={filtered.length}
+                  totalItems={totalEstudiantes}
                   pageSize={PAGE_SIZE}
-                  onPageChange={setPage}
+                  onPageChange={(p) => {
+                    setPage(p);
+                    fetchEstudiantes(p);
+                  }}
                   itemLabel={["estudiante", "estudiantes"]}
                 />
               </>

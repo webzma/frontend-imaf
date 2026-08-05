@@ -1,7 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatDate } from "@/lib/format";
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/pagination";
+import { fetchPage, PAGE_SIZE } from "@/lib/api";
 import { EmptyState } from "@/components/empty-state";
 import {
   DetailHeader,
@@ -108,8 +109,6 @@ function getAuthHeaders() {
   };
 }
 
-const PAGE_SIZE = 10;
-
 function getInitials(name: string): string {
   return name
     .split(" ")
@@ -170,6 +169,8 @@ export default function InstructoresPage() {
   const [filterTitulo, setFilterTitulo] = useState("todos");
   const [filterDepartamento, setFilterDepartamento] = useState("todos");
   const [page, setPage] = useState(1);
+  const [totalInstructores, setTotalInstructores] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingTiposContrato, setLoadingTiposContrato] = useState(true);
   const [error, setError] = useState("");
@@ -243,18 +244,24 @@ export default function InstructoresPage() {
     }
   };
 
-  const fetchInstructores = async () => {
+  // Guarda contra respuestas fuera de orden al navegar rápido entre páginas.
+  const latestPageRef = useRef(1);
+
+  const fetchInstructores = async (pageNum = 1) => {
+    latestPageRef.current = pageNum;
     try {
-      const res = await fetch(`${process.env.API_URL}api/admin/profesores`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) {
-        setError("No se pudo cargar la lista de instructores.");
-        return;
-      }
-      setInstructores(await res.json());
+      const result = await fetchPage<Instructor>(
+        `${process.env.API_URL}api/admin/profesores`,
+        pageNum,
+        getAuthHeaders(),
+      );
+      if (latestPageRef.current !== pageNum) return; // respuesta obsoleta
+      setInstructores(result.items);
+      setTotalInstructores(result.total);
+      setTotalPages(result.totalPages);
+      setError("");
     } catch {
-      setError("Error al conectar con el servidor.");
+      setError("No se pudo cargar la lista de instructores.");
     } finally {
       setLoading(false);
     }
@@ -332,7 +339,7 @@ export default function InstructoresPage() {
   };
 
   useEffect(() => {
-    fetchInstructores();
+    fetchInstructores(1);
     fetchTiposContrato();
   }, []);
 
@@ -365,10 +372,10 @@ export default function InstructoresPage() {
         setSubmitError(messages as string);
         return;
       }
-      const created = await res.json();
-      setInstructores((prev) => [...prev, created]);
       form.reset();
       setOpen(false);
+      setPage(1);
+      fetchInstructores(1);
       toast.success("Instructor registrado correctamente");
     } catch {
       setSubmitError("Error al conectar con el servidor.");
@@ -405,7 +412,7 @@ export default function InstructoresPage() {
   }, [instructores, search, filterTitulo, filterDepartamento]);
 
   const counts = {
-    total: instructores.length,
+    total: totalInstructores,
     conTitulo: instructores.filter((p) => p.titulo).length,
     departamentos: new Set(
       instructores.map((p) => p.departamento).filter(Boolean),
@@ -415,18 +422,18 @@ export default function InstructoresPage() {
   const hasFilters =
     filterTitulo !== "todos" || filterDepartamento !== "todos" || search !== "";
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  // Los filtros se aplican solo a lo cargado; si se está en otra página se
+  // vuelve a la primera para no mostrar el número de página desincronizado.
   const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  );
 
   const limpiarFiltros = () => {
     setSearch("");
     setFilterTitulo("todos");
     setFilterDepartamento("todos");
-    setPage(1);
+    if (page !== 1) {
+      setPage(1);
+      fetchInstructores(1);
+    }
   };
 
   return (
@@ -886,7 +893,10 @@ export default function InstructoresPage() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
-                setPage(1);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchInstructores(1);
+                }
               }}
               className="pl-9 h-10 font-sans text-sm"
             />
@@ -898,7 +908,10 @@ export default function InstructoresPage() {
               value={filterTitulo}
               onValueChange={(v) => {
                 setFilterTitulo(v);
-                setPage(1);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchInstructores(1);
+                }
               }}
             >
               <SelectTrigger className="h-10 w-42 font-sans text-sm">
@@ -916,7 +929,10 @@ export default function InstructoresPage() {
               value={filterDepartamento}
               onValueChange={(v) => {
                 setFilterDepartamento(v);
-                setPage(1);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchInstructores(1);
+                }
               }}
             >
               <SelectTrigger className="h-10 w-44 font-sans text-sm">
@@ -992,7 +1008,7 @@ export default function InstructoresPage() {
               <>
                 {/* Móvil: una tarjeta por instructor. */}
                 <ul className="md:hidden">
-                  {paginated.map((p) => (
+                  {filtered.map((p) => (
                     <DataCard key={p.id}>
                       <DataCardHeader
                         aside={
@@ -1092,10 +1108,10 @@ export default function InstructoresPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {paginated.map((p, i) => (
+                      {filtered.map((p, i) => (
                         <tr
                           key={p.id}
-                          className={`hover:bg-surface-container transition-colors ${i < paginated.length - 1 ? "border-b border-outline-variant" : ""}`}
+                          className={`hover:bg-surface-container transition-colors ${i < filtered.length - 1 ? "border-b border-outline-variant" : ""}`}
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
@@ -1185,9 +1201,12 @@ export default function InstructoresPage() {
                 <Pagination
                   page={safePage}
                   totalPages={totalPages}
-                  totalItems={filtered.length}
+                  totalItems={totalInstructores}
                   pageSize={PAGE_SIZE}
-                  onPageChange={setPage}
+                  onPageChange={(p) => {
+                    setPage(p);
+                    fetchInstructores(p);
+                  }}
                   itemLabel={["instructor", "instructores"]}
                 />
               </>

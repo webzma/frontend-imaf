@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { formatDate } from "@/lib/format";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE } from "@/lib/api";
 import {
   BookOpen,
   Users,
@@ -64,6 +66,7 @@ export default function InstructorDashboard() {
   const [me, setMe] = useState<MeResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     fetch(`${process.env.API_URL}api/me`, { headers: getAuthHeaders() })
@@ -96,6 +99,12 @@ export default function InstructorDashboard() {
     0,
   );
   const cursosActivos = cursos.filter((c) => c.estado === "activo").length;
+  const totalPages = Math.max(1, Math.ceil(cursos.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedCursos = cursos.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE,
+  );
 
   const firstName = me.name.split(" ")[0];
 
@@ -186,7 +195,7 @@ export default function InstructorDashboard() {
             </div>
           ) : (
             <div className="bg-surface-container-low rounded-sm ambient-shadow overflow-hidden">
-              {cursos.slice(0, 5).map((curso, i) => {
+              {pagedCursos.map((curso, i) => {
                 const inscritos = curso.limite_cupo - curso.cupos_restantes;
                 return (
                   <button
@@ -195,7 +204,7 @@ export default function InstructorDashboard() {
                       router.push(`/instructor/cursos/${curso.id}`)
                     }
                     className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-surface-container transition-colors ${
-                      i < Math.min(cursos.length, 5) - 1
+                      i < pagedCursos.length - 1
                         ? "border-b border-outline-variant"
                         : ""
                     }`}
@@ -234,6 +243,15 @@ export default function InstructorDashboard() {
                   </button>
                 );
               })}
+
+              <Pagination
+                page={safePage}
+                totalPages={totalPages}
+                totalItems={cursos.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setPage}
+                itemLabel={["curso", "cursos"]}
+              />
             </div>
           )}
         </div>
