@@ -654,9 +654,7 @@ export default function EstudiantesPage() {
                     )}
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="direccion">
-                      Dirección de habitación *
-                    </Label>
+                    <Label htmlFor="direccion">Dirección de habitación *</Label>
                     <Input
                       id="direccion"
                       placeholder="Av. Principal, casa N° 5"

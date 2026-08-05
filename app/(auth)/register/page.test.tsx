@@ -115,9 +115,7 @@ describe("Página de registro", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Selecciona un género")).toBeInTheDocument();
     expect(screen.getByText("Selecciona un municipio")).toBeInTheDocument();
-    expect(
-      screen.getByText("La dirección es obligatoria"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("La dirección es obligatoria")).toBeInTheDocument();
     expect(
       screen.getByText("La contraseña debe tener al menos 8 caracteres"),
     ).toBeInTheDocument();
