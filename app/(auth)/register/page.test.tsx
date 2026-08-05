@@ -62,7 +62,10 @@ afterEach(() => {
 /* ── Helpers para llenar el formulario ── */
 
 async function llenarDatosValidos(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText("Nombre completo"), "Juan Pérez");
+  await user.type(screen.getByLabelText("Primer nombre"), "Juan");
+  await user.type(screen.getByLabelText(/Segundo nombre/), "Pablo");
+  await user.type(screen.getByLabelText("Primer apellido"), "Pérez");
+  await user.type(screen.getByLabelText("Segundo apellido"), "Gómez");
   await user.type(
     screen.getByLabelText("Correo electrónico"),
     "juan@correo.com",
@@ -91,7 +94,13 @@ describe("Página de registro", () => {
     await user.click(screen.getByRole("button", { name: /crear cuenta/i }));
 
     expect(
-      await screen.findByText("El nombre es obligatorio"),
+      await screen.findByText("El primer nombre es obligatorio"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("El primer apellido es obligatorio"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("El segundo apellido es obligatorio"),
     ).toBeInTheDocument();
     expect(screen.getByText("El correo es obligatorio")).toBeInTheDocument();
     expect(screen.getByText("La cédula es obligatoria")).toBeInTheDocument();
@@ -162,7 +171,10 @@ describe("Página de registro", () => {
 
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body).toMatchObject({
-      name: "Juan Pérez",
+      primer_nombre: "Juan",
+      segundo_nombre: "Pablo",
+      primer_apellido: "Pérez",
+      segundo_apellido: "Gómez",
       email: "juan@correo.com",
       cedula: "12345678",
       telefono: "04121234567",

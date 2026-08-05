@@ -4,9 +4,14 @@ import { PageHeader } from "@/components/page-header";
 import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { formatDate } from "@/lib/format";
-import { sanitizarDigitos, SOLO_DIGITOS, SOLO_LETRAS } from "@/lib/validators";
+import { sanitizarDigitos, sanitizarLetras } from "@/lib/validators";
+import {
+  instructorSchema,
+  editInstructorSchema,
+  type InstructorForm,
+  type EditInstructorForm,
+} from "@/lib/schemas";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,6 +67,10 @@ import municipios from "@/data/municipios.json";
 interface User {
   name: string;
   email: string;
+  primer_nombre?: string | null;
+  segundo_nombre?: string | null;
+  primer_apellido?: string | null;
+  segundo_apellido?: string | null;
 }
 
 interface Instructor {
@@ -124,66 +133,6 @@ const tituloLabel: Record<string, string> = {
   doctorado: "Doctorado",
 };
 
-/* ── Zod Schema ── */
-
-const instructorSchema = z.object({
-  name: z
-    .string()
-    .min(1, "El nombre es obligatorio")
-    .max(255)
-    .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
-  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  password: z.string().min(8, "Mínimo 8 caracteres"),
-  cedula: z
-    .string()
-    .min(1, "La cédula es obligatoria")
-    .max(15)
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
-  telefono: z
-    .string()
-    .max(20)
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
-    .optional()
-    .or(z.literal("")),
-  municipio: z.string().max(255).optional(),
-  tipo_contrato_id: z.number().optional(),
-  fecha_nacimiento: z.string().optional(),
-  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
-  especialidad: z.string().max(255).optional(),
-  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
-  departamento: z.string().max(255).optional(),
-});
-
-const editInstructorSchema = z.object({
-  name: z
-    .string()
-    .min(1, "El nombre es obligatorio")
-    .max(255)
-    .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
-  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  cedula: z
-    .string()
-    .min(1, "La cédula es obligatoria")
-    .max(15)
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
-  telefono: z
-    .string()
-    .max(20)
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
-    .optional()
-    .or(z.literal("")),
-  municipio: z.string().max(255).optional(),
-  tipo_contrato_id: z.number().optional(),
-  fecha_nacimiento: z.string().optional(),
-  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
-  especialidad: z.string().max(255).optional(),
-  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
-  departamento: z.string().max(255).optional(),
-});
-
-type InstructorForm = z.infer<typeof instructorSchema>;
-type EditInstructorForm = z.infer<typeof editInstructorSchema>;
-
 /* ── Table Skeleton ── */
 
 function TableSkeleton() {
@@ -238,7 +187,10 @@ export default function InstructoresPage() {
   const form = useForm<InstructorForm>({
     resolver: zodResolver(instructorSchema),
     defaultValues: {
-      name: "",
+      primer_nombre: "",
+      segundo_nombre: "",
+      primer_apellido: "",
+      segundo_apellido: "",
       email: "",
       password: "",
       cedula: "",
@@ -256,7 +208,10 @@ export default function InstructoresPage() {
   const editForm = useForm<EditInstructorForm>({
     resolver: zodResolver(editInstructorSchema),
     defaultValues: {
-      name: "",
+      primer_nombre: "",
+      segundo_nombre: "",
+      primer_apellido: "",
+      segundo_apellido: "",
       email: "",
       cedula: "",
       telefono: "",
@@ -310,7 +265,10 @@ export default function InstructoresPage() {
     setEditingInstructor(instructor);
     setEditSubmitError("");
     editForm.reset({
-      name: instructor.user.name,
+      primer_nombre: instructor.user.primer_nombre ?? "",
+      segundo_nombre: instructor.user.segundo_nombre ?? "",
+      primer_apellido: instructor.user.primer_apellido ?? "",
+      segundo_apellido: instructor.user.segundo_apellido ?? "",
       email: instructor.user.email,
       cedula: instructor.cedula,
       telefono: instructor.telefono ?? "",
@@ -334,6 +292,7 @@ export default function InstructoresPage() {
     try {
       const body: Record<string, unknown> = {
         ...data,
+        segundo_nombre: data.segundo_nombre || null,
         telefono: data.telefono || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
@@ -383,6 +342,7 @@ export default function InstructoresPage() {
     try {
       const body: Record<string, unknown> = {
         ...data,
+        segundo_nombre: data.segundo_nombre || null,
         telefono: data.telefono || null,
         municipio: data.municipio || null,
         tipo_contrato_id: data.tipo_contrato_id || null,
@@ -512,18 +472,81 @@ export default function InstructoresPage() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="grid gap-4"
               >
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Nombre completo *</Label>
-                  <Input
-                    id="name"
-                    placeholder="Ej: María López"
-                    {...form.register("name")}
-                  />
-                  {form.formState.errors.name && (
-                    <p className="text-sm text-danger">
-                      {form.formState.errors.name.message}
-                    </p>
-                  )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="primer_nombre">Primer nombre *</Label>
+                    <Input
+                      id="primer_nombre"
+                      placeholder="María"
+                      {...form.register("primer_nombre", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "primer_nombre",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.primer_nombre && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.primer_nombre.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="segundo_nombre">Segundo nombre</Label>
+                    <Input
+                      id="segundo_nombre"
+                      placeholder="José"
+                      {...form.register("segundo_nombre", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "segundo_nombre",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="primer_apellido">Primer apellido *</Label>
+                    <Input
+                      id="primer_apellido"
+                      placeholder="López"
+                      {...form.register("primer_apellido", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "primer_apellido",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.primer_apellido && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.primer_apellido.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="segundo_apellido">Segundo apellido *</Label>
+                    <Input
+                      id="segundo_apellido"
+                      placeholder="García"
+                      {...form.register("segundo_apellido", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "segundo_apellido",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.segundo_apellido && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.segundo_apellido.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -564,6 +587,7 @@ export default function InstructoresPage() {
                       id="cedula"
                       inputMode="numeric"
                       pattern="[0-9]*"
+                      maxLength={8}
                       placeholder="12345678"
                       {...form.register("cedula", {
                         onChange: (e) =>
@@ -1194,18 +1218,85 @@ export default function InstructoresPage() {
             onSubmit={editForm.handleSubmit(onEditSubmit)}
             className="grid gap-4"
           >
-            <div className="grid gap-2">
-              <Label htmlFor="edit-name">Nombre completo *</Label>
-              <Input
-                id="edit-name"
-                placeholder="Ej: María López"
-                {...editForm.register("name")}
-              />
-              {editForm.formState.errors.name && (
-                <p className="text-sm text-danger">
-                  {editForm.formState.errors.name.message}
-                </p>
-              )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-primer_nombre">Primer nombre *</Label>
+                <Input
+                  id="edit-primer_nombre"
+                  placeholder="María"
+                  {...editForm.register("primer_nombre", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "primer_nombre",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.primer_nombre && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.primer_nombre.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-segundo_nombre">
+                  Segundo nombre (opcional)
+                </Label>
+                <Input
+                  id="edit-segundo_nombre"
+                  placeholder="José"
+                  {...editForm.register("segundo_nombre", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "segundo_nombre",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-primer_apellido">Primer apellido *</Label>
+                <Input
+                  id="edit-primer_apellido"
+                  placeholder="López"
+                  {...editForm.register("primer_apellido", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "primer_apellido",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.primer_apellido && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.primer_apellido.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-segundo_apellido">
+                  Segundo apellido *
+                </Label>
+                <Input
+                  id="edit-segundo_apellido"
+                  placeholder="García"
+                  {...editForm.register("segundo_apellido", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "segundo_apellido",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.segundo_apellido && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.segundo_apellido.message}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -1229,6 +1320,7 @@ export default function InstructoresPage() {
                   id="edit-cedula"
                   inputMode="numeric"
                   pattern="[0-9]*"
+                  maxLength={8}
                   placeholder="12345678"
                   {...editForm.register("cedula", {
                     onChange: (e) =>
