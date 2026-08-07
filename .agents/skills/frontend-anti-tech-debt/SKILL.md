@@ -3,7 +3,16 @@ name: frontend-anti-tech-debt
 description: Frontend Architecture & Anti-Technical-Debt Guardrails for React, Next.js, Astro, and modern web applications.
 version: 1.0.0
 author: Emcahell
-tags: [react, nextjs, typescript, architecture, performance, state-management, clean-code]
+tags:
+  [
+    react,
+    nextjs,
+    typescript,
+    architecture,
+    performance,
+    state-management,
+    clean-code,
+  ]
 ---
 
 # Frontend Architecture & Anti-Technical-Debt Guardrails
@@ -13,6 +22,7 @@ This skill establishes strict architectural standards and quality guardrails for
 ---
 
 ## 1. Separation of Concerns & Modular Design
+
 - **Single File Length Rule:** A React component file MUST NOT exceed **150 lines of code**. If it exceeds this threshold, it must be refactored into smaller sub-components or custom hooks.
 - **Presenter vs. Container Pattern:**
   - UI components are strictly presentational. They only handle markup, styling, and simple layout events.
@@ -22,6 +32,7 @@ This skill establishes strict architectural standards and quality guardrails for
 ---
 
 ## 2. State Management Rules
+
 - **Local-First State Principle:**
   - Use `useState` or `useReducer` strictly for ephemeral UI state (e.g., toggles, dropdown visibility, local input values).
 - **Global Store Usage (Zustand/Redux):**
@@ -34,6 +45,7 @@ This skill establishes strict architectural standards and quality guardrails for
 ---
 
 ## 3. Rendering Optimization & Performance Guardrails
+
 - **Reference Stability:** Avoid defining inline functions or non-primitive object literals directly inside render bodies when passing them as props to heavily nested or list-item components.
 - **Targeted Re-renders:**
   - Structure state as close to where it is used as possible ("pushing state down") to avoid top-level root re-renders.
@@ -43,6 +55,7 @@ This skill establishes strict architectural standards and quality guardrails for
 ---
 
 ## 4. Testability & Integration Guardrails
+
 - **Test-Driven Architecture:**
   - Every custom hook and utility function MUST be a pure, isolated unit that can be tested independently (e.g., via Vitest/Jest).
   - If a component is impossible to test without mocking dozens of global context wrappers or side effects, treat it as an architectural failure and refactor immediately.
