@@ -24,7 +24,6 @@ import {
   Users,
   CheckCircle2,
   XCircle,
-  Mail,
   CreditCard,
   Upload,
   Clock,
@@ -125,15 +124,6 @@ function getAuthHeaders() {
     Authorization: `Bearer ${getCookie("token")}`,
     Accept: "application/json",
   };
-}
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
 }
 
 const pagoEstadoConfig = {
@@ -889,120 +879,6 @@ export default function CursoDetallePage({
                 )}
               </div>
             )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {/* Instructor */}
-              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <GraduationCap className="w-3.5 h-3.5 text-primary/80" />
-                  <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
-                    Instructor
-                  </h3>
-                </div>
-                {curso.instructor?.user ? (
-                  <div className="flex items-start gap-4">
-                    <div className="relative shrink-0">
-                      <div className="absolute inset-0 rounded-full gradient-primary opacity-30 blur-md" />
-                      <div className="relative w-12 h-12 rounded-full bg-primary-container flex items-center justify-center ring-2 ring-primary/10">
-                        <span className="font-sans text-base font-bold text-on-primary-container">
-                          {getInitials(curso.instructor.user.name ?? "")}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-serif font-light text-xl text-on-surface tight-tracking leading-tight">
-                        {curso.instructor.user.name ?? "Sin nombre"}
-                      </p>
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <Mail className="w-3 h-3 text-muted-foreground" />
-                        <p className="font-sans text-xs text-muted-foreground truncate">
-                          {curso.instructor.user.email ?? ""}
-                        </p>
-                      </div>
-                      {curso.instructor.especialidad && (
-                        <p className="font-sans text-xs text-primary/80 mt-2 font-semibold">
-                          {curso.instructor.especialidad}
-                        </p>
-                      )}
-                      {curso.instructor.titulo && (
-                        <p className="font-sans text-xs text-muted-foreground mt-1 capitalize">
-                          {curso.instructor.titulo}
-                        </p>
-                      )}
-                      {curso.instructor.departamento && (
-                        <p className="font-sans text-xs text-muted-foreground mt-0.5">
-                          Depto. {curso.instructor.departamento}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-6 gap-2">
-                    <div className="w-10 h-10 rounded-full bg-primary-container/60 flex items-center justify-center">
-                      <GraduationCap className="w-4 h-4 text-on-primary-container" />
-                    </div>
-                    <p className="font-sans text-sm text-muted-foreground">
-                      Sin instructor asignado
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Estudiantes */}
-              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-primary/80" />
-                    <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
-                      Estudiantes
-                    </h3>
-                  </div>
-                  <span className="inline-flex items-center font-sans text-[10px] font-bold text-on-primary-container bg-primary-container/70 px-2 py-0.5 rounded-full tabular-nums">
-                    {curso.estudiantes.length}
-                  </span>
-                </div>
-
-                {curso.estudiantes.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-6 gap-2">
-                    <div className="w-10 h-10 rounded-full bg-primary-container/60 flex items-center justify-center">
-                      <Users className="w-4 h-4 text-on-primary-container" />
-                    </div>
-                    <p className="font-sans text-sm text-muted-foreground">
-                      Sin estudiantes matriculados
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
-                    {curso.estudiantes.map((est) => (
-                      <div
-                        key={est.id}
-                        className="flex items-center gap-3 py-2 border-b border-outline-variant last:border-0"
-                      >
-                        <div className="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
-                          <span className="font-sans text-[10px] font-bold text-on-secondary-container">
-                            {getInitials(est.nombre)}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-sans text-sm text-on-surface truncate">
-                            {est.nombre}
-                          </p>
-                        </div>
-                        <Badge
-                          variant={
-                            est.estado as "activo" | "inactivo" | "graduado"
-                          }
-                          className="text-[10px] shrink-0"
-                        >
-                          {est.estado.charAt(0).toUpperCase() +
-                            est.estado.slice(1)}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
 
             {/* Temario */}
             {curso.temario?.length > 0 && (
