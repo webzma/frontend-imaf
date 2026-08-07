@@ -235,7 +235,8 @@ export default function InstructoresPage() {
         },
       );
       if (res.ok) {
-        setTiposContrato(await res.json());
+        const data = await res.json();
+        setTiposContrato(Array.isArray(data) ? data : (data.data ?? []));
       }
     } catch {
       // Silently fail for contract types

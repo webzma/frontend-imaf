@@ -379,7 +379,11 @@ export default function CursoDetailPage({
                 e.curso === null || e.curso.id !== cursoData.id,
             ),
           );
-          setInstructores(instructoresData);
+          setInstructores(
+            Array.isArray(instructoresData)
+              ? instructoresData
+              : (instructoresData.data ?? []),
+          );
           setTemario(Array.isArray(temarioData) ? temarioData : []);
           setSesiones(Array.isArray(sesionesData) ? sesionesData : []);
         },

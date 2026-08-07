@@ -3,12 +3,12 @@
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { formatDate } from "@/lib/format";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
-import { PAGE_SIZE } from "@/lib/api";
+import { fetchPage, PAGE_SIZE } from "@/lib/api";
 import {
   BookOpen,
   Users,
@@ -33,14 +33,6 @@ interface CursoResumen {
   fecha_fin: string | null;
 }
 
-interface ProfesorMe {
-  cursos: CursoResumen[];
-}
-
-interface MeResponse {
-  profesor: ProfesorMe;
-}
-
 /* ── Helpers ── */
 
 function getCookie(name: string): string {
@@ -61,6 +53,8 @@ function getAuthHeaders() {
 export default function MisCursosPage() {
   const router = useRouter();
   const [cursos, setCursos] = useState<CursoResumen[]>([]);
+  const [totalCursos, setTotalCursos] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
@@ -69,12 +63,32 @@ export default function MisCursosPage() {
   >("todos");
   const [page, setPage] = useState(1);
 
+  // Guarda contra respuestas fuera de orden al navegar rápido entre páginas.
+  const latestPageRef = useRef(1);
+
+  const loadCursos = async (pageNum: number, background = false) => {
+    latestPageRef.current = pageNum;
+    if (!background) setLoading(true);
+    try {
+      const result = await fetchPage<CursoResumen>(
+        `${process.env.API_URL}api/profesor/cursos`,
+        pageNum,
+        getAuthHeaders(),
+      );
+      if (latestPageRef.current !== pageNum) return; // respuesta obsoleta
+      setCursos(result.items);
+      setTotalCursos(result.total);
+      setTotalPages(result.totalPages);
+      setError("");
+    } catch {
+      setError("Error al cargar los cursos.");
+    } finally {
+      if (!background) setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetch(`${process.env.API_URL}api/me`, { headers: getAuthHeaders() })
-      .then((r) => r.json())
-      .then((data: MeResponse) => setCursos(data.profesor?.cursos ?? []))
-      .catch(() => setError("Error al cargar los cursos."))
-      .finally(() => setLoading(false));
+    loadCursos(1);
   }, []);
 
   const filtered = useMemo(() => {
@@ -88,12 +102,7 @@ export default function MisCursosPage() {
     });
   }, [cursos, search, filterEstado]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  );
 
   if (loading) {
     return (
@@ -119,7 +128,7 @@ export default function MisCursosPage() {
           icon={BookOpen}
           eyebrow="Instructor / Mis Cursos"
           title="Mis Cursos"
-          subtitle={`${cursos.length} curso${cursos.length !== 1 ? "s" : ""} asignado${cursos.length !== 1 ? "s" : ""}`}
+          subtitle={`${totalCursos} curso${totalCursos !== 1 ? "s" : ""} asignado${totalCursos !== 1 ? "s" : ""}`}
           className="mb-8 md:mb-8"
         />
 
@@ -168,6 +177,7 @@ export default function MisCursosPage() {
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setPage(1);
+                  loadCursos(1, true);
                 }}
                 className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/60 font-sans text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               />
@@ -179,6 +189,7 @@ export default function MisCursosPage() {
                   onClick={() => {
                     setFilterEstado(v);
                     setPage(1);
+                    loadCursos(1, true);
                   }}
                   className={`px-3 py-1.5 rounded-md font-sans text-xs font-medium capitalize transition-colors ${
                     filterEstado === v
@@ -218,7 +229,7 @@ export default function MisCursosPage() {
         ) : (
           <>
             <div className="space-y-3">
-              {paginated.map((curso) => {
+              {filtered.map((curso) => {
                 const inscritos = curso.limite_cupo - curso.cupos_restantes;
                 const pct =
                   curso.limite_cupo > 0
@@ -291,14 +302,17 @@ export default function MisCursosPage() {
               })}
             </div>
 
-            {totalPages > 1 && (
+            {filtered.length > 0 && totalPages > 1 && (
               <div className="mt-3 bg-surface-container-low rounded-sm overflow-hidden ambient-shadow">
                 <Pagination
                   page={safePage}
                   totalPages={totalPages}
-                  totalItems={filtered.length}
+                  totalItems={totalCursos}
                   pageSize={PAGE_SIZE}
-                  onPageChange={setPage}
+                  onPageChange={(p) => {
+                    setPage(p);
+                    loadCursos(p);
+                  }}
                   itemLabel={["curso", "cursos"]}
                 />
               </div>

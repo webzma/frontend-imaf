@@ -241,7 +241,10 @@ export default function EstudiantesPage() {
       const res = await fetch(`${process.env.API_URL}api/admin/cursos`, {
         headers: getAuthHeaders(),
       });
-      if (res.ok) setCursos(await res.json());
+      if (res.ok) {
+        const data = await res.json();
+        setCursos(Array.isArray(data) ? data : (data.data ?? []));
+      }
     } catch {
       /* silent */
     }
