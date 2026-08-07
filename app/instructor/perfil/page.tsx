@@ -29,6 +29,7 @@ import {
   MapPin,
   Building2,
   BadgeCheck,
+  Briefcase,
   User,
   Pencil,
   Loader2,
@@ -524,6 +525,7 @@ export default function PerfilPage() {
         ) : (
           /* ── View mode ── */
           <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 md:p-7">
+            {/* Información personal */}
             <div className="flex items-center gap-2 mb-5">
               <User className="w-3.5 h-3.5 text-primary/80" />
               <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
@@ -554,27 +556,6 @@ export default function PerfilPage() {
               />
               <InfoRow
                 icon={
-                  <Building2 className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Departamento"
-                value={p.departamento}
-              />
-              <InfoRow
-                icon={
-                  <GraduationCap className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Especialidad"
-                value={p.especialidad}
-              />
-              <InfoRow
-                icon={
-                  <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Título"
-                value={p.titulo ? tituloLabel[p.titulo] : null}
-              />
-              <InfoRow
-                icon={
                   <CalendarDays className="w-3.5 h-3.5 text-on-primary-container" />
                 }
                 label="Fecha de nacimiento"
@@ -590,6 +571,38 @@ export default function PerfilPage() {
                     ? p.genero.charAt(0).toUpperCase() + p.genero.slice(1)
                     : null
                 }
+              />
+            </div>
+
+            {/* Información profesional */}
+            <div className="border-t border-outline-variant my-6" />
+            <div className="flex items-center gap-2 mb-5">
+              <Briefcase className="w-3.5 h-3.5 text-primary/80" />
+              <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                Información profesional
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+              <InfoRow
+                icon={
+                  <GraduationCap className="w-3.5 h-3.5 text-on-primary-container" />
+                }
+                label="Título"
+                value={p.titulo ? tituloLabel[p.titulo] : null}
+              />
+              <InfoRow
+                icon={
+                  <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
+                }
+                label="Especialidad"
+                value={p.especialidad}
+              />
+              <InfoRow
+                icon={
+                  <Building2 className="w-3.5 h-3.5 text-on-primary-container" />
+                }
+                label="Departamento"
+                value={p.departamento}
               />
             </div>
           </div>
