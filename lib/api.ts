@@ -38,28 +38,61 @@ export async function fetchPage<T>(
 
   // Respuesta plana: el endpoint no pagina; cortamos localmente.
   if (Array.isArray(body)) {
-    return {
-      items: body.slice((page - 1) * pageSize, page * pageSize),
-      total: body.length,
-      page,
-      totalPages: Math.max(1, Math.ceil(body.length / pageSize)),
-    };
+    return sliceLocal(body, body.length, page, pageSize);
   }
 
-  // Respuesta de Laravel `paginate()`.
-  const record = body as {
-    data?: T[];
-    total?: number;
-    current_page?: number;
-    last_page?: number;
-    per_page?: number;
-  };
-  const items = record.data ?? [];
-  const total = record.total ?? items.length;
+  // Respuesta paginada de Laravel `paginate()`: trae `data` con una sola
+  // página y los metadatos `total`, `current_page`, `last_page` y
+  // `per_page`. Si faltan los metadatos pero hay `data`, el backend está
+  // devolviendo un arreglo envuelto en `{ data: [...] }` sin paginar
+  // (API Resource sin `->paginate()`): en ese caso cortamos localmente.
+  const record = body as Record<string, unknown>;
+  const data = Array.isArray(record.data) ? (record.data as T[]) : null;
+  if (data) {
+    const total = typeof record.total === "number" ? record.total : data.length;
+    const hasPaginationMeta =
+      typeof record.current_page === "number" &&
+      typeof record.last_page === "number" &&
+      typeof record.per_page === "number";
+    const serverPageSize =
+      typeof record.per_page === "number" ? record.per_page : pageSize;
+
+    // Solo se confía en la paginación del servidor si devuelve la misma
+    // cantidad que pedimos. Si el backend pagina con otro `per_page`
+    // (p. ej. ignora el parámetro y usa el default de Laravel), cortamos
+    // localmente para garantizar exactamente `pageSize` registros.
+    if (
+      hasPaginationMeta &&
+      data.length <= pageSize &&
+      serverPageSize <= pageSize
+    ) {
+      return {
+        items: data,
+        total,
+        page: record.current_page as number,
+        totalPages: record.last_page as number,
+      };
+    }
+
+    // Sin metadatos (o per_page distinto): `data` trae la lista completa,
+    // se corta aquí.
+    return sliceLocal(data, total, page, pageSize);
+  }
+
+  // Formato inesperado: devolver vacío en vez de romper la UI.
+  return { items: [], total: 0, page, totalPages: 1 };
+}
+
+function sliceLocal<T>(
+  list: T[],
+  total: number,
+  page: number,
+  pageSize: number,
+): PageResult<T> {
   return {
-    items,
+    items: list.slice((page - 1) * pageSize, page * pageSize),
     total,
-    page: record.current_page ?? page,
-    totalPages: record.last_page ?? Math.max(1, Math.ceil(total / pageSize)),
+    page,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
   };
 }

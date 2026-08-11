@@ -1,12 +1,12 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { formatDate } from "@/lib/format";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
-import { PAGE_SIZE } from "@/lib/api";
+import { fetchPage, PAGE_SIZE } from "@/lib/api";
 import {
   BookOpen,
   Users,
@@ -64,14 +64,45 @@ function getAuthHeaders() {
 export default function InstructorDashboard() {
   const router = useRouter();
   const [me, setMe] = useState<MeResponse | null>(null);
+  const [cursos, setCursos] = useState<CursoResumen[]>([]);
+  const [totalCursos, setTotalCursos] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
 
+  // Guarda contra respuestas fuera de orden al navegar rápido entre páginas.
+  const latestPageRef = useRef(1);
+
+  const loadCursos = async (pageNum: number, background = false) => {
+    latestPageRef.current = pageNum;
+    if (!background) setLoading(true);
+    try {
+      const result = await fetchPage<CursoResumen>(
+        `${process.env.API_URL}api/profesor/cursos`,
+        pageNum,
+        getAuthHeaders(),
+      );
+      if (latestPageRef.current !== pageNum) return; // respuesta obsoleta
+      setCursos(result.items);
+      setTotalCursos(result.total);
+      setTotalPages(result.totalPages);
+    } catch {
+      setError("Error al cargar los datos.");
+    } finally {
+      if (!background) setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetch(`${process.env.API_URL}api/me`, { headers: getAuthHeaders() })
-      .then((r) => r.json())
-      .then((data: MeResponse) => setMe(data))
+    // Perfil (nombre y especialidad) + cursos paginados (10 por petición).
+    Promise.all([
+      loadCursos(1, true),
+      fetch(`${process.env.API_URL}api/me`, { headers: getAuthHeaders() }).then(
+        (r) => r.json(),
+      ),
+    ])
+      .then(([, data]) => setMe(data as MeResponse))
       .catch(() => setError("Error al cargar los datos."))
       .finally(() => setLoading(false));
   }, []);
@@ -93,18 +124,16 @@ export default function InstructorDashboard() {
     );
   }
 
-  const cursos = me.profesor?.cursos ?? [];
-  const totalEstudiantes = cursos.reduce(
+  // Estadísticas con el set completo (viene del perfil api/me).
+  const cursosCompletos = me?.profesor?.cursos ?? [];
+  const totalEstudiantes = cursosCompletos.reduce(
     (sum, c) => sum + (c.limite_cupo - c.cupos_restantes),
     0,
   );
-  const cursosActivos = cursos.filter((c) => c.estado === "activo").length;
-  const totalPages = Math.max(1, Math.ceil(cursos.length / PAGE_SIZE));
+  const cursosActivos = cursosCompletos.filter(
+    (c) => c.estado === "activo",
+  ).length;
   const safePage = Math.min(page, totalPages);
-  const pagedCursos = cursos.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  );
 
   const firstName = me.name.split(" ")[0];
 
@@ -128,7 +157,7 @@ export default function InstructorDashboard() {
               </p>
             </div>
             <p className="font-sans text-3xl font-light text-on-surface">
-              {cursos.length}
+              {totalCursos}
             </p>
             <p className="font-sans text-xs text-muted-foreground mt-1">
               {cursosActivos} activo{cursosActivos !== 1 ? "s" : ""}
@@ -161,7 +190,7 @@ export default function InstructorDashboard() {
               {cursosActivos}
             </p>
             <p className="font-sans text-xs text-muted-foreground mt-1">
-              de {cursos.length} total
+              de {totalCursos} total
             </p>
           </div>
         </div>
@@ -195,7 +224,7 @@ export default function InstructorDashboard() {
             </div>
           ) : (
             <div className="bg-surface-container-low rounded-sm ambient-shadow overflow-hidden">
-              {pagedCursos.map((curso, i) => {
+              {cursos.map((curso, i) => {
                 const inscritos = curso.limite_cupo - curso.cupos_restantes;
                 return (
                   <button
@@ -204,7 +233,7 @@ export default function InstructorDashboard() {
                       router.push(`/instructor/cursos/${curso.id}`)
                     }
                     className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-surface-container transition-colors ${
-                      i < pagedCursos.length - 1
+                      i < cursos.length - 1
                         ? "border-b border-outline-variant"
                         : ""
                     }`}
@@ -247,9 +276,12 @@ export default function InstructorDashboard() {
               <Pagination
                 page={safePage}
                 totalPages={totalPages}
-                totalItems={cursos.length}
+                totalItems={totalCursos}
                 pageSize={PAGE_SIZE}
-                onPageChange={setPage}
+                onPageChange={(p) => {
+                  setPage(p);
+                  loadCursos(p);
+                }}
                 itemLabel={["curso", "cursos"]}
               />
             </div>
