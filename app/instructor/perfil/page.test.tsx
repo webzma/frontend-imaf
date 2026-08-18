@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
+import { renderWithQuery } from "@/lib/test-utils";
 import userEvent from "@testing-library/user-event";
 import PerfilPage from "./page";
 
@@ -59,7 +60,7 @@ async function abrirEdicion(user: ReturnType<typeof userEvent.setup>) {
 describe("Perfil de instructor", () => {
   it("carga y muestra los datos del perfil", async () => {
     fetchMock.mockResolvedValueOnce(ok(meMock));
-    render(<PerfilPage />);
+    renderWithQuery(<PerfilPage />);
 
     expect(await screen.findByText("María García")).toBeInTheDocument();
     expect(screen.getByText("maria@correo.com")).toBeInTheDocument();
@@ -68,7 +69,7 @@ describe("Perfil de instructor", () => {
   it("sanitiza cédula y teléfono al escribir", async () => {
     fetchMock.mockResolvedValueOnce(ok(meMock));
     const user = userEvent.setup();
-    render(<PerfilPage />);
+    renderWithQuery(<PerfilPage />);
 
     await abrirEdicion(user);
 
@@ -84,7 +85,7 @@ describe("Perfil de instructor", () => {
   it("bloquea el envío si la especialidad tiene caracteres de inyección", async () => {
     fetchMock.mockResolvedValueOnce(ok(meMock));
     const user = userEvent.setup();
-    render(<PerfilPage />);
+    renderWithQuery(<PerfilPage />);
 
     await abrirEdicion(user);
 
@@ -109,7 +110,7 @@ describe("Perfil de instructor", () => {
       .mockResolvedValueOnce(ok({ telefono: "04120000000" }));
 
     const user = userEvent.setup();
-    render(<PerfilPage />);
+    renderWithQuery(<PerfilPage />);
 
     await abrirEdicion(user);
 

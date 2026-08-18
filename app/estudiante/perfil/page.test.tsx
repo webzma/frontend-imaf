@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
+import { renderWithQuery } from "@/lib/test-utils";
 import userEvent from "@testing-library/user-event";
 import PerfilPage from "./page";
 
@@ -49,7 +50,7 @@ afterEach(() => {
 describe("Perfil de estudiante", () => {
   it("carga y muestra los datos del perfil", async () => {
     fetchMock.mockResolvedValueOnce(ok(perfilMock));
-    render(<PerfilPage />);
+    renderWithQuery(<PerfilPage />);
 
     // El nombre aparece dos veces (tarjeta y credenciales): se apunta al heading
     expect(
@@ -63,7 +64,7 @@ describe("Perfil de estudiante", () => {
   it("sanitiza el teléfono: elimina las letras mientras se escribe", async () => {
     fetchMock.mockResolvedValueOnce(ok(perfilMock));
     const user = userEvent.setup();
-    render(<PerfilPage />);
+    renderWithQuery(<PerfilPage />);
 
     await user.click(
       await screen.findByRole("button", { name: /editar perfil/i }),
@@ -85,7 +86,7 @@ describe("Perfil de estudiante", () => {
       );
 
     const user = userEvent.setup();
-    render(<PerfilPage />);
+    renderWithQuery(<PerfilPage />);
 
     await user.click(
       await screen.findByRole("button", { name: /editar perfil/i }),

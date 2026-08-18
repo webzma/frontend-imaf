@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useQueryClient } from "@tanstack/react-query";
+import { PERFIL_INSTRUCTOR_KEY } from "@/lib/query-keys";
 import { sanitizarDigitos } from "@/lib/validators";
 import {
   perfilInstructorSchema,
@@ -107,6 +109,7 @@ export default function PerfilPage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingFoto, setUploadingFoto] = useState(false);
+  const queryClient = useQueryClient();
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -195,6 +198,9 @@ export default function PerfilPage() {
       setMe((prev) =>
         prev ? { ...prev, profesor: { ...prev.profesor, ...body } } : prev,
       );
+      // El avatar de la barra lateral lee el perfil desde react-query; sin
+      // esto seguiría mostrando las iniciales hasta recargar la página.
+      queryClient.invalidateQueries({ queryKey: PERFIL_INSTRUCTOR_KEY });
       toast.success("Foto de perfil actualizada");
     } catch {
       toast.error("Error al conectar con el servidor");

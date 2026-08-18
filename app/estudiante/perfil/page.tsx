@@ -33,6 +33,8 @@ import {
   IdCard,
   Camera,
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { PERFIL_ESTUDIANTE_KEY } from "@/lib/query-keys";
 import municipios from "@/data/municipios.json";
 import { sanitizarDigitos } from "@/lib/validators";
 import {
@@ -88,6 +90,7 @@ export default function PerfilPage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingFoto, setUploadingFoto] = useState(false);
+  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<PerfilEstudianteForm>({
@@ -155,6 +158,9 @@ export default function PerfilPage() {
         return;
       }
       setPerfil(body);
+      // El avatar de la barra lateral lee el perfil desde react-query; sin
+      // esto seguiría mostrando las iniciales hasta recargar la página.
+      queryClient.invalidateQueries({ queryKey: PERFIL_ESTUDIANTE_KEY });
       toast.success("Foto de perfil actualizada");
     } catch {
       toast.error("Error al conectar con el servidor");

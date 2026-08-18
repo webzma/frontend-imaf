@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useTheme } from "@/hooks/use-theme";
 import { Avatar } from "@/components/avatar";
+import { PERFIL_INSTRUCTOR_KEY } from "@/lib/query-keys";
 import logoImaf from "@/public/logo-imaf.webp";
 import Image from "next/image";
 
@@ -83,7 +84,7 @@ function getCookie(name: string): string {
   return match ? match[2] : "";
 }
 
-const PROFILE_KEY = ["instructor", "me"] as const;
+const PROFILE_KEY = PERFIL_INSTRUCTOR_KEY;
 const NOTIF_COUNT_KEY = ["instructor", "notificaciones", "count"] as const;
 
 async function fetchProfile(): Promise<{
