@@ -29,6 +29,7 @@ import {
   MapPin,
   Building2,
   BadgeCheck,
+  Briefcase,
   User,
   Pencil,
   Loader2,
@@ -37,6 +38,7 @@ import {
   CalendarDays,
   Camera,
 } from "lucide-react";
+import municipios from "@/data/municipios.json";
 
 /* ── Types ── */
 
@@ -345,10 +347,14 @@ export default function PerfilPage() {
 
         {editing ? (
           /* ── Edit form ── */
-          <div className="bg-surface-container-low rounded-sm ambient-shadow p-6">
-            <h3 className="font-sans text-xs tracking-[0.18em] uppercase text-muted-foreground font-semibold mb-5">
-              Editar información
-            </h3>
+          <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 md:p-7">
+            {/* Información personal */}
+            <div className="flex items-center gap-2 mb-5">
+              <User className="w-3.5 h-3.5 text-primary/80" />
+              <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                Información personal
+              </h3>
+            </div>
             <div className="grid gap-4">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
@@ -357,7 +363,7 @@ export default function PerfilPage() {
                     id="cedula"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    maxLength={15}
+                    maxLength={8}
                     placeholder="Ej: 12345678"
                     {...form.register("cedula", {
                       onChange: (e) =>
@@ -400,16 +406,95 @@ export default function PerfilPage() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="municipio">Municipio</Label>
-                  <Input
-                    id="municipio"
-                    placeholder="Ej: Caracas"
-                    {...form.register("municipio")}
-                  />
+                  <Select
+                    value={form.watch("municipio") || undefined}
+                    onValueChange={(value) =>
+                      form.setValue("municipio", value, {
+                        shouldValidate: true,
+                      })
+                    }
+                  >
+                    <SelectTrigger id="municipio" className="w-full">
+                      <SelectValue placeholder="Seleccionar municipio" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {municipios.map((municipio) => (
+                        <SelectItem key={municipio} value={municipio}>
+                          {municipio}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {form.formState.errors.municipio && (
                     <p className="text-xs text-danger">
                       {form.formState.errors.municipio.message}
                     </p>
                   )}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="genero">Género</Label>
+                  <Select
+                    value={form.watch("genero") || undefined}
+                    onValueChange={(v) =>
+                      form.setValue(
+                        "genero",
+                        v as PerfilInstructorForm["genero"],
+                        { shouldValidate: true },
+                      )
+                    }
+                  >
+                    <SelectTrigger id="genero">
+                      <SelectValue placeholder="No especificado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="masculino">Masculino</SelectItem>
+                      <SelectItem value="femenino">Femenino</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="fecha_nacimiento">Fecha de nacimiento</Label>
+                <Input
+                  id="fecha_nacimiento"
+                  type="date"
+                  {...form.register("fecha_nacimiento")}
+                />
+              </div>
+            </div>
+
+            {/* Información profesional */}
+            <div className="border-t border-outline-variant my-6" />
+            <div className="flex items-center gap-2 mb-5">
+              <Briefcase className="w-3.5 h-3.5 text-primary/80" />
+              <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                Información profesional
+              </h3>
+            </div>
+            <div className="grid gap-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="titulo">Título académico</Label>
+                  <Select
+                    value={form.watch("titulo") || undefined}
+                    onValueChange={(v) =>
+                      form.setValue(
+                        "titulo",
+                        v as PerfilInstructorForm["titulo"],
+                        { shouldValidate: true },
+                      )
+                    }
+                  >
+                    <SelectTrigger id="titulo">
+                      <SelectValue placeholder="Sin título" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="licenciatura">Licenciatura</SelectItem>
+                      <SelectItem value="maestria">Maestría</SelectItem>
+                      <SelectItem value="doctorado">Doctorado</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="departamento">Departamento</Label>
@@ -439,91 +524,36 @@ export default function PerfilPage() {
                   </p>
                 )}
               </div>
+            </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label>Título académico</Label>
-                  <Select
-                    value={form.watch("titulo") || undefined}
-                    onValueChange={(v) =>
-                      form.setValue(
-                        "titulo",
-                        v as PerfilInstructorForm["titulo"],
-                        { shouldValidate: true },
-                      )
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sin título" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="licenciatura">Licenciatura</SelectItem>
-                      <SelectItem value="maestria">Maestría</SelectItem>
-                      <SelectItem value="doctorado">Doctorado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label>Género</Label>
-                  <Select
-                    value={form.watch("genero") || undefined}
-                    onValueChange={(v) =>
-                      form.setValue(
-                        "genero",
-                        v as PerfilInstructorForm["genero"],
-                        { shouldValidate: true },
-                      )
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="No especificado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="masculino">Masculino</SelectItem>
-                      <SelectItem value="femenino">Femenino</SelectItem>
-                      <SelectItem value="otro">Otro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="fecha_nacimiento">Fecha de nacimiento</Label>
-                <Input
-                  id="fecha_nacimiento"
-                  type="date"
-                  {...form.register("fecha_nacimiento")}
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={saving}
-                  className="gap-2"
-                >
-                  <X className="w-4 h-4" />
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={() => form.handleSubmit(handleSave)()}
-                  disabled={saving}
-                  className="gap-2"
-                >
-                  {saving ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  Guardar cambios
-                </Button>
-              </div>
+            <div className="flex items-center justify-end gap-2 pt-2 mt-6">
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                disabled={saving}
+                className="gap-2"
+              >
+                <X className="w-4 h-4" />
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => form.handleSubmit(handleSave)()}
+                disabled={saving}
+                className="gap-2"
+              >
+                {saving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                Guardar cambios
+              </Button>
             </div>
           </div>
         ) : (
           /* ── View mode ── */
           <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 md:p-7">
+            {/* Información personal */}
             <div className="flex items-center gap-2 mb-5">
               <User className="w-3.5 h-3.5 text-primary/80" />
               <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
@@ -554,27 +584,6 @@ export default function PerfilPage() {
               />
               <InfoRow
                 icon={
-                  <Building2 className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Departamento"
-                value={p.departamento}
-              />
-              <InfoRow
-                icon={
-                  <GraduationCap className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Especialidad"
-                value={p.especialidad}
-              />
-              <InfoRow
-                icon={
-                  <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Título"
-                value={p.titulo ? tituloLabel[p.titulo] : null}
-              />
-              <InfoRow
-                icon={
                   <CalendarDays className="w-3.5 h-3.5 text-on-primary-container" />
                 }
                 label="Fecha de nacimiento"
@@ -590,6 +599,38 @@ export default function PerfilPage() {
                     ? p.genero.charAt(0).toUpperCase() + p.genero.slice(1)
                     : null
                 }
+              />
+            </div>
+
+            {/* Información profesional */}
+            <div className="border-t border-outline-variant my-6" />
+            <div className="flex items-center gap-2 mb-5">
+              <Briefcase className="w-3.5 h-3.5 text-primary/80" />
+              <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                Información profesional
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+              <InfoRow
+                icon={
+                  <GraduationCap className="w-3.5 h-3.5 text-on-primary-container" />
+                }
+                label="Título"
+                value={p.titulo ? tituloLabel[p.titulo] : null}
+              />
+              <InfoRow
+                icon={
+                  <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
+                }
+                label="Especialidad"
+                value={p.especialidad}
+              />
+              <InfoRow
+                icon={
+                  <Building2 className="w-3.5 h-3.5 text-on-primary-container" />
+                }
+                label="Departamento"
+                value={p.departamento}
               />
             </div>
           </div>

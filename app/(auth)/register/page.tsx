@@ -17,7 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
-import { sanitizarDigitos } from "@/lib/validators";
+import {
+  sanitizarDigitos,
+  sanitizarLetras,
+  sanitizarTexto,
+} from "@/lib/validators";
 import { registroSchema, type RegistroForm } from "@/lib/schemas";
 import logoImaf from "@/public/logo-imaf.webp";
 import municipios from "@/data/municipios.json";
@@ -31,13 +35,17 @@ export default function RegisterPage() {
   const form = useForm<RegistroForm>({
     resolver: zodResolver(registroSchema),
     defaultValues: {
-      name: "",
+      primer_nombre: "",
+      segundo_nombre: "",
+      primer_apellido: "",
+      segundo_apellido: "",
       email: "",
       cedula: "",
       telefono: "",
       fecha_nacimiento: "",
       genero: "",
       municipio: "",
+      direccion: "",
       password: "",
       password_confirmation: "",
     },
@@ -54,7 +62,11 @@ export default function RegisterPage() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          // El backend guarda los 4 campos; vacío se envía como null.
+          segundo_nombre: data.segundo_nombre || null,
+        }),
       });
 
       const body = await res.json();
@@ -137,20 +149,100 @@ export default function RegisterPage() {
           noValidate
           className="space-y-6"
         >
-          {/* Fila 1 */}
-          <div className="space-y-2">
-            <Label htmlFor="name">{fieldLabel("Nombre completo")}</Label>
-            <Input
-              id="name"
-              autoComplete="name"
-              placeholder="Juan Pérez"
-              {...form.register("name")}
-            />
-            {form.formState.errors.name && (
-              <p className="text-sm text-danger">
-                {form.formState.errors.name.message}
-              </p>
-            )}
+          {/* Fila 1: nombres */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="primer_nombre">
+                {fieldLabel("Primer nombre")}
+              </Label>
+              <Input
+                id="primer_nombre"
+                autoComplete="given-name"
+                placeholder="Juan"
+                {...form.register("primer_nombre", {
+                  onChange: (e) =>
+                    form.setValue(
+                      "primer_nombre",
+                      sanitizarLetras(e.target.value),
+                    ),
+                })}
+              />
+              {form.formState.errors.primer_nombre && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.primer_nombre.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="segundo_nombre">
+                {fieldLabel("Segundo nombre (opcional)")}
+              </Label>
+              <Input
+                id="segundo_nombre"
+                autoComplete="additional-name"
+                placeholder="Pablo"
+                {...form.register("segundo_nombre", {
+                  onChange: (e) =>
+                    form.setValue(
+                      "segundo_nombre",
+                      sanitizarLetras(e.target.value),
+                    ),
+                })}
+              />
+              {form.formState.errors.segundo_nombre && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.segundo_nombre.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Fila 2: apellidos */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="primer_apellido">
+                {fieldLabel("Primer apellido")}
+              </Label>
+              <Input
+                id="primer_apellido"
+                autoComplete="family-name"
+                placeholder="Pérez"
+                {...form.register("primer_apellido", {
+                  onChange: (e) =>
+                    form.setValue(
+                      "primer_apellido",
+                      sanitizarLetras(e.target.value),
+                    ),
+                })}
+              />
+              {form.formState.errors.primer_apellido && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.primer_apellido.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="segundo_apellido">
+                {fieldLabel("Segundo apellido")}
+              </Label>
+              <Input
+                id="segundo_apellido"
+                autoComplete="family-name"
+                placeholder="Gómez"
+                {...form.register("segundo_apellido", {
+                  onChange: (e) =>
+                    form.setValue(
+                      "segundo_apellido",
+                      sanitizarLetras(e.target.value),
+                    ),
+                })}
+              />
+              {form.formState.errors.segundo_apellido && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.segundo_apellido.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -178,8 +270,8 @@ export default function RegisterPage() {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder="0000000000"
-                maxLength={15}
+                placeholder="00000000"
+                maxLength={8}
                 {...form.register("cedula", {
                   onChange: (e) =>
                     form.setValue("cedula", sanitizarDigitos(e.target.value)),
@@ -255,31 +347,53 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Fila 4 - Municipio */}
-          <div className="space-y-2">
-            <Label htmlFor="municipio">{fieldLabel("Municipio")}</Label>
-            <Select
-              value={form.watch("municipio") || undefined}
-              onValueChange={(value) =>
-                form.setValue("municipio", value, { shouldValidate: true })
-              }
-            >
-              <SelectTrigger id="municipio">
-                <SelectValue placeholder="Seleccionar municipio" />
-              </SelectTrigger>
-              <SelectContent>
-                {municipios.map((municipio) => (
-                  <SelectItem key={municipio} value={municipio}>
-                    {municipio}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {form.formState.errors.municipio && (
-              <p className="text-sm text-danger">
-                {form.formState.errors.municipio.message}
-              </p>
-            )}
+          {/* Fila 4 - Municipio y dirección */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="municipio">{fieldLabel("Municipio")}</Label>
+              <Select
+                value={form.watch("municipio") || undefined}
+                onValueChange={(value) =>
+                  form.setValue("municipio", value, { shouldValidate: true })
+                }
+              >
+                <SelectTrigger id="municipio">
+                  <SelectValue placeholder="Seleccionar municipio" />
+                </SelectTrigger>
+                <SelectContent>
+                  {municipios.map((municipio) => (
+                    <SelectItem key={municipio} value={municipio}>
+                      {municipio}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.municipio && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.municipio.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="direccion">
+                {fieldLabel("Dirección de habitación")}
+              </Label>
+              <Input
+                id="direccion"
+                autoComplete="street-address"
+                placeholder="Av. Principal, casa N° 5"
+                maxLength={255}
+                {...form.register("direccion", {
+                  onChange: (e) =>
+                    form.setValue("direccion", sanitizarTexto(e.target.value)),
+                })}
+              />
+              {form.formState.errors.direccion && (
+                <p className="text-sm text-danger">
+                  {form.formState.errors.direccion.message}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Contraseñas */}

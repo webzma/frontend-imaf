@@ -38,7 +38,7 @@ const navItems = [
     section: "General",
     items: [
       {
-        label: "Dashboard",
+        label: "Inicio",
         href: "/instructor",
         icon: LayoutDashboard,
         exact: true,

@@ -1,12 +1,22 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { formatDate } from "@/lib/format";
-import { sanitizarDigitos, SOLO_DIGITOS, SOLO_LETRAS } from "@/lib/validators";
+import {
+  sanitizarDigitos,
+  sanitizarLetras,
+  sanitizarTexto,
+} from "@/lib/validators";
+import municipios from "@/data/municipios.json";
+import {
+  estudianteSchema,
+  editEstudianteSchema,
+  type EstudianteForm,
+  type EditEstudianteForm,
+} from "@/lib/schemas";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/pagination";
+import { fetchPage, PAGE_SIZE } from "@/lib/api";
 import { EmptyState } from "@/components/empty-state";
 import {
   DetailHeader,
@@ -67,6 +78,10 @@ interface Curso {
 interface User {
   name: string;
   email: string;
+  primer_nombre?: string | null;
+  segundo_nombre?: string | null;
+  primer_apellido?: string | null;
+  segundo_apellido?: string | null;
 }
 
 interface Estudiante {
@@ -75,6 +90,8 @@ interface Estudiante {
   telefono: string | null;
   fecha_nacimiento: string | null;
   genero: string | null;
+  municipio: string | null;
+  direccion: string | null;
   fecha_inscripcion: string;
   estado: "activo" | "inactivo" | "graduado";
   user: User;
@@ -96,8 +113,6 @@ function getAuthHeaders() {
     "Content-Type": "application/json",
   };
 }
-
-const PAGE_SIZE = 10;
 
 function getInitials(name: string): string {
   return name
@@ -121,67 +136,6 @@ const estadoLabel: Record<string, string> = {
   inactivo: "Inactivo",
   graduado: "Graduado",
 };
-
-/* ── Zod Schema ── */
-
-const editEstudianteSchema = z.object({
-  name: z
-    .string()
-    .min(1, "El nombre es obligatorio")
-    .max(255)
-    .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
-  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  cedula: z
-    .string()
-    .min(1, "La cédula es obligatoria")
-    .max(15)
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
-  telefono: z
-    .string()
-    .max(20)
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
-    .optional()
-    .or(z.literal("")),
-  fecha_nacimiento: z.string().optional(),
-  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
-  curso_id: z.string().optional(),
-  fecha_inscripcion: z
-    .string()
-    .min(1, "La fecha de inscripción es obligatoria"),
-  estado: z.enum(["activo", "inactivo", "graduado"]),
-});
-
-type EditEstudianteForm = z.infer<typeof editEstudianteSchema>;
-
-const estudianteSchema = z.object({
-  name: z
-    .string()
-    .min(1, "El nombre es obligatorio")
-    .max(255)
-    .regex(SOLO_LETRAS, "El nombre solo puede contener letras y espacios"),
-  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  password: z.string().min(8, "Mínimo 8 caracteres"),
-  cedula: z
-    .string()
-    .min(1, "La cédula es obligatoria")
-    .max(15)
-    .regex(SOLO_DIGITOS, "La cédula solo puede contener dígitos"),
-  telefono: z
-    .string()
-    .max(20)
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
-    .optional()
-    .or(z.literal("")),
-  fecha_nacimiento: z.string().optional(),
-  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
-  curso_id: z.string().optional(),
-  fecha_inscripcion: z
-    .string()
-    .min(1, "La fecha de inscripción es obligatoria"),
-  estado: z.enum(["activo", "inactivo", "graduado"]),
-});
-
-type EstudianteForm = z.infer<typeof estudianteSchema>;
 
 /* ── Table Skeleton ── */
 
@@ -220,6 +174,8 @@ export default function EstudiantesPage() {
   const [filterEstado, setFilterEstado] = useState("todos");
   const [filterCurso, setFilterCurso] = useState("todos");
   const [page, setPage] = useState(1);
+  const [totalEstudiantes, setTotalEstudiantes] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
@@ -239,32 +195,42 @@ export default function EstudiantesPage() {
   const form = useForm<EstudianteForm>({
     resolver: zodResolver(estudianteSchema),
     defaultValues: {
-      name: "",
+      primer_nombre: "",
+      segundo_nombre: "",
+      primer_apellido: "",
+      segundo_apellido: "",
       email: "",
       password: "",
       cedula: "",
       telefono: "",
       fecha_nacimiento: "",
       genero: undefined,
+      municipio: "",
+      direccion: "",
       curso_id: undefined,
       fecha_inscripcion: new Date().toISOString().split("T")[0],
       estado: "activo",
     },
   });
 
-  const fetchEstudiantes = async () => {
+  // Guarda contra respuestas fuera de orden al navegar rápido entre páginas.
+  const latestPageRef = useRef(1);
+
+  const fetchEstudiantes = async (pageNum = 1) => {
+    latestPageRef.current = pageNum;
     try {
-      const res = await fetch(`${process.env.API_URL}api/admin/estudiantes`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) {
-        setError("No se pudo cargar la lista de estudiantes.");
-        return;
-      }
-      const data = await res.json();
-      setEstudiantes(Array.isArray(data) ? data : (data.data ?? []));
+      const result = await fetchPage<Estudiante>(
+        `${process.env.API_URL}api/admin/estudiantes`,
+        pageNum,
+        getAuthHeaders(),
+      );
+      if (latestPageRef.current !== pageNum) return; // respuesta obsoleta
+      setEstudiantes(result.items);
+      setTotalEstudiantes(result.total);
+      setTotalPages(result.totalPages);
+      setError("");
     } catch {
-      setError("Error al conectar con el servidor.");
+      setError("No se pudo cargar la lista de estudiantes.");
     } finally {
       setLoading(false);
     }
@@ -275,14 +241,17 @@ export default function EstudiantesPage() {
       const res = await fetch(`${process.env.API_URL}api/admin/cursos`, {
         headers: getAuthHeaders(),
       });
-      if (res.ok) setCursos(await res.json());
+      if (res.ok) {
+        const data = await res.json();
+        setCursos(Array.isArray(data) ? data : (data.data ?? []));
+      }
     } catch {
       /* silent */
     }
   };
 
   useEffect(() => {
-    fetchEstudiantes();
+    fetchEstudiantes(1);
     fetchCursos();
   }, []);
 
@@ -292,6 +261,7 @@ export default function EstudiantesPage() {
     try {
       const body: Record<string, unknown> = {
         ...data,
+        segundo_nombre: data.segundo_nombre || null,
         telefono: data.telefono || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
@@ -310,10 +280,10 @@ export default function EstudiantesPage() {
         setSubmitError(messages as string);
         return;
       }
-      const created = await res.json();
-      setEstudiantes((prev) => [...prev, created]);
       form.reset();
       setOpen(false);
+      setPage(1);
+      fetchEstudiantes(1);
       toast.success("Estudiante registrado correctamente");
     } catch {
       setSubmitError("Error al conectar con el servidor.");
@@ -327,12 +297,17 @@ export default function EstudiantesPage() {
     setEditTarget(e);
     setEditError("");
     editForm.reset({
-      name: e.user.name,
+      primer_nombre: e.user.primer_nombre ?? "",
+      segundo_nombre: e.user.segundo_nombre ?? "",
+      primer_apellido: e.user.primer_apellido ?? "",
+      segundo_apellido: e.user.segundo_apellido ?? "",
       email: e.user.email,
       cedula: e.cedula,
       telefono: e.telefono ?? "",
       fecha_nacimiento: e.fecha_nacimiento ?? "",
       genero: (e.genero as EditEstudianteForm["genero"]) ?? undefined,
+      municipio: e.municipio ?? "",
+      direccion: e.direccion ?? "",
       curso_id: e.curso ? String(e.curso.id) : "",
       fecha_inscripcion: e.fecha_inscripcion,
       estado: e.estado,
@@ -345,12 +320,17 @@ export default function EstudiantesPage() {
     setEditError("");
     try {
       const body: Record<string, unknown> = {
-        name: data.name,
+        primer_nombre: data.primer_nombre,
+        segundo_nombre: data.segundo_nombre || null,
+        primer_apellido: data.primer_apellido,
+        segundo_apellido: data.segundo_apellido,
         email: data.email,
         cedula: data.cedula,
         telefono: data.telefono || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
+        municipio: data.municipio,
+        direccion: data.direccion,
         curso_id: data.curso_id ? Number(data.curso_id) : null,
         fecha_inscripcion: data.fecha_inscripcion,
         estado: data.estado,
@@ -403,7 +383,7 @@ export default function EstudiantesPage() {
   }, [estudiantes, search, filterEstado, filterCurso]);
 
   const counts = {
-    total: estudiantes.length,
+    total: totalEstudiantes,
     activos: estudiantes.filter((e) => e.estado === "activo").length,
     graduados: estudiantes.filter((e) => e.estado === "graduado").length,
   };
@@ -411,20 +391,18 @@ export default function EstudiantesPage() {
   const hasFilters =
     filterEstado !== "todos" || filterCurso !== "todos" || search !== "";
 
-  // Volver a la página 1 al cambiar un filtro; y si aun así la página queda
-  // fuera de rango (la lista encogió), se acota aquí en render.
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  // Los filtros se aplican solo a lo cargado; si se está en otra página se
+  // vuelve a la primera para no mostrar el número de página desincronizado.
   const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  );
 
   const limpiarFiltros = () => {
     setSearch("");
     setFilterEstado("todos");
     setFilterCurso("todos");
-    setPage(1);
+    if (page !== 1) {
+      setPage(1);
+      fetchEstudiantes(1);
+    }
   };
 
   return (
@@ -470,18 +448,83 @@ export default function EstudiantesPage() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="grid gap-4"
               >
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Nombre completo *</Label>
-                  <Input
-                    id="name"
-                    placeholder="Ej: Juan Pérez"
-                    {...form.register("name")}
-                  />
-                  {form.formState.errors.name && (
-                    <p className="text-sm text-danger">
-                      {form.formState.errors.name.message}
-                    </p>
-                  )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="primer_nombre">Primer nombre *</Label>
+                    <Input
+                      id="primer_nombre"
+                      placeholder="Juan"
+                      {...form.register("primer_nombre", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "primer_nombre",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.primer_nombre && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.primer_nombre.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="segundo_nombre">
+                      Segundo nombre (opcional)
+                    </Label>
+                    <Input
+                      id="segundo_nombre"
+                      placeholder="Pablo"
+                      {...form.register("segundo_nombre", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "segundo_nombre",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="primer_apellido">Primer apellido *</Label>
+                    <Input
+                      id="primer_apellido"
+                      placeholder="Pérez"
+                      {...form.register("primer_apellido", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "primer_apellido",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.primer_apellido && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.primer_apellido.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="segundo_apellido">Segundo apellido *</Label>
+                    <Input
+                      id="segundo_apellido"
+                      placeholder="Gómez"
+                      {...form.register("segundo_apellido", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "segundo_apellido",
+                            sanitizarLetras(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.segundo_apellido && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.segundo_apellido.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -522,6 +565,7 @@ export default function EstudiantesPage() {
                       id="cedula"
                       inputMode="numeric"
                       pattern="[0-9]*"
+                      maxLength={8}
                       placeholder="12345678"
                       {...form.register("cedula", {
                         onChange: (e) =>
@@ -583,6 +627,54 @@ export default function EstudiantesPage() {
                         <SelectItem value="otro">Otro</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Municipio *</Label>
+                    <Select
+                      value={form.watch("municipio") || undefined}
+                      onValueChange={(v) =>
+                        form.setValue("municipio", v, { shouldValidate: true })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar municipio" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {municipios.map((municipio) => (
+                          <SelectItem key={municipio} value={municipio}>
+                            {municipio}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {form.formState.errors.municipio && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.municipio.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="direccion">Dirección de habitación *</Label>
+                    <Input
+                      id="direccion"
+                      placeholder="Av. Principal, casa N° 5"
+                      maxLength={255}
+                      {...form.register("direccion", {
+                        onChange: (e) =>
+                          form.setValue(
+                            "direccion",
+                            sanitizarTexto(e.target.value),
+                          ),
+                      })}
+                    />
+                    {form.formState.errors.direccion && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.direccion.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -727,7 +819,10 @@ export default function EstudiantesPage() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
-                setPage(1);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchEstudiantes(1);
+                }
               }}
               className="pl-9 h-10 font-sans text-sm"
             />
@@ -739,7 +834,10 @@ export default function EstudiantesPage() {
               value={filterEstado}
               onValueChange={(v) => {
                 setFilterEstado(v);
-                setPage(1);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchEstudiantes(1);
+                }
               }}
             >
               <SelectTrigger className="h-10 w-42 font-sans text-sm">
@@ -757,7 +855,10 @@ export default function EstudiantesPage() {
               value={filterCurso}
               onValueChange={(v) => {
                 setFilterCurso(v);
-                setPage(1);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchEstudiantes(1);
+                }
               }}
             >
               <SelectTrigger className="h-10 w-44 font-sans text-sm">
@@ -832,7 +933,7 @@ export default function EstudiantesPage() {
                 {/* Móvil: una tarjeta por estudiante. La tabla de 6 columnas
                     obligaba a desplazarse en horizontal para leer un registro. */}
                 <ul className="md:hidden">
-                  {paginated.map((e) => (
+                  {filtered.map((e) => (
                     <DataCard key={e.id}>
                       <DataCardHeader
                         aside={
@@ -925,10 +1026,10 @@ export default function EstudiantesPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {paginated.map((e, i) => (
+                      {filtered.map((e, i) => (
                         <tr
                           key={e.id}
-                          className={`hover:bg-surface-container transition-colors ${i < paginated.length - 1 ? "border-b border-outline-variant" : ""}`}
+                          className={`hover:bg-surface-container transition-colors ${i < filtered.length - 1 ? "border-b border-outline-variant" : ""}`}
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
@@ -1001,9 +1102,12 @@ export default function EstudiantesPage() {
                 <Pagination
                   page={safePage}
                   totalPages={totalPages}
-                  totalItems={filtered.length}
+                  totalItems={totalEstudiantes}
                   pageSize={PAGE_SIZE}
-                  onPageChange={setPage}
+                  onPageChange={(p) => {
+                    setPage(p);
+                    fetchEstudiantes(p);
+                  }}
                   itemLabel={["estudiante", "estudiantes"]}
                 />
               </>
@@ -1030,14 +1134,83 @@ export default function EstudiantesPage() {
           </DialogHeader>
 
           <form onSubmit={editForm.handleSubmit(onEdit)} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-name">Nombre completo *</Label>
-              <Input id="edit-name" {...editForm.register("name")} />
-              {editForm.formState.errors.name && (
-                <p className="text-sm text-danger">
-                  {editForm.formState.errors.name.message}
-                </p>
-              )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-primer_nombre">Primer nombre *</Label>
+                <Input
+                  id="edit-primer_nombre"
+                  placeholder="Juan"
+                  {...editForm.register("primer_nombre", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "primer_nombre",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.primer_nombre && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.primer_nombre.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-segundo_nombre">Segundo nombre</Label>
+                <Input
+                  id="edit-segundo_nombre"
+                  placeholder="Pablo"
+                  {...editForm.register("segundo_nombre", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "segundo_nombre",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-primer_apellido">Primer apellido *</Label>
+                <Input
+                  id="edit-primer_apellido"
+                  placeholder="Pérez"
+                  {...editForm.register("primer_apellido", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "primer_apellido",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.primer_apellido && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.primer_apellido.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-segundo_apellido">
+                  Segundo apellido *
+                </Label>
+                <Input
+                  id="edit-segundo_apellido"
+                  placeholder="Gómez"
+                  {...editForm.register("segundo_apellido", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "segundo_apellido",
+                        sanitizarLetras(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.segundo_apellido && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.segundo_apellido.message}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -1060,6 +1233,7 @@ export default function EstudiantesPage() {
                   id="edit-cedula"
                   inputMode="numeric"
                   pattern="[0-9]*"
+                  maxLength={8}
                   placeholder="12345678"
                   {...editForm.register("cedula", {
                     onChange: (e) =>
@@ -1124,7 +1298,6 @@ export default function EstudiantesPage() {
                   <SelectContent>
                     <SelectItem value="masculino">Masculino</SelectItem>
                     <SelectItem value="femenino">Femenino</SelectItem>
-                    <SelectItem value="otro">Otro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1148,6 +1321,58 @@ export default function EstudiantesPage() {
                     <SelectItem value="graduado">Graduado</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Municipio *</Label>
+                <Select
+                  value={editForm.watch("municipio") || undefined}
+                  onValueChange={(v) =>
+                    editForm.setValue("municipio", v, {
+                      shouldValidate: true,
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar municipio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {municipios.map((municipio) => (
+                      <SelectItem key={municipio} value={municipio}>
+                        {municipio}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {editForm.formState.errors.municipio && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.municipio.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-direccion">
+                  Dirección de habitación *
+                </Label>
+                <Input
+                  id="edit-direccion"
+                  placeholder="Av. Principal, casa N° 5"
+                  maxLength={255}
+                  {...editForm.register("direccion", {
+                    onChange: (e) =>
+                      editForm.setValue(
+                        "direccion",
+                        sanitizarTexto(e.target.value),
+                      ),
+                  })}
+                />
+                {editForm.formState.errors.direccion && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.direccion.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -1267,6 +1492,12 @@ export default function EstudiantesPage() {
                 </DetailField>
                 <DetailField label="Género">
                   {viewTarget.genero && generoLabel[viewTarget.genero]}
+                </DetailField>
+                <DetailField label="Municipio">
+                  {viewTarget.municipio}
+                </DetailField>
+                <DetailField label="Dirección de habitación">
+                  {viewTarget.direccion}
                 </DetailField>
               </DetailSection>
 
