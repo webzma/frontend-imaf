@@ -64,6 +64,7 @@ import {
   CalendarClock,
   ClipboardCheck,
   SearchX,
+  Wallet,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -881,26 +882,6 @@ export default function CursoDetailPage({
                 <h1 className="font-serif text-4xl md:text-[2.8rem] tight-tracking leading-[1.08] text-on-surface">
                   {curso.nombre}
                 </h1>
-
-                {/* Meta esencial en una sola línea, bajo el título */}
-                <div className="flex items-center flex-wrap gap-x-5 gap-y-2 mt-4">
-                  <span className="flex items-center gap-1.5 font-mono text-sm font-bold text-muted-foreground">
-                    <Hash className="w-3.5 h-3.5" />
-                    {curso.codigo}
-                  </span>
-                  {(curso.fecha_inicio || curso.fecha_fin) && (
-                    <span className="flex items-center gap-1.5 font-sans text-sm text-muted-foreground">
-                      <CalendarDays className="w-3.5 h-3.5" />
-                      {formatDate(curso.fecha_inicio)}
-                      {curso.fecha_fin && ` → ${formatDate(curso.fecha_fin)}`}
-                    </span>
-                  )}
-                  <span className="font-sans text-sm font-semibold text-on-surface">
-                    {curso.precio === 0
-                      ? "Gratuito"
-                      : `Bs. ${formatPrice(curso.precio)}`}
-                  </span>
-                </div>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
@@ -934,19 +915,79 @@ export default function CursoDetailPage({
                 </button>
               </div>
             </div>
+
+            {/* Datos clave del curso.
+                Antes iban en una sola línea de texto pequeño y gris bajo el
+                título: se leían como pie de foto y el dato no se distinguía de
+                su contexto. Ahora cada uno es un campo con etiqueta propia y
+                valor con peso, sobre una superficie un nivel más alta. */}
+            <dl className="mt-6 grid gap-px overflow-hidden rounded-lg bg-outline-variant sm:grid-cols-3">
+              <div className="bg-surface-container px-4 py-3.5">
+                <dt className="flex items-center gap-1.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
+                  <Hash className="w-3 h-3" />
+                  Código
+                </dt>
+                <dd className="mt-1.5 font-mono text-lg font-bold tight-tracking text-on-surface">
+                  {curso.codigo}
+                </dd>
+              </div>
+
+              <div className="bg-surface-container px-4 py-3.5">
+                <dt className="flex items-center gap-1.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
+                  <CalendarDays className="w-3 h-3" />
+                  Periodo
+                </dt>
+                <dd className="mt-1.5 font-sans text-base font-semibold text-on-surface">
+                  {curso.fecha_inicio || curso.fecha_fin ? (
+                    <>
+                      {formatDate(curso.fecha_inicio)}
+                      {curso.fecha_fin && (
+                        <>
+                          <span className="text-muted-foreground"> → </span>
+                          {formatDate(curso.fecha_fin)}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <span className="font-normal text-muted-foreground">
+                      Sin definir
+                    </span>
+                  )}
+                </dd>
+              </div>
+
+              <div className="bg-surface-container px-4 py-3.5">
+                <dt className="flex items-center gap-1.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
+                  <Wallet className="w-3 h-3" />
+                  Costo
+                </dt>
+                <dd
+                  className={`mt-1.5 font-sans text-lg font-bold tabular-nums tight-tracking ${
+                    curso.precio === 0 ? "text-success" : "text-on-surface"
+                  }`}
+                >
+                  {curso.precio === 0
+                    ? "Gratuito"
+                    : `Bs. ${formatPrice(curso.precio)}`}
+                </dd>
+              </div>
+            </dl>
           </div>
 
           {/* Franja del instructor: banda propia para que no compita con el título */}
           <div className="border-t border-outline-variant bg-surface-container px-6 md:px-8 py-4">
             {curso.instructor?.user ? (
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
-                  <span className="font-sans text-xs font-bold text-on-secondary-container">
+              <div className="flex items-center gap-3.5 flex-wrap">
+                <div className="w-11 h-11 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+                  <span className="font-sans text-sm font-bold text-on-secondary-container">
                     {getInitials(curso.instructor.user.name)}
                   </span>
                 </div>
                 <div className="min-w-0">
-                  <p className="font-sans text-sm font-semibold text-on-surface flex items-center gap-2 flex-wrap">
+                  <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
+                    Instructor
+                  </p>
+                  <p className="font-sans text-base font-semibold text-on-surface flex items-center gap-2 flex-wrap mt-0.5">
                     {curso.instructor.user.name}
                     {instructorFull?.titulo && (
                       <Badge
@@ -962,20 +1003,20 @@ export default function CursoDetailPage({
                       </Badge>
                     )}
                   </p>
-                  <div className="flex items-center gap-x-4 gap-y-1 mt-0.5 flex-wrap">
-                    <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
-                      <Mail className="w-3 h-3" />
+                  <div className="flex items-center gap-x-4 gap-y-1 mt-1 flex-wrap">
+                    <span className="font-sans text-sm text-muted-foreground flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5" />
                       {curso.instructor.user.email}
                     </span>
                     {instructorFull?.especialidad && (
-                      <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
-                        <BadgeCheck className="w-3 h-3" />
+                      <span className="font-sans text-sm text-muted-foreground flex items-center gap-1.5">
+                        <BadgeCheck className="w-3.5 h-3.5" />
                         {instructorFull.especialidad}
                       </span>
                     )}
                     {instructorFull?.departamento && (
-                      <span className="font-sans text-xs text-muted-foreground flex items-center gap-1">
-                        <Building2 className="w-3 h-3" />
+                      <span className="font-sans text-sm text-muted-foreground flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5" />
                         {instructorFull.departamento}
                       </span>
                     )}
