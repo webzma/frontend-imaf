@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/empty-state";
+import { Avatar } from "@/components/avatar";
 import { SIN_INYECCION } from "@/lib/validators";
 import {
   DataCard,
@@ -73,6 +74,7 @@ interface Pago {
     id: number;
     nombre: string;
     cedula: string;
+    foto: string | null;
     user: { name: string; email: string };
   };
   curso: {
@@ -96,15 +98,6 @@ function getAuthHeaders() {
     Accept: "application/json",
     "Content-Type": "application/json",
   };
-}
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
 }
 
 const PAGE_SIZE = 10;
@@ -766,11 +759,12 @@ export default function AdminPagosPage() {
                         </Badge>
                       }
                     >
-                      <div className="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
-                        <span className="font-sans text-[10px] font-bold text-on-secondary-container">
-                          {getInitials(pago.estudiante.nombre)}
-                        </span>
-                      </div>
+                      <Avatar
+                        src={pago.estudiante.foto}
+                        name={pago.estudiante.nombre}
+                        size={8}
+                        tone="secondary"
+                      />
                       <div className="min-w-0">
                         <p className="font-sans text-sm font-medium text-on-surface truncate">
                           {pago.estudiante.nombre}
@@ -846,11 +840,12 @@ export default function AdminPagosPage() {
                       >
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
-                              <span className="font-sans text-[10px] font-bold text-on-secondary-container">
-                                {getInitials(pago.estudiante.nombre)}
-                              </span>
-                            </div>
+                            <Avatar
+                              src={pago.estudiante.foto}
+                              name={pago.estudiante.nombre}
+                              size={8}
+                              tone="secondary"
+                            />
                             <div className="min-w-0">
                               <p className="font-sans text-sm font-medium text-on-surface truncate">
                                 {pago.estudiante.nombre}

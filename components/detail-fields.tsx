@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Avatar } from "@/components/avatar";
 
 /**
  * Primitivas para fichas de solo lectura. Antes, los datos completos de un
@@ -60,12 +61,12 @@ export function DetailField({
 
 /** Cabecera de la ficha: avatar, identidad y estado. */
 export function DetailHeader({
-  initials,
+  foto,
   name,
   email,
   badge,
 }: {
-  initials: string;
+  foto?: string | null;
   name: string;
   email: string;
   badge?: React.ReactNode;
@@ -73,11 +74,7 @@ export function DetailHeader({
   return (
     <div className="flex items-start justify-between gap-4 border-b border-outline-variant pb-5">
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-container">
-          <span className="font-sans text-base font-bold text-on-primary-container">
-            {initials}
-          </span>
-        </div>
+        <Avatar src={foto} name={name} size={12} />
         <div className="min-w-0">
           <p className="truncate font-sans text-base font-semibold text-on-surface">
             {name}

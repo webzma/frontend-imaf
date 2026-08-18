@@ -5,6 +5,7 @@ import { formatDate, formatTime } from "@/lib/format";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Avatar } from "@/components/avatar";
 import {
   ArrowLeft,
   Users,
@@ -29,6 +30,7 @@ interface Estudiante {
   id: number;
   nombre: string;
   cedula: string;
+  foto: string | null;
   estado: "activo" | "inactivo" | "graduado";
   estado_pago: "pendiente" | "aprobado" | "reprobado";
   estado_aprobacion_curso: "pendiente" | "aprobado" | "reprobado";
@@ -74,15 +76,6 @@ function getAuthHeaders() {
     Accept: "application/json",
     "Content-Type": "application/json",
   };
-}
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
 }
 
 /* ── Page ── */
@@ -360,11 +353,12 @@ export default function CursoDetailPage({
                   >
                     {/* Row principal */}
                     <div className="flex items-center gap-4 px-5 pt-4 pb-3">
-                      <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center shrink-0">
-                        <span className="font-sans text-xs font-bold text-muted-foreground">
-                          {getInitials(est.nombre)}
-                        </span>
-                      </div>
+                      <Avatar
+                        src={est.foto}
+                        name={est.nombre}
+                        size={10}
+                        tone="muted"
+                      />
                       <div className="flex-1 min-w-0">
                         <p className="font-sans text-sm font-semibold text-on-surface truncate">
                           {est.nombre}

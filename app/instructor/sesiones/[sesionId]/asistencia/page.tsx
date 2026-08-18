@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
+import { Avatar } from "@/components/avatar";
 import {
   ArrowLeft,
   CalendarDays,
@@ -38,6 +39,7 @@ interface RegistroAsistencia {
   estudiante_id: number;
   nombre: string;
   cedula: string;
+  foto: string | null;
   presente: boolean;
   observacion: string | null;
 }
@@ -56,15 +58,6 @@ function getAuthHeaders() {
     Accept: "application/json",
     "Content-Type": "application/json",
   };
-}
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
 }
 
 /* ── Page ── */
@@ -414,23 +407,13 @@ export default function AsistenciaInstructorPage({
                   }`}
                 >
                   <div className="flex items-center gap-4 px-5 pt-4 pb-3">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                        registro.presente
-                          ? "bg-success-container"
-                          : "bg-surface-container"
-                      }`}
-                    >
-                      <span
-                        className={`font-sans text-xs font-bold ${
-                          registro.presente
-                            ? "text-on-success-container"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        {getInitials(registro.nombre)}
-                      </span>
-                    </div>
+                    <Avatar
+                      src={registro.foto}
+                      name={registro.nombre}
+                      size={10}
+                      tone={registro.presente ? "success" : "muted"}
+                      className="transition-colors"
+                    />
                     <div className="flex-1 min-w-0">
                       <p className="font-sans text-sm font-semibold text-on-surface truncate">
                         {registro.nombre}

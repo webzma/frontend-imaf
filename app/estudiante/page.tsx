@@ -7,6 +7,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Avatar } from "@/components/avatar";
 import {
   BookOpen,
   User,
@@ -39,6 +40,7 @@ interface EstudiantePerfil {
   telefono: string | null;
   fecha_nacimiento: string | null;
   genero: string | null;
+  foto: string | null;
   fecha_inscripcion: string;
   estado: string;
   user: { id: number; name: string; email: string };
@@ -49,15 +51,6 @@ function getCookie(name: string): string {
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
   return match ? match[2] : "";
-}
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
 }
 
 function getGreeting() {
@@ -297,11 +290,12 @@ export default function EstudianteDashboard() {
               <div className="flex flex-col items-center text-center gap-3">
                 <div className="relative">
                   <div className="absolute inset-0 rounded-full gradient-primary opacity-30 blur-md" />
-                  <div className="relative w-16 h-16 rounded-full bg-primary-container flex items-center justify-center ring-2 ring-primary/10">
-                    <span className="font-sans text-xl font-bold text-on-primary-container">
-                      {getInitials(perfil.nombre)}
-                    </span>
-                  </div>
+                  <Avatar
+                    src={perfil.foto}
+                    name={perfil.nombre}
+                    size={16}
+                    className="relative ring-2 ring-primary/10"
+                  />
                 </div>
                 <div>
                   <h4 className="font-serif font-light text-xl text-on-surface tight-tracking">

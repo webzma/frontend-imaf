@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/pagination";
 import { fetchPage, PAGE_SIZE } from "@/lib/api";
 import { EmptyState } from "@/components/empty-state";
+import { Avatar } from "@/components/avatar";
 import {
   DetailHeader,
   DetailSection,
@@ -85,6 +86,7 @@ interface Instructor {
   tipo_contrato: { id: number; nombre: string } | null;
   fecha_nacimiento: string | null;
   genero: string | null;
+  foto: string | null;
   user: User;
 }
 
@@ -107,15 +109,6 @@ function getAuthHeaders() {
     Accept: "application/json",
     "Content-Type": "application/json",
   };
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
 }
 
 /* ── Styles ── */
@@ -1028,11 +1021,7 @@ export default function InstructoresPage() {
                           ) : null
                         }
                       >
-                        <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                          <span className="font-sans text-sm font-bold text-on-primary-container">
-                            {getInitials(p.user.name)}
-                          </span>
-                        </div>
+                        <Avatar src={p.foto} name={p.user.name} />
                         <div className="min-w-0">
                           <p className="font-sans font-semibold text-on-surface text-sm truncate">
                             {p.user.name}
@@ -1116,11 +1105,7 @@ export default function InstructoresPage() {
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                                <span className="font-sans text-sm font-bold text-on-primary-container">
-                                  {getInitials(p.user.name)}
-                                </span>
-                              </div>
+                              <Avatar src={p.foto} name={p.user.name} />
                               <div>
                                 <p className="font-sans font-semibold text-on-surface text-sm">
                                   {p.user.name}
@@ -1596,7 +1581,7 @@ export default function InstructoresPage() {
           {viewTarget && (
             <div className="space-y-6">
               <DetailHeader
-                initials={getInitials(viewTarget.user.name)}
+                foto={viewTarget.foto}
                 name={viewTarget.user.name}
                 email={viewTarget.user.email}
                 badge={

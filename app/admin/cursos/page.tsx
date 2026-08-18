@@ -10,6 +10,7 @@ import { formatDate, formatPrice } from "@/lib/format";
 import { cursoSchema, type CursoForm } from "@/lib/schemas";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
+import { Avatar } from "@/components/avatar";
 import { Pagination } from "@/components/ui/pagination";
 import { fetchPage, PAGE_SIZE } from "@/lib/api";
 import { Input } from "@/components/ui/input";
@@ -39,7 +40,6 @@ import {
   Search,
   Users,
   FileText,
-  GraduationCap,
   Filter,
   CalendarDays,
   MessageCircle,
@@ -75,6 +75,7 @@ interface Curso {
   instructor?: {
     id: number;
     user_id: number;
+    foto: string | null;
     user: { id: number; name: string; email: string };
   } | null;
   estudiantes?: Estudiante[];
@@ -154,8 +155,12 @@ function CursoCard({ curso }: { curso: Curso }) {
 
         {/* Instructor */}
         {curso.instructor?.user?.name && (
-          <p className="font-sans text-xs text-primary/70 font-medium mb-2 flex items-center gap-1">
-            <GraduationCap className="w-3 h-3" />
+          <p className="font-sans text-xs text-primary/70 font-medium mb-2 flex items-center gap-1.5">
+            <Avatar
+              src={curso.instructor.foto}
+              name={curso.instructor.user.name}
+              size={7}
+            />
             {curso.instructor.user.name}
           </p>
         )}

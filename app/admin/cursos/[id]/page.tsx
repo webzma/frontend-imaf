@@ -16,6 +16,7 @@ import {
 } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar } from "@/components/avatar";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/empty-state";
 import { Input } from "@/components/ui/input";
@@ -79,6 +80,7 @@ interface EstudianteEnCurso {
   id: number;
   nombre: string;
   cedula: string;
+  foto: string | null;
   fecha_inscripcion: string;
   estado: "activo" | "inactivo" | "graduado";
   user: EstudianteUser;
@@ -105,6 +107,7 @@ interface CursoInstructor {
   id: number;
   user_id: number;
   cedula: string | null;
+  foto: string | null;
   especialidad: string | null;
   titulo: string | null;
   departamento: string | null;
@@ -151,15 +154,6 @@ function getAuthHeaders() {
     Accept: "application/json",
     "Content-Type": "application/json",
   };
-}
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
 }
 
 /* ── No more local badge styles — using <Badge> component variants ── */
@@ -982,11 +976,12 @@ export default function CursoDetailPage({
           <div className="border-t border-outline-variant bg-surface-container px-6 md:px-8 py-4">
             {curso.instructor?.user ? (
               <div className="flex items-center gap-3.5 flex-wrap">
-                <div className="w-11 h-11 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
-                  <span className="font-sans text-sm font-bold text-on-secondary-container">
-                    {getInitials(curso.instructor.user.name)}
-                  </span>
-                </div>
+                <Avatar
+                  src={curso.instructor.foto}
+                  name={curso.instructor.user.name}
+                  size={11}
+                  tone="secondary"
+                />
                 <div className="min-w-0">
                   <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
                     Instructor
@@ -1210,11 +1205,11 @@ export default function CursoDetailPage({
                             >
                               <td className="px-6 py-3.5 whitespace-nowrap">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                                    <span className="font-sans text-xs font-bold text-on-primary-container">
-                                      {getInitials(e.nombre)}
-                                    </span>
-                                  </div>
+                                  <Avatar
+                                    src={e.foto}
+                                    name={e.nombre}
+                                    size={8}
+                                  />
                                   <div>
                                     <p className="font-sans font-semibold text-on-surface text-sm">
                                       {e.nombre}

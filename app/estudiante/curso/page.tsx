@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar } from "@/components/avatar";
 import {
   BookOpen,
   Hash,
@@ -67,6 +68,7 @@ interface MiCursoResponse {
     instructor: {
       id: number;
       nombre: string | null;
+      foto: string | null;
       especialidad: string | null;
       titulo: string | null;
       departamento: string | null;
@@ -86,16 +88,6 @@ function getCookie(name: string): string {
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
   return match ? match[2] : "";
-}
-
-function getInitials(name: string | null): string {
-  if (!name) return "?";
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
 }
 
 /* ── Sub-components ── */
@@ -376,11 +368,12 @@ export default function CursoPage() {
                   <div className="flex items-start gap-4">
                     <div className="relative shrink-0">
                       <div className="absolute inset-0 rounded-full gradient-primary opacity-30 blur-md" />
-                      <div className="relative w-12 h-12 rounded-full bg-primary-container flex items-center justify-center ring-2 ring-primary/10">
-                        <span className="font-sans text-base font-bold text-on-primary-container">
-                          {getInitials(curso.instructor.nombre)}
-                        </span>
-                      </div>
+                      <Avatar
+                        src={curso.instructor.foto}
+                        name={curso.instructor.nombre}
+                        size={12}
+                        className="relative ring-2 ring-primary/10"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-serif font-light text-xl text-on-surface tight-tracking leading-tight">

@@ -30,6 +30,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useTheme } from "@/hooks/use-theme";
+import { Avatar } from "@/components/avatar";
 import logoImaf from "@/public/logo-imaf.webp";
 import Image from "next/image";
 
@@ -100,6 +101,7 @@ function authHeaders() {
 async function fetchProfile(): Promise<{
   nombre: string | null;
   email: string | null;
+  foto: string | null;
 }> {
   const res = await fetch(`${process.env.API_URL}api/estudiante/perfil`, {
     headers: authHeaders(),
@@ -108,6 +110,7 @@ async function fetchProfile(): Promise<{
   return {
     nombre: data?.nombre ?? null,
     email: data?.user?.email ?? null,
+    foto: data?.foto ?? null,
   };
 }
 
@@ -133,6 +136,7 @@ export default function EstudianteSidebar() {
   });
   const nombre = profile?.nombre ?? null;
   const email = profile?.email ?? null;
+  const foto = profile?.foto ?? null;
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: NOTIF_COUNT_KEY,
@@ -161,14 +165,6 @@ export default function EstudianteSidebar() {
 
   const isActive = (href: string, exact: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
-
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .slice(0, 2)
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
 
   const handleLogout = async () => {
     try {
@@ -271,11 +267,7 @@ export default function EstudianteSidebar() {
       <SidebarFooter className="border-t border-sidebar-border shrink-0">
         {state !== "collapsed" && nombre && (
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-sm bg-sidebar-accent/40">
-            <div className="size-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-              <span className="text-xs font-bold text-primary">
-                {getInitials(nombre)}
-              </span>
-            </div>
+            <Avatar src={foto} name={nombre} size={7} tone="sidebar" />
             <div className="flex-1 min-w-0">
               <p className="font-sans text-xs font-semibold text-sidebar-foreground truncate">
                 {nombre}
