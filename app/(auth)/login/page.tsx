@@ -203,18 +203,13 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* No existe endpoint de reseteo, así que la vía de recuperación real
-              es el canal de soporte de la institución. Mejor eso que un enlace
-              a una ruta inexistente — o que no ofrecer ninguna salida. */}
           <p className="font-sans text-sm text-muted-foreground mt-6 text-center">
-            <a
-              href="https://wa.me/584121512141?text=Hola%2C%20necesito%20recuperar%20el%20acceso%20a%20mi%20cuenta%20IMAF"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:text-primary-hover font-medium transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            <Link
+              href="/forgot-password"
+              className="text-primary hover:text-primary/70 font-medium transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               ¿Olvidaste tu contraseña?
-            </a>
+            </Link>
           </p>
 
           <p className="font-sans text-sm text-muted-foreground mt-10 text-center">

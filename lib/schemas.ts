@@ -173,6 +173,30 @@ export const loginSchema = z.object({
 
 export type LoginForm = z.infer<typeof loginSchema>;
 
+/* ── Auth: forgot password ── */
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
+});
+
+export type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
+
+/* ── Auth: reset password ── */
+
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, "La contraseña debe tener al menos 8 caracteres"),
+    password_confirmation: z.string().min(1, "Confirma tu contraseña"),
+  })
+  .refine((d) => d.password === d.password_confirmation, {
+    message: "Las contraseñas no coinciden",
+    path: ["password_confirmation"],
+  });
+
+export type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
+
 /* ── Campos de identidad (nombre dividido en 4) ── */
 
 /**
