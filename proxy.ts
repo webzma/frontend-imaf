@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Routes accessible only when NOT authenticated
-const AUTH_ROUTES = ["/login", "/register"];
+const AUTH_ROUTES = ["/login", "/register", "/forgot-password", "/reset-password"];
 
 // Protected routes and the roles allowed to access them
 const PROTECTED_ROUTES: Record<string, string[]> = {
