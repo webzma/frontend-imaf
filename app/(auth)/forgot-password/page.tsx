@@ -9,10 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
-import {
-  forgotPasswordSchema,
-  type ForgotPasswordForm,
-} from "@/lib/schemas";
+import { forgotPasswordSchema, type ForgotPasswordForm } from "@/lib/schemas";
 import logoImaf from "@/public/logo-imaf.webp";
 
 export default function ForgotPasswordPage() {
@@ -29,17 +26,14 @@ export default function ForgotPasswordPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(
-        `${process.env.API_URL}api/forgot-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(data),
+      const res = await fetch(`${process.env.API_URL}api/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-      );
+        body: JSON.stringify(data),
+      });
       const body = await res.json();
       if (!res.ok) {
         setError(body.message || "Error al procesar la solicitud.");
@@ -108,15 +102,18 @@ export default function ForgotPasswordPage() {
                 <span className="text-on-surface font-medium">
                   {form.getValues("email")}
                 </span>{" "}
-                está registrado en nuestra plataforma, recibirás un enlace
-                para restablecer tu contraseña.
+                está registrado en nuestra plataforma, recibirás un enlace para
+                restablecer tu contraseña.
               </p>
               <p className="font-sans text-xs text-muted-foreground mb-6">
                 ¿No lo encontraste? Revisa tu carpeta de spam o correo no
                 deseado.
               </p>
               <Link href="/login">
-                <Button variant="outline" className="w-full h-11 font-sans font-semibold">
+                <Button
+                  variant="outline"
+                  className="w-full h-11 font-sans font-semibold"
+                >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Volver al inicio de sesión
                 </Button>
@@ -130,8 +127,8 @@ export default function ForgotPasswordPage() {
                   Recuperar
                 </h2>
                 <p className="font-sans text-sm text-muted-foreground">
-                  Ingresa tu correo electrónico y te enviaremos un enlace
-                  para restablecer tu contraseña
+                  Ingresa tu correo electrónico y te enviaremos un enlace para
+                  restablecer tu contraseña
                 </p>
               </div>
 
