@@ -40,8 +40,8 @@ function ResetPasswordForm() {
           Enlace inválido
         </h2>
         <p className="font-sans text-sm text-muted-foreground leading-relaxed mb-8">
-          El enlace de restablecimiento no es válido o está incompleto.
-          Solicita un nuevo enlace desde la página de inicio de sesión.
+          El enlace de restablecimiento no es válido o está incompleto. Solicita
+          un nuevo enlace desde la página de inicio de sesión.
         </p>
         <Link href="/forgot-password">
           <Button className="w-full h-11 font-sans font-semibold">
@@ -56,22 +56,19 @@ function ResetPasswordForm() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(
-        `${process.env.API_URL}api/reset-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            token,
-            email,
-            password: data.password,
-            password_confirmation: data.password_confirmation,
-          }),
+      const res = await fetch(`${process.env.API_URL}api/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-      );
+        body: JSON.stringify({
+          token,
+          email,
+          password: data.password,
+          password_confirmation: data.password_confirmation,
+        }),
+      });
       const body = await res.json();
       if (!res.ok) {
         setError(body.message || "Error al restablecer la contraseña.");
@@ -97,8 +94,8 @@ function ResetPasswordForm() {
             Contraseña actualizada
           </h2>
           <p className="font-sans text-sm text-muted-foreground leading-relaxed mb-8">
-            Tu contraseña ha sido restablecida correctamente. Ya puedes
-            iniciar sesión con tu nueva contraseña.
+            Tu contraseña ha sido restablecida correctamente. Ya puedes iniciar
+            sesión con tu nueva contraseña.
           </p>
           <Button
             className="w-full h-11 font-sans font-semibold"
@@ -261,8 +258,8 @@ export default function ResetPasswordPage() {
             <span className="text-primary">primero.</span>
           </h1>
           <p className="font-sans text-base text-muted-foreground leading-relaxed max-w-[18rem]">
-            Elige una contraseña segura que no hayas utilizado antes en
-            esta plataforma.
+            Elige una contraseña segura que no hayas utilizado antes en esta
+            plataforma.
           </p>
         </div>
 
