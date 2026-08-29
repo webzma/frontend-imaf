@@ -6,7 +6,10 @@
   { "codigo": "0171", "nombre": "BANCO ACTIVO" },
   { "codigo": "0128", "nombre": "BANCO CARONÍ" },
   { "codigo": "0163", "nombre": "BANCO DEL TESORO" },
-  { "codigo": "0175", "nombre": "BANCO DIGITAL DE LOS TRABAJADORES, BANCO UNIVERSAL" },
+  {
+    "codigo": "0175",
+    "nombre": "BANCO DIGITAL DE LOS TRABAJADORES, BANCO UNIVERSAL"
+  },
   { "codigo": "0115", "nombre": "BANCO EXTERIOR" },
   { "codigo": "0151", "nombre": "BANCO FONDO COMÚN" },
   { "codigo": "0105", "nombre": "BANCO MERCANTIL" },

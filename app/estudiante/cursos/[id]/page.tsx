@@ -262,7 +262,6 @@ function PagoModal({
         setFormError("El número de referencia solo puede contener dígitos.");
         return;
       }
-
     }
 
     setSubmitting(true);
@@ -525,7 +524,10 @@ function PagoModal({
                       Banco origen (opcional)
                     </Label>
                     <Select value={bancoOrigen} onValueChange={setBancoOrigen}>
-                      <SelectTrigger id="banco" className="font-sans text-sm h-10">
+                      <SelectTrigger
+                        id="banco"
+                        className="font-sans text-sm h-10"
+                      >
                         <SelectValue placeholder="Selecciona un banco" />
                       </SelectTrigger>
                       <SelectContent>
