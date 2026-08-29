@@ -8,6 +8,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import bancosData from "@/data/bancos.json";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -254,10 +262,7 @@ function PagoModal({
         setFormError("El número de referencia solo puede contener dígitos.");
         return;
       }
-      if (bancoOrigen.trim().length > 100) {
-        setFormError("El banco de origen no puede superar 100 caracteres.");
-        return;
-      }
+
     }
 
     setSubmitting(true);
@@ -519,14 +524,18 @@ function PagoModal({
                     >
                       Banco origen (opcional)
                     </Label>
-                    <Input
-                      id="banco"
-                      value={bancoOrigen}
-                      onChange={(e) => setBancoOrigen(e.target.value)}
-                      maxLength={100}
-                      placeholder="Ej: Banesco"
-                      className="font-sans text-sm h-10"
-                    />
+                    <Select value={bancoOrigen} onValueChange={setBancoOrigen}>
+                      <SelectTrigger id="banco" className="font-sans text-sm h-10">
+                        <SelectValue placeholder="Selecciona un banco" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {bancosData.map((b) => (
+                          <SelectItem key={b.codigo} value={b.nombre}>
+                            {b.codigo} - {b.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-1.5">
