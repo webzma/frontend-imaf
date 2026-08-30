@@ -48,9 +48,7 @@ export function CedulaInput({
 }: CedulaInputProps) {
   return (
     <div className="grid gap-2">
-      <Label htmlFor={id}>
-        Cédula{required && " *"}
-      </Label>
+      <Label htmlFor={id}>Cédula{required && " *"}</Label>
       <div className="flex gap-2">
         <Select
           value={nacionalidad}
@@ -84,9 +82,7 @@ export function CedulaInput({
           disabled={disabled}
         />
       </div>
-      {error && (
-        <p className="text-xs text-danger">{error}</p>
-      )}
+      {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   );
 }

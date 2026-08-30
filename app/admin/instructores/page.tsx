@@ -275,7 +275,8 @@ export default function InstructoresPage() {
       primer_apellido: instructor.user.primer_apellido ?? "",
       segundo_apellido: instructor.user.segundo_apellido ?? "",
       email: instructor.user.email,
-      nacionalidad: (instructor.nacionalidad as EditInstructorForm["nacionalidad"]) ?? "V",
+      nacionalidad:
+        (instructor.nacionalidad as EditInstructorForm["nacionalidad"]) ?? "V",
       cedula: instructor.cedula,
       telefono: instructor.telefono ?? "",
       fecha_nacimiento: instructor.fecha_nacimiento

@@ -139,9 +139,7 @@ describe("registroSchema", () => {
       ...valido,
       nacionalidad: undefined,
     });
-    expect(mensajeDe(r, "nacionalidad")).toBe(
-      "Selecciona una nacionalidad",
-    );
+    expect(mensajeDe(r, "nacionalidad")).toBe("Selecciona una nacionalidad");
   });
 
   it("exige la dirección de habitación", () => {
@@ -574,7 +572,8 @@ describe("editInstructorSchema", () => {
     primer_nombre: "María",
     segundo_nombre: "",
     primer_apellido: "López",
-    segundo_apellido: "García",    email: "maria@correo.com",
+    segundo_apellido: "García",
+    email: "maria@correo.com",
     nacionalidad: "V",
     cedula: "87654321",
     telefono: "",
@@ -586,9 +585,6 @@ describe("editInstructorSchema", () => {
     titulo: undefined,
     departamento: "",
   };
-
-
-
 
   it("acepta una edición válida sin contraseña", () => {
     expect(editInstructorSchema.safeParse(valido).success).toBe(true);

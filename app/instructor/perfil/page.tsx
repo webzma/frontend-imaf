@@ -148,7 +148,8 @@ export default function PerfilPage() {
 
   const populateForm = (p: Profesor) => {
     form.reset({
-      nacionalidad: (p.nacionalidad as PerfilInstructorForm["nacionalidad"]) ?? "V",
+      nacionalidad:
+        (p.nacionalidad as PerfilInstructorForm["nacionalidad"]) ?? "V",
       cedula: p.cedula ?? "",
       telefono: p.telefono ?? "",
       municipio: p.municipio ?? "",

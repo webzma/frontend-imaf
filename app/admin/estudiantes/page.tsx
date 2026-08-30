@@ -298,7 +298,8 @@ export default function EstudiantesPage() {
       primer_apellido: e.user.primer_apellido ?? "",
       segundo_apellido: e.user.segundo_apellido ?? "",
       email: e.user.email,
-      nacionalidad: (e.nacionalidad as EditEstudianteForm["nacionalidad"]) ?? "V",
+      nacionalidad:
+        (e.nacionalidad as EditEstudianteForm["nacionalidad"]) ?? "V",
       cedula: e.cedula,
       telefono: e.telefono ?? "",
       fecha_nacimiento: e.fecha_nacimiento ?? "",
