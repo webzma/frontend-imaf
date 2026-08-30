@@ -2240,6 +2240,8 @@ export default function CursoDetailPage({
                 <Input
                   type="date"
                   {...sesionForm.register("fecha")}
+                  min={curso?.fecha_inicio ?? undefined}
+                  max={curso?.fecha_fin ?? undefined}
                   className="font-sans text-sm"
                 />
                 {sesionForm.formState.errors.fecha && (
