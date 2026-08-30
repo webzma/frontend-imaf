@@ -12,6 +12,7 @@ import {
   type InstructorForm,
   type EditInstructorForm,
 } from "@/lib/schemas";
+import { CedulaInput } from "@/components/cedula-input";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -77,6 +78,7 @@ interface User {
 
 interface Instructor {
   id: number;
+  nacionalidad: string | null;
   cedula: string;
   telefono: string | null;
   especialidad: string | null;
@@ -187,6 +189,7 @@ export default function InstructoresPage() {
       segundo_apellido: "",
       email: "",
       password: "",
+      nacionalidad: "V",
       cedula: "",
       telefono: "",
       municipio: "",
@@ -207,6 +210,7 @@ export default function InstructoresPage() {
       primer_apellido: "",
       segundo_apellido: "",
       email: "",
+      nacionalidad: "V",
       cedula: "",
       telefono: "",
       fecha_nacimiento: "",
@@ -271,6 +275,7 @@ export default function InstructoresPage() {
       primer_apellido: instructor.user.primer_apellido ?? "",
       segundo_apellido: instructor.user.segundo_apellido ?? "",
       email: instructor.user.email,
+      nacionalidad: (instructor.nacionalidad as EditInstructorForm["nacionalidad"]) ?? "V",
       cedula: instructor.cedula,
       telefono: instructor.telefono ?? "",
       fecha_nacimiento: instructor.fecha_nacimiento
@@ -582,28 +587,25 @@ export default function InstructoresPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="cedula">Cédula *</Label>
-                    <Input
-                      id="cedula"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      maxLength={8}
-                      placeholder="12345678"
-                      {...form.register("cedula", {
-                        onChange: (e) =>
-                          form.setValue(
-                            "cedula",
-                            sanitizarDigitos(e.target.value),
-                          ),
-                      })}
-                    />
-                    {form.formState.errors.cedula && (
-                      <p className="text-sm text-danger">
-                        {form.formState.errors.cedula.message}
-                      </p>
-                    )}
-                  </div>
+                  <CedulaInput
+                    nacionalidad={form.watch("nacionalidad") ?? "V"}
+                    onNacionalidadChange={(v) =>
+                      form.setValue("nacionalidad", v as "V" | "E", {
+                        shouldValidate: true,
+                      })
+                    }
+                    cedula={form.watch("cedula")}
+                    onCedulaChange={(v) =>
+                      form.setValue("cedula", v, { shouldValidate: true })
+                    }
+                    error={
+                      form.formState.errors.cedula?.message
+                        ? String(form.formState.errors.cedula.message)
+                        : undefined
+                    }
+                    required
+                    id="cedula"
+                  />
                   <div className="grid gap-2">
                     <Label htmlFor="telefono">Teléfono</Label>
                     <Input
@@ -1319,28 +1321,25 @@ export default function InstructoresPage() {
                   </p>
                 )}
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-cedula">Cédula *</Label>
-                <Input
-                  id="edit-cedula"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={8}
-                  placeholder="12345678"
-                  {...editForm.register("cedula", {
-                    onChange: (e) =>
-                      editForm.setValue(
-                        "cedula",
-                        sanitizarDigitos(e.target.value),
-                      ),
-                  })}
-                />
-                {editForm.formState.errors.cedula && (
-                  <p className="text-sm text-danger">
-                    {editForm.formState.errors.cedula.message}
-                  </p>
-                )}
-              </div>
+              <CedulaInput
+                nacionalidad={editForm.watch("nacionalidad") ?? "V"}
+                onNacionalidadChange={(v) =>
+                  editForm.setValue("nacionalidad", v as "V" | "E", {
+                    shouldValidate: true,
+                  })
+                }
+                cedula={editForm.watch("cedula")}
+                onCedulaChange={(v) =>
+                  editForm.setValue("cedula", v, { shouldValidate: true })
+                }
+                error={
+                  editForm.formState.errors.cedula?.message
+                    ? String(editForm.formState.errors.cedula.message)
+                    : undefined
+                }
+                required
+                id="edit-cedula"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">

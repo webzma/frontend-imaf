@@ -242,6 +242,13 @@ export const camposNombre = {
 
 /* ── Cédula: 7 u 8 dígitos ── */
 
+/** Nacionalidad: V (venezolano) o E (extranjero). */
+const nacionalidadRequerida = z.enum(["V", "E"], {
+  message: "Selecciona una nacionalidad",
+});
+
+const nacionalidadOpcional = z.enum(["V", "E"]).optional();
+
 /** Cédula obligatoria: solo dígitos y de 7 u 8 caracteres. */
 const cedulaObligatoria = z
   .string()
@@ -280,6 +287,7 @@ export const registroSchema = z
       .string()
       .min(1, "El correo es obligatorio")
       .email("Correo inválido"),
+    nacionalidad: nacionalidadRequerida,
     cedula: cedulaObligatoria,
     telefono: z
       .string()
@@ -328,6 +336,7 @@ export type PerfilEstudianteForm = z.infer<typeof perfilEstudianteSchema>;
 /* ── Perfil instructor ── */
 
 export const perfilInstructorSchema = z.object({
+  nacionalidad: nacionalidadOpcional,
   cedula: cedulaOpcional,
   telefono: z
     .string()
@@ -366,6 +375,7 @@ export const estudianteSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
+  nacionalidad: nacionalidadRequerida,
   cedula: cedulaObligatoria,
   telefono: z
     .string()
@@ -389,6 +399,7 @@ export type EstudianteForm = z.infer<typeof estudianteSchema>;
 export const editEstudianteSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
+  nacionalidad: nacionalidadRequerida,
   cedula: cedulaObligatoria,
   telefono: z
     .string()
@@ -415,6 +426,7 @@ export const instructorSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
+  nacionalidad: nacionalidadRequerida,
   cedula: cedulaObligatoria,
   telefono: z
     .string()
@@ -436,6 +448,7 @@ export type InstructorForm = z.infer<typeof instructorSchema>;
 export const editInstructorSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
+  nacionalidad: nacionalidadRequerida,
   cedula: cedulaObligatoria,
   telefono: z
     .string()

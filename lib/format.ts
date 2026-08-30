@@ -122,3 +122,13 @@ export function formatRelativeTime(dateString: string): string {
   }
   return formatDate(dateString);
 }
+
+/** Formatea una cédula con prefijo de nacionalidad: "V-12345678". */
+export function formatCedula(
+  cedula: string | null | undefined,
+  nacionalidad?: string | null,
+): string {
+  if (!cedula) return "—";
+  const prefix = nacionalidad === "E" ? "E" : "V";
+  return `${prefix}-${cedula}`;
+}
