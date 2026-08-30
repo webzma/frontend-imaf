@@ -23,6 +23,7 @@ import {
   sanitizarTexto,
 } from "@/lib/validators";
 import { registroSchema, type RegistroForm } from "@/lib/schemas";
+import { CedulaInput } from "@/components/cedula-input";
 import logoImaf from "@/public/logo-imaf.webp";
 import municipios from "@/data/municipios.json";
 
@@ -40,6 +41,7 @@ export default function RegisterPage() {
       primer_apellido: "",
       segundo_apellido: "",
       email: "",
+      nacionalidad: "V",
       cedula: "",
       telefono: "",
       fecha_nacimiento: "",
@@ -263,26 +265,25 @@ export default function RegisterPage() {
 
           {/* Fila 2 */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="cedula">{fieldLabel("Cédula")}</Label>
-              <Input
-                id="cedula"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder="00000000"
-                maxLength={8}
-                {...form.register("cedula", {
-                  onChange: (e) =>
-                    form.setValue("cedula", sanitizarDigitos(e.target.value)),
-                })}
-              />
-              {form.formState.errors.cedula && (
-                <p className="text-sm text-danger">
-                  {form.formState.errors.cedula.message}
-                </p>
-              )}
-            </div>
+            <CedulaInput
+              nacionalidad={form.watch("nacionalidad") ?? "V"}
+              onNacionalidadChange={(v) =>
+                form.setValue("nacionalidad", v as "V" | "E", {
+                  shouldValidate: true,
+                })
+              }
+              cedula={form.watch("cedula")}
+              onCedulaChange={(v) =>
+                form.setValue("cedula", v, { shouldValidate: true })
+              }
+              error={
+                form.formState.errors.cedula?.message
+                  ? String(form.formState.errors.cedula.message)
+                  : undefined
+              }
+              required
+              id="cedula"
+            />
             <div className="space-y-2">
               <Label htmlFor="telefono">{fieldLabel("Teléfono")}</Label>
               <Input

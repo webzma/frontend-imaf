@@ -70,7 +70,7 @@ async function llenarDatosValidos(user: ReturnType<typeof userEvent.setup>) {
     screen.getByLabelText("Correo electrónico"),
     "juan@correo.com",
   );
-  await user.type(screen.getByLabelText("Cédula"), "12345678");
+  await user.type(screen.getByLabelText(/Cédula/), "12345678");
   await user.type(screen.getByLabelText("Teléfono"), "04121234567");
   fireEvent.change(screen.getByLabelText("Fecha de nacimiento"), {
     target: { value: "2000-01-01" },
@@ -145,7 +145,7 @@ describe("Página de registro", () => {
     const user = userEvent.setup();
     render(<RegisterPage />);
 
-    const cedula = screen.getByLabelText("Cédula");
+    const cedula = screen.getByLabelText(/Cédula/);
     await user.type(cedula, "12ab34");
 
     expect(cedula).toHaveValue("1234");

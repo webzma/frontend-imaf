@@ -24,6 +24,7 @@ import {
   perfilInstructorSchema,
   type PerfilInstructorForm,
 } from "@/lib/schemas";
+import { CedulaInput } from "@/components/cedula-input";
 import {
   GraduationCap,
   Mail,
@@ -46,6 +47,7 @@ import municipios from "@/data/municipios.json";
 
 interface Profesor {
   id: number;
+  nacionalidad: string | null;
   cedula: string | null;
   telefono: string | null;
   municipio: string | null;
@@ -116,6 +118,7 @@ export default function PerfilPage() {
   const form = useForm<PerfilInstructorForm>({
     resolver: zodResolver(perfilInstructorSchema),
     defaultValues: {
+      nacionalidad: "V",
       cedula: "",
       telefono: "",
       municipio: "",
@@ -145,6 +148,8 @@ export default function PerfilPage() {
 
   const populateForm = (p: Profesor) => {
     form.reset({
+      nacionalidad:
+        (p.nacionalidad as PerfilInstructorForm["nacionalidad"]) ?? "V",
       cedula: p.cedula ?? "",
       telefono: p.telefono ?? "",
       municipio: p.municipio ?? "",
@@ -214,6 +219,7 @@ export default function PerfilPage() {
     setSaving(true);
     try {
       const body = {
+        nacionalidad: data.nacionalidad || null,
         cedula: data.cedula || null,
         telefono: data.telefono || null,
         municipio: data.municipio || null,
@@ -363,28 +369,24 @@ export default function PerfilPage() {
             </div>
             <div className="grid gap-4">
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="cedula">Cédula</Label>
-                  <Input
-                    id="cedula"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={8}
-                    placeholder="Ej: 12345678"
-                    {...form.register("cedula", {
-                      onChange: (e) =>
-                        form.setValue(
-                          "cedula",
-                          sanitizarDigitos(e.target.value),
-                        ),
-                    })}
-                  />
-                  {form.formState.errors.cedula && (
-                    <p className="text-xs text-danger">
-                      {form.formState.errors.cedula.message}
-                    </p>
-                  )}
-                </div>
+                <CedulaInput
+                  nacionalidad={form.watch("nacionalidad") ?? "V"}
+                  onNacionalidadChange={(v) =>
+                    form.setValue("nacionalidad", v as "V" | "E", {
+                      shouldValidate: true,
+                    })
+                  }
+                  cedula={form.watch("cedula") ?? ""}
+                  onCedulaChange={(v) =>
+                    form.setValue("cedula", v, { shouldValidate: true })
+                  }
+                  error={
+                    form.formState.errors.cedula?.message
+                      ? String(form.formState.errors.cedula.message)
+                      : undefined
+                  }
+                  id="cedula"
+                />
                 <div className="grid gap-2">
                   <Label htmlFor="telefono">Teléfono</Label>
                   <Input

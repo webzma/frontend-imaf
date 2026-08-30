@@ -66,6 +66,7 @@ describe("registroSchema", () => {
     primer_apellido: "Pérez",
     segundo_apellido: "Gómez",
     email: "juan@correo.com",
+    nacionalidad: "V",
     cedula: "12345678",
     telefono: "04121234567",
     fecha_nacimiento: "2000-01-01",
@@ -131,6 +132,14 @@ describe("registroSchema", () => {
     });
     expect(mensajeDe(r, "genero")).toBe("Selecciona un género");
     expect(mensajeDe(r, "municipio")).toBe("Selecciona un municipio");
+  });
+
+  it("exige seleccionar nacionalidad", () => {
+    const r = registroSchema.safeParse({
+      ...valido,
+      nacionalidad: undefined,
+    });
+    expect(mensajeDe(r, "nacionalidad")).toBe("Selecciona una nacionalidad");
   });
 
   it("exige la dirección de habitación", () => {
@@ -389,6 +398,7 @@ describe("estudianteSchema", () => {
     segundo_apellido: "Gómez",
     email: "juan@correo.com",
     password: "clave12345",
+    nacionalidad: "V",
     cedula: "12345678",
     telefono: "",
     fecha_nacimiento: "",
@@ -462,6 +472,7 @@ describe("editEstudianteSchema", () => {
     primer_apellido: "Pérez",
     segundo_apellido: "Gómez",
     email: "juan@correo.com",
+    nacionalidad: "V",
     cedula: "12345678",
     telefono: "",
     fecha_nacimiento: "",
@@ -515,6 +526,7 @@ describe("instructorSchema", () => {
     segundo_apellido: "García",
     email: "maria@correo.com",
     password: "clave12345",
+    nacionalidad: "V",
     cedula: "87654321",
     telefono: "",
     municipio: "",
@@ -562,6 +574,7 @@ describe("editInstructorSchema", () => {
     primer_apellido: "López",
     segundo_apellido: "García",
     email: "maria@correo.com",
+    nacionalidad: "V",
     cedula: "87654321",
     telefono: "",
     municipio: "",
