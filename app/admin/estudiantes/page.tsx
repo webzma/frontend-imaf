@@ -168,6 +168,7 @@ export default function EstudiantesPage() {
   const [search, setSearch] = useState("");
   const [filterEstado, setFilterEstado] = useState("todos");
   const [filterCurso, setFilterCurso] = useState("todos");
+  const [filterMunicipio, setFilterMunicipio] = useState("todos");
   const [page, setPage] = useState(1);
   const [totalEstudiantes, setTotalEstudiantes] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -377,9 +378,14 @@ export default function EstudiantesPage() {
         (filterCurso === "sin_curso"
           ? !e.curso
           : String(e.curso?.id) === filterCurso);
-      return matchSearch && matchEstado && matchCurso;
+      const matchMunicipio =
+        filterMunicipio === "todos" ||
+        (filterMunicipio === "sin_municipio"
+          ? !e.municipio
+          : e.municipio === filterMunicipio);
+      return matchSearch && matchEstado && matchCurso && matchMunicipio;
     });
-  }, [estudiantes, search, filterEstado, filterCurso]);
+  }, [estudiantes, search, filterEstado, filterCurso, filterMunicipio]);
 
   const counts = {
     total: totalEstudiantes,
@@ -388,7 +394,10 @@ export default function EstudiantesPage() {
   };
 
   const hasFilters =
-    filterEstado !== "todos" || filterCurso !== "todos" || search !== "";
+    filterEstado !== "todos" ||
+    filterCurso !== "todos" ||
+    filterMunicipio !== "todos" ||
+    search !== "";
 
   // Los filtros se aplican solo a lo cargado; si se está en otra página se
   // vuelve a la primera para no mostrar el número de página desincronizado.
@@ -398,6 +407,7 @@ export default function EstudiantesPage() {
     setSearch("");
     setFilterEstado("todos");
     setFilterCurso("todos");
+    setFilterMunicipio("todos");
     if (page !== 1) {
       setPage(1);
       fetchEstudiantes(1);
@@ -866,6 +876,30 @@ export default function EstudiantesPage() {
                 {cursos.map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>
                     {c.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={filterMunicipio}
+              onValueChange={(v) => {
+                setFilterMunicipio(v);
+                if (page !== 1) {
+                  setPage(1);
+                  fetchEstudiantes(1);
+                }
+              }}
+            >
+              <SelectTrigger className="h-10 w-48 font-sans text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los municipios</SelectItem>
+                <SelectItem value="sin_municipio">Sin municipio</SelectItem>
+                {municipios.map((municipio) => (
+                  <SelectItem key={municipio} value={municipio}>
+                    {municipio}
                   </SelectItem>
                 ))}
               </SelectContent>
