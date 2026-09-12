@@ -51,9 +51,9 @@ interface Profesor {
   cedula: string | null;
   telefono: string | null;
   municipio: string | null;
-  especialidad: string | null;
-  titulo: "licenciatura" | "maestria" | "doctorado" | null;
-  departamento: string | null;
+  especialidad: { id: number; nombre: string } | null;
+  titulo: { id: number; nombre: string } | null;
+  departamento: { id: number; nombre: string } | null;
   fecha_nacimiento: string | null;
   genero: "masculino" | "femenino" | "otro" | null;
   foto: string | null;
@@ -97,13 +97,12 @@ function toDateInput(value: string | null | undefined): string {
   return value.slice(0, 10);
 }
 
-const tituloLabel: Record<string, string> = {
-  licenciatura: "Licenciatura",
-  maestria: "Maestría",
-  doctorado: "Doctorado",
-};
-
 /* ── Page ── */
+
+interface CatalogoItem {
+  id: number;
+  nombre: string;
+}
 
 export default function PerfilPage() {
   const [me, setMe] = useState<MeResponse | null>(null);
@@ -114,6 +113,9 @@ export default function PerfilPage() {
   const queryClient = useQueryClient();
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [especialidades, setEspecialidades] = useState<CatalogoItem[]>([]);
+  const [departamentos, setDepartamentos] = useState<CatalogoItem[]>([]);
+  const [titulos, setTitulos] = useState<CatalogoItem[]>([]);
 
   const form = useForm<PerfilInstructorForm>({
     resolver: zodResolver(perfilInstructorSchema),
@@ -122,9 +124,9 @@ export default function PerfilPage() {
       cedula: "",
       telefono: "",
       municipio: "",
-      especialidad: "",
-      titulo: undefined,
-      departamento: "",
+      especialidad_id: undefined,
+      titulo_id: undefined,
+      departamento_id: undefined,
       fecha_nacimiento: "",
       genero: undefined,
     },
@@ -141,6 +143,25 @@ export default function PerfilPage() {
       })
       .catch(() => setError("Error al cargar el perfil."))
       .finally(() => setLoading(false));
+    // Cargar catálogos para los selects
+    const API = process.env.API_URL || "";
+    Promise.allSettled([
+      fetch(`${API}api/admin/especialidades`, { headers: getAuthHeaders() })
+        .then((r) => r.json())
+        .then((data) =>
+          setEspecialidades(Array.isArray(data) ? data : (data.data ?? [])),
+        ),
+      fetch(`${API}api/admin/departamentos`, { headers: getAuthHeaders() })
+        .then((r) => r.json())
+        .then((data) =>
+          setDepartamentos(Array.isArray(data) ? data : (data.data ?? [])),
+        ),
+      fetch(`${API}api/admin/titulos`, { headers: getAuthHeaders() })
+        .then((r) => r.json())
+        .then((data) =>
+          setTitulos(Array.isArray(data) ? data : (data.data ?? [])),
+        ),
+    ]);
     // populateForm usa form.reset (referencia estable de react-hook-form);
     // el efecto solo debe correr una vez al montar el perfil.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -153,9 +174,9 @@ export default function PerfilPage() {
       cedula: p.cedula ?? "",
       telefono: p.telefono ?? "",
       municipio: p.municipio ?? "",
-      especialidad: p.especialidad ?? "",
-      titulo: (p.titulo as PerfilInstructorForm["titulo"]) ?? undefined,
-      departamento: p.departamento ?? "",
+      especialidad_id: p.especialidad?.id ?? undefined,
+      titulo_id: p.titulo?.id ?? undefined,
+      departamento_id: p.departamento?.id ?? undefined,
       fecha_nacimiento: toDateInput(p.fecha_nacimiento),
       genero: (p.genero as PerfilInstructorForm["genero"]) ?? undefined,
     });
@@ -223,9 +244,9 @@ export default function PerfilPage() {
         cedula: data.cedula || null,
         telefono: data.telefono || null,
         municipio: data.municipio || null,
-        especialidad: data.especialidad || null,
-        titulo: data.titulo || null,
-        departamento: data.departamento || null,
+        especialidad_id: data.especialidad_id || null,
+        titulo_id: data.titulo_id || null,
+        departamento_id: data.departamento_id || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
       };
@@ -332,14 +353,9 @@ export default function PerfilPage() {
                 </span>
               </div>
               {p.titulo && (
-                <Badge
-                  variant={
-                    p.titulo as "licenciatura" | "maestria" | "doctorado"
-                  }
-                  className="mt-2 gap-1"
-                >
+                <Badge variant="default" className="mt-2 gap-1">
                   <BadgeCheck className="w-3 h-3" />
-                  {tituloLabel[p.titulo]}
+                  {p.titulo.nombre}
                 </Badge>
               )}
             </div>
@@ -485,52 +501,76 @@ export default function PerfilPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="titulo">Título académico</Label>
                   <Select
-                    value={form.watch("titulo") || undefined}
+                    value={form.watch("titulo_id")?.toString() || undefined}
                     onValueChange={(v) =>
-                      form.setValue(
-                        "titulo",
-                        v as PerfilInstructorForm["titulo"],
-                        { shouldValidate: true },
-                      )
+                      form.setValue("titulo_id", v ? parseInt(v) : undefined, {
+                        shouldValidate: true,
+                      })
                     }
                   >
                     <SelectTrigger id="titulo">
-                      <SelectValue placeholder="Sin título" />
+                      <SelectValue placeholder="No especificado" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="licenciatura">Licenciatura</SelectItem>
-                      <SelectItem value="maestria">Maestría</SelectItem>
-                      <SelectItem value="doctorado">Doctorado</SelectItem>
+                      {titulos.map((t) => (
+                        <SelectItem key={t.id} value={t.id.toString()}>
+                          {t.nombre}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="departamento">Departamento</Label>
-                  <Input
-                    id="departamento"
-                    placeholder="Ej: Artes Visuales"
-                    {...form.register("departamento")}
-                  />
-                  {form.formState.errors.departamento && (
-                    <p className="text-xs text-danger">
-                      {form.formState.errors.departamento.message}
-                    </p>
-                  )}
+                  <Select
+                    value={
+                      form.watch("departamento_id")?.toString() || undefined
+                    }
+                    onValueChange={(v) =>
+                      form.setValue(
+                        "departamento_id",
+                        v ? parseInt(v) : undefined,
+                        { shouldValidate: true },
+                      )
+                    }
+                  >
+                    <SelectTrigger id="departamento">
+                      <SelectValue placeholder="No especificado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departamentos.map((d) => (
+                        <SelectItem key={d.id} value={d.id.toString()}>
+                          {d.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="especialidad">Especialidad</Label>
-                <Input
-                  id="especialidad"
-                  placeholder="Ej: Fotografía Digital"
-                  {...form.register("especialidad")}
-                />
-                {form.formState.errors.especialidad && (
-                  <p className="text-xs text-danger">
-                    {form.formState.errors.especialidad.message}
-                  </p>
-                )}
+                <Select
+                  value={form.watch("especialidad_id")?.toString() || undefined}
+                  onValueChange={(v) =>
+                    form.setValue(
+                      "especialidad_id",
+                      v ? parseInt(v) : undefined,
+                      { shouldValidate: true },
+                    )
+                  }
+                >
+                  <SelectTrigger id="especialidad">
+                    <SelectValue placeholder="No especificado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {especialidades.map((e) => (
+                      <SelectItem key={e.id} value={e.id.toString()}>
+                        {e.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -624,21 +664,21 @@ export default function PerfilPage() {
                   <GraduationCap className="w-3.5 h-3.5 text-on-primary-container" />
                 }
                 label="Título"
-                value={p.titulo ? tituloLabel[p.titulo] : null}
+                value={p.titulo?.nombre ?? null}
               />
               <InfoRow
                 icon={
                   <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
                 }
                 label="Especialidad"
-                value={p.especialidad}
+                value={p.especialidad?.nombre ?? null}
               />
               <InfoRow
                 icon={
                   <Building2 className="w-3.5 h-3.5 text-on-primary-container" />
                 }
                 label="Departamento"
-                value={p.departamento}
+                value={p.departamento?.nombre ?? null}
               />
             </div>
           </div>

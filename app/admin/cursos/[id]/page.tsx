@@ -97,9 +97,9 @@ interface InstructorFull {
   user_id: number;
   cedula: string | null;
   telefono: string | null;
-  especialidad: string | null;
-  titulo: string | null;
-  departamento: string | null;
+  especialidad: { id: number; nombre: string } | null;
+  titulo: { id: number; nombre: string } | null;
+  departamento: { id: number; nombre: string } | null;
   user: InstructorUser;
 }
 
@@ -108,9 +108,9 @@ interface CursoInstructor {
   user_id: number;
   cedula: string | null;
   foto: string | null;
-  especialidad: string | null;
-  titulo: string | null;
-  departamento: string | null;
+  especialidad: { id: number; nombre: string } | null;
+  titulo: { id: number; nombre: string } | null;
+  departamento: { id: number; nombre: string } | null;
   user: InstructorUser;
 }
 
@@ -990,15 +990,10 @@ export default function CursoDetailPage({
                     {curso.instructor.user.name}
                     {instructorFull?.titulo && (
                       <Badge
-                        variant={
-                          instructorFull.titulo as
-                            | "licenciatura"
-                            | "maestria"
-                            | "doctorado"
-                        }
+                        variant="default"
                         className="font-sans text-[10px] px-1.5 py-0 capitalize"
                       >
-                        {instructorFull.titulo}
+                        {instructorFull.titulo.nombre}
                       </Badge>
                     )}
                   </p>
@@ -1010,13 +1005,13 @@ export default function CursoDetailPage({
                     {instructorFull?.especialidad && (
                       <span className="font-sans text-sm text-muted-foreground flex items-center gap-1.5">
                         <BadgeCheck className="w-3.5 h-3.5" />
-                        {instructorFull.especialidad}
+                        {instructorFull.especialidad.nombre}
                       </span>
                     )}
                     {instructorFull?.departamento && (
                       <span className="font-sans text-sm text-muted-foreground flex items-center gap-1.5">
                         <Building2 className="w-3.5 h-3.5" />
-                        {instructorFull.departamento}
+                        {instructorFull.departamento.nombre}
                       </span>
                     )}
                   </div>
@@ -1717,7 +1712,7 @@ export default function CursoDetailPage({
                           {p.user.name}
                           {p.especialidad && (
                             <span className="text-muted-foreground text-xs ml-2">
-                              {p.especialidad}
+                              {p.especialidad.nombre}
                             </span>
                           )}
                         </span>

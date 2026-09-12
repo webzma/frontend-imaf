@@ -20,6 +20,20 @@ function ok(body: unknown) {
   return Promise.resolve({ ok: true, json: async () => body });
 }
 
+function mockCatalogs() {
+  // Mock the catalog fetch calls that happen on mount
+  fetchMock
+    .mockResolvedValueOnce(ok([])) // especialidades
+    .mockResolvedValueOnce(ok([])) // departamentos
+    .mockResolvedValueOnce(ok([])); // titulos
+}
+
+// Default mock: /api/me + 3 catalogs
+function mockMeAndCatalogs() {
+  fetchMock.mockResolvedValueOnce(ok(meMock));
+  mockCatalogs();
+}
+
 const meMock = {
   id: 1,
   name: "María García",
@@ -59,7 +73,7 @@ async function abrirEdicion(user: ReturnType<typeof userEvent.setup>) {
 
 describe("Perfil de instructor", () => {
   it("carga y muestra los datos del perfil", async () => {
-    fetchMock.mockResolvedValueOnce(ok(meMock));
+    mockMeAndCatalogs();
     renderWithQuery(<PerfilPage />);
 
     expect(await screen.findByText("María García")).toBeInTheDocument();
@@ -67,7 +81,7 @@ describe("Perfil de instructor", () => {
   });
 
   it("sanitiza cédula y teléfono al escribir", async () => {
-    fetchMock.mockResolvedValueOnce(ok(meMock));
+    mockMeAndCatalogs();
     const user = userEvent.setup();
     renderWithQuery(<PerfilPage />);
 
@@ -87,30 +101,22 @@ describe("Perfil de instructor", () => {
     expect(telefono).toHaveValue("04121234567");
   });
 
-  it("bloquea el envío si la especialidad tiene caracteres de inyección", async () => {
-    fetchMock.mockResolvedValueOnce(ok(meMock));
-    const user = userEvent.setup();
+  it("muestra los selects de catálogos vacíos cuando no hay datos", async () => {
+    mockMeAndCatalogs();
     renderWithQuery(<PerfilPage />);
 
+    const user = userEvent.setup();
     await abrirEdicion(user);
 
-    await user.type(screen.getByLabelText("Especialidad"), "O'Brien");
-
-    await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
-
+    // The selects should be present
     expect(
-      await screen.findByText(
-        "La especialidad contiene caracteres no permitidos",
-      ),
-    ).toBeInTheDocument();
-    // La validación falló antes de llegar al servidor.
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+      screen.getAllByText("No especificado").length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it("guarda los cambios, envía el PUT al profesor y muestra el toast", async () => {
+    mockMeAndCatalogs();
     fetchMock
-      // GET inicial de /api/me
-      .mockResolvedValueOnce(ok(meMock))
       // PUT de actualización
       .mockResolvedValueOnce(ok({ telefono: "04121234567" }));
 
@@ -132,14 +138,14 @@ describe("Perfil de instructor", () => {
       return llamada!;
     });
     const [url, init] = llamadaPut;
-    expect(String(url)).toContain("/api/profesor/perfil/7");
+    expect(String(url)).toContain("api/profesor/perfil/7");
 
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body).toMatchObject({
       telefono: "04121234567",
       cedula: null,
-      especialidad: null,
-      titulo: null,
+      especialidad_id: null,
+      titulo_id: null,
     });
 
     expect(toastMock.success).toHaveBeenCalledWith(
