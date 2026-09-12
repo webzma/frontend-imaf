@@ -609,17 +609,25 @@ describe("perfilEstudianteSchema", () => {
   it("rechaza teléfonos con letras", () => {
     const r = perfilEstudianteSchema.safeParse({ telefono: "0412a" });
     expect(mensajeDe(r, "telefono")).toBe(
-      "El teléfono solo puede contener dígitos",
+      "El teléfono debe tener exactamente 11 dígitos (4 + 7)",
     );
   });
 
-  it("rechaza teléfonos de más de 20 dígitos", () => {
-    const r = perfilEstudianteSchema.safeParse({
-      telefono: "123456789012345678901",
-    });
-    expect(mensajeDe(r, "telefono")).toBe(
-      "El teléfono no puede superar 20 dígitos",
-    );
+  it("rechaza teléfonos con menos o más de 11 dígitos", () => {
+    expect(
+      perfilEstudianteSchema.safeParse({ telefono: "1234567890" }).success,
+    ).toBe(false);
+    expect(
+      perfilEstudianteSchema.safeParse({ telefono: "123456789012" }).success,
+    ).toBe(false);
+  });
+
+  it("acepta un teléfono válido de 11 dígitos", () => {
+    expect(
+      perfilEstudianteSchema
+        .safeParse({ telefono: "04121234567" })
+        .success,
+    ).toBe(true);
   });
 
   it("rechaza municipios con comillas (inyección)", () => {

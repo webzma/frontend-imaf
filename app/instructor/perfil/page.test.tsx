@@ -80,6 +80,11 @@ describe("Perfil de instructor", () => {
     const telefono = screen.getByLabelText("Teléfono");
     await user.type(telefono, "0412xx00");
     expect(telefono).toHaveValue("041200");
+
+    // Ingresa un teléfono válido de 11 dígitos y verifica que se acepte
+    await user.clear(telefono);
+    await user.type(telefono, "04121234567");
+    expect(telefono).toHaveValue("04121234567");
   });
 
   it("bloquea el envío si la especialidad tiene caracteres de inyección", async () => {
@@ -107,14 +112,14 @@ describe("Perfil de instructor", () => {
       // GET inicial de /api/me
       .mockResolvedValueOnce(ok(meMock))
       // PUT de actualización
-      .mockResolvedValueOnce(ok({ telefono: "04120000000" }));
+      .mockResolvedValueOnce(ok({ telefono: "04121234567" }));
 
     const user = userEvent.setup();
     renderWithQuery(<PerfilPage />);
 
     await abrirEdicion(user);
 
-    await user.type(screen.getByLabelText("Teléfono"), "04120000000");
+    await user.type(screen.getByLabelText("Teléfono"), "04121234567");
 
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
 
@@ -131,7 +136,7 @@ describe("Perfil de instructor", () => {
 
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body).toMatchObject({
-      telefono: "04120000000",
+      telefono: "04121234567",
       cedula: null,
       especialidad: null,
       titulo: null,

@@ -74,25 +74,30 @@ describe("Perfil de estudiante", () => {
     await user.type(telefono, "0412ab34");
 
     expect(telefono).toHaveValue("041234");
+
+    // Ingresa un teléfono válido de 11 dígitos y verifica que se acepte
+    await user.clear(telefono);
+    await user.type(telefono, "04121234567");
+    expect(telefono).toHaveValue("04121234567");
   });
 
   it("guarda los cambios, envía el PUT y cierra el formulario", async () => {
     fetchMock
       // GET inicial del perfil
-      .mockResolvedValueOnce(ok(perfilMock))
-      // PUT con el perfil actualizado
+      .mockResolvedValueOnce(ok(perfilMock))      
+    // PUT con el perfil actualizado
       .mockResolvedValueOnce(
-        ok({ ...perfilMock, telefono: "041234", genero: "masculino" }),
+        ok({ ...perfilMock, telefono: "04121234567", genero: "masculino" }),
       );
 
-    const user = userEvent.setup();
-    renderWithQuery(<PerfilPage />);
+      const user = userEvent.setup();
+      renderWithQuery(<PerfilPage />);
 
-    await user.click(
-      await screen.findByRole("button", { name: /editar perfil/i }),
-    );
+      await user.click(
+        await screen.findByRole("button", { name: /editar perfil/i }),
+      );
 
-    await user.type(screen.getByLabelText("Teléfono"), "041234");
+      await user.type(screen.getByLabelText("Teléfono"), "04121234567");
 
     // Género es el Select de Radix cuyo placeholder es "Sin especificar"
     const comboboxGenero = screen
@@ -117,7 +122,7 @@ describe("Perfil de estudiante", () => {
 
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body).toMatchObject({
-      telefono: "041234",
+      telefono: "04121234567",
       genero: "masculino",
       municipio: null,
     });
