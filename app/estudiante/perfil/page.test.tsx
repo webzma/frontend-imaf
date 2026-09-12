@@ -84,20 +84,20 @@ describe("Perfil de estudiante", () => {
   it("guarda los cambios, envía el PUT y cierra el formulario", async () => {
     fetchMock
       // GET inicial del perfil
-      .mockResolvedValueOnce(ok(perfilMock))      
-    // PUT con el perfil actualizado
+      .mockResolvedValueOnce(ok(perfilMock))
+      // PUT con el perfil actualizado
       .mockResolvedValueOnce(
         ok({ ...perfilMock, telefono: "04121234567", genero: "masculino" }),
       );
 
-      const user = userEvent.setup();
-      renderWithQuery(<PerfilPage />);
+    const user = userEvent.setup();
+    renderWithQuery(<PerfilPage />);
 
-      await user.click(
-        await screen.findByRole("button", { name: /editar perfil/i }),
-      );
+    await user.click(
+      await screen.findByRole("button", { name: /editar perfil/i }),
+    );
 
-      await user.type(screen.getByLabelText("Teléfono"), "04121234567");
+    await user.type(screen.getByLabelText("Teléfono"), "04121234567");
 
     // Género es el Select de Radix cuyo placeholder es "Sin especificar"
     const comboboxGenero = screen

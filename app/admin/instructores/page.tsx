@@ -1390,7 +1390,8 @@ export default function InstructoresPage() {
                   id="edit-telefono"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  placeholder="04121234567"                  {...editForm.register("telefono", {
+                  placeholder="04121234567"
+                  {...editForm.register("telefono", {
                     onChange: (e) =>
                       editForm.setValue(
                         "telefono",
@@ -1398,7 +1399,7 @@ export default function InstructoresPage() {
                         { shouldValidate: true },
                       ),
                   })}
-                  />
+                />
                 {editForm.formState.errors.telefono && (
                   <p className="text-sm text-danger">
                     {editForm.formState.errors.telefono.message}
