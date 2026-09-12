@@ -293,7 +293,10 @@ export const registroSchema = z
     telefono: z
       .string()
       .min(1, "El teléfono es obligatorio")
-      .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)"),
+      .regex(
+        SOLO_TELEFONO_11,
+        "El teléfono debe tener exactamente 11 dígitos (4 + 7)",
+      ),
     fecha_nacimiento: z
       .string()
       .min(1, "La fecha de nacimiento es obligatoria"),
@@ -319,7 +322,10 @@ export const perfilEstudianteSchema = z.object({
     .string()
     .max(11, "El teléfono no puede superar 11 dígitos")
     .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
-    .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+    .regex(
+      SOLO_TELEFONO_11,
+      "El teléfono debe tener exactamente 11 dígitos (4 + 7)",
+    )
     .optional()
     .or(z.literal("")),
   municipio: z
@@ -343,7 +349,10 @@ export const perfilInstructorSchema = z.object({
     .string()
     .max(11, "El teléfono no puede superar 11 dígitos")
     .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
-    .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+    .regex(
+      SOLO_TELEFONO_11,
+      "El teléfono debe tener exactamente 11 dígitos (4 + 7)",
+    )
     .optional()
     .or(z.literal("")),
   municipio: z
@@ -401,12 +410,16 @@ export type EstudianteForm = z.infer<typeof estudianteSchema>;
 export const editEstudianteSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  nacionalidad: nacionalidadRequerida,  cedula: cedulaObligatoria,
+  nacionalidad: nacionalidadRequerida,
+  cedula: cedulaObligatoria,
   telefono: z
     .string()
     .max(11, "El teléfono no puede superar 11 dígitos")
     .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
-    .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+    .regex(
+      SOLO_TELEFONO_11,
+      "El teléfono debe tener exactamente 11 dígitos (4 + 7)",
+    )
     .optional()
     .or(z.literal("")),
   fecha_nacimiento: z.string().optional(),
@@ -432,7 +445,10 @@ export const instructorSchema = z.object({
     .string()
     .max(11, "El teléfono no puede superar 11 dígitos")
     .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
-    .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+    .regex(
+      SOLO_TELEFONO_11,
+      "El teléfono debe tener exactamente 11 dígitos (4 + 7)",
+    )
     .optional()
     .or(z.literal("")),
   municipio: z.string().max(255).optional(),
@@ -455,7 +471,10 @@ export const editInstructorSchema = z.object({
     .string()
     .max(11, "El teléfono no puede superar 11 dígitos")
     .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
-    .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+    .regex(
+      SOLO_TELEFONO_11,
+      "El teléfono debe tener exactamente 11 dígitos (4 + 7)",
+    )
     .optional()
     .or(z.literal("")),
   municipio: z.string().max(255).optional(),

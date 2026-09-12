@@ -624,9 +624,7 @@ describe("perfilEstudianteSchema", () => {
 
   it("acepta un teléfono válido de 11 dígitos", () => {
     expect(
-      perfilEstudianteSchema
-        .safeParse({ telefono: "04121234567" })
-        .success,
+      perfilEstudianteSchema.safeParse({ telefono: "04121234567" }).success,
     ).toBe(true);
   });
 
