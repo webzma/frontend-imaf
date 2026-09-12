@@ -292,11 +292,15 @@ export default function RegisterPage() {
                 type="tel"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder="0999999999"
-                maxLength={20}
+                placeholder="04121234567"
+                maxLength={11}
                 {...form.register("telefono", {
                   onChange: (e) =>
-                    form.setValue("telefono", sanitizarDigitos(e.target.value)),
+                    form.setValue(
+                      "telefono",
+                      sanitizarDigitos(e.target.value),
+                      { shouldValidate: true },
+                    ),
                 })}
               />
               {form.formState.errors.telefono && (

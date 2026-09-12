@@ -11,6 +11,7 @@ import {
   SOLO_LETRAS,
   SOLO_TEXTO_SEGURO,
   SIN_INYECCION,
+  SOLO_TELEFONO_11,
 } from "@/lib/validators";
 
 /** Fecha "YYYY-MM-DD" opcional que rechaza días no hábiles. */
@@ -292,8 +293,7 @@ export const registroSchema = z
     telefono: z
       .string()
       .min(1, "El teléfono es obligatorio")
-      .max(20)
-      .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos"),
+      .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)"),
     fecha_nacimiento: z
       .string()
       .min(1, "La fecha de nacimiento es obligatoria"),
@@ -317,8 +317,9 @@ export type RegistroForm = z.infer<typeof registroSchema>;
 export const perfilEstudianteSchema = z.object({
   telefono: z
     .string()
-    .max(20, "El teléfono no puede superar 20 dígitos")
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .max(11, "El teléfono no puede superar 11 dígitos")
+    .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+    .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
     .optional()
     .or(z.literal("")),
   municipio: z
@@ -340,8 +341,9 @@ export const perfilInstructorSchema = z.object({
   cedula: cedulaOpcional,
   telefono: z
     .string()
-    .max(20, "El teléfono no puede superar 20 dígitos")
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .max(11, "El teléfono no puede superar 11 dígitos")
+    .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+    .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
     .optional()
     .or(z.literal("")),
   municipio: z
@@ -399,12 +401,12 @@ export type EstudianteForm = z.infer<typeof estudianteSchema>;
 export const editEstudianteSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  nacionalidad: nacionalidadRequerida,
-  cedula: cedulaObligatoria,
+  nacionalidad: nacionalidadRequerida,  cedula: cedulaObligatoria,
   telefono: z
     .string()
-    .max(20)
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .max(11, "El teléfono no puede superar 11 dígitos")
+    .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+    .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
     .optional()
     .or(z.literal("")),
   fecha_nacimiento: z.string().optional(),
@@ -417,11 +419,9 @@ export const editEstudianteSchema = z.object({
     .min(1, "La fecha de inscripción es obligatoria"),
   estado: z.enum(["activo", "inactivo", "graduado"]),
 });
-
 export type EditEstudianteForm = z.infer<typeof editEstudianteSchema>;
 
 /* ── Admin: crear/editar instructor ── */
-
 export const instructorSchema = z.object({
   ...camposNombre,
   email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
@@ -430,8 +430,9 @@ export const instructorSchema = z.object({
   cedula: cedulaObligatoria,
   telefono: z
     .string()
-    .max(20)
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .max(11, "El teléfono no puede superar 11 dígitos")
+    .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+    .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
     .optional()
     .or(z.literal("")),
   municipio: z.string().max(255).optional(),
@@ -452,8 +453,9 @@ export const editInstructorSchema = z.object({
   cedula: cedulaObligatoria,
   telefono: z
     .string()
-    .max(20)
-    .regex(SOLO_DIGITOS, "El teléfono solo puede contener dígitos")
+    .max(11, "El teléfono no puede superar 11 dígitos")
+    .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+    .regex(SOLO_TELEFONO_11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
     .optional()
     .or(z.literal("")),
   municipio: z.string().max(255).optional(),

@@ -7,6 +7,12 @@ export const SOLO_DIGITOS = /^\d+$/;
 export const SOLO_LETRAS = /^[\p{L}\p{M}\s'.-]+$/u;
 
 /**
+ * 11 dígitos numéricos estrictos: prefijo de 4 dígitos (código de área /
+ * operador) + 7 dígitos del número. Ej: 04121234567.
+ */
+export const SOLO_TELEFONO_11 = /^\d{11}$/;
+
+/**
  * Texto general seguro para títulos/nombres de entidades (cursos, sesiones,
  * temario). Permite letras (con acentos), números, espacios y puntuación
  * común, pero bloquea caracteres de riesgo de inyección: () [] {} = < >
@@ -36,3 +42,4 @@ export const sanitizarTexto = (valor: string) => valor.replace(/['"`;\\]/g, "");
 
 export const esSoloDigitos = (valor: string) => SOLO_DIGITOS.test(valor);
 export const esSoloLetras = (valor: string) => SOLO_LETRAS.test(valor);
+export const esTelefonoValido = (valor: string) => SOLO_TELEFONO_11.test(valor);

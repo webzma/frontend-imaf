@@ -629,9 +629,15 @@ export default function InstructoresPage() {
                           form.setValue(
                             "telefono",
                             sanitizarDigitos(e.target.value),
+                            { shouldValidate: true },
                           ),
                       })}
                     />
+                    {form.formState.errors.telefono && (
+                      <p className="text-sm text-danger">
+                        {form.formState.errors.telefono.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -1384,15 +1390,20 @@ export default function InstructoresPage() {
                   id="edit-telefono"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  placeholder="04121234567"
-                  {...editForm.register("telefono", {
+                  placeholder="04121234567"                  {...editForm.register("telefono", {
                     onChange: (e) =>
                       editForm.setValue(
                         "telefono",
                         sanitizarDigitos(e.target.value),
+                        { shouldValidate: true },
                       ),
                   })}
-                />
+                  />
+                {editForm.formState.errors.telefono && (
+                  <p className="text-sm text-danger">
+                    {editForm.formState.errors.telefono.message}
+                  </p>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-fecha_nacimiento">
