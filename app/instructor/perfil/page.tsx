@@ -54,6 +54,7 @@ interface Profesor {
   especialidad: { id: number; nombre: string } | null;
   titulo: { id: number; nombre: string } | null;
   departamento: { id: number; nombre: string } | null;
+  tipo_contrato: { id: number; nombre: string } | null;
   fecha_nacimiento: string | null;
   genero: "masculino" | "femenino" | "otro" | null;
   foto: string | null;
@@ -679,6 +680,13 @@ export default function PerfilPage() {
                 }
                 label="Departamento"
                 value={p.departamento?.nombre ?? null}
+              />
+              <InfoRow
+                icon={
+                  <Briefcase className="w-3.5 h-3.5 text-on-primary-container" />
+                }
+                label="Tipo de contrato"
+                value={p.tipo_contrato?.nombre ?? null}
               />
             </div>
           </div>
