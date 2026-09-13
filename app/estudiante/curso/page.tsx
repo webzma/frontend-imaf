@@ -69,9 +69,9 @@ interface MiCursoResponse {
       id: number;
       nombre: string | null;
       foto: string | null;
-      especialidad: string | null;
-      titulo: string | null;
-      departamento: string | null;
+      especialidad: { id: number; nombre: string } | null;
+      titulo: { id: number; nombre: string } | null;
+      departamento: { id: number; nombre: string } | null;
     } | null;
     temario: TemarioItem[];
     sesiones: SesionItem[];
@@ -381,17 +381,17 @@ export default function CursoPage() {
                       </p>
                       {curso.instructor.especialidad && (
                         <p className="font-sans text-xs text-primary/80 mt-1.5 font-semibold">
-                          {curso.instructor.especialidad}
+                          {curso.instructor.especialidad.nombre}
                         </p>
                       )}
                       {curso.instructor.titulo && (
                         <p className="font-sans text-xs text-muted-foreground mt-1 capitalize">
-                          {curso.instructor.titulo}
+                          {curso.instructor.titulo.nombre}
                         </p>
                       )}
                       {curso.instructor.departamento && (
                         <p className="font-sans text-xs text-muted-foreground mt-0.5">
-                          Depto. {curso.instructor.departamento}
+                          Depto. {curso.instructor.departamento.nombre}
                         </p>
                       )}
                     </div>

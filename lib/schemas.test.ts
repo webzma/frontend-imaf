@@ -530,12 +530,12 @@ describe("instructorSchema", () => {
     cedula: "87654321",
     telefono: "",
     municipio: "",
-    tipo_contrato_id: undefined,
+    tipo_contrato_id: 1,
     fecha_nacimiento: "",
     genero: undefined,
-    especialidad: "",
-    titulo: undefined,
-    departamento: "",
+    especialidad_id: 1,
+    titulo_id: 1,
+    departamento_id: 1,
   };
 
   it("acepta un instructor válido", () => {
@@ -565,6 +565,18 @@ describe("instructorSchema", () => {
       "El segundo nombre solo puede contener letras y espacios",
     );
   });
+
+  it("exige especialidad, título y departamento", () => {
+    const r = instructorSchema.safeParse({
+      ...valido,
+      especialidad_id: undefined,
+      titulo_id: undefined,
+      departamento_id: undefined,
+    });
+    expect(mensajeDe(r, "especialidad_id")).toBe("Selecciona una especialidad");
+    expect(mensajeDe(r, "titulo_id")).toBe("Selecciona un título");
+    expect(mensajeDe(r, "departamento_id")).toBe("Selecciona un departamento");
+  });
 });
 
 describe("editInstructorSchema", () => {
@@ -581,9 +593,9 @@ describe("editInstructorSchema", () => {
     tipo_contrato_id: undefined,
     fecha_nacimiento: "",
     genero: undefined,
-    especialidad: "",
-    titulo: undefined,
-    departamento: "",
+    especialidad_id: undefined,
+    titulo_id: undefined,
+    departamento_id: undefined,
   };
 
   it("acepta una edición válida sin contraseña", () => {
@@ -664,13 +676,13 @@ describe("perfilInstructorSchema", () => {
     ).toBe(true);
   });
 
-  it("rechaza especialidades con punto y coma (inyección)", () => {
-    const r = perfilInstructorSchema.safeParse({ especialidad: "a;b" });
-    expect(mensajeDe(r, "especialidad")).toContain("no permitidos");
+  it("rechaza especialidad no numérica", () => {
+    const r = perfilInstructorSchema.safeParse({ especialidad_id: "abc" });
+    expect(r.success).toBe(false);
   });
 
-  it("rechaza un título fuera del enum", () => {
-    const r = perfilInstructorSchema.safeParse({ titulo: "bachiller" });
+  it("rechaza titulo no numérico", () => {
+    const r = perfilInstructorSchema.safeParse({ titulo_id: "bachiller" });
     expect(r.success).toBe(false);
   });
 });

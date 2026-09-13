@@ -361,19 +361,9 @@ export const perfilInstructorSchema = z.object({
     .regex(SIN_INYECCION, "El municipio contiene caracteres no permitidos")
     .optional()
     .or(z.literal("")),
-  especialidad: z
-    .string()
-    .max(255)
-    .regex(SIN_INYECCION, "La especialidad contiene caracteres no permitidos")
-    .optional()
-    .or(z.literal("")),
-  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
-  departamento: z
-    .string()
-    .max(255)
-    .regex(SIN_INYECCION, "El departamento contiene caracteres no permitidos")
-    .optional()
-    .or(z.literal("")),
+  especialidad_id: z.number().optional(),
+  titulo_id: z.number().optional(),
+  departamento_id: z.number().optional(),
   fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
 });
@@ -435,30 +425,50 @@ export const editEstudianteSchema = z.object({
 export type EditEstudianteForm = z.infer<typeof editEstudianteSchema>;
 
 /* ── Admin: crear/editar instructor ── */
-export const instructorSchema = z.object({
-  ...camposNombre,
-  email: z.string().min(1, "El correo es obligatorio").email("Correo inválido"),
-  password: z.string().min(8, "Mínimo 8 caracteres"),
-  nacionalidad: nacionalidadRequerida,
-  cedula: cedulaObligatoria,
-  telefono: z
-    .string()
-    .max(11, "El teléfono no puede superar 11 dígitos")
-    .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
-    .regex(
-      SOLO_TELEFONO_11,
-      "El teléfono debe tener exactamente 11 dígitos (4 + 7)",
-    )
-    .optional()
-    .or(z.literal("")),
-  municipio: z.string().max(255).optional(),
-  tipo_contrato_id: z.number().optional(),
-  fecha_nacimiento: z.string().optional(),
-  genero: z.enum(["masculino", "femenino", "otro"]).optional(),
-  especialidad: z.string().max(255).optional(),
-  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
-  departamento: z.string().max(255).optional(),
-});
+export const instructorSchema = z
+  .object({
+    ...camposNombre,
+    email: z
+      .string()
+      .min(1, "El correo es obligatorio")
+      .email("Correo inválido"),
+    password: z.string().min(8, "Mínimo 8 caracteres"),
+    nacionalidad: nacionalidadRequerida,
+    cedula: cedulaObligatoria,
+    telefono: z
+      .string()
+      .max(11, "El teléfono no puede superar 11 dígitos")
+      .min(11, "El teléfono debe tener exactamente 11 dígitos (4 + 7)")
+      .regex(
+        SOLO_TELEFONO_11,
+        "El teléfono debe tener exactamente 11 dígitos (4 + 7)",
+      )
+      .optional()
+      .or(z.literal("")),
+    municipio: z.string().max(255).optional(),
+    tipo_contrato_id: z.number().optional(),
+    fecha_nacimiento: z.string().optional(),
+    genero: z.enum(["masculino", "femenino", "otro"]).optional(),
+    especialidad_id: z.number().optional(),
+    titulo_id: z.number().optional(),
+    departamento_id: z.number().optional(),
+  })
+  .refine((d) => d.tipo_contrato_id, {
+    message: "Selecciona un tipo de contrato",
+    path: ["tipo_contrato_id"],
+  })
+  .refine((d) => d.especialidad_id, {
+    message: "Selecciona una especialidad",
+    path: ["especialidad_id"],
+  })
+  .refine((d) => d.titulo_id, {
+    message: "Selecciona un título",
+    path: ["titulo_id"],
+  })
+  .refine((d) => d.departamento_id, {
+    message: "Selecciona un departamento",
+    path: ["departamento_id"],
+  });
 
 export type InstructorForm = z.infer<typeof instructorSchema>;
 
@@ -481,9 +491,9 @@ export const editInstructorSchema = z.object({
   tipo_contrato_id: z.number().optional(),
   fecha_nacimiento: z.string().optional(),
   genero: z.enum(["masculino", "femenino", "otro"]).optional(),
-  especialidad: z.string().max(255).optional(),
-  titulo: z.enum(["licenciatura", "maestria", "doctorado"]).optional(),
-  departamento: z.string().max(255).optional(),
+  especialidad_id: z.number().optional(),
+  titulo_id: z.number().optional(),
+  departamento_id: z.number().optional(),
 });
 
 export type EditInstructorForm = z.infer<typeof editInstructorSchema>;

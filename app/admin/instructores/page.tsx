@@ -81,9 +81,9 @@ interface Instructor {
   nacionalidad: string | null;
   cedula: string;
   telefono: string | null;
-  especialidad: string | null;
-  titulo: "licenciatura" | "maestria" | "doctorado" | null;
-  departamento: string | null;
+  especialidad: { id: number; nombre: string } | null;
+  titulo: { id: number; nombre: string } | null;
+  departamento: { id: number; nombre: string } | null;
   municipio: string | null;
   tipo_contrato: { id: number; nombre: string } | null;
   fecha_nacimiento: string | null;
@@ -92,7 +92,7 @@ interface Instructor {
   user: User;
 }
 
-interface TipoContrato {
+interface CatalogoItem {
   id: number;
   nombre: string;
 }
@@ -119,12 +119,6 @@ const generoLabel: Record<string, string> = {
   masculino: "Masculino",
   femenino: "Femenino",
   otro: "Otro",
-};
-
-const tituloLabel: Record<string, string> = {
-  licenciatura: "Licenciatura",
-  maestria: "Maestría",
-  doctorado: "Doctorado",
 };
 
 /* ── Table Skeleton ── */
@@ -159,7 +153,10 @@ function TableSkeleton() {
 
 export default function InstructoresPage() {
   const [instructores, setInstructores] = useState<Instructor[]>([]);
-  const [tiposContrato, setTiposContrato] = useState<TipoContrato[]>([]);
+  const [tiposContrato, setTiposContrato] = useState<CatalogoItem[]>([]);
+  const [especialidades, setEspecialidades] = useState<CatalogoItem[]>([]);
+  const [departamentos, setDepartamentos] = useState<CatalogoItem[]>([]);
+  const [titulos, setTitulos] = useState<CatalogoItem[]>([]);
   const [search, setSearch] = useState("");
   const [filterTitulo, setFilterTitulo] = useState("todos");
   const [filterDepartamento, setFilterDepartamento] = useState("todos");
@@ -169,6 +166,7 @@ export default function InstructoresPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingTiposContrato, setLoadingTiposContrato] = useState(true);
+  const [loadingCatalogos, setLoadingCatalogos] = useState(true);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -197,9 +195,9 @@ export default function InstructoresPage() {
       tipo_contrato_id: undefined,
       fecha_nacimiento: "",
       genero: undefined,
-      especialidad: "",
-      titulo: undefined,
-      departamento: "",
+      especialidad_id: undefined,
+      titulo_id: undefined,
+      departamento_id: undefined,
     },
   });
 
@@ -216,30 +214,51 @@ export default function InstructoresPage() {
       telefono: "",
       fecha_nacimiento: "",
       genero: undefined,
-      especialidad: "",
-      titulo: undefined,
-      departamento: "",
+      especialidad_id: undefined,
+      titulo_id: undefined,
+      departamento_id: undefined,
       municipio: "",
       tipo_contrato_id: undefined,
     },
   });
 
-  const fetchTiposContrato = async () => {
+  const fetchCatalogos = async () => {
     try {
-      const res = await fetch(
-        `${process.env.API_URL}api/admin/tipo-contratos`,
-        {
+      const [tcRes, espRes, depRes, titRes] = await Promise.all([
+        fetch(`${process.env.API_URL}api/admin/tipo-contratos`, {
           headers: getAuthHeaders(),
-        },
-      );
-      if (res.ok) {
-        const data = await res.json();
+        }),
+        fetch(`${process.env.API_URL}api/admin/especialidades`, {
+          headers: getAuthHeaders(),
+        }),
+        fetch(`${process.env.API_URL}api/admin/departamentos`, {
+          headers: getAuthHeaders(),
+        }),
+        fetch(`${process.env.API_URL}api/admin/titulos`, {
+          headers: getAuthHeaders(),
+        }),
+      ]);
+      if (tcRes.ok) {
+        const data = await tcRes.json();
         setTiposContrato(Array.isArray(data) ? data : (data.data ?? []));
       }
+      if (espRes.ok) {
+        const data = await espRes.json();
+        setEspecialidades(Array.isArray(data) ? data : (data.data ?? []));
+      }
+      if (depRes.ok) {
+        const data = await depRes.json();
+        setDepartamentos(Array.isArray(data) ? data : (data.data ?? []));
+      }
+      if (titRes.ok) {
+        const data = await titRes.json();
+        setTitulos(Array.isArray(data) ? data : (data.data ?? []));
+      }
     } catch {
-      // Silently fail for contract types
+      // Silently fail for catalogs
     } finally {
       setLoadingTiposContrato(false);
+      setLoadingCatalogos(false);
     }
   };
 
@@ -284,9 +303,9 @@ export default function InstructoresPage() {
         ? instructor.fecha_nacimiento.slice(0, 10)
         : "",
       genero: (instructor.genero as EditInstructorForm["genero"]) ?? undefined,
-      especialidad: instructor.especialidad ?? "",
-      titulo: (instructor.titulo as EditInstructorForm["titulo"]) ?? undefined,
-      departamento: instructor.departamento ?? "",
+      especialidad_id: instructor.especialidad?.id ?? undefined,
+      titulo_id: instructor.titulo?.id ?? undefined,
+      departamento_id: instructor.departamento?.id ?? undefined,
       municipio: instructor.municipio ?? "",
       tipo_contrato_id: instructor.tipo_contrato?.id ?? undefined,
     });
@@ -304,9 +323,9 @@ export default function InstructoresPage() {
         telefono: data.telefono || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
-        especialidad: data.especialidad || null,
-        titulo: data.titulo || null,
-        departamento: data.departamento || null,
+        especialidad_id: data.especialidad_id || null,
+        titulo_id: data.titulo_id || null,
+        departamento_id: data.departamento_id || null,
         municipio: data.municipio || null,
         tipo_contrato_id: data.tipo_contrato_id || null,
       };
@@ -341,7 +360,7 @@ export default function InstructoresPage() {
 
   useEffect(() => {
     fetchInstructores(1);
-    fetchTiposContrato();
+    fetchCatalogos();
   }, []);
 
   const onSubmit = async (data: InstructorForm) => {
@@ -356,9 +375,9 @@ export default function InstructoresPage() {
         tipo_contrato_id: data.tipo_contrato_id || null,
         fecha_nacimiento: data.fecha_nacimiento || null,
         genero: data.genero || null,
-        especialidad: data.especialidad || null,
-        titulo: data.titulo || null,
-        departamento: data.departamento || null,
+        especialidad_id: data.especialidad_id || null,
+        titulo_id: data.titulo_id || null,
+        departamento_id: data.departamento_id || null,
       };
       const res = await fetch(`${process.env.API_URL}api/admin/profesores`, {
         method: "POST",
@@ -385,13 +404,10 @@ export default function InstructoresPage() {
     }
   };
 
-  // Unique departments from data
-  const departamentos = useMemo(() => {
-    const set = new Set(
-      instructores.map((p) => p.departamento).filter(Boolean) as string[],
-    );
-    return Array.from(set).sort();
-  }, [instructores]);
+  // Unique departments from API catalog
+  const departamentosDisponibles = useMemo(() => {
+    return departamentos.map((d) => d.nombre);
+  }, [departamentos]);
 
   const filtered = useMemo(() => {
     return instructores.filter((p) => {
@@ -400,14 +416,15 @@ export default function InstructoresPage() {
         p.user.name.toLowerCase().includes(q) ||
         p.cedula.includes(q) ||
         p.user.email.toLowerCase().includes(q) ||
-        (p.especialidad?.toLowerCase().includes(q) ?? false) ||
-        (p.departamento?.toLowerCase().includes(q) ?? false);
-      const matchTitulo = filterTitulo === "todos" || p.titulo === filterTitulo;
+        (p.especialidad?.nombre.toLowerCase().includes(q) ?? false) ||
+        (p.departamento?.nombre.toLowerCase().includes(q) ?? false);
+      const matchTitulo =
+        filterTitulo === "todos" || p.titulo?.nombre === filterTitulo;
       const matchDept =
         filterDepartamento === "todos" ||
         (filterDepartamento === "sin_departamento"
           ? !p.departamento
-          : p.departamento === filterDepartamento);
+          : p.departamento?.nombre === filterDepartamento);
       const matchMunicipio =
         filterMunicipio === "todos" ||
         (filterMunicipio === "sin_municipio"
@@ -421,7 +438,7 @@ export default function InstructoresPage() {
     total: totalInstructores,
     conTitulo: instructores.filter((p) => p.titulo).length,
     departamentos: new Set(
-      instructores.map((p) => p.departamento).filter(Boolean),
+      instructores.map((p) => p.departamento?.nombre).filter(Boolean),
     ).size,
   };
 
@@ -695,101 +712,87 @@ export default function InstructoresPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="especialidad">Especialidad</Label>
-                    <Select
-                      value={form.watch("especialidad") ?? ""}
-                      onValueChange={(v) => form.setValue("especialidad", v)}
-                    >
-                      <SelectTrigger id="especialidad" className="w-full">
-                        <SelectValue placeholder="Seleccionar especialidad" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Matemáticas">Matemáticas</SelectItem>
-                        <SelectItem value="Física">Física</SelectItem>
-                        <SelectItem value="Química">Química</SelectItem>
-                        <SelectItem value="Biología">Biología</SelectItem>
-                        <SelectItem value="Ciencias Naturales">
-                          Ciencias Naturales
-                        </SelectItem>
-                        <SelectItem value="Lengua y Literatura">
-                          Lengua y Literatura
-                        </SelectItem>
-                        <SelectItem value="Historia">Historia</SelectItem>
-                        <SelectItem value="Geografía">Geografía</SelectItem>
-                        <SelectItem value="Inglés">Inglés</SelectItem>
-                        <SelectItem value="Arte y Cultura">
-                          Arte y Cultura
-                        </SelectItem>
-                        <SelectItem value="Música">Música</SelectItem>
-                        <SelectItem value="Educación Física">
-                          Educación Física
-                        </SelectItem>
-                        <SelectItem value="Computación e Informática">
-                          Computación e Informática
-                        </SelectItem>
-                        <SelectItem value="Administración">
-                          Administración
-                        </SelectItem>
-                        <SelectItem value="Economía">Economía</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {loadingCatalogos ? (
+                      <div className="h-10 w-full rounded-sm border border-outline-variant bg-surface-variant/50 animate-pulse" />
+                    ) : (
+                      <Select
+                        value={form.watch("especialidad_id")?.toString() ?? ""}
+                        onValueChange={(v) =>
+                          form.setValue(
+                            "especialidad_id",
+                            v ? parseInt(v) : undefined,
+                          )
+                        }
+                      >
+                        <SelectTrigger id="especialidad" className="w-full">
+                          <SelectValue placeholder="Seleccionar especialidad" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {especialidades.map((e) => (
+                            <SelectItem key={e.id} value={e.id.toString()}>
+                              {e.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="departamento">Departamento</Label>
-                    <Select
-                      value={form.watch("departamento") ?? ""}
-                      onValueChange={(v) => form.setValue("departamento", v)}
-                    >
-                      <SelectTrigger id="departamento" className="w-full">
-                        <SelectValue placeholder="Seleccionar departamento" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Ciencias Exactas">
-                          Ciencias Exactas
-                        </SelectItem>
-                        <SelectItem value="Ciencias Naturales">
-                          Ciencias Naturales
-                        </SelectItem>
-                        <SelectItem value="Ciencias Sociales">
-                          Ciencias Sociales
-                        </SelectItem>
-                        <SelectItem value="Humanidades">Humanidades</SelectItem>
-                        <SelectItem value="Idiomas">Idiomas</SelectItem>
-                        <SelectItem value="Arte y Cultura">
-                          Arte y Cultura
-                        </SelectItem>
-                        <SelectItem value="Tecnología">Tecnología</SelectItem>
-                        <SelectItem value="Educación Física">
-                          Educación Física
-                        </SelectItem>
-                        <SelectItem value="Administración y Economía">
-                          Administración y Economía
-                        </SelectItem>
-                        <SelectItem value="Música">Música</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {loadingCatalogos ? (
+                      <div className="h-10 w-full rounded-sm border border-outline-variant bg-surface-variant/50 animate-pulse" />
+                    ) : (
+                      <Select
+                        value={form.watch("departamento_id")?.toString() ?? ""}
+                        onValueChange={(v) =>
+                          form.setValue(
+                            "departamento_id",
+                            v ? parseInt(v) : undefined,
+                          )
+                        }
+                      >
+                        <SelectTrigger id="departamento" className="w-full">
+                          <SelectValue placeholder="Seleccionar departamento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {departamentos.map((d) => (
+                            <SelectItem key={d.id} value={d.id.toString()}>
+                              {d.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label>Título académico</Label>
-                    <Select
-                      value={form.watch("titulo") ?? ""}
-                      onValueChange={(v) =>
-                        form.setValue("titulo", v as InstructorForm["titulo"])
-                      }
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Seleccionar título" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="licenciatura">
-                          Licenciatura
-                        </SelectItem>
-                        <SelectItem value="maestria">Maestría</SelectItem>
-                        <SelectItem value="doctorado">Doctorado</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {loadingCatalogos ? (
+                      <div className="h-10 w-full rounded-sm border border-outline-variant bg-surface-variant/50 animate-pulse" />
+                    ) : (
+                      <Select
+                        value={form.watch("titulo_id")?.toString() ?? ""}
+                        onValueChange={(v) =>
+                          form.setValue(
+                            "titulo_id",
+                            v ? parseInt(v) : undefined,
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar título" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {titulos.map((t) => (
+                            <SelectItem key={t.id} value={t.id.toString()}>
+                              {t.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                   <div className="grid gap-2">
                     <Label>Tipo de Contrato</Label>
@@ -932,9 +935,11 @@ export default function InstructoresPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos los títulos</SelectItem>
-                <SelectItem value="licenciatura">Licenciatura</SelectItem>
-                <SelectItem value="maestria">Maestría</SelectItem>
-                <SelectItem value="doctorado">Doctorado</SelectItem>
+                {titulos.map((t) => (
+                  <SelectItem key={t.id} value={t.nombre}>
+                    {t.nombre}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -954,9 +959,9 @@ export default function InstructoresPage() {
               <SelectContent>
                 <SelectItem value="todos">Todos los departamentos</SelectItem>
                 <SelectItem value="sin_departamento">
-                  Sin departamento
+                  No especificado
                 </SelectItem>
-                {departamentos.map((d) => (
+                {departamentosDisponibles.map((d) => (
                   <SelectItem key={d} value={d}>
                     {d}
                   </SelectItem>
@@ -1051,15 +1056,10 @@ export default function InstructoresPage() {
                         aside={
                           p.titulo ? (
                             <Badge
-                              variant={
-                                p.titulo as
-                                  | "licenciatura"
-                                  | "maestria"
-                                  | "doctorado"
-                              }
+                              variant="default"
                               className="font-sans text-xs font-semibold px-2.5 py-1"
                             >
-                              {tituloLabel[p.titulo]}
+                              {p.titulo.nombre}
                             </Badge>
                           ) : null
                         }
@@ -1081,16 +1081,16 @@ export default function InstructoresPage() {
                           </span>
                         </DataCardField>
                         <DataCardField label="Especialidad">
-                          {p.especialidad ?? (
+                          {p.especialidad?.nombre ?? (
                             <span className="text-muted-foreground">
-                              Sin especialidad
+                              No especificado
                             </span>
                           )}
                         </DataCardField>
                         <DataCardField label="Departamento">
-                          {p.departamento ?? (
+                          {p.departamento?.nombre ?? (
                             <span className="text-muted-foreground">
-                              Sin departamento
+                              No especificado
                             </span>
                           )}
                         </DataCardField>
@@ -1165,37 +1165,32 @@ export default function InstructoresPage() {
                           <td className="px-6 py-4 font-sans text-sm">
                             {p.especialidad ? (
                               <span className="text-on-surface">
-                                {p.especialidad}
+                                {p.especialidad.nombre}
                               </span>
                             ) : (
                               <span className="text-muted-foreground italic text-xs">
-                                Sin especialidad
+                                No especificado
                               </span>
                             )}
                           </td>
                           <td className="px-6 py-4 font-sans text-sm">
                             {p.departamento ? (
                               <span className="text-on-surface">
-                                {p.departamento}
+                                {p.departamento.nombre}
                               </span>
                             ) : (
                               <span className="text-muted-foreground italic text-xs">
-                                Sin departamento
+                                No especificado
                               </span>
                             )}
                           </td>
                           <td className="px-6 py-4">
                             {p.titulo ? (
                               <Badge
-                                variant={
-                                  p.titulo as
-                                    | "licenciatura"
-                                    | "maestria"
-                                    | "doctorado"
-                                }
+                                variant="default"
                                 className="font-sans text-xs font-semibold px-3 py-1"
                               >
-                                {tituloLabel[p.titulo]}
+                                {p.titulo.nombre}
                               </Badge>
                             ) : (
                               <span className="text-muted-foreground font-sans text-sm">
@@ -1440,75 +1435,46 @@ export default function InstructoresPage() {
               <div className="grid gap-2">
                 <Label>Especialidad</Label>
                 <Select
-                  value={editForm.watch("especialidad") ?? ""}
-                  onValueChange={(v) => editForm.setValue("especialidad", v)}
+                  value={editForm.watch("especialidad_id")?.toString() ?? ""}
+                  onValueChange={(v) =>
+                    editForm.setValue(
+                      "especialidad_id",
+                      v ? parseInt(v) : undefined,
+                    )
+                  }
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Seleccionar especialidad" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Matemáticas">Matemáticas</SelectItem>
-                    <SelectItem value="Física">Física</SelectItem>
-                    <SelectItem value="Química">Química</SelectItem>
-                    <SelectItem value="Biología">Biología</SelectItem>
-                    <SelectItem value="Ciencias Naturales">
-                      Ciencias Naturales
-                    </SelectItem>
-                    <SelectItem value="Lengua y Literatura">
-                      Lengua y Literatura
-                    </SelectItem>
-                    <SelectItem value="Historia">Historia</SelectItem>
-                    <SelectItem value="Geografía">Geografía</SelectItem>
-                    <SelectItem value="Inglés">Inglés</SelectItem>
-                    <SelectItem value="Arte y Cultura">
-                      Arte y Cultura
-                    </SelectItem>
-                    <SelectItem value="Música">Música</SelectItem>
-                    <SelectItem value="Educación Física">
-                      Educación Física
-                    </SelectItem>
-                    <SelectItem value="Computación e Informática">
-                      Computación e Informática
-                    </SelectItem>
-                    <SelectItem value="Administración">
-                      Administración
-                    </SelectItem>
-                    <SelectItem value="Economía">Economía</SelectItem>
+                    {especialidades.map((e) => (
+                      <SelectItem key={e.id} value={e.id.toString()}>
+                        {e.nombre}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-2">
                 <Label>Departamento</Label>
                 <Select
-                  value={editForm.watch("departamento") ?? ""}
-                  onValueChange={(v) => editForm.setValue("departamento", v)}
+                  value={editForm.watch("departamento_id")?.toString() ?? ""}
+                  onValueChange={(v) =>
+                    editForm.setValue(
+                      "departamento_id",
+                      v ? parseInt(v) : undefined,
+                    )
+                  }
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Seleccionar departamento" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Ciencias Exactas">
-                      Ciencias Exactas
-                    </SelectItem>
-                    <SelectItem value="Ciencias Naturales">
-                      Ciencias Naturales
-                    </SelectItem>
-                    <SelectItem value="Ciencias Sociales">
-                      Ciencias Sociales
-                    </SelectItem>
-                    <SelectItem value="Humanidades">Humanidades</SelectItem>
-                    <SelectItem value="Idiomas">Idiomas</SelectItem>
-                    <SelectItem value="Arte y Cultura">
-                      Arte y Cultura
-                    </SelectItem>
-                    <SelectItem value="Tecnología">Tecnología</SelectItem>
-                    <SelectItem value="Educación Física">
-                      Educación Física
-                    </SelectItem>
-                    <SelectItem value="Administración y Economía">
-                      Administración y Economía
-                    </SelectItem>
-                    <SelectItem value="Música">Música</SelectItem>
+                    {departamentos.map((d) => (
+                      <SelectItem key={d.id} value={d.id.toString()}>
+                        {d.nombre}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -1537,21 +1503,20 @@ export default function InstructoresPage() {
               <div className="grid gap-2">
                 <Label>Título académico</Label>
                 <Select
-                  value={editForm.watch("titulo") ?? ""}
+                  value={editForm.watch("titulo_id")?.toString() ?? ""}
                   onValueChange={(v) =>
-                    editForm.setValue(
-                      "titulo",
-                      v as EditInstructorForm["titulo"],
-                    )
+                    editForm.setValue("titulo_id", v ? parseInt(v) : undefined)
                   }
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Seleccionar título" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="licenciatura">Licenciatura</SelectItem>
-                    <SelectItem value="maestria">Maestría</SelectItem>
-                    <SelectItem value="doctorado">Doctorado</SelectItem>
+                    {titulos.map((t) => (
+                      <SelectItem key={t.id} value={t.id.toString()}>
+                        {t.nombre}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -1632,16 +1597,8 @@ export default function InstructoresPage() {
                 email={viewTarget.user.email}
                 badge={
                   viewTarget.titulo ? (
-                    <Badge
-                      variant={
-                        viewTarget.titulo as
-                          | "licenciatura"
-                          | "maestria"
-                          | "doctorado"
-                      }
-                      className="font-sans px-2.5 py-1"
-                    >
-                      {tituloLabel[viewTarget.titulo]}
+                    <Badge variant="default" className="font-sans px-2.5 py-1">
+                      {viewTarget.titulo.nombre}
                     </Badge>
                   ) : null
                 }
@@ -1674,13 +1631,13 @@ export default function InstructoresPage() {
 
               <DetailSection title="Datos profesionales">
                 <DetailField label="Especialidad">
-                  {viewTarget.especialidad}
+                  {viewTarget.especialidad?.nombre}
                 </DetailField>
                 <DetailField label="Departamento">
-                  {viewTarget.departamento}
+                  {viewTarget.departamento?.nombre}
                 </DetailField>
                 <DetailField label="Título">
-                  {viewTarget.titulo && tituloLabel[viewTarget.titulo]}
+                  {viewTarget.titulo?.nombre}
                 </DetailField>
                 <DetailField label="Tipo de contrato">
                   {viewTarget.tipo_contrato?.nombre}
