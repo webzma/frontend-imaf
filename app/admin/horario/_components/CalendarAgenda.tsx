@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { Calendar, GraduationCap, Clock } from "lucide-react";
 import {
+  ESTADO_LABEL,
   estadoColor,
   formatHour,
   formatLongDate,
@@ -19,12 +20,6 @@ interface Props {
   sesiones: Sesion[];
   onEdit: (sesion: Sesion) => void;
 }
-
-const ESTADO_LABEL: Record<string, string> = {
-  programada: "Programada",
-  realizada: "Realizada",
-  cancelada: "Cancelada",
-};
 
 export default function CalendarAgenda({ current, sesiones, onEdit }: Props) {
   const grouped = useMemo(() => {
@@ -49,7 +44,7 @@ export default function CalendarAgenda({ current, sesiones, onEdit }: Props) {
 
   if (grouped.length === 0) {
     return (
-      <div className="bg-surface-container-lowest rounded-sm ambient-shadow py-20 flex flex-col items-center justify-center gap-3">
+      <div className="bg-surface-container-lowest rounded-lg border border-border ambient-shadow py-20 flex flex-col items-center justify-center gap-3">
         <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center">
           <Calendar className="w-6 h-6 text-on-primary-container" />
         </div>
@@ -64,7 +59,7 @@ export default function CalendarAgenda({ current, sesiones, onEdit }: Props) {
   }
 
   return (
-    <div className="bg-surface-container-lowest rounded-sm ambient-shadow divide-y divide-outline-variant">
+    <div className="bg-surface-container-lowest rounded-lg border border-border ambient-shadow divide-y divide-border">
       {grouped.map(([date, dayItems]) => (
         <div key={date} className="px-6 py-5">
           <div className="flex items-baseline gap-3 mb-3">
@@ -83,7 +78,7 @@ export default function CalendarAgenda({ current, sesiones, onEdit }: Props) {
                 <button
                   key={s.id}
                   onClick={() => onEdit(s)}
-                  className="group flex flex-col md:flex-row md:items-center gap-2 md:gap-4 px-4 py-3 rounded-sm bg-surface-container-low/50 hover:bg-surface-container transition-colors text-left"
+                  className={`group flex flex-col md:flex-row md:items-center gap-2 md:gap-4 px-4 py-3 rounded-md border-l-[3px] ${color.accent} bg-surface-container-low hover:bg-surface-container transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
                 >
                   <div className="flex items-center gap-2 md:min-w-[150px]">
                     <Clock className="w-3.5 h-3.5 text-muted-foreground" />
@@ -103,7 +98,7 @@ export default function CalendarAgenda({ current, sesiones, onEdit }: Props) {
                     </p>
                     {s.curso && (
                       <p className="font-sans text-xs text-muted-foreground truncate flex items-center gap-1.5 mt-0.5">
-                        <span className="font-mono font-semibold text-primary/70">
+                        <span className="font-semibold text-on-surface-variant">
                           {s.curso.codigo}
                         </span>
                         <span>·</span>

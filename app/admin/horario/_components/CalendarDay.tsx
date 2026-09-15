@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import {
   computeHourRange,
+  cursoAccent,
   cursosActivosForDate,
   estadoColor,
   formatHour,
@@ -72,8 +73,8 @@ export default function CalendarDay({
   };
 
   return (
-    <div className="bg-surface-container-lowest rounded-sm ambient-shadow overflow-hidden">
-      <div className="px-6 py-4 bg-surface-container-low border-b border-outline-variant">
+    <div className="bg-surface-container-lowest rounded-lg border border-border ambient-shadow overflow-hidden">
+      <div className="px-6 py-4 bg-surface-container-low border-b border-border">
         <p className="font-serif text-2xl font-light tight-tracking text-on-surface capitalize">
           {formatLongDate(current)}
         </p>
@@ -85,17 +86,14 @@ export default function CalendarDay({
       </div>
 
       {cursosDia.length > 0 && (
-        <div className="px-6 py-3 flex flex-wrap gap-2 bg-secondary-container/30 border-b border-outline-variant">
+        <div className="px-6 py-3 flex flex-wrap gap-2 bg-surface-container-low border-b border-border">
           {cursosDia.map((c) => (
             <span
               key={c.id}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container/80 text-xs font-sans text-on-surface/75"
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-border border-l-[3px] ${cursoAccent(c.id).border} bg-surface-container-high text-xs font-sans text-on-surface-variant`}
               title={`${c.fecha_inicio} → ${c.fecha_fin ?? "—"}`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-primary/60" />
-              <span className="font-mono font-semibold text-primary/80">
-                {c.codigo}
-              </span>
+              <span className="font-semibold text-on-surface">{c.codigo}</span>
               <span>{c.nombre}</span>
             </span>
           ))}
@@ -103,7 +101,7 @@ export default function CalendarDay({
       )}
 
       {allDay.length > 0 && (
-        <div className="px-6 py-3 border-b border-outline-variant flex flex-wrap gap-2 bg-surface-container-low/40">
+        <div className="px-6 py-3 border-b border-border flex flex-wrap gap-2 bg-surface-container-low">
           <span className="font-sans text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold self-center">
             Todo el día
           </span>
@@ -118,11 +116,11 @@ export default function CalendarDay({
                   e.dataTransfer.setData("text/plain", String(s.id));
                   e.dataTransfer.effectAllowed = "move";
                 }}
-                className={`text-left rounded-sm px-2.5 py-1 text-xs font-sans font-medium ${color.bg} ${color.text} hover:brightness-95 cursor-pointer`}
+                className={`text-left rounded-sm px-2.5 py-1 text-xs font-sans font-medium ${color.bg} ${color.text} border-l-[3px] ${color.accent} hover:brightness-110 dark:hover:brightness-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer`}
               >
                 {s.titulo}
                 {s.curso && (
-                  <span className="ml-2 opacity-70 font-mono text-[10px]">
+                  <span className="ml-2 font-semibold text-[10px]">
                     {s.curso.codigo}
                   </span>
                 )}
@@ -147,20 +145,20 @@ export default function CalendarDay({
             <div
               key={h}
               style={{ height: HOUR_PX }}
-              className="font-sans text-[11px] text-muted-foreground tabular-nums text-right pr-3 pt-1 border-b border-outline-variant"
+              className="font-sans text-[11px] text-muted-foreground tabular-nums text-right pr-3 pt-1 border-b border-border"
             >
               {String(h).padStart(2, "0")}:00
             </div>
           ))}
         </div>
 
-        <div className="relative border-l border-outline-variant">
+        <div className="relative border-l border-border">
           {hours.map((h) => (
             <button
               key={h}
               onClick={() => onCreate(iso, `${String(h).padStart(2, "0")}:00`)}
               style={{ height: HOUR_PX }}
-              className="block w-full border-b border-outline-variant hover:bg-primary/5 transition-colors cursor-pointer"
+              className="block w-full border-b border-border hover:bg-primary-container/30 transition-colors cursor-pointer"
               aria-label={`Crear sesión a las ${h}:00`}
             />
           ))}
@@ -189,17 +187,17 @@ export default function CalendarDay({
                   left: `calc(${leftPct}% + 6px)`,
                   width: `calc(${widthPct}% - 12px)`,
                 }}
-                className={`absolute rounded-sm px-3 py-2 text-left ${color.bg} ${color.text} hover:brightness-95 shadow-sm overflow-hidden cursor-pointer`}
+                className={`absolute rounded-sm px-3 py-2 text-left ${color.bg} ${color.text} border-l-[3px] ${color.accent} hover:brightness-110 dark:hover:brightness-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring overflow-hidden cursor-pointer`}
               >
                 <div className="font-sans font-semibold text-sm truncate">
                   {s.titulo}
                 </div>
-                <div className="font-sans text-xs opacity-80 tabular-nums">
+                <div className="font-sans text-xs tabular-nums">
                   {formatHour(s.hora_inicio)}
                   {s.hora_fin && ` – ${formatHour(s.hora_fin)}`}
                 </div>
                 {s.curso && (
-                  <div className="font-sans text-xs opacity-75 truncate">
+                  <div className="font-sans text-xs truncate">
                     {s.curso.codigo} · {s.curso.nombre}
                   </div>
                 )}

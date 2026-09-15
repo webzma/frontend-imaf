@@ -326,6 +326,11 @@ export default function InstructorHorarioPage() {
             onCreate={noop}
             onEdit={setDetail}
             onMove={noop}
+            onShowDay={(date) => {
+              setCurrent(parseISODate(date));
+              setView("dia");
+            }}
+            readOnly
           />
         ) : view === "semana" ? (
           <CalendarWeek

@@ -34,6 +34,7 @@ import {
   MONTH_LABELS,
   addDays,
   addMonths,
+  ESTADO_LABEL,
   estadoColor,
   formatLongDate,
   formatShortDate,
@@ -281,6 +282,16 @@ export default function HorarioPage() {
     setCurrent(parseISODate(normalizeDate(fecha)));
   };
 
+  const hayFiltros =
+    filterCurso !== "todos" ||
+    filterInstructor !== "todos" ||
+    filterEstado !== "todos";
+
+  const showDay = (date: string) => {
+    setCurrent(parseISODate(date));
+    setView("dia");
+  };
+
   const clearFilters = () => {
     setFilterCurso("todos");
     setFilterInstructor("todos");
@@ -376,33 +387,42 @@ export default function HorarioPage() {
             </Button>
             <button
               onClick={goPrev}
-              className="w-9 h-9 inline-flex items-center justify-center rounded-sm hover:bg-surface-container-low text-on-surface/70 hover:text-on-surface transition-colors"
+              className="w-9 h-9 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
               aria-label="Anterior"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={goNext}
-              className="w-9 h-9 inline-flex items-center justify-center rounded-sm hover:bg-surface-container-low text-on-surface/70 hover:text-on-surface transition-colors"
+              className="w-9 h-9 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
               aria-label="Siguiente"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
-            <p className="font-serif text-2xl font-light tight-tracking text-on-surface ml-2 capitalize">
+            <h2
+              aria-live="polite"
+              className="font-serif text-2xl md:text-3xl font-light tight-tracking text-on-surface ml-1 capitalize"
+            >
               {rangeLabel}
-            </p>
+            </h2>
           </div>
 
           {/* View switch */}
-          <div className="inline-flex items-center bg-surface-container-low rounded-sm p-0.5 ambient-shadow">
+          <div
+            role="group"
+            aria-label="Vista del calendario"
+            className="inline-flex items-center bg-surface-container-low border border-border rounded-md p-1"
+          >
             {(["mes", "semana", "dia", "agenda"] as CalendarView[]).map((v) => (
               <button
                 key={v}
+                type="button"
                 onClick={() => setView(v)}
-                className={`px-3 py-1.5 rounded-sm font-sans text-xs font-semibold transition-colors ${
+                aria-pressed={view === v}
+                className={`px-3 md:px-4 py-1.5 rounded-sm font-sans text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                   view === v
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-on-surface"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-on-surface hover:bg-surface-container-high"
                 }`}
               >
                 {VIEW_LABELS[v]}
@@ -412,11 +432,17 @@ export default function HorarioPage() {
         </div>
 
         {/* Filtros */}
-        <div className="flex items-center gap-3 mb-6 flex-wrap">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+        <div className="flex items-center gap-x-4 gap-y-3 mb-6 flex-wrap bg-surface-container-low border border-border rounded-lg px-3 py-3 md:px-4">
+          <div className="flex items-center gap-2 flex-wrap w-full lg:w-auto">
+            <Filter
+              className="hidden sm:block w-3.5 h-3.5 text-muted-foreground"
+              aria-hidden
+            />
             <Select value={filterCurso} onValueChange={setFilterCurso}>
-              <SelectTrigger className="h-9 w-48 font-sans text-sm">
+              <SelectTrigger
+                aria-label="Filtrar por curso"
+                className="h-9 w-full sm:w-56 font-sans text-sm bg-surface-container-lowest"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -433,7 +459,10 @@ export default function HorarioPage() {
               value={filterInstructor}
               onValueChange={setFilterInstructor}
             >
-              <SelectTrigger className="h-9 w-44 font-sans text-sm">
+              <SelectTrigger
+                aria-label="Filtrar por instructor"
+                className="h-9 w-full sm:w-56 font-sans text-sm bg-surface-container-lowest"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -447,7 +476,10 @@ export default function HorarioPage() {
             </Select>
 
             <Select value={filterEstado} onValueChange={setFilterEstado}>
-              <SelectTrigger className="h-9 w-40 font-sans text-sm">
+              <SelectTrigger
+                aria-label="Filtrar por estado"
+                className="h-9 w-full sm:w-48 font-sans text-sm bg-surface-container-lowest"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -459,40 +491,67 @@ export default function HorarioPage() {
             </Select>
           </div>
 
-          <div className="flex items-center gap-4 ml-auto flex-wrap">
+          <div className="flex items-center gap-x-5 gap-y-2 lg:ml-auto flex-wrap">
+            {hayFiltros && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="font-sans text-xs font-semibold text-primary hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
+                Limpiar filtros
+              </button>
+            )}
+
             {/* Leyenda de estados */}
-            <div className="flex items-center gap-3">
+            <ul
+              className="flex items-center gap-3"
+              aria-label="Leyenda de estados"
+            >
               {(["programada", "realizada", "cancelada"] as const).map((e) => (
-                <span
+                <li
                   key={e}
-                  className="inline-flex items-center gap-1.5 font-sans text-xs text-on-surface/65 capitalize"
+                  className="inline-flex items-center gap-1.5 font-sans text-xs text-muted-foreground"
                 >
                   <span
-                    className={`w-2 h-2 rounded-full ${estadoColor(e).dot}`}
+                    aria-hidden
+                    className={`w-2.5 h-2.5 rounded-[3px] ${estadoColor(e).dot}`}
                   />
-                  {e}
-                </span>
+                  {ESTADO_LABEL[e]}
+                </li>
               ))}
-            </div>
+            </ul>
 
-            <label className="inline-flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showCursoRanges}
-                onChange={(e) => setShowCursoRanges(e.target.checked)}
-                className="accent-primary"
-              />
-              <span className="font-sans text-xs text-on-surface/65">
-                Mostrar rango de cursos
+            <button
+              type="button"
+              role="switch"
+              aria-checked={showCursoRanges}
+              onClick={() => setShowCursoRanges((v) => !v)}
+              className="group inline-flex items-center gap-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span
+                className={`relative inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors ${
+                  showCursoRanges
+                    ? "bg-primary"
+                    : "bg-surface-container-highest"
+                }`}
+              >
+                <span
+                  className={`absolute h-3 w-3 rounded-full bg-surface-container-lowest shadow-sm transition-transform ${
+                    showCursoRanges ? "translate-x-3.5" : "translate-x-0.5"
+                  }`}
+                />
               </span>
-            </label>
+              <span className="font-sans text-xs text-muted-foreground group-hover:text-on-surface">
+                Rango de cursos
+              </span>
+            </button>
           </div>
         </div>
 
         {/* Aviso cuando el rango visible no tiene sesiones */}
         {!loading && sesionesEnRango.length === 0 && (
-          <div className="flex flex-wrap items-center gap-3 bg-secondary-container/40 border border-outline-variant rounded-sm px-4 py-3 mb-6">
-            <p className="font-sans text-sm text-on-surface/75">
+          <div className="flex flex-wrap items-center gap-3 bg-surface-container-low border border-border border-l-[3px] border-l-info rounded-lg px-4 py-3 mb-6">
+            <p className="font-sans text-sm text-on-surface-variant">
               {sesiones.length === 0 ? (
                 <>
                   Aún no hay sesiones creadas. Usa{" "}
@@ -536,8 +595,8 @@ export default function HorarioPage() {
 
         {/* Vistas */}
         {loading ? (
-          <div className="bg-surface-container-lowest rounded-sm ambient-shadow py-20 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-primary/60" />
+          <div className="bg-surface-container-lowest border border-border rounded-lg ambient-shadow py-20 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : view === "mes" ? (
           <CalendarMonth
@@ -548,6 +607,7 @@ export default function HorarioPage() {
             onCreate={openCreate}
             onEdit={openEdit}
             onMove={handleMove}
+            onShowDay={showDay}
           />
         ) : view === "semana" ? (
           <CalendarWeek

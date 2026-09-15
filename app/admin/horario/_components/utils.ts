@@ -207,11 +207,18 @@ export function computeHourRange(
   return { min, max };
 }
 
-/** Colores por estado de sesión. */
+export const ESTADO_LABEL: Record<string, string> = {
+  programada: "Programada",
+  realizada: "Realizada",
+  cancelada: "Cancelada",
+};
+
+/** Colores por estado de sesión. `accent` es un borde izquierdo que refuerza el estado. */
 export function estadoColor(estado: string): {
   bg: string;
   text: string;
   dot: string;
+  accent: string;
 } {
   switch (estado) {
     case "realizada":
@@ -219,12 +226,14 @@ export function estadoColor(estado: string): {
         bg: "bg-success-container",
         text: "text-on-success-container",
         dot: "bg-success",
+        accent: "border-l-success",
       };
     case "cancelada":
       return {
         bg: "bg-danger-container",
         text: "text-on-danger-container",
         dot: "bg-danger",
+        accent: "border-l-danger",
       };
     case "programada":
     default:
@@ -232,6 +241,82 @@ export function estadoColor(estado: string): {
         bg: "bg-primary-container",
         text: "text-on-primary-container",
         dot: "bg-primary",
+        accent: "border-l-primary",
       };
   }
+}
+
+/** Acento estable por curso. Matices distintos de los usados por los estados de sesión. */
+const CURSO_ACCENTS = [
+  { border: "border-l-chart-2", dot: "bg-chart-2" },
+  { border: "border-l-chart-3", dot: "bg-chart-3" },
+  { border: "border-l-chart-4", dot: "bg-chart-4" },
+  { border: "border-l-chart-5", dot: "bg-chart-5" },
+  { border: "border-l-chart-1", dot: "bg-chart-1" },
+];
+
+export function cursoAccent(id: number) {
+  return CURSO_ACCENTS[Math.abs(id) % CURSO_ACCENTS.length];
+}
+
+export interface CursoSegment {
+  curso: CursoRef;
+  /** Columna inicial y final dentro de la semana (0 = lunes, inclusivas). */
+  startCol: number;
+  endCol: number;
+  lane: number;
+  /** El curso empezó antes de esta semana / sigue después de ella. */
+  continuesBefore: boolean;
+  continuesAfter: boolean;
+}
+
+/**
+ * Parte los rangos de curso en segmentos para una semana (7 días desde `weekStart`)
+ * y les asigna carriles para que no se solapen.
+ */
+export function cursoSegmentsForWeek(
+  cursos: CursoRef[],
+  weekStart: Date,
+): CursoSegment[] {
+  const weekDays = Array.from({ length: 7 }, (_, i) =>
+    toISODate(addDays(weekStart, i)),
+  );
+  const first = weekDays[0];
+  const last = weekDays[6];
+
+  const raw = cursos
+    .map((curso) => {
+      const ini = normalizeDate(curso.fecha_inicio);
+      if (!ini) return null;
+      const end = normalizeDate(curso.fecha_fin) || ini;
+      if (end < first || ini > last) return null;
+      const startCol = ini <= first ? 0 : weekDays.indexOf(ini);
+      const endCol = end >= last ? 6 : weekDays.indexOf(end);
+      return {
+        curso,
+        startCol,
+        endCol,
+        continuesBefore: ini < first,
+        continuesAfter: end > last,
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null)
+    .sort(
+      (a, b) =>
+        a.startCol - b.startCol ||
+        b.endCol - b.startCol - (a.endCol - a.startCol) ||
+        a.curso.id - b.curso.id,
+    );
+
+  const laneEnds: number[] = [];
+  return raw.map((seg) => {
+    let lane = laneEnds.findIndex((end) => end < seg.startCol);
+    if (lane === -1) {
+      lane = laneEnds.length;
+      laneEnds.push(seg.endCol);
+    } else {
+      laneEnds[lane] = seg.endCol;
+    }
+    return { ...seg, lane };
+  });
 }
