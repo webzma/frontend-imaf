@@ -32,8 +32,8 @@ interface CursoResumen {
 interface ProfesorMe {
   id: number;
   user_id: number;
-  especialidad: string | null;
-  titulo: string | null;
+  especialidad: { id: number; nombre: string } | null;
+  titulo: { id: number; nombre: string } | null;
   cursos: CursoResumen[];
 }
 
@@ -144,7 +144,7 @@ export default function InstructorDashboard() {
           icon={GraduationCap}
           eyebrow="Panel de Instructor"
           title={<>Bienvenido, {firstName}</>}
-          subtitle={me.profesor?.especialidad}
+          subtitle={me.profesor?.especialidad?.nombre}
         />
 
         {/* Stats */}

@@ -55,9 +55,9 @@ interface Instructor {
   nombre: string;
   cedula: string | null;
   telefono: string | null;
-  especialidad: string | null;
-  titulo: string | null;
-  departamento: string | null;
+  especialidad: { id: number; nombre: string } | null;
+  titulo: { id: number; nombre: string } | null;
+  departamento: { id: number; nombre: string } | null;
   name?: string;
   user: { id: number; name: string; email: string };
 }

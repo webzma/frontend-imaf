@@ -13,6 +13,10 @@ import {
   ArrowUpRight,
   Plus,
   AlertTriangle,
+  BookMarked,
+  Building2,
+  Award,
+  FileText,
 } from "lucide-react";
 
 interface StatCard {
@@ -187,6 +191,36 @@ export default function AdminDashboard() {
               <Link href="/admin/cursos">
                 <Plus className="w-4 h-4" />
                 Crear curso
+              </Link>
+            </Button>
+          </div>
+
+          <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-muted-foreground font-medium mb-4 mt-8">
+            Catálogos de instructores
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Button asChild variant="outline" className="gap-2 w-full h-11">
+              <Link href="/admin/especialidades">
+                <BookMarked className="w-4 h-4" />
+                Especialidad
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="gap-2 w-full h-11">
+              <Link href="/admin/departamentos">
+                <Building2 className="w-4 h-4" />
+                Departamento
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="gap-2 w-full h-11">
+              <Link href="/admin/titulos">
+                <Award className="w-4 h-4" />
+                Título
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="gap-2 w-full h-11">
+              <Link href="/admin/tipo-contratos">
+                <FileText className="w-4 h-4" />
+                Tipo de contrato
               </Link>
             </Button>
           </div>
