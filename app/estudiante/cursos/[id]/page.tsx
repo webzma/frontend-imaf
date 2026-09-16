@@ -46,6 +46,8 @@ import {
   Calendar,
   Sparkles,
   ArrowUpRight,
+  Copy,
+  Check,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -98,6 +100,16 @@ interface CursoDetalle {
   estudiantes: Estudiante[];
   temario: TemarioItem[];
   sesiones: SesionItem[];
+}
+
+interface DatoBancario {
+  tipo: "pago_movil" | "transferencia";
+  rif: string;
+  banco: string;
+  telefono: string | null;
+  concepto: string;
+  numero_cuenta: string | null;
+  nombre_titular: string | null;
 }
 
 type MetodoPago = "transferencia" | "pago_movil" | "efectivo";
@@ -196,13 +208,43 @@ function PagoModal({
   open,
   onClose,
   onSuccess,
+  datosBancarios,
 }: {
   curso: CursoDetalle;
   open: boolean;
   onClose: () => void;
   onSuccess: (pago: Pago) => void;
+  datosBancarios: DatoBancario[];
 }) {
   const [metodo, setMetodo] = useState<MetodoPago | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyBankData = () => {
+    const datos =
+      metodo === "pago_movil"
+        ? datosBancarios.find((d) => d.tipo === "pago_movil")
+        : datosBancarios.find((d) => d.tipo === "transferencia");
+    if (!datos) return;
+
+    const monto = parseFloat(curso.precio).toFixed(2);
+    let text = "";
+    if (metodo === "pago_movil") {
+      text = `RIF: ${datos.rif}\nBanco: ${datos.banco}\nTeléfono: ${datos.telefono}\nMonto: ${monto} Bs.\nConcepto: ${datos.concepto}`;
+    } else {
+      text = `RIF: ${datos.rif}\nBanco: ${datos.banco}\nCuenta: ${datos.numero_cuenta}\nTitular: ${datos.nombre_titular}\nMonto: ${monto} Bs.\nConcepto: ${datos.concepto}`;
+    }
+
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(true);
+        toast.success("Datos copiados al portapapeles.");
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {
+        toast.error("No se pudo copiar. Intenta manualmente.");
+      });
+  };
   const [referencia, setReferencia] = useState("");
   const [bancoOrigen, setBancoOrigen] = useState("");
   const [archivo, setArchivo] = useState<File | null>(null);
@@ -326,6 +368,7 @@ function PagoModal({
       setArchivo(null);
       setPreview(null);
       setFormError("");
+      setCopied(false);
     }
   }, [open]);
 
@@ -394,11 +437,27 @@ function PagoModal({
 
             {/* Datos / instrucciones según el método */}
             <div className="bg-primary-container/40 rounded-sm px-4 py-3 space-y-1.5 text-sm font-sans">
-              <p className="font-bold text-on-primary-container dark:text-accent-foreground text-[10px] tracking-[0.18em] uppercase mb-2">
-                {metodo === "efectivo"
-                  ? "Instrucciones de pago"
-                  : "Datos para el pago"}
-              </p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-bold text-on-primary-container dark:text-accent-foreground text-[10px] tracking-[0.18em] uppercase">
+                  {metodo === "efectivo"
+                    ? "Instrucciones de pago"
+                    : "Datos para el pago"}
+                </p>
+                {metodo !== "efectivo" && (
+                  <button
+                    type="button"
+                    onClick={handleCopyBankData}
+                    className="inline-flex items-center gap-1 font-sans text-[10px] font-semibold text-primary hover:opacity-70 transition-opacity uppercase tracking-[0.12em]"
+                  >
+                    {copied ? (
+                      <Check className="w-3 h-3" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
+                    {copied ? "¡Copiado!" : "Copiar datos"}
+                  </button>
+                )}
+              </div>
               <div className="flex justify-between gap-3">
                 <span className="text-muted-foreground">Concepto</span>
                 <span className="font-medium text-on-surface truncate max-w-[180px]">
@@ -411,54 +470,78 @@ function PagoModal({
                   {formatCurrency(parseFloat(curso.precio))}
                 </span>
               </div>
-              {metodo === "pago_movil" && (
-                <>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Banco</span>
-                    <span className="font-medium text-on-surface">
-                      Banco de Venezuela
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Teléfono</span>
-                    <span className="font-mono font-medium text-on-surface tabular-nums">
-                      0414-0000000
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Cédula</span>
-                    <span className="font-mono font-medium text-on-surface tabular-nums">
-                      V-00.000.000
-                    </span>
-                  </div>
-                </>
-              )}
-              {metodo === "transferencia" && (
-                <>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Banco</span>
-                    <span className="font-medium text-on-surface">
-                      Banco de Venezuela
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted-foreground">Cuenta</span>
-                    <span className="font-mono font-medium text-on-surface tabular-nums">
-                      0102-0000-00-0000000000
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Titular</span>
-                    <span className="font-medium text-on-surface">IMAF</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">RIF</span>
-                    <span className="font-mono font-medium text-on-surface tabular-nums">
-                      J-00000000-0
-                    </span>
-                  </div>
-                </>
-              )}
+              {metodo === "pago_movil" &&
+                (() => {
+                  const d = datosBancarios.find((x) => x.tipo === "pago_movil");
+                  if (!d)
+                    return (
+                      <p className="text-xs text-muted-foreground italic pt-1">
+                        No hay datos de pago móvil configurados.
+                      </p>
+                    );
+                  return (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Banco</span>
+                        <span className="font-medium text-on-surface">
+                          {d.banco}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Teléfono</span>
+                        <span className="font-mono font-medium text-on-surface tabular-nums">
+                          {d.telefono}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">RIF</span>
+                        <span className="font-mono font-medium text-on-surface tabular-nums">
+                          {d.rif}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
+              {metodo === "transferencia" &&
+                (() => {
+                  const d = datosBancarios.find(
+                    (x) => x.tipo === "transferencia",
+                  );
+                  if (!d)
+                    return (
+                      <p className="text-xs text-muted-foreground italic pt-1">
+                        No hay datos de transferencia configurados.
+                      </p>
+                    );
+                  return (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Banco</span>
+                        <span className="font-medium text-on-surface">
+                          {d.banco}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <span className="text-muted-foreground">Cuenta</span>
+                        <span className="font-mono font-medium text-on-surface tabular-nums">
+                          {d.numero_cuenta}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Titular</span>
+                        <span className="font-medium text-on-surface">
+                          {d.nombre_titular}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">RIF</span>
+                        <span className="font-mono font-medium text-on-surface tabular-nums">
+                          {d.rif}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
               {metodo === "efectivo" && (
                 <>
                   <div className="flex justify-between gap-3">
@@ -643,6 +726,7 @@ export default function CursoDetallePage({
   const [miCursoId, setMiCursoId] = useState<number | null>(null);
   const [pagoActivo, setPagoActivo] = useState<Pago | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [datosBancarios, setDatosBancarios] = useState<DatoBancario[]>([]);
 
   useEffect(() => {
     const headers = getAuthHeaders();
@@ -660,8 +744,11 @@ export default function CursoDetallePage({
       fetch(`${process.env.API_URL}api/estudiante/pagos`, { headers }).then(
         (r) => r.json(),
       ),
+      fetch(`${process.env.API_URL}api/datos-bancarios`, { headers })
+        .then((r) => r.json())
+        .catch(() => []),
     ])
-      .then(([cursoData, perfil, pagos]) => {
+      .then(([cursoData, perfil, pagos, bankData]) => {
         setCurso(cursoData);
         setMiCursoId(perfil?.curso?.id ?? null);
         const cursoId = Number(id);
@@ -669,6 +756,9 @@ export default function CursoDetallePage({
           ? (pagos.find((p: Pago) => p.curso_id === cursoId) ?? null)
           : null;
         setPagoActivo(pago);
+        if (Array.isArray(bankData)) {
+          setDatosBancarios(bankData);
+        }
       })
       .catch(() => toast.error("Error al cargar el curso"))
       .finally(() => setLoading(false));
@@ -1041,6 +1131,7 @@ export default function CursoDetallePage({
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onSuccess={handlePagoSuccess}
+          datosBancarios={datosBancarios}
         />
       )}
     </div>

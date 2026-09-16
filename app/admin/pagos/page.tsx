@@ -48,11 +48,30 @@ import {
   Users,
   AlertTriangle,
   SearchX,
+  Landmark,
+  Smartphone,
+  ChevronRight,
+  ArrowLeft,
 } from "lucide-react";
 
 /* ── Types ── */
 
 type MetodoPago = "transferencia" | "pago_movil" | "efectivo";
+
+type PagoMovilBankData = {
+  rif: string;
+  banco: string;
+  telefono: string;
+  concepto: string;
+};
+
+type TransferenciaBankData = {
+  rif: string;
+  banco: string;
+  numero_cuenta: string;
+  concepto: string;
+  nombre_titular: string;
+};
 
 const METODO_LABELS: Record<MetodoPago, string> = {
   transferencia: "Transferencia",
@@ -484,6 +503,293 @@ function PagoDetailModal({
   );
 }
 
+/* ── Form: Pago Móvil ── */
+
+function BankFormPagoMovil({
+  data,
+  saving,
+  onBack,
+  onSave,
+}: {
+  data: PagoMovilBankData | null;
+  saving: boolean;
+  onBack: () => void;
+  onSave: (d: PagoMovilBankData) => void;
+}) {
+  const [form, setForm] = useState(
+    data ?? { rif: "", banco: "", telefono: "", concepto: "" },
+  );
+  const [error, setError] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!form.rif.trim()) {
+      setError("El RIF es obligatorio.");
+      return;
+    }
+    if (!form.banco.trim()) {
+      setError("El banco es obligatorio.");
+      return;
+    }
+    if (!form.telefono.trim()) {
+      setError("El teléfono es obligatorio.");
+      return;
+    }
+    if (!form.concepto.trim()) {
+      setError("El concepto es obligatorio.");
+      return;
+    }
+    onSave(form);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary hover:opacity-70 transition-opacity"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" />
+        Cambiar tipo
+      </button>
+      {error && (
+        <div className="bg-danger-container border border-danger/25 text-danger text-sm px-4 py-3 rounded-sm font-sans">
+          {error}
+        </div>
+      )}
+      <div className="space-y-1.5">
+        <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
+          RIF *{" "}
+          <span className="text-muted-foreground normal-case tracking-normal">
+            (Ej: J-12345678-9)
+          </span>
+        </Label>
+        <Input
+          value={form.rif}
+          onChange={(e) => setForm((f) => ({ ...f, rif: e.target.value }))}
+          placeholder="J-00000000-0"
+          className="font-sans text-sm h-10"
+          required
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
+          Banco *
+        </Label>
+        <Input
+          value={form.banco}
+          onChange={(e) => setForm((f) => ({ ...f, banco: e.target.value }))}
+          placeholder="Nombre del banco"
+          className="font-sans text-sm h-10"
+          required
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
+          Teléfono *{" "}
+          <span className="text-muted-foreground normal-case tracking-normal">
+            (Ej: 0414-1234567)
+          </span>
+        </Label>
+        <Input
+          value={form.telefono}
+          onChange={(e) => setForm((f) => ({ ...f, telefono: e.target.value }))}
+          placeholder="0414-0000000"
+          className="font-sans text-sm h-10"
+          required
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
+          Concepto *
+        </Label>
+        <Input
+          value={form.concepto}
+          onChange={(e) => setForm((f) => ({ ...f, concepto: e.target.value }))}
+          placeholder="Descripción del concepto"
+          className="font-sans text-sm h-10"
+          required
+        />
+      </div>
+      <div className="flex gap-3 pt-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1 font-sans text-sm h-10"
+          onClick={onBack}
+          disabled={saving}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          className="flex-1 font-sans text-sm h-10"
+          disabled={saving}
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+          Guardar
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+/* ── Form: Transferencia ── */
+
+function BankFormTransferencia({
+  data,
+  saving,
+  onBack,
+  onSave,
+}: {
+  data: TransferenciaBankData | null;
+  saving: boolean;
+  onBack: () => void;
+  onSave: (d: TransferenciaBankData) => void;
+}) {
+  const [form, setForm] = useState(
+    data ?? {
+      rif: "",
+      banco: "",
+      numero_cuenta: "",
+      concepto: "",
+      nombre_titular: "",
+    },
+  );
+  const [error, setError] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!form.rif.trim()) {
+      setError("El RIF es obligatorio.");
+      return;
+    }
+    if (!form.banco.trim()) {
+      setError("El banco es obligatorio.");
+      return;
+    }
+    if (!form.numero_cuenta.trim()) {
+      setError("El número de cuenta es obligatorio.");
+      return;
+    }
+    if (!form.concepto.trim()) {
+      setError("El concepto es obligatorio.");
+      return;
+    }
+    if (!form.nombre_titular.trim()) {
+      setError("El nombre del titular es obligatorio.");
+      return;
+    }
+    onSave(form);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary hover:opacity-70 transition-opacity"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" />
+        Cambiar tipo
+      </button>
+      {error && (
+        <div className="bg-danger-container border border-danger/25 text-danger text-sm px-4 py-3 rounded-sm font-sans">
+          {error}
+        </div>
+      )}
+      <div className="space-y-1.5">
+        <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
+          RIF *{" "}
+          <span className="text-muted-foreground normal-case tracking-normal">
+            (Ej: J-12345678-9)
+          </span>
+        </Label>
+        <Input
+          value={form.rif}
+          onChange={(e) => setForm((f) => ({ ...f, rif: e.target.value }))}
+          placeholder="J-00000000-0"
+          className="font-sans text-sm h-10"
+          required
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
+          Banco *
+        </Label>
+        <Input
+          value={form.banco}
+          onChange={(e) => setForm((f) => ({ ...f, banco: e.target.value }))}
+          placeholder="Nombre del banco"
+          className="font-sans text-sm h-10"
+          required
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
+          Número de cuenta *
+        </Label>
+        <Input
+          value={form.numero_cuenta}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, numero_cuenta: e.target.value }))
+          }
+          placeholder="0102-0000-00-0000000000"
+          className="font-sans text-sm h-10"
+          required
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
+          Concepto *
+        </Label>
+        <Input
+          value={form.concepto}
+          onChange={(e) => setForm((f) => ({ ...f, concepto: e.target.value }))}
+          placeholder="Descripción del concepto"
+          className="font-sans text-sm h-10"
+          required
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface/70">
+          Nombre del titular *
+        </Label>
+        <Input
+          value={form.nombre_titular}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, nombre_titular: e.target.value }))
+          }
+          placeholder="Nombre completo del titular"
+          className="font-sans text-sm h-10"
+          required
+        />
+      </div>
+      <div className="flex gap-3 pt-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1 font-sans text-sm h-10"
+          onClick={onBack}
+          disabled={saving}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          className="flex-1 font-sans text-sm h-10"
+          disabled={saving}
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+          Guardar
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 /* ── Page ── */
 
 export default function AdminPagosPage() {
@@ -495,8 +801,53 @@ export default function AdminPagosPage() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Pago | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [bankModalOpen, setBankModalOpen] = useState(false);
+  const [bankTipo, setBankTipo] = useState<
+    "pago_movil" | "transferencia" | null
+  >(null);
+  const [bankData, setBankData] = useState<{
+    pago_movil: PagoMovilBankData | null;
+    transferencia: TransferenciaBankData | null;
+  }>({ pago_movil: null, transferencia: null });
+  const [bankSaving, setBankSaving] = useState(false);
 
+  // Cargar datos bancarios al montar
   useEffect(() => {
+    fetch(`${process.env.API_URL}api/admin/datos-bancarios`, {
+      headers: getAuthHeaders(),
+    })
+      .then(async (r) => {
+        if (!r.ok) return;
+        const data = await r.json();
+        const dataMap: {
+          pago_movil: PagoMovilBankData | null;
+          transferencia: TransferenciaBankData | null;
+        } = {
+          pago_movil: null,
+          transferencia: null,
+        };
+        for (const item of data) {
+          if (item.tipo === "pago_movil") {
+            dataMap.pago_movil = {
+              rif: item.rif ?? "",
+              banco: item.banco ?? "",
+              telefono: item.telefono ?? "",
+              concepto: item.concepto ?? "",
+            };
+          } else if (item.tipo === "transferencia") {
+            dataMap.transferencia = {
+              rif: item.rif ?? "",
+              banco: item.banco ?? "",
+              numero_cuenta: item.numero_cuenta ?? "",
+              concepto: item.concepto ?? "",
+              nombre_titular: item.nombre_titular ?? "",
+            };
+          }
+        }
+        setBankData(dataMap);
+      })
+      .catch(() => {});
+
     fetch(`${process.env.API_URL}api/admin/pagos`, {
       headers: getAuthHeaders(),
     })
@@ -606,6 +957,16 @@ export default function AdminPagosPage() {
           eyebrow="Admin / Pagos"
           title="Comprobantes de pago"
           subtitle="Revisa y gestiona las solicitudes de inscripción por pago móvil."
+          actions={
+            <Button
+              variant="outline"
+              onClick={() => setBankModalOpen(true)}
+              className="font-sans text-sm h-10 gap-2"
+            >
+              <Landmark className="w-4 h-4" />
+              Gestionar datos bancarios
+            </Button>
+          }
         />
 
         {/* Stats */}
@@ -946,6 +1307,137 @@ export default function AdminPagosPage() {
         }}
         onUpdate={handleUpdate}
       />
+
+      {/* Modal: Gestionar datos bancarios */}
+      <Dialog
+        open={bankModalOpen}
+        onOpenChange={(v) => !v && setBankModalOpen(false)}
+      >
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif font-light text-2xl tight-tracking">
+              Datos bancarios
+            </DialogTitle>
+            <DialogDescription className="font-sans text-sm text-muted-foreground">
+              {bankTipo === null
+                ? "Selecciona el tipo de datos bancarios que deseas gestionar."
+                : bankTipo === "pago_movil"
+                  ? "Configura los datos de pago móvil de la institución."
+                  : "Configura los datos de transferencia de la institución."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Paso 1: selección de tipo */}
+          {bankTipo === null && (
+            <div className="grid gap-2.5">
+              <button
+                onClick={() => setBankTipo("pago_movil")}
+                className="group flex items-center gap-4 text-left bg-surface-container-low hover:bg-primary-container/40 border border-outline-variant hover:border-primary/40 rounded-sm px-4 py-3.5 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+                  <Smartphone className="w-4.5 h-4.5 text-on-primary-container" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-sans text-sm font-semibold text-on-surface">
+                    Pago Móvil
+                  </p>
+                  <p className="font-sans text-xs text-muted-foreground mt-0.5">
+                    RIF, banco, teléfono, monto y concepto.
+                  </p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-[background-color,border-color,color,box-shadow,transform,opacity] shrink-0" />
+              </button>
+              <button
+                onClick={() => setBankTipo("transferencia")}
+                className="group flex items-center gap-4 text-left bg-surface-container-low hover:bg-primary-container/40 border border-outline-variant hover:border-primary/40 rounded-sm px-4 py-3.5 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+                  <Landmark className="w-4.5 h-4.5 text-on-primary-container" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-sans text-sm font-semibold text-on-surface">
+                    Transferencia
+                  </p>
+                  <p className="font-sans text-xs text-muted-foreground mt-0.5">
+                    RIF, número de cuenta, monto, concepto y titular.
+                  </p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-[background-color,border-color,color,box-shadow,transform,opacity] shrink-0" />
+              </button>
+            </div>
+          )}
+
+          {/* Formulario: Pago Móvil */}
+          {bankTipo === "pago_movil" && (
+            <BankFormPagoMovil
+              data={bankData.pago_movil}
+              saving={bankSaving}
+              onBack={() => setBankTipo(null)}
+              onSave={async (d) => {
+                setBankSaving(true);
+                try {
+                  const res = await fetch(
+                    `${process.env.API_URL}api/admin/datos-bancarios`,
+                    {
+                      method: "POST",
+                      headers: getAuthHeaders(),
+                      body: JSON.stringify({ tipo: "pago_movil", ...d }),
+                    },
+                  );
+                  const body = await res.json();
+                  if (!res.ok)
+                    throw new Error(body.message || "Error al guardar.");
+                  setBankData((prev) => ({ ...prev, pago_movil: d }));
+                  toast.success("Datos de pago móvil guardados.");
+                  setBankModalOpen(false);
+                  setBankTipo(null);
+                } catch (err: unknown) {
+                  toast.error(
+                    err instanceof Error ? err.message : "Error al guardar.",
+                  );
+                } finally {
+                  setBankSaving(false);
+                }
+              }}
+            />
+          )}
+
+          {/* Formulario: Transferencia */}
+          {bankTipo === "transferencia" && (
+            <BankFormTransferencia
+              data={bankData.transferencia}
+              saving={bankSaving}
+              onBack={() => setBankTipo(null)}
+              onSave={async (d) => {
+                setBankSaving(true);
+                try {
+                  const res = await fetch(
+                    `${process.env.API_URL}api/admin/datos-bancarios`,
+                    {
+                      method: "POST",
+                      headers: getAuthHeaders(),
+                      body: JSON.stringify({ tipo: "transferencia", ...d }),
+                    },
+                  );
+                  const body = await res.json();
+                  if (!res.ok)
+                    throw new Error(body.message || "Error al guardar.");
+                  setBankData((prev) => ({ ...prev, transferencia: d }));
+                  toast.success("Datos de transferencia guardados.");
+                  setBankModalOpen(false);
+                  setBankTipo(null);
+                } catch (err: unknown) {
+                  toast.error(
+                    err instanceof Error ? err.message : "Error al guardar.",
+                  );
+                } finally {
+                  setBankSaving(false);
+                }
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
