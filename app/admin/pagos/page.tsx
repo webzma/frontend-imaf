@@ -50,7 +50,6 @@ import {
   SearchX,
   Landmark,
   Smartphone,
-  Banknote,
   ChevronRight,
   ArrowLeft,
 } from "lucide-react";
@@ -58,6 +57,21 @@ import {
 /* ── Types ── */
 
 type MetodoPago = "transferencia" | "pago_movil" | "efectivo";
+
+type PagoMovilBankData = {
+  rif: string;
+  banco: string;
+  telefono: string;
+  concepto: string;
+};
+
+type TransferenciaBankData = {
+  rif: string;
+  banco: string;
+  numero_cuenta: string;
+  concepto: string;
+  nombre_titular: string;
+};
 
 const METODO_LABELS: Record<MetodoPago, string> = {
   transferencia: "Transferencia",
@@ -497,29 +511,15 @@ function BankFormPagoMovil({
   onBack,
   onSave,
 }: {
-  data: {
-    rif: string;
-    banco: string;
-    telefono: string;
-    concepto: string;
-  } | null;
+  data: PagoMovilBankData | null;
   saving: boolean;
   onBack: () => void;
-  onSave: (d: {
-    rif: string;
-    banco: string;
-    telefono: string;
-    concepto: string;
-  }) => void;
+  onSave: (d: PagoMovilBankData) => void;
 }) {
   const [form, setForm] = useState(
     data ?? { rif: "", banco: "", telefono: "", concepto: "" },
   );
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (data) setForm(data);
-  }, [data]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -643,22 +643,10 @@ function BankFormTransferencia({
   onBack,
   onSave,
 }: {
-  data: {
-    rif: string;
-    banco: string;
-    numero_cuenta: string;
-    concepto: string;
-    nombre_titular: string;
-  } | null;
+  data: TransferenciaBankData | null;
   saving: boolean;
   onBack: () => void;
-  onSave: (d: {
-    rif: string;
-    banco: string;
-    numero_cuenta: string;
-    concepto: string;
-    nombre_titular: string;
-  }) => void;
+  onSave: (d: TransferenciaBankData) => void;
 }) {
   const [form, setForm] = useState(
     data ?? {
@@ -670,10 +658,6 @@ function BankFormTransferencia({
     },
   );
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (data) setForm(data);
-  }, [data]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -822,19 +806,8 @@ export default function AdminPagosPage() {
     "pago_movil" | "transferencia" | null
   >(null);
   const [bankData, setBankData] = useState<{
-    pago_movil: {
-      rif: string;
-      banco: string;
-      telefono: string;
-      concepto: string;
-    } | null;
-    transferencia: {
-      rif: string;
-      banco: string;
-      numero_cuenta: string;
-      concepto: string;
-      nombre_titular: string;
-    } | null;
+    pago_movil: PagoMovilBankData | null;
+    transferencia: TransferenciaBankData | null;
   }>({ pago_movil: null, transferencia: null });
   const [bankSaving, setBankSaving] = useState(false);
 
@@ -846,9 +819,12 @@ export default function AdminPagosPage() {
       .then(async (r) => {
         if (!r.ok) return;
         const data = await r.json();
-        const dataMap = {
-          pago_movil: null as typeof bankData.pago_movil,
-          transferencia: null as typeof bankData.transferencia,
+        const dataMap: {
+          pago_movil: PagoMovilBankData | null;
+          transferencia: TransferenciaBankData | null;
+        } = {
+          pago_movil: null,
+          transferencia: null,
         };
         for (const item of data) {
           if (item.tipo === "pago_movil") {
