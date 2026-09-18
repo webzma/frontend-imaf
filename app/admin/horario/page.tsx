@@ -1,8 +1,12 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { ErrorState } from "@/components/error-state";
+import { apiFetch, fetchAll, mensajeDeError } from "@/lib/api-client";
+import { adminKeys } from "@/lib/query-keys";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -45,20 +49,6 @@ import {
   toISODate,
 } from "./_components/utils";
 
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : "";
-}
-
-function getAuthHeaders() {
-  return {
-    Authorization: `Bearer ${getCookie("token")}`,
-    Accept: "application/json",
-    "Content-Type": "application/json",
-  };
-}
-
 const VIEW_LABELS: Record<CalendarView, string> = {
   mes: "Mes",
   semana: "Semana",
@@ -75,11 +65,6 @@ export default function HorarioPage() {
   });
   const [showCursoRanges, setShowCursoRanges] = useState(true);
 
-  const [sesiones, setSesiones] = useState<Sesion[]>([]);
-  const [cursos, setCursos] = useState<CursoRef[]>([]);
-  const [instructores, setInstructores] = useState<InstructorRef[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const [filterCurso, setFilterCurso] = useState<string>("todos");
   const [filterInstructor, setFilterInstructor] = useState<string>("todos");
   const [filterEstado, setFilterEstado] = useState<string>("todos");
@@ -89,50 +74,73 @@ export default function HorarioPage() {
   const [defaultDate, setDefaultDate] = useState<string>("");
   const [defaultHora, setDefaultHora] = useState<string>("");
 
-  const apiUrl = process.env.API_URL ?? "";
+  const queryClient = useQueryClient();
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [hRes, cRes, iRes] = await Promise.all([
-        fetch(`${apiUrl}api/admin/horario`, { headers: getAuthHeaders() }),
-        fetch(`${apiUrl}api/admin/cursos`, { headers: getAuthHeaders() }),
-        fetch(`${apiUrl}api/admin/profesores`, { headers: getAuthHeaders() }),
-      ]);
-      const fallos: string[] = [];
-      if (hRes.ok) {
-        const d = await hRes.json();
-        setSesiones(Array.isArray(d) ? d : (d.data ?? []));
-      } else {
-        fallos.push("sesiones");
-      }
-      if (cRes.ok) {
-        const d = await cRes.json();
-        setCursos(Array.isArray(d) ? d : (d.data ?? []));
-      } else {
-        fallos.push("cursos");
-      }
-      if (iRes.ok) {
-        const d = await iRes.json();
-        setInstructores(Array.isArray(d) ? d : (d.data ?? []));
-      } else {
-        fallos.push("instructores");
-      }
-      if (fallos.length > 0) {
-        toast.error(
-          `No se pudo cargar: ${fallos.join(", ")}. Verifica tu sesión e intenta de nuevo.`,
-        );
-      }
-    } catch {
-      toast.error("Error al cargar el horario.");
-    } finally {
-      setLoading(false);
-    }
-  }, [apiUrl]);
+  /**
+   * Las tres listas, en paralelo y cacheadas.
+   *
+   * Los desplegables de curso e instructor pedían su endpoint sin `per_page`,
+   * que devuelve diez registros: filtrar por el curso número once era
+   * imposible y el diálogo de sesión tampoco lo ofrecía. `fetchAll` trae el
+   * catálogo completo.
+   */
+  const [consultaSesiones, consultaCursos, consultaInstructores] = useQueries({
+    queries: [
+      {
+        queryKey: adminKeys.horario(),
+        queryFn: async () => {
+          const d = await apiFetch<Sesion[] | { data?: Sesion[] }>(
+            "api/admin/horario",
+          );
+          return Array.isArray(d) ? d : (d.data ?? []);
+        },
+      },
+      {
+        queryKey: adminKeys.opciones("cursos"),
+        queryFn: () => fetchAll<CursoRef>("api/admin/cursos"),
+        staleTime: 5 * 60 * 1000,
+      },
+      {
+        queryKey: adminKeys.opciones("profesores"),
+        queryFn: () => fetchAll<InstructorRef>("api/admin/profesores"),
+        staleTime: 5 * 60 * 1000,
+      },
+    ],
+  });
 
-  useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+  const sesiones = useMemo(
+    () => consultaSesiones.data ?? [],
+    [consultaSesiones.data],
+  );
+  const cursos = useMemo(
+    () => consultaCursos.data ?? [],
+    [consultaCursos.data],
+  );
+  const instructores = useMemo(
+    () => consultaInstructores.data ?? [],
+    [consultaInstructores.data],
+  );
+  const loading =
+    consultaSesiones.isLoading ||
+    consultaCursos.isLoading ||
+    consultaInstructores.isLoading;
+
+  // Sin el horario no hay pantalla; que falle un catálogo solo vacía un filtro.
+  const errorCarga = consultaSesiones.error;
+  const recargar = () => {
+    consultaSesiones.refetch();
+    consultaCursos.refetch();
+    consultaInstructores.refetch();
+  };
+
+  /** Escribe en la caché de sesiones; sustituye al `setSesiones` de antes. */
+  const setSesiones = useCallback(
+    (actualizar: (prev: Sesion[]) => Sesion[]) =>
+      queryClient.setQueryData<Sesion[]>(adminKeys.horario(), (prev) =>
+        actualizar(prev ?? []),
+      ),
+    [queryClient],
+  );
 
   // Aplica filtros
   const filteredSesiones = useMemo(() => {
@@ -219,30 +227,18 @@ export default function HorarioPage() {
     );
 
     try {
-      const res = await fetch(`${apiUrl}api/admin/sesiones/${sesionId}`, {
+      const updated = await apiFetch<Sesion>(`api/admin/sesiones/${sesionId}`, {
         method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ fecha: newDate }),
+        body: { fecha: newDate },
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        const msg = err.errors
-          ? Object.values(err.errors).flat().join(", ")
-          : err.message;
-        throw new Error(
-          typeof msg === "string" && msg ? msg : "No se pudo mover la sesión.",
-        );
-      }
-      const updated: Sesion = await res.json();
       setSesiones((prev) => prev.map((s) => (s.id === sesionId ? updated : s)));
       toast.success("Sesión reprogramada");
     } catch (e) {
+      // Se deshace el movimiento optimista: la sesión vuelve a su día.
       setSesiones((prev) =>
         prev.map((s) => (s.id === sesionId ? { ...s, fecha: previous } : s)),
       );
-      toast.error(
-        e instanceof Error ? e.message : "No se pudo mover la sesión.",
-      );
+      toast.error(mensajeDeError(e, "No se pudo mover la sesión."));
     }
   };
 
@@ -594,7 +590,13 @@ export default function HorarioPage() {
         )}
 
         {/* Vistas */}
-        {loading ? (
+        {errorCarga ? (
+          <ErrorState
+            error={errorCarga}
+            onRetry={recargar}
+            fallback="No se pudo cargar el horario."
+          />
+        ) : loading ? (
           <div className="bg-surface-container-lowest border border-border rounded-lg ambient-shadow py-20 flex items-center justify-center">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
@@ -645,8 +647,6 @@ export default function HorarioPage() {
         defaultHora={defaultHora}
         onSaved={handleSaved}
         onDeleted={handleDeleted}
-        getAuthHeaders={getAuthHeaders}
-        apiUrl={apiUrl}
       />
     </div>
   );

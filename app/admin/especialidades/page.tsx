@@ -1,16 +1,9 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import CatalogoPage from "@/components/catalogo-page";
-import { BookOpen } from "lucide-react";
-
-export default function EspecialidadesPage() {
-  return (
-    <CatalogoPage
-      title="Especialidades"
-      subtitle="Gestiona las especialidades disponibles para asignar a instructores."
-      singular="especialidad"
-      apiSlug="especialidades"
-      icon={BookOpen}
-    />
-  );
+/**
+ * Ruta heredada. Los cuatro catálogos viven ahora en una sola pantalla con
+ * pestañas; se mantiene la redirección para no romper los enlaces guardados.
+ */
+export default function EspecialidadesRedirect() {
+  redirect("/admin/catalogos?tipo=especialidades");
 }

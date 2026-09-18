@@ -1,16 +1,9 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import CatalogoPage from "@/components/catalogo-page";
-import { Building2 } from "lucide-react";
-
-export default function DepartamentosPage() {
-  return (
-    <CatalogoPage
-      title="Departamentos"
-      subtitle="Gestiona los departamentos disponibles para asignar a instructores."
-      singular="departamento"
-      apiSlug="departamentos"
-      icon={Building2}
-    />
-  );
+/**
+ * Ruta heredada. Los cuatro catálogos viven ahora en una sola pantalla con
+ * pestañas; se mantiene la redirección para no romper los enlaces guardados.
+ */
+export default function DepartamentosRedirect() {
+  redirect("/admin/catalogos?tipo=departamentos");
 }

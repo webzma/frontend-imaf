@@ -23,6 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { apiFetch, mensajeDeError } from "@/lib/api-client";
 import { sesionHorarioSchema, type SesionHorarioForm } from "@/lib/schemas";
 import type { CursoRef, Sesion } from "./types";
 import { normalizeDate, normalizeTime } from "./utils";
@@ -36,8 +39,6 @@ interface Props {
   defaultHora?: string;
   onSaved: (s: Sesion) => void;
   onDeleted: (id: number) => void;
-  getAuthHeaders: () => Record<string, string>;
-  apiUrl: string;
 }
 
 export default function SesionDialog({
@@ -49,13 +50,12 @@ export default function SesionDialog({
   defaultHora,
   onSaved,
   onDeleted,
-  getAuthHeaders,
-  apiUrl,
 }: Props) {
   const isEdit = !!initial;
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [confirmarBorrado, setConfirmarBorrado] = useState(false);
 
   const form = useForm<SesionHorarioForm>({
     resolver: zodResolver(sesionHorarioSchema),
@@ -117,52 +117,36 @@ export default function SesionDialog({
         hora_fin: data.hora_fin || null,
         estado: data.estado,
       };
-      const url = isEdit
-        ? `${apiUrl}api/admin/sesiones/${initial!.id}`
-        : `${apiUrl}api/admin/sesiones`;
-      const res = await fetch(url, {
-        method: isEdit ? "PUT" : "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        const messages = err.errors
-          ? Object.values(err.errors).flat().join(", ")
-          : err.message || "Error al guardar la sesión.";
-        setSubmitError(messages as string);
-        return;
-      }
-      const saved: Sesion = await res.json();
+      const saved = await apiFetch<Sesion>(
+        isEdit ? `api/admin/sesiones/${initial!.id}` : "api/admin/sesiones",
+        { method: isEdit ? "PUT" : "POST", body },
+      );
       toast.success(isEdit ? "Sesión actualizada" : "Sesión creada");
       onSaved(saved);
       onOpenChange(false);
-    } catch {
-      setSubmitError("Error al conectar con el servidor.");
+    } catch (error) {
+      setSubmitError(mensajeDeError(error, "No se pudo guardar la sesión."));
     } finally {
       setSubmitting(false);
     }
   };
 
+  /**
+   * Borrar usaba `confirm()` del navegador: un cuadro del sistema, sin los
+   * estilos ni el idioma del resto del producto y sin estado de carga, en la
+   * única acción del horario que no se puede deshacer.
+   */
   const onDelete = async () => {
     if (!initial) return;
-    if (!confirm("¿Eliminar esta sesión? Esta acción no se puede deshacer."))
-      return;
     setDeleting(true);
     try {
-      const res = await fetch(`${apiUrl}api/admin/sesiones/${initial.id}`, {
-        method: "DELETE",
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) {
-        toast.error("No se pudo eliminar la sesión.");
-        return;
-      }
+      await apiFetch(`api/admin/sesiones/${initial.id}`, { method: "DELETE" });
       toast.success("Sesión eliminada");
       onDeleted(initial.id);
+      setConfirmarBorrado(false);
       onOpenChange(false);
-    } catch {
-      toast.error("Error al conectar con el servidor.");
+    } catch (error) {
+      toast.error(mensajeDeError(error, "No se pudo eliminar la sesión."));
     } finally {
       setDeleting(false);
     }
@@ -303,18 +287,14 @@ export default function SesionDialog({
             )}
           </div>
 
-          {submitError && (
-            <div className="bg-danger-container border border-danger/25 text-danger text-sm px-4 py-3 rounded-sm">
-              {submitError}
-            </div>
-          )}
+          {submitError && <Alert variant="danger">{submitError}</Alert>}
 
           <DialogFooter className="flex sm:justify-between gap-2">
             {isEdit ? (
               <Button
                 type="button"
                 variant="outline"
-                onClick={onDelete}
+                onClick={() => setConfirmarBorrado(true)}
                 disabled={deleting || submitting}
                 className="text-danger hover:bg-danger-container hover:text-danger border-danger/30"
               >
@@ -346,6 +326,16 @@ export default function SesionDialog({
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <ConfirmDialog
+        open={confirmarBorrado}
+        onOpenChange={setConfirmarBorrado}
+        title="Eliminar sesión"
+        description="La sesión desaparecerá del horario y del curso. Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        loading={deleting}
+        onConfirm={onDelete}
+      />
     </Dialog>
   );
 }

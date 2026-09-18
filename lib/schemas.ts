@@ -424,6 +424,26 @@ export const editEstudianteSchema = z.object({
 });
 export type EditEstudianteForm = z.infer<typeof editEstudianteSchema>;
 
+/**
+ * Campos del panel de estudiante, uno solo para alta y edición.
+ *
+ * `password` solo se exige al crear, así que vive aquí como opcional y
+ * `nuevoEstudianteSchema` añade la exigencia. De paso el teléfono queda con la
+ * misma regla en los dos modos: el alta aceptaba cualquier cantidad de dígitos
+ * y la edición exigía once, de modo que un registro creado en el panel podía
+ * no poder volver a guardarse sin tocar un campo que nadie había cambiado.
+ */
+export const estudiantePanelSchema = editEstudianteSchema.extend({
+  password: z.string().optional().or(z.literal("")),
+});
+
+export type EstudiantePanelForm = z.infer<typeof estudiantePanelSchema>;
+
+export const nuevoEstudianteSchema = estudiantePanelSchema.refine(
+  (d) => (d.password ?? "").length >= 8,
+  { message: "Mínimo 8 caracteres", path: ["password"] },
+);
+
 /* ── Admin: crear/editar instructor ── */
 export const instructorSchema = z
   .object({
@@ -497,3 +517,62 @@ export const editInstructorSchema = z.object({
 });
 
 export type EditInstructorForm = z.infer<typeof editInstructorSchema>;
+
+/**
+ * Campos del panel de instructor, uno solo para alta y edición. Mismo trato
+ * que en estudiantes: `password` es opcional aquí y obligatorio al crear.
+ */
+export const instructorPanelSchema = editInstructorSchema
+  .extend({ password: z.string().optional().or(z.literal("")) })
+  .refine((d) => d.tipo_contrato_id, {
+    message: "Selecciona un tipo de contrato",
+    path: ["tipo_contrato_id"],
+  })
+  .refine((d) => d.especialidad_id, {
+    message: "Selecciona una especialidad",
+    path: ["especialidad_id"],
+  })
+  .refine((d) => d.titulo_id, {
+    message: "Selecciona un título",
+    path: ["titulo_id"],
+  })
+  .refine((d) => d.departamento_id, {
+    message: "Selecciona un departamento",
+    path: ["departamento_id"],
+  });
+
+export type InstructorPanelForm = z.infer<typeof instructorPanelSchema>;
+
+export const nuevoInstructorSchema = instructorPanelSchema.refine(
+  (d) => (d.password ?? "").length >= 8,
+  { message: "Mínimo 8 caracteres", path: ["password"] },
+);
+
+/* ── Cuenta propia del administrador ── */
+
+/**
+ * Perfil de quien tiene la sesión abierta. La contraseña es opcional: se
+ * cambia solo si se rellena, y entonces el backend exige la actual.
+ */
+export const cuentaAdminSchema = z
+  .object({
+    ...camposNombre,
+    email: z.string().email("Correo inválido"),
+    password_actual: z.string().optional().or(z.literal("")),
+    password: z
+      .string()
+      .min(8, "La contraseña debe tener al menos 8 caracteres")
+      .optional()
+      .or(z.literal("")),
+    password_confirmation: z.string().optional().or(z.literal("")),
+  })
+  .refine((d) => !d.password || d.password === d.password_confirmation, {
+    message: "Las contraseñas no coinciden",
+    path: ["password_confirmation"],
+  })
+  .refine((d) => !d.password || Boolean(d.password_actual), {
+    message: "Escribe tu contraseña actual para poder cambiarla",
+    path: ["password_actual"],
+  });
+
+export type CuentaAdminForm = z.infer<typeof cuentaAdminSchema>;

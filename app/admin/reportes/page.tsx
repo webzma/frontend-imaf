@@ -1,122 +1,59 @@
 "use client";
 
-import { PageHeader } from "@/components/page-header";
-import { useState, useEffect, useMemo } from "react";
-import { LOCALE, formatCurrency as fmt } from "@/lib/format";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  LabelList,
+  ResponsiveContainer,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
 } from "recharts";
+import {
+  BarChart2,
+  BookOpen,
+  CheckCircle,
+  Clock,
+  GraduationCap,
+  Users,
+  XCircle,
+} from "lucide-react";
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { ErrorState } from "@/components/error-state";
+import { PageHeader } from "@/components/page-header";
+import { PageShell } from "@/components/page-shell";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StatRow } from "@/components/stat-row";
 import {
-  BarChart2,
-  Users,
-  GraduationCap,
-  BookOpen,
-  TrendingUp,
-  CheckCircle,
-  Clock,
-  XCircle,
-} from "lucide-react";
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableScroll,
+} from "@/components/ui/table";
+import { apiFetch } from "@/lib/api-client";
+import { adminKeys } from "@/lib/query-keys";
+import { LOCALE, formatCurrency } from "@/lib/format";
+import { useUrlState } from "@/hooks/use-url-state";
+import { BarraApilada } from "./_components/BarraApilada";
+import { ChartCard } from "./_components/ChartCard";
+import { PERIODOS, type Periodo, type ReporteData } from "./tipos";
 
-/* ── Types ── */
-
-interface Estudiante {
-  id: number;
-  estado: string;
-  curso_id: number | null;
-  user?: { name: string };
-}
-
-interface Curso {
-  id: number;
-  nombre: string;
-  codigo: string;
-  estado: "activo" | "inactivo";
-  estudiantes?: Estudiante[];
-}
-
-interface Instructor {
-  id: number;
-  user?: { name: string };
-}
-
-interface IngresoItem {
-  label: string;
-  total: number;
-  cantidad: number;
-}
-
-interface PagoUsuario {
-  user_id: number;
-  nombre: string;
-  total_pagos: number;
-  aprobados: number;
-  pendientes: number;
-  rechazados: number;
-  total_ingreso: number;
-}
-
-interface PagoCurso {
-  curso_id: number;
-  nombre: string;
-  codigo: string;
-  precio: number;
-  total_pagos: number;
-  aprobados: number;
-  pendientes: number;
-  rechazados: number;
-  total_ingreso: number;
-}
-
-interface ResumenReporte {
-  total_pagos: number;
-  aprobados: number;
-  pendientes: number;
-  rechazados: number;
-  total_ingresos: number;
-}
-
-interface ReporteData {
-  ingresos: IngresoItem[];
-  pagos_por_usuario: PagoUsuario[];
-  pagos_por_curso: PagoCurso[];
-  resumen: ResumenReporte;
-}
-
-/* ── Helpers ── */
-
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : "";
-}
-
-function getAuthHeaders() {
-  return {
-    Authorization: `Bearer ${getCookie("token")}`,
-    Accept: "application/json",
-  };
-}
-
-function fmtLabel(label: string, periodo: string) {
+function etiquetaPeriodo(label: string, periodo: Periodo) {
   if (periodo === "mensual") {
-    const [y, m] = label.split("-");
-    return new Date(Number(y), Number(m) - 1).toLocaleDateString(LOCALE, {
+    const [anio, mes] = label.split("-");
+    return new Date(Number(anio), Number(mes) - 1).toLocaleDateString(LOCALE, {
       month: "short",
       year: "2-digit",
     });
@@ -125,380 +62,217 @@ function fmtLabel(label: string, periodo: string) {
   return label;
 }
 
-/* ── Stat Card ── */
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  sub,
-  containerClass = "bg-primary-container",
-  iconClass = "text-on-primary-container",
-}: {
-  label: string;
-  value: string | number;
-  icon: React.ComponentType<{ className?: string }>;
-  sub?: string;
-  containerClass?: string;
-  iconClass?: string;
-}) {
-  return (
-    <div className="bg-surface-container-low rounded-sm p-5 ambient-shadow">
-      <div
-        className={`w-10 h-10 rounded-md flex items-center justify-center ${containerClass} mb-4`}
-      >
-        <Icon className={`w-5 h-5 ${iconClass}`} />
-      </div>
-      <p className="font-sans text-3xl font-light tight-tracking text-on-surface tabular-nums mb-1">
-        {value}
-      </p>
-      <p className="font-sans text-xs tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-        {label}
-      </p>
-      {sub && (
-        <p className="font-sans text-xs text-muted-foreground mt-1">{sub}</p>
-      )}
-    </div>
-  );
-}
-
-/* ── Chart Section Wrapper ── */
-
-function ChartCard({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6">
-      <div className="mb-5">
-        <h2 className="font-serif font-light text-xl tight-tracking text-on-surface">
-          {title}
-        </h2>
-        {description && (
-          <p className="font-sans text-xs text-muted-foreground mt-0.5">
-            {description}
-          </p>
-        )}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-/* ── Custom Pie Label ── */
-
-const RADIAN = Math.PI / 180;
-function PieLabel({
-  cx,
-  cy,
-  midAngle,
-  innerRadius,
-  outerRadius,
-  percent,
-}: {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percent: number;
-}) {
-  if (percent < 0.05) return null;
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="white"
-      textAnchor="middle"
-      dominantBaseline="central"
-      className="font-sans text-xs font-semibold"
-    >
-      {`${(percent * 100).toFixed(0)}%`}
-    </text>
-  );
-}
-
-/* ── Period Tab ── */
-
-const PERIODOS = [
-  { key: "semanal", label: "Semanal" },
-  { key: "mensual", label: "Mensual" },
-  { key: "anual", label: "Anual" },
-] as const;
-
-type Periodo = (typeof PERIODOS)[number]["key"];
-
-/* ── Page ── */
+const ESTADO_ESTUDIANTE_LABEL: Record<string, string> = {
+  activo: "Activos",
+  inactivo: "Inactivos",
+  graduado: "Graduados",
+};
 
 export default function ReportesPage() {
-  const [cursos, setCursos] = useState<Curso[]>([]);
-  const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
-  const [instructores, setInstructores] = useState<Instructor[]>([]);
-  const [reporte, setReporte] = useState<ReporteData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadingReporte, setLoadingReporte] = useState(true);
-  const [periodo, setPeriodo] = useState<Periodo>("mensual");
+  const { get, set } = useUrlState();
+  const periodo = (get("periodo", "mensual") as Periodo) ?? "mensual";
 
-  /* Base data */
-  useEffect(() => {
-    const headers = getAuthHeaders();
-    Promise.all([
-      fetch(`${process.env.API_URL}api/admin/cursos`, { headers }).then((r) =>
-        r.json(),
-      ),
-      fetch(`${process.env.API_URL}api/admin/estudiantes`, { headers }).then(
-        (r) => r.json(),
-      ),
-      fetch(`${process.env.API_URL}api/admin/profesores`, { headers }).then(
-        (r) => r.json(),
-      ),
-    ])
-      .then(([c, e, p]) => {
-        setCursos(Array.isArray(c) ? c : (c.data ?? []));
-        setEstudiantes(Array.isArray(e) ? e : (e.data ?? []));
-        setInstructores(Array.isArray(p) ? p : (p.data ?? []));
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  /**
+   * Todo sale de `/api/admin/reportes`.
+   *
+   * Los totales, la ocupación por curso y el reparto por estado se calculaban
+   * en el navegador sobre la primera página de cada listado — diez registros —
+   * así que esta pantalla publicaba cifras que no eran ciertas. Ahora los
+   * agrega la base de datos.
+   */
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: adminKeys.reportes(periodo),
+    queryFn: () =>
+      apiFetch<ReporteData>("api/admin/reportes", { params: { periodo } }),
+  });
 
-  /* Reporte data (re-fetches when periodo changes) */
-  useEffect(() => {
-    fetch(`${process.env.API_URL}api/admin/reportes?periodo=${periodo}`, {
-      headers: getAuthHeaders(),
-    })
-      .then((r) => r.json())
-      .then((data) => setReporte(data))
-      .finally(() => setLoadingReporte(false));
-  }, [periodo]);
+  const ingresos = useMemo(
+    () =>
+      (data?.ingresos ?? []).map((fila) => ({
+        ...fila,
+        etiqueta: etiquetaPeriodo(fila.label, periodo),
+      })),
+    [data, periodo],
+  );
 
-  /* ── Derived metrics (existing) ── */
+  const ocupacion = useMemo(
+    () =>
+      (data?.cursos ?? [])
+        .filter((curso) => curso.estudiantes > 0)
+        .slice(0, 8)
+        .map((curso) => ({
+          codigo: curso.codigo,
+          nombre: curso.nombre,
+          estudiantes: curso.estudiantes,
+        })),
+    [data],
+  );
 
-  const totalEstudiantes = estudiantes.length;
-  const totalCursos = cursos.length;
-  const totalInstructores = instructores.length;
-
-  const estudiantesPorCurso = useMemo(() => {
-    return cursos
-      .map((c) => ({
-        nombre: c.codigo,
-        fullName: c.nombre,
-        estudiantes: c.estudiantes?.length ?? 0,
-      }))
-      .sort((a, b) => b.estudiantes - a.estudiantes)
-      .slice(0, 8);
-  }, [cursos]);
-
-  const estadoCursos = useMemo(() => {
-    const activos = cursos.filter((c) => c.estado === "activo").length;
-    const inactivos = cursos.filter((c) => c.estado === "inactivo").length;
-    return [
-      { name: "Activos", value: activos },
-      { name: "Inactivos", value: inactivos },
-    ].filter((d) => d.value > 0);
-  }, [cursos]);
-
-  const estadoEstudiantes = useMemo(() => {
-    const counts: Record<string, number> = {};
-    estudiantes.forEach((e) => {
-      const estado = e.estado || "desconocido";
-      counts[estado] = (counts[estado] || 0) + 1;
-    });
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
-  }, [estudiantes]);
-
-  /* ── Income chart data ── */
-  const ingresosData = useMemo(() => {
-    if (!reporte?.ingresos) return [];
-    return reporte.ingresos.map((row) => ({
-      label: fmtLabel(row.label, periodo),
-      total: row.total,
-      cantidad: row.cantidad,
-    }));
-  }, [reporte, periodo]);
-
-  /* ── Payments by course chart data ── */
-  const pagosCursoData = useMemo(() => {
-    if (!reporte?.pagos_por_curso) return [];
-    return reporte.pagos_por_curso.slice(0, 8).map((c) => ({
-      nombre: c.codigo,
-      fullName: c.nombre,
-      ingreso: c.total_ingreso,
-      pagos: c.total_pagos,
-    }));
-  }, [reporte]);
-
-  const barConfig = {
-    estudiantes: { label: "Estudiantes", color: "var(--color-chart-1)" },
+  const configIngresos = {
+    total: { label: "Ingreso", color: "var(--color-chart-1)" },
   } satisfies ChartConfig;
 
-  const ingresosConfig = {
-    total: { label: "Ingresos", color: "var(--color-chart-2)" },
+  const configOcupacion = {
+    estudiantes: { label: "Estudiantes", color: "var(--color-chart-2)" },
   } satisfies ChartConfig;
 
-  const cursosIngresoConfig = {
-    ingreso: { label: "Ingreso", color: "var(--color-chart-3)" },
-  } satisfies ChartConfig;
-
-  const PIE_COLORS_STATUS = ["oklch(0.52 0.14 8)", "oklch(0.90 0.06 8)"];
-  const PIE_COLORS_ESTADO = [
-    "oklch(0.52 0.14 8)",
-    "oklch(0.46 0.07 350)",
-    "oklch(0.54 0.09 350)",
-    "oklch(0.38 0.022 8)",
-  ];
-  const resumen = reporte?.resumen;
+  const resumen = data?.resumen;
+  const cursosActivos = data?.estado_cursos?.activo ?? 0;
+  const totalCursos = data?.totales.cursos ?? 0;
 
   return (
-    <div className="relative min-h-full bg-surface">
-      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
-        <PageHeader
-          icon={BarChart2}
-          eyebrow="Analítica / Reportes"
-          title="Reportes"
-          subtitle="Métricas y estadísticas generales de la plataforma."
+    <PageShell>
+      <PageHeader
+        icon={BarChart2}
+        eyebrow="Analítica / Reportes"
+        title="Reportes"
+        subtitle="Métricas de toda la plataforma, calculadas sobre la base completa."
+      />
+
+      {error ? (
+        <ErrorState
+          error={error}
+          onRetry={refetch}
+          fallback="No se pudieron cargar los reportes."
         />
-
-        {/* ── General Stat Cards ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 mb-10">
-          <StatCard
-            label="Estudiantes"
-            value={loading ? "—" : totalEstudiantes}
-            icon={Users}
-            containerClass="bg-primary-container"
-            iconClass="text-on-primary-container"
+      ) : (
+        <>
+          <StatRow
+            className="mb-10"
+            columns={3}
+            loading={isLoading}
+            stats={[
+              {
+                label: "Estudiantes",
+                value: data?.totales.estudiantes ?? 0,
+                icon: Users,
+                tone: "primary",
+                href: "/admin/estudiantes",
+              },
+              {
+                label: "Cursos",
+                value: totalCursos,
+                sub: `${cursosActivos} activos`,
+                icon: BookOpen,
+                tone: "info",
+                href: "/admin/cursos",
+              },
+              {
+                label: "Instructores",
+                value: data?.totales.instructores ?? 0,
+                icon: GraduationCap,
+                tone: "secondary",
+                href: "/admin/instructores",
+              },
+            ]}
           />
-          <StatCard
-            label="Cursos"
-            value={loading ? "—" : totalCursos}
-            icon={BookOpen}
-            containerClass="bg-secondary-container"
-            iconClass="text-on-secondary-container"
-          />
-          <StatCard
-            label="Instructores"
-            value={loading ? "—" : totalInstructores}
-            icon={GraduationCap}
-            containerClass="bg-primary-container/70"
-            iconClass="text-on-primary-container"
-          />
-        </div>
 
-        {/* ── Income Section ── */}
-        <div className="mb-3 flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="font-serif font-light text-2xl tight-tracking text-on-surface">
-              Ingresos
-            </h2>
-            <p className="font-sans text-xs text-muted-foreground mt-0.5">
-              Pagos aprobados acumulados según el período seleccionado
-            </p>
-          </div>
-          {/* Period tabs */}
-          <div className="flex items-center gap-1 bg-surface-container-low rounded-sm p-1 ambient-shadow">
-            {PERIODOS.map((p) => (
-              <button
-                key={p.key}
-                onClick={() => {
-                  setLoadingReporte(true);
-                  setPeriodo(p.key);
-                }}
-                className={`font-sans text-xs font-semibold px-3 py-1.5 rounded-[3px] transition-colors ${
-                  periodo === p.key
-                    ? "bg-primary dark:bg-primary-container text-white "
-                    : "text-muted-foreground hover:text-on-surface"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Income stat cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <div className="bg-surface-container-low rounded-sm p-5 ambient-shadow">
-            <div className="w-10 h-10 rounded-md flex items-center justify-center bg-success-container mb-4">
-              <span className="text-on-success-container font-sans text-sm font-semibold">
-                Bs.
-              </span>
+          {/* ── Ingresos ── */}
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="font-serif text-2xl font-light tight-tracking text-on-surface">
+                Ingresos
+              </h2>
+              <p className="mt-0.5 font-sans text-xs text-muted-foreground">
+                Suma de los pagos aprobados en el período seleccionado.
+              </p>
             </div>
-            <p className="font-sans text-3xl font-light tight-tracking text-on-surface tabular-nums mb-1">
-              {resumen ? fmt(resumen.total_ingresos) : "—"}
-            </p>
-            <p className="font-sans text-xs tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-              Total ingresos
-            </p>
-          </div>
-          <StatCard
-            label="Pagos aprobados"
-            value={resumen?.aprobados ?? "—"}
-            icon={CheckCircle}
-            containerClass="bg-success-container"
-            iconClass="text-on-success-container"
-          />
-          <StatCard
-            label="Pagos pendientes"
-            value={resumen?.pendientes ?? "—"}
-            icon={Clock}
-            containerClass="bg-warning-container"
-            iconClass="text-on-warning-container"
-          />
-          <StatCard
-            label="Pagos rechazados"
-            value={resumen?.rechazados ?? "—"}
-            icon={XCircle}
-            containerClass="bg-danger-container"
-            iconClass="text-on-danger-container"
-          />
-        </div>
 
-        {/* Income bar chart */}
-        <div className="mb-10">
+            {/* El período vive en la URL: un reporte anual se puede compartir. */}
+            <div
+              role="group"
+              aria-label="Período del reporte"
+              className="flex items-center gap-1 rounded-sm bg-surface-container-low p-1 ambient-shadow"
+            >
+              {PERIODOS.map((opcion) => (
+                <button
+                  key={opcion.key}
+                  type="button"
+                  aria-pressed={periodo === opcion.key}
+                  onClick={() =>
+                    set("periodo", opcion.key === "mensual" ? null : opcion.key)
+                  }
+                  className={`rounded-[3px] px-3 py-1.5 font-sans text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    periodo === opcion.key
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-on-surface"
+                  }`}
+                >
+                  {opcion.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <StatRow
+            className="mb-6"
+            columns={4}
+            loading={isLoading}
+            stats={[
+              {
+                label: "Total ingresos",
+                value: resumen ? formatCurrency(resumen.total_ingresos) : "—",
+                icon: BarChart2,
+                tone: "success",
+              },
+              {
+                label: "Aprobados",
+                value: resumen?.aprobados ?? 0,
+                icon: CheckCircle,
+                tone: "success",
+              },
+              {
+                label: "Pendientes",
+                value: resumen?.pendientes ?? 0,
+                icon: Clock,
+                tone: "warning",
+                href: "/admin/pagos?estado=pendiente",
+              },
+              {
+                label: "Rechazados",
+                value: resumen?.rechazados ?? 0,
+                icon: XCircle,
+                tone: "danger",
+              },
+            ]}
+          />
+
           <ChartCard
-            title={`Ingresos ${periodo === "semanal" ? "semanales" : periodo === "mensual" ? "mensuales" : "anuales"}`}
-            description="Suma de pagos aprobados en el período"
+            className="mb-6"
+            title={`Ingresos por período`}
+            description="Una sola serie, así que el color solo la distingue del fondo; el valor exacto aparece al pasar por encima."
           >
-            {loadingReporte ? (
-              <div className="h-[260px] flex items-center justify-center font-sans text-sm text-muted-foreground">
-                Cargando...
-              </div>
-            ) : ingresosData.length === 0 ? (
-              <p className="font-sans text-sm text-muted-foreground text-center py-10">
-                Sin datos de ingresos en este período
+            {isLoading ? (
+              <Skeleton className="h-[260px] w-full" />
+            ) : ingresos.length === 0 ? (
+              <p className="py-10 text-center font-sans text-sm text-muted-foreground">
+                Todavía no hay pagos aprobados en este período.
               </p>
             ) : (
               <ChartContainer
-                config={ingresosConfig}
+                config={configIngresos}
                 className="h-[260px] w-full"
               >
                 <BarChart
-                  data={ingresosData}
-                  margin={{ top: 4, right: 8, left: 10, bottom: 0 }}
+                  data={ingresos}
+                  margin={{ top: 4, right: 8, left: 10 }}
                 >
                   <CartesianGrid
                     vertical={false}
                     strokeDasharray="3 3"
-                    stroke="oklch(0.45 0.10 8 / 0.12)"
+                    stroke="var(--color-outline-variant)"
                   />
                   <XAxis
-                    dataKey="label"
-                    tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
+                    dataKey="etiqueta"
                     tickLine={false}
                     axisLine={false}
+                    tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
                   />
                   <YAxis
-                    tickFormatter={(v) => `Bs. ${v}`}
-                    tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
                     tickLine={false}
                     axisLine={false}
+                    tickFormatter={(v) => `Bs. ${v}`}
+                    tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
                   />
                   <ChartTooltip
                     content={
@@ -506,12 +280,12 @@ export default function ReportesPage() {
                         formatter={(value, _name, props) => (
                           <div className="flex flex-col gap-0.5">
                             <span className="font-medium text-on-surface">
-                              {props.payload?.label as string}
+                              {String(props.payload?.etiqueta ?? "")}
                             </span>
-                            <span className="text-success font-semibold">
-                              {fmt(Number(value))}
+                            <span className="font-semibold text-on-surface">
+                              {formatCurrency(Number(value))}
                             </span>
-                            <span className="text-muted-foreground text-xs">
+                            <span className="text-xs text-muted-foreground">
                               {String(props.payload?.cantidad ?? "")} pago
                               {Number(props.payload?.cantidad) !== 1 ? "s" : ""}
                             </span>
@@ -522,428 +296,275 @@ export default function ReportesPage() {
                   />
                   <Bar
                     dataKey="total"
-                    fill="var(--color-chart-2)"
-                    radius={[3, 3, 0, 0]}
+                    fill="var(--color-chart-1)"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={48}
                   />
                 </BarChart>
               </ChartContainer>
             )}
           </ChartCard>
-        </div>
 
-        {loading || loadingReporte ? (
-          <div className="flex items-center justify-center py-24 font-sans text-sm text-muted-foreground">
-            Cargando datos...
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Bar: Students per course */}
+          {/* ── Ocupación y reparto ── */}
+          <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
             <ChartCard
               title="Estudiantes por curso"
-              description="Distribución de alumnos matriculados en cada curso"
+              description="Los ocho cursos con más matrícula."
             >
-              {estudiantesPorCurso.length === 0 ? (
-                <p className="font-sans text-sm text-muted-foreground text-center py-10">
-                  Sin datos
+              {isLoading ? (
+                <Skeleton className="h-[280px] w-full" />
+              ) : ocupacion.length === 0 ? (
+                <p className="py-10 text-center font-sans text-sm text-muted-foreground">
+                  Ningún curso tiene estudiantes matriculados.
                 </p>
               ) : (
-                <ChartContainer config={barConfig} className="h-[260px] w-full">
-                  <BarChart
-                    data={estudiantesPorCurso}
-                    margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
-                  >
-                    <CartesianGrid
-                      vertical={false}
-                      strokeDasharray="3 3"
-                      stroke="oklch(0.45 0.10 8 / 0.12)"
-                    />
-                    <XAxis
-                      dataKey="nombre"
-                      tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      allowDecimals={false}
-                      tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent
-                          formatter={(value, _name, props) => (
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-medium text-on-surface">
-                                {props.payload?.fullName as string}
-                              </span>
-                              <span className="text-muted-foreground">
-                                {value} estudiante
-                                {Number(value) !== 1 ? "s" : ""}
-                              </span>
-                            </div>
-                          )}
-                        />
-                      }
-                    />
-                    <Bar
-                      dataKey="estudiantes"
-                      fill="var(--color-chart-1)"
-                      radius={[3, 3, 0, 0]}
-                    />
-                  </BarChart>
-                </ChartContainer>
-              )}
-            </ChartCard>
-
-            {/* Bar: Income per course */}
-            <ChartCard
-              title="Ingresos por curso"
-              description="Total recaudado por pagos aprobados en cada curso"
-            >
-              {pagosCursoData.length === 0 ? (
-                <p className="font-sans text-sm text-muted-foreground text-center py-10">
-                  Sin datos
-                </p>
-              ) : (
+                // Barras horizontales: los nombres de curso son largos y en
+                // vertical se recortaban o giraban 45°.
                 <ChartContainer
-                  config={cursosIngresoConfig}
-                  className="h-[260px] w-full"
+                  config={configOcupacion}
+                  className="h-[280px] w-full"
                 >
-                  <BarChart
-                    data={pagosCursoData}
-                    margin={{ top: 4, right: 8, left: 10, bottom: 0 }}
-                  >
-                    <CartesianGrid
-                      vertical={false}
-                      strokeDasharray="3 3"
-                      stroke="oklch(0.45 0.10 8 / 0.12)"
-                    />
-                    <XAxis
-                      dataKey="nombre"
-                      tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      tickFormatter={(v) => `Bs. ${v}`}
-                      tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent
-                          formatter={(value, _name, props) => (
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-medium text-on-surface">
-                                {props.payload?.fullName as string}
-                              </span>
-                              <span className="text-success font-semibold">
-                                {fmt(Number(value))}
-                              </span>
-                              <span className="text-muted-foreground text-xs">
-                                {String(props.payload?.pagos ?? "")} pago
-                                {Number(props.payload?.pagos) !== 1 ? "s" : ""}
-                              </span>
-                            </div>
-                          )}
+                  <ResponsiveContainer>
+                    <BarChart
+                      data={ocupacion}
+                      layout="vertical"
+                      margin={{ top: 4, right: 32, left: 4 }}
+                    >
+                      <CartesianGrid
+                        horizontal={false}
+                        strokeDasharray="3 3"
+                        stroke="var(--color-outline-variant)"
+                      />
+                      <XAxis type="number" hide />
+                      <YAxis
+                        type="category"
+                        dataKey="codigo"
+                        width={80}
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
+                      />
+                      <ChartTooltip
+                        content={
+                          <ChartTooltipContent
+                            formatter={(value, _name, props) => (
+                              <div className="flex flex-col gap-0.5">
+                                <span className="font-medium text-on-surface">
+                                  {String(props.payload?.nombre ?? "")}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {Number(value)} estudiante
+                                  {Number(value) !== 1 ? "s" : ""}
+                                </span>
+                              </div>
+                            )}
+                          />
+                        }
+                      />
+                      <Bar
+                        dataKey="estudiantes"
+                        fill="var(--color-chart-2)"
+                        radius={[0, 4, 4, 0]}
+                        maxBarSize={22}
+                      >
+                        {/* Etiqueta directa: el valor exacto sin depender del hover. */}
+                        <LabelList
+                          dataKey="estudiantes"
+                          position="right"
+                          className="fill-muted-foreground"
+                          fontSize={11}
                         />
-                      }
-                    />
-                    <Bar
-                      dataKey="ingreso"
-                      fill="var(--color-chart-3)"
-                      radius={[3, 3, 0, 0]}
-                    />
-                  </BarChart>
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </ChartContainer>
               )}
             </ChartCard>
 
-            {/* Pie: Course status */}
             <ChartCard
-              title="Estado de cursos"
-              description="Proporción de cursos activos e inactivos"
+              title="Reparto de estudiantes"
+              description="Estado de la matrícula sobre el total registrado."
             >
-              {estadoCursos.length === 0 ? (
-                <p className="font-sans text-sm text-muted-foreground text-center py-10">
-                  Sin datos
-                </p>
+              {isLoading ? (
+                <Skeleton className="h-[200px] w-full" />
               ) : (
-                <div className="h-[260px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={estadoCursos}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        dataKey="value"
-                        labelLine={false}
-                        label={PieLabel as never}
-                      >
-                        {estadoCursos.map((_, i) => (
-                          <Cell
-                            key={i}
-                            fill={
-                              PIE_COLORS_STATUS[i % PIE_COLORS_STATUS.length]
-                            }
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        formatter={(value, name) => [value ?? 0, name]}
-                        contentStyle={{
-                          fontFamily: "var(--font-sans)",
-                          fontSize: 12,
-                          borderRadius: 4,
-                          border: "none",
-                          boxShadow: "0 4px 16px oklch(0.15 0.012 8 / 0.12)",
-                        }}
-                      />
-                      <Legend
-                        iconType="circle"
-                        iconSize={8}
-                        wrapperStyle={{
-                          fontFamily: "var(--font-sans)",
-                          fontSize: 12,
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+                <BarraApilada
+                  segmentos={[
+                    {
+                      label: ESTADO_ESTUDIANTE_LABEL.activo,
+                      value: data?.estado_estudiantes?.activo ?? 0,
+                      slot: 1,
+                    },
+                    {
+                      label: ESTADO_ESTUDIANTE_LABEL.graduado,
+                      value: data?.estado_estudiantes?.graduado ?? 0,
+                      slot: 2,
+                    },
+                    {
+                      label: ESTADO_ESTUDIANTE_LABEL.inactivo,
+                      value: data?.estado_estudiantes?.inactivo ?? 0,
+                      slot: 3,
+                    },
+                  ]}
+                />
               )}
-            </ChartCard>
 
-            {/* Pie: Student status */}
-            <ChartCard
-              title="Estado de estudiantes"
-              description="Distribución de estudiantes por su estado actual"
-            >
-              {estadoEstudiantes.length === 0 ? (
-                <p className="font-sans text-sm text-muted-foreground text-center py-10">
-                  Sin datos
+              <div className="mt-8 border-t border-outline-variant pt-6">
+                <h3 className="mb-3 font-sans text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+                  Cursos
+                </h3>
+                {/* Dos clases no son una gráfica: son un número con contexto. */}
+                <p className="font-sans text-sm text-on-surface">
+                  <span className="font-serif text-3xl font-light tabular-nums">
+                    {cursosActivos}
+                  </span>
+                  <span className="ml-2 text-muted-foreground">
+                    de {totalCursos} {totalCursos === 1 ? "curso" : "cursos"}{" "}
+                    {totalCursos === 1 ? "está activo" : "están activos"}
+                  </span>
                 </p>
-              ) : (
-                <div className="h-[260px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={estadoEstudiantes}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        dataKey="value"
-                        labelLine={false}
-                        label={PieLabel as never}
-                      >
-                        {estadoEstudiantes.map((_, i) => (
-                          <Cell
-                            key={i}
-                            fill={
-                              PIE_COLORS_ESTADO[i % PIE_COLORS_ESTADO.length]
-                            }
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        formatter={(value, name) => [value ?? 0, name]}
-                        contentStyle={{
-                          fontFamily: "var(--font-sans)",
-                          fontSize: 12,
-                          borderRadius: 4,
-                          border: "none",
-                          boxShadow: "0 4px 16px oklch(0.15 0.012 8 / 0.12)",
-                        }}
-                      />
-                      <Legend
-                        iconType="circle"
-                        iconSize={8}
-                        wrapperStyle={{
-                          fontFamily: "var(--font-sans)",
-                          fontSize: 12,
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </ChartCard>
-          </div>
-        )}
-
-        {/* ── Payments by course table ── */}
-        {reporte && (reporte.pagos_por_curso?.length ?? 0) > 0 && (
-          <div className="mt-6">
-            <ChartCard
-              title="Pagos por curso"
-              description="Detalle de recaudación y estado de pagos en cada curso"
-            >
-              <div className="table-scroll">
-                <table className="w-full font-sans text-sm table-sticky-first [--table-sticky-bg:var(--surface-container-lowest)]">
-                  <thead>
-                    <tr className="border-b border-outline-variant">
-                      <th className="text-left py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Curso
-                      </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Precio
-                      </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Aprobados
-                      </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Pendientes
-                      </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Rechazados
-                      </th>
-                      <th className="text-right py-2 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Recaudado
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(reporte.pagos_por_curso ?? []).map((c) => (
-                      <tr
-                        key={c.curso_id}
-                        className="border-b border-outline-variant hover:bg-surface-container-low/50 transition-colors"
-                      >
-                        <td className="py-3 pr-4">
-                          <span className="font-mono text-xs text-primary/70 mr-2">
-                            {c.codigo}
-                          </span>
-                          <span className="text-on-surface">{c.nombre}</span>
-                        </td>
-                        <td className="py-3 pr-4 text-right text-muted-foreground tabular-nums">
-                          {fmt(c.precio)}
-                        </td>
-                        <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-success font-semibold">
-                            {c.aprobados}
-                          </span>
-                        </td>
-                        <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-warning font-semibold">
-                            {c.pendientes}
-                          </span>
-                        </td>
-                        <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-danger font-semibold">
-                            {c.rechazados}
-                          </span>
-                        </td>
-                        <td className="py-3 text-right tabular-nums font-semibold text-on-surface">
-                          {fmt(c.total_ingreso)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="pt-3 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold"
-                      >
-                        Total
-                      </td>
-                      <td className="pt-3 text-right font-bold text-on-surface tabular-nums">
-                        {fmt(
-                          (reporte.pagos_por_curso ?? []).reduce(
-                            (s, c) => s + c.total_ingreso,
-                            0,
-                          ),
-                        )}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
               </div>
             </ChartCard>
           </div>
-        )}
 
-        {/* ── Payments by user table ── */}
-        {reporte && (reporte.pagos_por_usuario?.length ?? 0) > 0 && (
-          <div className="mt-6">
-            <ChartCard
-              title="Pagos por usuario"
-              description="Historial de pagos y recaudación por cada estudiante"
-            >
-              <div className="table-scroll">
-                <table className="w-full font-sans text-sm table-sticky-first [--table-sticky-bg:var(--surface-container-lowest)]">
-                  <thead>
-                    <tr className="border-b border-outline-variant">
-                      <th className="text-left py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Usuario
-                      </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Total pagos
-                      </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Aprobados
-                      </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Pendientes
-                      </th>
-                      <th className="text-right py-2 pr-4 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Rechazados
-                      </th>
-                      <th className="text-right py-2 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                        Ingreso generado
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(reporte.pagos_por_usuario ?? []).map((u) => (
-                      <tr
-                        key={u.user_id}
-                        className="border-b border-outline-variant hover:bg-surface-container-low/50 transition-colors"
-                      >
-                        <td className="py-3 pr-4 text-on-surface font-medium">
-                          {u.nombre}
-                        </td>
-                        <td className="py-3 pr-4 text-right tabular-nums text-muted-foreground">
-                          {u.total_pagos}
-                        </td>
-                        <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-success font-semibold">
-                            {u.aprobados}
-                          </span>
-                        </td>
-                        <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-warning font-semibold">
-                            {u.pendientes}
-                          </span>
-                        </td>
-                        <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="text-danger font-semibold">
-                            {u.rechazados}
-                          </span>
-                        </td>
-                        <td className="py-3 text-right tabular-nums font-semibold text-on-surface">
-                          {fmt(u.total_ingreso)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </ChartCard>
-          </div>
-        )}
+          {/* ── Tablas: la vista de datos de las gráficas de arriba ── */}
+          <TablaPagosCurso data={data} loading={isLoading} />
+          <TablaPagosUsuario data={data} loading={isLoading} />
+        </>
+      )}
+    </PageShell>
+  );
+}
 
-        {/* Footer note */}
-        <div className="mt-8 flex items-center gap-2 text-muted-foreground">
-          <TrendingUp className="w-3 h-3" />
-          <span className="font-sans text-[10px] tracking-[0.15em] uppercase">
-            Datos en tiempo real
-          </span>
-        </div>
-      </div>
-    </div>
+function TablaPagosCurso({
+  data,
+  loading,
+}: {
+  data?: ReporteData;
+  loading: boolean;
+}) {
+  if (loading) return <Skeleton className="mb-6 h-48 w-full rounded-sm" />;
+  if (!data?.pagos_por_curso?.length) return null;
+
+  return (
+    <ChartCard
+      className="mb-6"
+      title="Pagos por curso"
+      description="Recaudación y estado de los pagos de cada curso."
+    >
+      <TableScroll>
+        <Table className="table-sticky-first [--table-sticky-bg:var(--surface-container-lowest)]">
+          <TableCaption>
+            Cursos con su precio, pagos aprobados, pendientes, rechazados e
+            ingreso total.
+          </TableCaption>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-0 py-2 pr-4">Curso</TableHead>
+              <TableHead className="px-0 py-2 pr-4 text-right">
+                Precio
+              </TableHead>
+              <TableHead className="px-0 py-2 pr-4 text-right">
+                Aprobados
+              </TableHead>
+              <TableHead className="px-0 py-2 pr-4 text-right">
+                Pendientes
+              </TableHead>
+              <TableHead className="px-0 py-2 pr-4 text-right">
+                Rechazados
+              </TableHead>
+              <TableHead className="px-0 py-2 text-right">Ingreso</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.pagos_por_curso.map((fila) => (
+              <TableRow key={fila.curso_id}>
+                <TableCell className="px-0 py-2.5 pr-4">
+                  <span className="font-medium">{fila.nombre}</span>
+                  <span className="ml-2 font-mono text-xs text-muted-foreground">
+                    {fila.codigo}
+                  </span>
+                </TableCell>
+                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums text-muted-foreground">
+                  {formatCurrency(fila.precio)}
+                </TableCell>
+                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
+                  {fila.aprobados}
+                </TableCell>
+                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
+                  {fila.pendientes}
+                </TableCell>
+                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
+                  {fila.rechazados}
+                </TableCell>
+                <TableCell className="px-0 py-2.5 text-right font-semibold tabular-nums">
+                  {formatCurrency(fila.total_ingreso)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableScroll>
+    </ChartCard>
+  );
+}
+
+function TablaPagosUsuario({
+  data,
+  loading,
+}: {
+  data?: ReporteData;
+  loading: boolean;
+}) {
+  if (loading) return <Skeleton className="h-48 w-full rounded-sm" />;
+  if (!data?.pagos_por_usuario?.length) return null;
+
+  return (
+    <ChartCard
+      title="Pagos por estudiante"
+      description="Quién ha pagado, cuánto y en qué estado quedó."
+    >
+      <TableScroll>
+        <Table className="table-sticky-first [--table-sticky-bg:var(--surface-container-lowest)]">
+          <TableCaption>
+            Estudiantes con su número de pagos por estado y el ingreso aportado.
+          </TableCaption>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-0 py-2 pr-4">Estudiante</TableHead>
+              <TableHead className="px-0 py-2 pr-4 text-right">Pagos</TableHead>
+              <TableHead className="px-0 py-2 pr-4 text-right">
+                Aprobados
+              </TableHead>
+              <TableHead className="px-0 py-2 pr-4 text-right">
+                Pendientes
+              </TableHead>
+              <TableHead className="px-0 py-2 text-right">Ingreso</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.pagos_por_usuario.slice(0, 20).map((fila) => (
+              <TableRow key={fila.user_id}>
+                <TableCell className="px-0 py-2.5 pr-4 font-medium">
+                  {fila.nombre}
+                </TableCell>
+                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
+                  {fila.total_pagos}
+                </TableCell>
+                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
+                  {fila.aprobados}
+                </TableCell>
+                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
+                  {fila.pendientes}
+                </TableCell>
+                <TableCell className="px-0 py-2.5 text-right font-semibold tabular-nums">
+                  {formatCurrency(fila.total_ingreso)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableScroll>
+    </ChartCard>
   );
 }

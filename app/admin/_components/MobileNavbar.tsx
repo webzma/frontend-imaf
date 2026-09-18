@@ -1,30 +1,26 @@
 "use client";
 
 import {
-  LayoutDashboard,
-  Users,
+  Bell,
   BookOpen,
   CreditCard,
-  Bell,
+  LayoutDashboard,
+  Users,
 } from "lucide-react";
 import { MobileNavbar, type MobileNavItem } from "@/components/mobile-navbar";
+import { NOTIF_COUNT_ADMIN_KEY } from "@/lib/query-keys";
 
 /**
  * Las cinco tareas más frecuentes. El resto del panel (Instructores, Horario,
- * Reportes) sigue accesible desde el menú lateral, que en móvil se abre con el
- * botón de la cabecera.
+ * Reportes, Catálogos) sigue accesible desde el menú lateral, que en móvil se
+ * abre con el botón de la cabecera.
  */
 const items: MobileNavItem[] = [
   { label: "Inicio", href: "/admin", icon: LayoutDashboard, exact: true },
   { label: "Estudiantes", href: "/admin/estudiantes", icon: Users },
   { label: "Cursos", href: "/admin/cursos", icon: BookOpen },
   { label: "Pagos", href: "/admin/pagos", icon: CreditCard },
-  {
-    label: "Avisos",
-    href: "/admin/notificaciones",
-    icon: Bell,
-    badge: true,
-  },
+  { label: "Avisos", href: "/admin/notificaciones", icon: Bell, badge: true },
 ];
 
 export default function AdminMobileNavbar() {
@@ -32,7 +28,7 @@ export default function AdminMobileNavbar() {
     <MobileNavbar
       items={items}
       countUrl={`${process.env.API_URL}api/admin/notificaciones/count`}
-      countQueryKey={["admin", "notificaciones", "count"]}
+      countQueryKey={NOTIF_COUNT_ADMIN_KEY}
     />
   );
 }

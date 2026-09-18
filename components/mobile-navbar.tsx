@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getToken } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 export interface MobileNavItem {
@@ -21,12 +22,6 @@ interface MobileNavbarProps {
   /** Endpoint que devuelve `{ unread_count }`. Si se omite, no hay punto. */
   countUrl?: string;
   countQueryKey?: readonly unknown[];
-}
-
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : "";
 }
 
 /**
@@ -54,7 +49,7 @@ export function MobileNavbar({
     queryFn: async () => {
       const res = await fetch(countUrl!, {
         headers: {
-          Authorization: `Bearer ${getCookie("token")}`,
+          Authorization: `Bearer ${getToken()}`,
           Accept: "application/json",
         },
       });

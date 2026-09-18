@@ -74,8 +74,34 @@ mismo rosa y el botón de eliminar se confundía con el de guardar.
 
 ### Gráficas
 
-`chart-1…5` son cinco **matices distintos** (magenta, azul, verde, naranja,
-morado), todos ≥4:1 sobre tarjeta blanca. No son cinco tintes del mismo rosa.
+`chart-1…5` son cinco **matices distintos en orden fijo**: magenta, azul,
+naranja, verde, morado. Los valores salen de un validador de paletas, no del
+ojo, y cumplen cinco comprobaciones en ambos modos: banda de luminosidad, suelo
+de croma, separación bajo daltonismo entre pares contiguos (ΔE ≥ 8 en OKLab
+×100), suelo de visión normal y contraste ≥ 3:1 sobre la superficie.
+
+Tres reglas que se derivan de ahí:
+
+1. **El orden no se cicla ni se reordena.** Una serie conserva su tono aunque un
+   filtro cambie cuántas series hay. El verde va detrás del naranja porque
+   contiguos se confundían bajo deuteranopia.
+2. **Como mucho tres series a la vez.** Los tres primeros tonos son seguros
+   comparando cualquier par entre sí; a partir de la cuarta serie hay pares que
+   no separan, así que se divide en varias gráficas en vez de añadir colores.
+3. **El modo oscuro tiene sus propios pasos, no el reflejo de los claros.** Los
+   pastel que había antes (`#ffb1c5`, `#6fd39b`…) quedaban fuera de la banda de
+   luminosidad del modo oscuro y el rosa caía bajo el suelo de croma: se leía
+   casi gris.
+
+| Uso                         | Forma                                           |
+| --------------------------- | ----------------------------------------------- |
+| Comparar magnitudes         | barra (horizontal si los nombres son largos)    |
+| Parte de un todo, ≤3 clases | barra apilada horizontal con leyenda y cifras   |
+| Dos clases                  | no es una gráfica: es un número con su contexto |
+| Más de ~7 clases            | una tabla                                       |
+
+Nunca una tarta con el porcentaje escrito en blanco encima: obliga a comparar
+ángulos y el texto no tiene contraste garantizado sobre un color de serie.
 
 ---
 
@@ -154,17 +180,64 @@ distinguen por el icono (WCAG 1.4.1).
 <Badge variant="aprobado">Aprobado</Badge>     {/* success + check */}
 ```
 
-### Tablas
+### Tablas ([`components/data-table.tsx`](components/data-table.tsx))
 
-Por encima de `md` son tablas normales. Por debajo, `.table-scroll` +
-`.table-sticky-first`: la primera columna (la que identifica la fila) queda
-fija mientras el resto se desplaza en horizontal.
+Una lista del panel **no se escribe a mano**. `<DataTable>` recibe una sola
+definición de columnas y genera con ella la tabla de escritorio, las tarjetas de
+móvil, el esqueleto de carga, el estado vacío, la ordenación y la paginación.
+Escribir las dos formas por separado era lo que hacía que divergieran en qué
+campos mostraba cada una.
 
 ```tsx
-<div className="table-scroll">
-  <table className="w-full table-sticky-first">…</table>
-</div>
+const columnas: Column<Estudiante>[] = [
+  { id: "nombre", header: "Estudiante", sortKey: "nombre", primary: true,
+    mobileLabel: null, cell: (e) => <Identidad estudiante={e} /> },
+  { id: "estado", header: "Estado", aside: true, cell: (e) => <Badge … /> },
+];
 ```
+
+- `primary` — identidad de la fila; encabeza la tarjeta en móvil.
+- `aside` — se ancla a la derecha de esa cabecera (estados, badges).
+- `mobileLabel: null` — la columna no se repite como par dato/valor.
+- `sortKey` — clave que entiende el backend; sin ella la columna no ordena.
+
+Por debajo de `md` sigue habiendo `.table-scroll` + `.table-sticky-first` para
+las tablas que se pintan fuera del componente.
+
+### Listas de recursos ([`hooks/use-resource-list.ts`](hooks/use-resource-list.ts))
+
+Buscar, filtrar, ordenar y paginar **los resuelve el servidor**, y el estado
+vive en la URL. Filtrar en memoria sobre la página cargada significaba que
+buscar a alguien de la página 4 devolvía "sin resultados", y guardarlo en
+`useState` significaba que recargar o compartir el enlace perdía el contexto.
+
+```tsx
+const lista = useResourceList<Estudiante>({
+  resource: "estudiantes",
+  path: "api/admin/estudiantes",
+  defaultFilters: { estado: TODOS, curso_id: TODOS },
+  defaultSort: { column: "nombre", direction: "asc" },
+});
+```
+
+Un filtro en `TODOS` no viaja como parámetro; cambiar cualquier filtro vuelve a
+la página 1; la búsqueda lleva retardo para no consultar por pulsación.
+
+### Formularios largos ([`components/form-panel.tsx`](components/form-panel.tsx))
+
+Más de seis campos van en `<FormPanel>`, un panel lateral con el pie fijo, no en
+un modal centrado con `overflow-y-auto`: ahí el botón de guardar se iba con el
+scroll y un error de validación arriba quedaba fuera de la vista. Los campos se
+envuelven en `<Field>`, que genera el `id`, asocia la etiqueta y engancha el
+mensaje de error con `aria-describedby`.
+
+### Confirmaciones ([`components/confirm-dialog.tsx`](components/confirm-dialog.tsx))
+
+Toda acción sin vuelta atrás pasa por `<ConfirmDialog>`, que es un `AlertDialog`
+de Radix: obliga a un botón de cancelar, devuelve el foco a él al abrir y no se
+cierra al pulsar fuera. **Nunca `confirm()` del navegador** y **nunca un diálogo
+dentro de otro**: dos trampas de foco apiladas dejan el foco suelto al cerrar la
+interior.
 
 ---
 
@@ -173,7 +246,15 @@ fija mientras el resto se desplaza en horizontal.
 - **Foco visible siempre**: `focus-visible:ring-2 focus-visible:ring-ring
 focus-visible:ring-offset-2`. El anillo es opaco; nunca `ring-ring/40`.
 - **Formularios**: `autoComplete` en todo campo de identidad o credencial.
-- **Errores**: dentro de un contenedor con `role="alert"` para que se anuncien.
+- **Errores**: nunca un `<div>` de color. `<Alert>` para un error de formulario
+  y `<ErrorState>` para un fallo de carga; los dos llevan su `role` dentro, así
+  que un error nuevo nace anunciándose y el de carga trae su botón de reintentar.
+- **Cambios silenciosos**: el conteo de resultados de una lista va en
+  `aria-live="polite"`. Al filtrar, "24 encontrados" cambiaba sin decir nada.
+- **Tablas**: `<th scope="col">` y un `<caption>` (puede ir en `sr-only`). Sin
+  ellos la tabla se lee como una lista plana de valores sueltos.
+- **Nada pulsable que no sea un control**: un `<div onClick>` no se alcanza con
+  teclado ni se anuncia. Tarjeta que abre algo → `<button>` o `<Link>`.
 - **Iconos sin texto**: `aria-label`. Textos `sr-only` en español.
 - **Movimiento**: `globals.css` anula transformaciones y acorta transiciones
   bajo `prefers-reduced-motion: reduce`.
@@ -191,3 +272,12 @@ focus-visible:ring-offset-2`. El anillo es opaco; nunca `ring-ring/40`.
 - ❌ Fotos de stock genéricas. Mejor tipografía que una imagen que no es del
   instituto.
 - ❌ `transition-all` — anima propiedades de layout. Enumera las propiedades.
+- ❌ Contar `data.length` de una respuesta paginada. Son diez registros, no el
+  total: para eso están los endpoints `…/resumen` y `/api/admin/dashboard`.
+- ❌ Pedir un catálogo para un `<Select>` sin `per_page`. Usa `fetchAll`, o el
+  desplegable se queda en diez opciones.
+- ❌ Copiar `getCookie` o `getAuthHeaders` en una pantalla. Todo pasa por
+  [`lib/api-client.ts`](lib/api-client.ts), que además cierra la sesión en un 401
+  en vez de dejar la vista vacía.
+- ❌ Tartas con el porcentaje en blanco encima, y cualquier color de gráfica
+  escrito a mano (`oklch(...)`) fuera de los tokens `chart-*`.

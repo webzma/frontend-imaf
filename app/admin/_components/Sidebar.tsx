@@ -1,23 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import {
-  LayoutDashboard,
-  Users,
-  GraduationCap,
-  BookOpen,
-  LogOut,
-  BarChart2,
-  Moon,
-  Sun,
-  CreditCard,
-  Bell,
-  X,
-  CalendarDays,
-} from "lucide-react";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { X } from "lucide-react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -32,151 +19,31 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useTheme } from "@/hooks/use-theme";
+import { Avatar } from "@/components/avatar";
+import { ADMIN_NAV } from "@/lib/admin-nav";
+import { useAdminProfile } from "@/hooks/use-admin-profile";
+import { useNotifCount } from "@/hooks/use-notif-count";
 import logoImaf from "@/public/logo-imaf.webp";
-import Image from "next/image";
-import { clearSession } from "@/lib/session";
-
-const navItems = [
-  {
-    section: "General",
-    items: [
-      {
-        label: "Inicio",
-        href: "/admin",
-        icon: LayoutDashboard,
-        exact: true,
-      },
-    ],
-  },
-  {
-    section: "Gestión",
-    items: [
-      {
-        label: "Estudiantes",
-        href: "/admin/estudiantes",
-        icon: Users,
-        exact: false,
-      },
-      {
-        label: "Instructores",
-        href: "/admin/instructores",
-        icon: GraduationCap,
-        exact: false,
-      },
-      { label: "Cursos", href: "/admin/cursos", icon: BookOpen, exact: false },
-      {
-        label: "Horario",
-        href: "/admin/horario",
-        icon: CalendarDays,
-        exact: false,
-      },
-      { label: "Pagos", href: "/admin/pagos", icon: CreditCard, exact: false },
-      {
-        label: "Notificaciones",
-        href: "/admin/notificaciones",
-        icon: Bell,
-        exact: false,
-      },
-    ],
-  },
-  {
-    section: "Analítica",
-    items: [
-      {
-        label: "Reportes",
-        href: "/admin/reportes",
-        icon: BarChart2,
-        exact: false,
-      },
-    ],
-  },
-  {
-    section: "Mi Cuenta",
-    items: [],
-  },
-];
-
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : "";
-}
-
-const NOTIF_COUNT_KEY = ["admin", "notificaciones", "count"] as const;
-
-async function fetchNotificationCount(): Promise<number> {
-  const res = await fetch(
-    `${process.env.API_URL}api/admin/notificaciones/count`,
-    {
-      headers: {
-        Authorization: `Bearer ${getCookie("token")}`,
-        Accept: "application/json",
-      },
-    },
-  );
-  const data = await res.json();
-  return data.unread_count || 0;
-}
 
 export default function AppSidebar() {
   const pathname = usePathname();
-  const { push } = useRouter();
   const { toggleSidebar, state, isMobile } = useSidebar();
   const collapsed = state === "collapsed";
-  const { dark, toggle: toggleDark } = useTheme();
-  const queryClient = useQueryClient();
+  const unreadCount = useNotifCount();
+  const { data: perfil } = useAdminProfile();
 
-  const { data: unreadCount = 0 } = useQuery({
-    queryKey: NOTIF_COUNT_KEY,
-    queryFn: fetchNotificationCount,
-    refetchInterval: 30000, // Poll every 30 seconds
-  });
+  const nombre = perfil?.name ?? "Administrador";
+  const email = perfil?.email ?? "";
 
-  // Sync the unread count when a notification is read elsewhere
-  useEffect(() => {
-    const handleNotificationRead = (event: CustomEvent) => {
-      queryClient.setQueryData(NOTIF_COUNT_KEY, event.detail.count);
-    };
-
-    window.addEventListener(
-      "notificationRead",
-      handleNotificationRead as EventListener,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "notificationRead",
-        handleNotificationRead as EventListener,
-      );
-    };
-  }, [queryClient]);
-
-  const isActive = (href: string, exact: boolean) =>
-    exact ? pathname === href : pathname.startsWith(href);
-
-  const handleLogout = async () => {
-    try {
-      await fetch(`${process.env.API_URL}api/logout`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${getCookie("token")}`,
-          Accept: "application/json",
-        },
-      });
-    } finally {
-      clearSession();
-      push("/login");
-    }
-  };
+  const isActive = (href: string, exact?: boolean) =>
+    exact
+      ? pathname === href
+      : pathname === href || pathname.startsWith(`${href}/`);
 
   const handleLinkClick = () => {
-    // Close sidebar only on mobile when clicking a link
     if (isMobile && state === "expanded") {
-      // Small delay to ensure navigation starts first
-      setTimeout(() => {
-        toggleSidebar();
-      }, 50);
+      // Pequeño retraso para que la navegación arranque antes de cerrar.
+      setTimeout(() => toggleSidebar(), 50);
     }
   };
 
@@ -185,47 +52,48 @@ export default function AppSidebar() {
       collapsible="icon"
       className="transition-transform duration-300 ease-in-out md:transition-none"
     >
-      {/* Logo */}
-      <SidebarHeader className="border-b border-sidebar-border p-5 relative">
+      <SidebarHeader className="relative border-b border-sidebar-border p-5">
         <div className="flex items-center gap-3">
           <div
-            className={`size-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}
+            className={`size-8 shrink-0 flex items-center justify-center ambient-shadow transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}
           >
             <Image src={logoImaf} alt="IMAF" width={28} height={28} />
           </div>
           {!collapsed && (
             <div>
-              <span className="font-sans font-semibold text-sidebar-foreground tracking-tight">
+              <span className="font-sans font-semibold tracking-tight text-sidebar-foreground">
                 IMAF
               </span>
-              <p className="font-sans text-[10px] text-sidebar-foreground/70 -mt-0.5 tracking-[0.2em] uppercase">
+              <p className="-mt-0.5 font-sans text-[10px] tracking-[0.2em] uppercase text-sidebar-foreground/70">
                 Admin
               </p>
             </div>
           )}
         </div>
-        {/* Close button for mobile */}
+
         {isMobile && state === "expanded" && (
           <button
             onClick={toggleSidebar}
-            className="absolute top-5 right-5 p-1.5 rounded-sm hover:bg-sidebar-accent/50 transition-colors md:hidden"
-            aria-label="Cerrar sidebar"
+            className="absolute top-5 right-5 rounded-sm p-1.5 transition-colors hover:bg-sidebar-accent/50 md:hidden"
+            aria-label="Cerrar menú lateral"
           >
             <X className="size-4 text-sidebar-foreground" />
           </button>
         )}
       </SidebarHeader>
 
-      {/* Navigation */}
       <SidebarContent>
-        {navItems.map((group) => (
-          <SidebarGroup key={group.section}>
+        {/* Los grupos salen de `ADMIN_NAV`, y solo los que tienen elementos:
+            antes había un grupo "Mi Cuenta" vacío que pintaba su etiqueta
+            flotando sobre la nada. */}
+        {ADMIN_NAV.filter((grupo) => grupo.items.length > 0).map((grupo) => (
+          <SidebarGroup key={grupo.section}>
             <SidebarGroupLabel className="font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-sidebar-foreground/70">
-              {group.section}
+              {grupo.section}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) => (
+                {grupo.items.map((item) => (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
@@ -235,8 +103,13 @@ export default function AppSidebar() {
                       <Link href={item.href} onClick={handleLinkClick}>
                         <item.icon />
                         <span>{item.label}</span>
-                        {item.label === "Notificaciones" && unreadCount > 0 && (
-                          <span className="size-2 bg-primary rounded-full ml-auto" />
+                        {item.badge && unreadCount > 0 && (
+                          <>
+                            <span className="ml-auto size-2 rounded-full bg-primary" />
+                            <span className="sr-only">
+                              {unreadCount} sin leer
+                            </span>
+                          </>
                         )}
                       </Link>
                     </SidebarMenuButton>
@@ -248,42 +121,26 @@ export default function AppSidebar() {
         ))}
       </SidebarContent>
 
-      {/* Bottom - user + logout */}
+      {/* El pie identifica a quien tiene la sesión abierta y lleva a su cuenta.
+          Tema y cierre de sesión viven ahora en el menú de la cabecera, que se
+          alcanza también con la barra colapsada. */}
       <SidebarFooter className="border-t border-sidebar-border">
-        {!collapsed && (
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-sm bg-sidebar-accent/40">
-            <div className="size-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-              <span className="text-xs font-bold text-primary">A</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-sans text-xs font-semibold text-sidebar-foreground truncate">
-                Administrador
-              </p>
-              <p className="font-sans text-[10px] text-sidebar-foreground/70 truncate">
-                admin
-              </p>
-            </div>
-          </div>
-        )}
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={toggleDark}
-              tooltip={dark ? "Modo claro" : "Modo oscuro"}
-              className="text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-            >
-              {dark ? <Sun /> : <Moon />}
-              <span>{dark ? "Modo claro" : "Modo oscuro"}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={handleLogout}
-              tooltip="Cerrar sesión"
-              className="text-sidebar-foreground/50 hover:text-danger hover:bg-danger-container"
-            >
-              <LogOut />
-              <span>Cerrar sesión</span>
+            <SidebarMenuButton asChild tooltip={nombre} className="h-auto py-2">
+              <Link href="/admin/perfil" onClick={handleLinkClick}>
+                <Avatar name={nombre} size={7} tone="sidebar" />
+                <span className="flex min-w-0 flex-col">
+                  <span className="truncate font-sans text-xs font-semibold text-sidebar-foreground">
+                    {nombre}
+                  </span>
+                  {email && (
+                    <span className="truncate font-sans text-[10px] text-sidebar-foreground/70">
+                      {email}
+                    </span>
+                  )}
+                </span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -1,16 +1,9 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import CatalogoPage from "@/components/catalogo-page";
-import { FileText } from "lucide-react";
-
-export default function TipoContratosPage() {
-  return (
-    <CatalogoPage
-      title="Tipos de Contrato"
-      subtitle="Gestiona los tipos de contrato disponibles para asignar a instructores."
-      singular="tipo de contrato"
-      apiSlug="tipo-contratos"
-      icon={FileText}
-    />
-  );
+/**
+ * Ruta heredada. Los cuatro catálogos viven ahora en una sola pantalla con
+ * pestañas; se mantiene la redirección para no romper los enlaces guardados.
+ */
+export default function TipoContratosRedirect() {
+  redirect("/admin/catalogos?tipo=tipo-contratos");
 }

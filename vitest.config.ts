@@ -8,6 +8,10 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    // `next.config.ts` inyecta `API_URL` al compilar, pero vitest no pasa por
+    // Next: sin esto las pantallas construían URLs como "undefinedapi/login" y
+    // cinco tests fallaban por la configuración, no por el código.
+    env: { API_URL: "http://localhost:8000/" },
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: ["**/*.{test,spec}.{ts,tsx}"],

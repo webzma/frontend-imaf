@@ -1,16 +1,9 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import CatalogoPage from "@/components/catalogo-page";
-import { Award } from "lucide-react";
-
-export default function TitulosPage() {
-  return (
-    <CatalogoPage
-      title="Títulos"
-      subtitle="Gestiona los títulos académicos disponibles para asignar a instructores."
-      singular="título"
-      apiSlug="titulos"
-      icon={Award}
-    />
-  );
+/**
+ * Ruta heredada. Los cuatro catálogos viven ahora en una sola pantalla con
+ * pestañas; se mantiene la redirección para no romper los enlaces guardados.
+ */
+export default function TitulosRedirect() {
+  redirect("/admin/catalogos?tipo=titulos");
 }
