@@ -4,6 +4,8 @@ import { PageHeader } from "@/components/page-header";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatRelativeTime } from "@/lib/format";
+import { clearSession } from "@/lib/session";
+import { toast } from "sonner";
 import { Bell, Check, Clock, ArrowUpRight, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,7 +24,7 @@ interface Notification {
 function getCookie(name: string): string {
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : "";
+  return match ? decodeURIComponent(match[2]) : "";
 }
 
 export default function NotificacionesPage() {
@@ -38,12 +40,25 @@ export default function NotificacionesPage() {
         Accept: "application/json",
       },
     })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) {
+          if (r.status === 401) {
+            clearSession();
+            window.location.href = "/login";
+            return null;
+          }
+          throw new Error("Error al cargar notificaciones");
+        }
+        return r.json();
+      })
       .then((data) => {
-        setNotifications(data.data || []);
+        if (data) {
+          setNotifications(data.data || []);
+        }
         setLoading(false);
       })
       .catch(() => {
+        toast.error("Error al cargar notificaciones");
         setLoading(false);
       });
   };
@@ -65,6 +80,12 @@ export default function NotificacionesPage() {
         },
       },
     )
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error("Error al marcar la notificación");
+        }
+        return r.json();
+      })
       .then(() => {
         setNotifications((prev) =>
           prev.map((n) =>
@@ -98,6 +119,12 @@ export default function NotificacionesPage() {
         Accept: "application/json",
       },
     })
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error("Error al marcar las notificaciones");
+        }
+        return r.json();
+      })
       .then(() => {
         setNotifications((prev) =>
           prev.map((n) => ({ ...n, read_at: new Date().toISOString() })),
