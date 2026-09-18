@@ -57,7 +57,6 @@ export default function CatalogoPage({
 
   const listaKey = adminKeys.opciones(slug);
 
-<<<<<<< HEAD
   const lista = useQuery({
     queryKey: listaKey,
     queryFn: async () => {
@@ -67,12 +66,6 @@ export default function CatalogoPage({
       return Array.isArray(body) ? body : (body.data ?? []);
     },
   });
-=======
-  useEffect(() => {
-    fetchItems();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
->>>>>>> 7c38a6f3c069ff25d16a29929de28d808107a329
 
   const items = lista.data ?? [];
 
