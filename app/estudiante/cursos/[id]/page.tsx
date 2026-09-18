@@ -136,7 +136,7 @@ const METODO_LABELS: Record<MetodoPago, string> = {
 function getCookie(name: string): string {
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : "";
+  return match ? decodeURIComponent(match[2]) : "";
 }
 
 function getAuthHeaders() {
