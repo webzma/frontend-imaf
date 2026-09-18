@@ -3,7 +3,9 @@
 import { PageHeader } from "@/components/page-header";
 import { useState, useEffect } from "react";
 import { LOCALE, formatDate } from "@/lib/format";
+import { clearSession } from "@/lib/session";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +52,7 @@ interface EstudiantePerfil {
 function getCookie(name: string): string {
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : "";
+  return match ? decodeURIComponent(match[2]) : "";
 }
 
 function getGreeting() {
@@ -61,6 +63,7 @@ function getGreeting() {
 }
 
 export default function EstudianteDashboard() {
+  const router = useRouter();
   const [perfil, setPerfil] = useState<EstudiantePerfil | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -71,13 +74,23 @@ export default function EstudianteDashboard() {
         Accept: "application/json",
       },
     })
-      .then((r) => r.json())
-      .then(setPerfil)
+      .then((r) => {
+        if (!r.ok) {
+          if (r.status === 401) {
+            clearSession();
+            window.location.href = "/login";
+            return null;
+          }
+          throw new Error("Error al cargar el perfil");
+        }
+        return r.json();
+      })
+      .then((data) => data && setPerfil(data))
       .catch(() => toast.error("Error al cargar el perfil"))
       .finally(() => setLoading(false));
   }, []);
 
-  const firstName = perfil?.nombre.split(" ")[0] ?? "";
+  const firstName = perfil?.nombre?.split(" ")[0] ?? "";
   const today = new Date().toLocaleDateString(LOCALE, {
     weekday: "long",
     day: "numeric",
@@ -131,7 +144,7 @@ export default function EstudianteDashboard() {
                   }
                   className="px-2.5 py-1"
                 >
-                  {perfil
+                  {perfil?.estado
                     ? perfil.estado.charAt(0).toUpperCase() +
                       perfil.estado.slice(1)
                     : "—"}
@@ -251,12 +264,19 @@ export default function EstudianteDashboard() {
                       No estás inscrito en ningún curso actualmente.
                     </p>
                   </div>
-                  <Link
-                    href="/estudiante/cursos"
-                    className="font-sans text-xs font-medium text-primary hover:underline underline-offset-4 mt-1"
+                  <span
+                    role="link"
+                    tabIndex={0}
+                    onClick={() => router.push("/estudiante/cursos")}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        router.push("/estudiante/cursos");
+                      }
+                    }}
+                    className="font-sans text-xs font-medium text-primary hover:underline underline-offset-4 mt-1 cursor-pointer"
                   >
                     Explorar catálogo →
-                  </Link>
+                  </span>
                 </div>
               )}
             </div>

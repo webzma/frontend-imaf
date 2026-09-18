@@ -87,7 +87,7 @@ const navItems = [
 function getCookie(name: string): string {
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : "";
+  return match ? decodeURIComponent(match[2]) : "";
 }
 
 const PROFILE_KEY = PERFIL_ESTUDIANTE_KEY;
@@ -108,6 +108,7 @@ async function fetchProfile(): Promise<{
   const res = await fetch(`${process.env.API_URL}api/estudiante/perfil`, {
     headers: authHeaders(),
   });
+  handleAuthError(res);
   const data = await res.json();
   return {
     nombre: data?.nombre ?? null,
@@ -121,8 +122,18 @@ async function fetchNotificationCount(): Promise<number> {
     `${process.env.API_URL}api/estudiante/notificaciones/count`,
     { headers: authHeaders() },
   );
+  handleAuthError(res);
   const data = await res.json();
   return data.unread_count || 0;
+}
+
+function handleAuthError(res: Response): void {
+  if (res.ok) return;
+  if (res.status === 401) {
+    clearSession();
+    window.location.href = "/login";
+  }
+  throw new Error("Error al consultar el servidor");
 }
 
 export default function EstudianteSidebar() {
