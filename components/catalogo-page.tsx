@@ -16,14 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Plus,
-  Loader2,
-  Pencil,
-  Trash2,
-  SearchX,
-  type LucideIcon,
-} from "lucide-react";
+import { Plus, Loader2, Pencil, Trash2, type LucideIcon } from "lucide-react";
 
 /* ── Helpers ── */
 
@@ -115,6 +108,7 @@ export default function CatalogoPage({
 
   useEffect(() => {
     fetchItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Create ──
