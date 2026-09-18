@@ -26,6 +26,7 @@ import { registroSchema, type RegistroForm } from "@/lib/schemas";
 import { CedulaInput } from "@/components/cedula-input";
 import logoImaf from "@/public/logo-imaf.webp";
 import municipios from "@/data/municipios.json";
+import { dashboardPath, setSession } from "@/lib/session";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -82,12 +83,8 @@ export default function RegisterPage() {
       }
 
       const role = body.user.role;
-      document.cookie = `role=${role}; path=/; SameSite=Lax`;
-      document.cookie = `token=${body.token}; path=/; SameSite=Lax`;
-
-      if (role === "admin") router.push("/admin");
-      else if (role === "profesor") router.push("/instructor");
-      else router.push("/estudiante");
+      setSession(body.token, role);
+      router.push(dashboardPath(role));
     } catch {
       setError("Error al conectar con el servidor.");
     } finally {

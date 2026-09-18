@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { loginSchema, type LoginForm } from "@/lib/schemas";
 import logoImaf from "@/public/logo-imaf.webp";
+import { dashboardPath, setSession } from "@/lib/session";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,11 +43,8 @@ export default function LoginPage() {
         return;
       }
       const role = body.user.role;
-      document.cookie = `role=${role}; path=/; SameSite=Lax`;
-      document.cookie = `token=${body.token}; path=/; SameSite=Lax`;
-      if (role === "admin") router.push("/admin");
-      else if (role === "profesor") router.push("/instructor");
-      else router.push("/estudiante");
+      setSession(body.token, role);
+      router.push(dashboardPath(role));
     } catch {
       setError("Error al conectar con el servidor.");
     } finally {

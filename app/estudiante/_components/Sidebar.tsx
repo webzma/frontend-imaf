@@ -34,6 +34,7 @@ import { Avatar } from "@/components/avatar";
 import { PERFIL_ESTUDIANTE_KEY } from "@/lib/query-keys";
 import logoImaf from "@/public/logo-imaf.webp";
 import Image from "next/image";
+import { clearSession } from "@/lib/session";
 
 const navItems = [
   {
@@ -177,8 +178,7 @@ export default function EstudianteSidebar() {
         },
       });
     } finally {
-      document.cookie = "token=; path=/; max-age=0";
-      document.cookie = "role=; path=/; max-age=0";
+      clearSession();
       push("/login");
     }
   };
