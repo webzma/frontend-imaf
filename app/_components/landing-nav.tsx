@@ -19,9 +19,9 @@ export function LandingNav() {
     <nav className="bg-surface-container-lowest/85 glass sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-16 py-5">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-6">
             <Image src={LogoImaf} alt="" width={30} height={30} />
-            <span className="font-serif text-2xl font-semibold text-on-surface">
+            <span className="font-serif text-2xl font-semibold text-on-surface hidden md:inline">
               IMAF
             </span>
           </Link>
