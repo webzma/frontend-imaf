@@ -6,6 +6,7 @@ import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "sonner";
 import Providers from "./providers";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { ThemeHandler } from "@/components/theme-handler";
 
 const cormorantGaramond = Cormorant_Garamond({
   subsets: ["latin"],
@@ -49,6 +50,7 @@ export default function RootLayout({
           height={2}
         />
         <Toaster richColors position="bottom-right" />
+        <ThemeHandler />
         <Providers>{children}</Providers>
       </body>
     </html>
