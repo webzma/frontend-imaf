@@ -6,7 +6,7 @@ export const THEME_STORAGE_KEY = "theme";
  * tema claro en cada carga, y las páginas donde no monta el sidebar (landing,
  * login, register) se quedarían siempre en claro.
  */
-export const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem("${THEME_STORAGE_KEY}");var d=t?t==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
+export const THEME_INIT_SCRIPT = `(function(){try{if(window.location.pathname==='/'){document.documentElement.classList.remove('dark');return;}var t=localStorage.getItem("${THEME_STORAGE_KEY}");var d=t?t==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
 
 export function getStoredTheme(): "light" | "dark" {
   if (typeof document === "undefined") return "light";
