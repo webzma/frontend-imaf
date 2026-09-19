@@ -18,7 +18,7 @@ export function ThemeHandler() {
           ? t === "dark"
           : window.matchMedia("(prefers-color-scheme: dark)").matches;
         document.documentElement.classList.toggle("dark", d);
-      } catch (e) {
+      } catch {
         // En caso de error (ej. modo incógnito), por defecto a claro o sistema
       }
     }
