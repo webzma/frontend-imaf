@@ -49,7 +49,13 @@ export function StatRow({
   }[columns];
 
   return (
-    <div className={cn("grid grid-cols-1 gap-4", rejilla, className)}>
+    <div
+      className={cn(
+        "grid max-sm:grid-cols-3 grid-cols-1 gap-2 sm:gap-4",
+        rejilla,
+        className,
+      )}
+    >
       {stats.map((stat) => (
         <StatCard key={stat.label} stat={stat} loading={loading} />
       ))}
@@ -62,14 +68,14 @@ function StatCard({ stat, loading }: { stat: Stat; loading: boolean }) {
 
   const contenido = (
     <>
-      <div className="mb-5 flex items-start justify-between">
+      <div className="max-sm:mb-2 mb-5 flex items-start justify-between">
         <div
           className={cn(
-            "flex size-10 items-center justify-center rounded-md",
+            "flex max-sm:size-7 size-10 items-center justify-center rounded-md",
             TONOS[stat.tone ?? "primary"],
           )}
         >
-          <Icon aria-hidden="true" className="size-5" />
+          <Icon aria-hidden="true" className="max-sm:size-3.5 size-5" />
         </div>
         {stat.href && (
           <ArrowUpRight
@@ -79,13 +85,13 @@ function StatCard({ stat, loading }: { stat: Stat; loading: boolean }) {
         )}
       </div>
       {loading ? (
-        <Skeleton className="mb-1 h-12 w-20" />
+        <Skeleton className="mb-1 max-sm:h-7 max-sm:w-14 h-12 w-20" />
       ) : (
-        <p className="mb-1 font-sans text-5xl font-light tabular-nums tight-tracking text-on-surface">
+        <p className="max-sm:mb-0.5 mb-1 font-sans max-sm:text-2xl text-5xl font-light tabular-nums tight-tracking text-on-surface">
           {stat.value}
         </p>
       )}
-      <p className="mt-2 font-sans text-xs font-medium tracking-[0.15em] uppercase text-on-surface">
+      <p className="max-sm:mt-1 mt-2 font-sans max-sm:text-[10px] text-xs font-medium tracking-[0.15em] uppercase text-on-surface">
         {stat.label}
       </p>
       {stat.sub && (
@@ -97,7 +103,7 @@ function StatCard({ stat, loading }: { stat: Stat; loading: boolean }) {
   );
 
   const base =
-    "rounded-lg bg-surface-container-low p-6 ambient-shadow transition-[background-color,box-shadow,transform] duration-200";
+    "rounded-lg bg-surface-container-low max-sm:p-3 p-6 ambient-shadow transition-[background-color,box-shadow,transform] duration-200";
 
   if (!stat.href) {
     return <div className={base}>{contenido}</div>;

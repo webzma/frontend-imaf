@@ -121,19 +121,19 @@ export default function EstudianteDashboard() {
         )}
 
         {/* Summary cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-10">
+        <div className="grid grid-cols-3 gap-3 md:gap-4 mb-10">
           {/* Estado */}
-          <div className="relative bg-surface-container-low rounded-sm p-5 ambient-shadow overflow-hidden group">
+          <div className="relative bg-surface-container-low rounded-sm max-sm:p-3 p-5 ambient-shadow overflow-hidden group">
             <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-primary/[0.04] group-hover:bg-primary/[0.08] transition-colors pointer-events-none" />
             <div className="relative">
-              <div className="w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 mb-3">
-                <Sparkles className="w-4 h-4 text-on-primary-container" />
+              <div className="max-sm:w-7 max-sm:h-7 w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 max-sm:mb-2 mb-3">
+                <Sparkles className="max-sm:w-3.5 max-sm:h-3.5 w-4 h-4 text-on-primary-container" />
               </div>
               <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold mb-2">
                 Estado
               </p>
               {loading ? (
-                <Skeleton className="h-6 w-24" />
+                <Skeleton className="max-sm:h-5 max-sm:w-16 h-6 w-24" />
               ) : (
                 <Badge
                   variant={
@@ -154,19 +154,19 @@ export default function EstudianteDashboard() {
           </div>
 
           {/* Cédula */}
-          <div className="relative bg-surface-container-low rounded-sm p-5 ambient-shadow overflow-hidden group">
+          <div className="relative bg-surface-container-low rounded-sm max-sm:p-3 p-5 ambient-shadow overflow-hidden group">
             <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-primary/[0.04] group-hover:bg-primary/[0.08] transition-colors pointer-events-none" />
             <div className="relative">
-              <div className="w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 mb-3">
-                <Hash className="w-4 h-4 text-on-primary-container" />
+              <div className="max-sm:w-7 max-sm:h-7 w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 max-sm:mb-2 mb-3">
+                <Hash className="max-sm:w-3.5 max-sm:h-3.5 w-4 h-4 text-on-primary-container" />
               </div>
               <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold mb-2">
                 Cédula
               </p>
               {loading ? (
-                <Skeleton className="h-6 w-28" />
+                <Skeleton className="max-sm:h-5 max-sm:w-20 h-6 w-28" />
               ) : (
-                <p className="font-mono text-base text-on-surface tabular-nums">
+                <p className="font-mono max-sm:text-sm text-base text-on-surface tabular-nums">
                   {perfil?.cedula ?? "—"}
                 </p>
               )}
@@ -174,19 +174,19 @@ export default function EstudianteDashboard() {
           </div>
 
           {/* Inscripción */}
-          <div className="relative bg-surface-container-low rounded-sm p-5 ambient-shadow overflow-hidden group">
+          <div className="relative bg-surface-container-low rounded-sm max-sm:p-3 p-5 ambient-shadow overflow-hidden group">
             <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-primary/[0.04] group-hover:bg-primary/[0.08] transition-colors pointer-events-none" />
             <div className="relative">
-              <div className="w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 mb-3">
-                <CalendarDays className="w-4 h-4 text-on-primary-container" />
+              <div className="max-sm:w-7 max-sm:h-7 w-9 h-9 rounded-md flex items-center justify-center bg-primary-container/80 max-sm:mb-2 mb-3">
+                <CalendarDays className="max-sm:w-3.5 max-sm:h-3.5 w-4 h-4 text-on-primary-container" />
               </div>
               <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold mb-2">
                 Inscripción
               </p>
               {loading ? (
-                <Skeleton className="h-6 w-36" />
+                <Skeleton className="max-sm:h-5 max-sm:w-24 h-6 w-36" />
               ) : (
-                <p className="font-sans text-sm text-on-surface font-medium">
+                <p className="font-sans max-sm:text-xs text-sm text-on-surface font-medium">
                   {perfil ? formatDate(perfil.fecha_inscripcion) : "—"}
                 </p>
               )}
