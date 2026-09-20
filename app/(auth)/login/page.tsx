@@ -12,13 +12,17 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { loginSchema, type LoginForm } from "@/lib/schemas";
 import logoImaf from "@/public/logo-imaf.webp";
+import logoImafDark from "@/public/logo-imaf-dark.webp";
 import { dashboardPath, setSession } from "@/lib/session";
+import { useTheme } from "@/hooks/use-theme";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { dark } = useTheme();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const logo = dark ? logoImafDark : logoImaf;
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -59,7 +63,7 @@ export default function LoginPage() {
         {/* Logotipo */}
         <div className="flex items-center relative z-10">
           <div className="w-9 h-9 rounded-lg flex items-center justify-center ambient-shadow shrink-0">
-            <Image src={logoImaf} alt="IMAF" width={40} height={40} />
+            <Image src={logo} alt="IMAF" width={40} height={40} />
           </div>
         </div>
 
@@ -93,7 +97,7 @@ export default function LoginPage() {
         {/* Logo mobile */}
         <div className="lg:hidden flex items-center gap-3 mb-14">
           <div className="w-18 h-18 flex items-center justify-center ambient-shadow">
-            <Image src={logoImaf} alt="IMAF" width={88} height={88} />
+            <Image src={logo} alt="IMAF" width={88} height={88} />
           </div>
         </div>
 

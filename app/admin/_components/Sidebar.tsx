@@ -20,17 +20,21 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar } from "@/components/avatar";
+import { useTheme } from "@/hooks/use-theme";
 import { ADMIN_NAV } from "@/lib/admin-nav";
 import { useAdminProfile } from "@/hooks/use-admin-profile";
 import { useNotifCount } from "@/hooks/use-notif-count";
 import logoImaf from "@/public/logo-imaf.webp";
+import logoImafDark from "@/public/logo-imaf-dark.webp";
 
 export default function AppSidebar() {
   const pathname = usePathname();
+  const { dark } = useTheme();
   const { toggleSidebar, state, isMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const unreadCount = useNotifCount();
   const { data: perfil } = useAdminProfile();
+  const logo = dark ? logoImafDark : logoImaf;
 
   const nombre = perfil?.name ?? "Administrador";
   const email = perfil?.email ?? "";
@@ -57,7 +61,7 @@ export default function AppSidebar() {
           <div
             className={`size-8 shrink-0 flex items-center justify-center ambient-shadow transition-transform duration-200 ${collapsed ? "-translate-x-3" : ""}`}
           >
-            <Image src={logoImaf} alt="IMAF" width={28} height={28} />
+            <Image src={logo} alt="IMAF" width={28} height={28} />
           </div>
           {!collapsed && (
             <div>

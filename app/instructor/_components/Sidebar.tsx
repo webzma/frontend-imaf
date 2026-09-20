@@ -33,6 +33,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { Avatar } from "@/components/avatar";
 import { PERFIL_INSTRUCTOR_KEY } from "@/lib/query-keys";
 import logoImaf from "@/public/logo-imaf.webp";
+import logoImafDark from "@/public/logo-imaf-dark.webp";
 import Image from "next/image";
 import { clearSession } from "@/lib/session";
 
@@ -129,6 +130,7 @@ export default function InstructorSidebar() {
   const { push } = useRouter();
   const { toggleSidebar, state, isMobile } = useSidebar();
   const { dark, toggle: toggleDark } = useTheme();
+  const logo = dark ? logoImafDark : logoImaf;
 
   const { data: profile } = useQuery({
     queryKey: PROFILE_KEY,
@@ -212,7 +214,7 @@ export default function InstructorSidebar() {
           <div
             className={`size-8 flex items-center justify-center ambient-shadow shrink-0 transition-transform duration-200 ${state === "collapsed" ? "-translate-x-3" : ""}`}
           >
-            <Image src={logoImaf} alt="IMAF" width={28} height={28} />
+            <Image src={logo} alt="IMAF" width={28} height={28} />
           </div>
           {state !== "collapsed" && (
             <div>
