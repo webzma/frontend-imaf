@@ -1,6 +1,8 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
+import { PageShell } from "@/components/page-shell";
+import { StatRow } from "@/components/stat-row";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -188,176 +190,159 @@ export default function InstructorHorarioPage() {
   const detailColor = detail ? estadoColor(detail.estado) : null;
 
   return (
-    <div className="relative min-h-full bg-surface">
-      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
-        <PageHeader
-          icon={CalendarDays}
-          eyebrow="Mi trabajo / Cronograma"
-          title="Mi Cronograma"
-          subtitle="Consulta tus clases asignadas por día y hora."
-          className="mb-8 md:mb-8"
-        />
+    <PageShell>
+      <PageHeader
+        icon={CalendarDays}
+        eyebrow="Mi trabajo / Cronograma"
+        title="Mi Cronograma"
+        subtitle="Consulta tus clases asignadas por día y hora."
+        className="mb-8 md:mb-8"
+      />
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-5 mb-8 max-w-2xl">
-          {[
-            {
-              label: "Total",
-              value: sesiones.length,
-              glow: "bg-primary-container",
-              color: "text-on-primary-container",
-            },
-            {
-              label: "Programadas",
-              value: totalProgramadas,
-              glow: "bg-secondary-container",
-              color: "text-on-secondary-container",
-            },
-            {
-              label: "Realizadas",
-              value: totalRealizadas,
-              glow: "bg-success-container",
-              color: "text-on-success-container",
-            },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className="bg-surface-container-low rounded-sm p-5 ambient-shadow"
+      {/* Stats */}
+      <StatRow
+        className="mb-8 max-w-2xl"
+        loading={false}
+        stats={[
+          {
+            label: "Total",
+            value: sesiones.length,
+            icon: CalendarDays,
+            tone: "primary",
+          },
+          {
+            label: "Programadas",
+            value: totalProgramadas,
+            icon: CalendarDays,
+            tone: "secondary",
+          },
+          {
+            label: "Realizadas",
+            value: totalRealizadas,
+            icon: CalendarDays,
+            tone: "success",
+          },
+        ]}
+      />
+
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={goToday}>
+            Hoy
+          </Button>
+          <button
+            onClick={goPrev}
+            className="w-9 h-9 inline-flex items-center justify-center rounded-sm hover:bg-surface-container-low text-on-surface/70 hover:text-on-surface transition-colors"
+            aria-label="Anterior"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={goNext}
+            className="w-9 h-9 inline-flex items-center justify-center rounded-sm hover:bg-surface-container-low text-on-surface/70 hover:text-on-surface transition-colors"
+            aria-label="Siguiente"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+          <p className="font-serif text-2xl font-light tight-tracking text-on-surface ml-2 capitalize">
+            {rangeLabel}
+          </p>
+        </div>
+
+        {/* View switch */}
+        <div className="inline-flex items-center bg-surface-container-low rounded-sm p-0.5 ambient-shadow">
+          {(["mes", "semana", "dia", "agenda"] as CalendarView[]).map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`px-3 py-1.5 rounded-sm font-sans text-xs font-semibold transition-colors ${
+                view === v
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-on-surface"
+              }`}
             >
-              <div
-                className={`w-9 md:w-10 h-9 md:h-10 rounded-md flex items-center justify-center ${s.glow} mb-4`}
-              >
-                <CalendarDays className={`w-4 md:w-5 h-4 md:h-5 ${s.color}`} />
-              </div>
-              <p className="font-sans text-2xl md:text-4xl font-light tight-tracking text-on-surface tabular-nums mb-1">
-                {s.value}
-              </p>
-              <p className="font-sans text-xs truncate tracking-[0.15em] uppercase text-muted-foreground font-semibold">
-                {s.label}
-              </p>
-            </div>
+              {VIEW_LABELS[v]}
+            </button>
           ))}
         </div>
-
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={goToday}>
-              Hoy
-            </Button>
-            <button
-              onClick={goPrev}
-              className="w-9 h-9 inline-flex items-center justify-center rounded-sm hover:bg-surface-container-low text-on-surface/70 hover:text-on-surface transition-colors"
-              aria-label="Anterior"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={goNext}
-              className="w-9 h-9 inline-flex items-center justify-center rounded-sm hover:bg-surface-container-low text-on-surface/70 hover:text-on-surface transition-colors"
-              aria-label="Siguiente"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <p className="font-serif text-2xl font-light tight-tracking text-on-surface ml-2 capitalize">
-              {rangeLabel}
-            </p>
-          </div>
-
-          {/* View switch */}
-          <div className="inline-flex items-center bg-surface-container-low rounded-sm p-0.5 ambient-shadow">
-            {(["mes", "semana", "dia", "agenda"] as CalendarView[]).map((v) => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className={`px-3 py-1.5 rounded-sm font-sans text-xs font-semibold transition-colors ${
-                  view === v
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-on-surface"
-                }`}
-              >
-                {VIEW_LABELS[v]}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Filtros */}
-        <div className="flex items-center gap-3 mb-6 flex-wrap">
-          <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-          <Select value={filterCurso} onValueChange={setFilterCurso}>
-            <SelectTrigger className="h-9 w-56 font-sans text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos mis cursos</SelectItem>
-              {cursos.map((c) => (
-                <SelectItem key={c.id} value={String(c.id)}>
-                  {c.codigo} — {c.nombre}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={filterEstado} onValueChange={setFilterEstado}>
-            <SelectTrigger className="h-9 w-40 font-sans text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos los estados</SelectItem>
-              <SelectItem value="programada">Programadas</SelectItem>
-              <SelectItem value="realizada">Realizadas</SelectItem>
-              <SelectItem value="cancelada">Canceladas</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Vistas (solo lectura: ver detalle al hacer clic) */}
-        {loading ? (
-          <div className="bg-surface-container-lowest rounded-sm ambient-shadow py-20 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-primary/60" />
-          </div>
-        ) : view === "mes" ? (
-          <CalendarMonth
-            current={current}
-            sesiones={filteredSesiones}
-            cursos={filteredCursos}
-            showCursoRanges={false}
-            onCreate={noop}
-            onEdit={setDetail}
-            onMove={noop}
-            onShowDay={(date) => {
-              setCurrent(parseISODate(date));
-              setView("dia");
-            }}
-            readOnly
-          />
-        ) : view === "semana" ? (
-          <CalendarWeek
-            current={current}
-            sesiones={filteredSesiones}
-            onCreate={noop}
-            onEdit={setDetail}
-            onMove={noop}
-          />
-        ) : view === "dia" ? (
-          <CalendarDay
-            current={current}
-            sesiones={filteredSesiones}
-            cursos={filteredCursos}
-            showCursoRanges={false}
-            onCreate={noop}
-            onEdit={setDetail}
-            onMove={noop}
-          />
-        ) : (
-          <CalendarAgenda
-            current={current}
-            sesiones={filteredSesiones}
-            onEdit={setDetail}
-          />
-        )}
       </div>
+
+      {/* Filtros */}
+      <div className="flex items-center gap-3 mb-6 flex-wrap">
+        <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+        <Select value={filterCurso} onValueChange={setFilterCurso}>
+          <SelectTrigger className="h-9 w-56 font-sans text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos mis cursos</SelectItem>
+            {cursos.map((c) => (
+              <SelectItem key={c.id} value={String(c.id)}>
+                {c.codigo} — {c.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={filterEstado} onValueChange={setFilterEstado}>
+          <SelectTrigger className="h-9 w-40 font-sans text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos los estados</SelectItem>
+            <SelectItem value="programada">Programadas</SelectItem>
+            <SelectItem value="realizada">Realizadas</SelectItem>
+            <SelectItem value="cancelada">Canceladas</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Vistas (solo lectura: ver detalle al hacer clic) */}
+      {loading ? (
+        <div className="bg-surface-container-lowest rounded-sm ambient-shadow py-20 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-primary/60" />
+        </div>
+      ) : view === "mes" ? (
+        <CalendarMonth
+          current={current}
+          sesiones={filteredSesiones}
+          cursos={filteredCursos}
+          showCursoRanges={false}
+          onCreate={noop}
+          onEdit={setDetail}
+          onMove={noop}
+          onShowDay={(date) => {
+            setCurrent(parseISODate(date));
+            setView("dia");
+          }}
+          readOnly
+        />
+      ) : view === "semana" ? (
+        <CalendarWeek
+          current={current}
+          sesiones={filteredSesiones}
+          onCreate={noop}
+          onEdit={setDetail}
+          onMove={noop}
+        />
+      ) : view === "dia" ? (
+        <CalendarDay
+          current={current}
+          sesiones={filteredSesiones}
+          cursos={filteredCursos}
+          showCursoRanges={false}
+          onCreate={noop}
+          onEdit={setDetail}
+          onMove={noop}
+        />
+      ) : (
+        <CalendarAgenda
+          current={current}
+          sesiones={filteredSesiones}
+          onEdit={setDetail}
+        />
+      )}
 
       {/* Detalle de sesión (solo lectura) */}
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
@@ -433,6 +418,6 @@ export default function InstructorHorarioPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }

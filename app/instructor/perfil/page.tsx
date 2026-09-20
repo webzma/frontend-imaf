@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
+import { PageShell } from "@/components/page-shell";
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -282,292 +283,265 @@ export default function PerfilPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen gap-2 text-muted-foreground font-sans text-sm">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        Cargando perfil...
-      </div>
+      <PageShell>
+        <div className="flex items-center justify-center min-h-[50vh] gap-2 text-muted-foreground font-sans text-sm">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Cargando perfil...
+        </div>
+      </PageShell>
     );
   }
 
   if (error || !me) {
     return (
-      <div className="px-10 py-10">
+      <PageShell>
         <p className="font-sans text-sm text-danger">{error}</p>
-      </div>
+      </PageShell>
     );
   }
 
   const p = me.profesor;
 
   return (
-    <div className="relative min-h-full bg-surface">
-      <div className="relative z-10 px-4 md:px-10 py-10 max-w-8xl">
-        <PageHeader icon={User} eyebrow="Mi perfil" title="Mi Perfil" />
+    <PageShell>
+      <PageHeader icon={User} eyebrow="Mi perfil" title="Mi Perfil" />
 
-        {/* Avatar + identidad */}
-        <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 mb-6">
-          <div className="flex items-center gap-5">
-            <div className="relative shrink-0">
-              <div className="w-16 h-16 rounded-full bg-primary/15 border-2 border-primary/20 flex items-center justify-center overflow-hidden">
-                {p.foto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={p.foto}
-                    alt={me.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="font-sans text-xl font-bold text-primary">
-                    {getInitials(me.name)}
-                  </span>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingFoto}
-                aria-label="Cambiar foto de perfil"
-                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary text-white dark:text-[#1a1817] flex items-center justify-center ring-2 ring-surface-container-low shadow-sm hover:opacity-90 transition-opacity disabled:opacity-60"
-              >
-                {uploadingFoto ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Camera className="w-3.5 h-3.5" />
-                )}
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                className="hidden"
-                onChange={handleFotoChange}
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="font-serif font-light text-2xl text-on-surface">
-                {me.name}
-              </h2>
-              <div className="flex items-center gap-1.5 mt-1">
-                <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="font-sans text-sm text-muted-foreground">
-                  {me.email}
+      {/* Avatar + identidad */}
+      <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 mb-6">
+        <div className="flex items-center gap-5">
+          <div className="relative shrink-0">
+            <div className="w-16 h-16 rounded-full bg-primary/15 border-2 border-primary/20 flex items-center justify-center overflow-hidden">
+              {p.foto ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={p.foto}
+                  alt={me.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="font-sans text-xl font-bold text-primary">
+                  {getInitials(me.name)}
                 </span>
-              </div>
-              {p.titulo && (
-                <Badge variant="default" className="mt-2 gap-1">
-                  <BadgeCheck className="w-3 h-3" />
-                  {p.titulo.nombre}
-                </Badge>
               )}
             </div>
-            {!editing && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 shrink-0"
-                onClick={() => setEditing(true)}
-              >
-                <Pencil className="w-3.5 h-3.5" />
-                Editar
-              </Button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingFoto}
+              aria-label="Cambiar foto de perfil"
+              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary text-white dark:text-[#1a1817] flex items-center justify-center ring-2 ring-surface-container-low shadow-sm hover:opacity-90 transition-opacity disabled:opacity-60"
+            >
+              {uploadingFoto ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Camera className="w-3.5 h-3.5" />
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={handleFotoChange}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-serif font-light text-2xl text-on-surface">
+              {me.name}
+            </h2>
+            <div className="flex items-center gap-1.5 mt-1">
+              <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="font-sans text-sm text-muted-foreground">
+                {me.email}
+              </span>
+            </div>
+            {p.titulo && (
+              <Badge variant="default" className="mt-2 gap-1">
+                <BadgeCheck className="w-3 h-3" />
+                {p.titulo.nombre}
+              </Badge>
             )}
           </div>
+          {!editing && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 shrink-0"
+              onClick={() => setEditing(true)}
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Editar
+            </Button>
+          )}
         </div>
+      </div>
 
-        {editing ? (
-          /* ── Edit form ── */
-          <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 md:p-7">
-            {/* Información personal */}
-            <div className="flex items-center gap-2 mb-5">
-              <User className="w-3.5 h-3.5 text-primary/80" />
-              <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
-                Información personal
-              </h3>
+      {editing ? (
+        /* ── Edit form ── */
+        <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 md:p-7">
+          {/* Información personal */}
+          <div className="flex items-center gap-2 mb-5">
+            <User className="w-3.5 h-3.5 text-primary/80" />
+            <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+              Información personal
+            </h3>
+          </div>
+          <div className="grid gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <CedulaInput
+                nacionalidad={form.watch("nacionalidad") ?? "V"}
+                onNacionalidadChange={(v) =>
+                  form.setValue("nacionalidad", v as "V" | "E", {
+                    shouldValidate: true,
+                  })
+                }
+                cedula={form.watch("cedula") ?? ""}
+                onCedulaChange={(v) =>
+                  form.setValue("cedula", v, { shouldValidate: true })
+                }
+                error={
+                  form.formState.errors.cedula?.message
+                    ? String(form.formState.errors.cedula.message)
+                    : undefined
+                }
+                id="cedula"
+              />
+              <div className="grid gap-2">
+                <Label htmlFor="telefono">Teléfono</Label>
+                <Input
+                  id="telefono"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={20}
+                  placeholder="Ej: 04120000000"
+                  {...form.register("telefono", {
+                    onChange: (e) =>
+                      form.setValue(
+                        "telefono",
+                        sanitizarDigitos(e.target.value),
+                      ),
+                  })}
+                />
+                {form.formState.errors.telefono && (
+                  <p className="text-xs text-danger">
+                    {form.formState.errors.telefono.message}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="grid gap-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <CedulaInput
-                  nacionalidad={form.watch("nacionalidad") ?? "V"}
-                  onNacionalidadChange={(v) =>
-                    form.setValue("nacionalidad", v as "V" | "E", {
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="municipio">Municipio</Label>
+                <Select
+                  value={form.watch("municipio") || undefined}
+                  onValueChange={(value) =>
+                    form.setValue("municipio", value, {
                       shouldValidate: true,
                     })
                   }
-                  cedula={form.watch("cedula") ?? ""}
-                  onCedulaChange={(v) =>
-                    form.setValue("cedula", v, { shouldValidate: true })
-                  }
-                  error={
-                    form.formState.errors.cedula?.message
-                      ? String(form.formState.errors.cedula.message)
-                      : undefined
-                  }
-                  id="cedula"
-                />
-                <div className="grid gap-2">
-                  <Label htmlFor="telefono">Teléfono</Label>
-                  <Input
-                    id="telefono"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={20}
-                    placeholder="Ej: 04120000000"
-                    {...form.register("telefono", {
-                      onChange: (e) =>
-                        form.setValue(
-                          "telefono",
-                          sanitizarDigitos(e.target.value),
-                        ),
-                    })}
-                  />
-                  {form.formState.errors.telefono && (
-                    <p className="text-xs text-danger">
-                      {form.formState.errors.telefono.message}
-                    </p>
-                  )}
-                </div>
+                >
+                  <SelectTrigger id="municipio" className="w-full">
+                    <SelectValue placeholder="Seleccionar municipio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {municipios.map((municipio) => (
+                      <SelectItem key={municipio} value={municipio}>
+                        {municipio}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.municipio && (
+                  <p className="text-xs text-danger">
+                    {form.formState.errors.municipio.message}
+                  </p>
+                )}
               </div>
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="municipio">Municipio</Label>
-                  <Select
-                    value={form.watch("municipio") || undefined}
-                    onValueChange={(value) =>
-                      form.setValue("municipio", value, {
-                        shouldValidate: true,
-                      })
-                    }
-                  >
-                    <SelectTrigger id="municipio" className="w-full">
-                      <SelectValue placeholder="Seleccionar municipio" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {municipios.map((municipio) => (
-                        <SelectItem key={municipio} value={municipio}>
-                          {municipio}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {form.formState.errors.municipio && (
-                    <p className="text-xs text-danger">
-                      {form.formState.errors.municipio.message}
-                    </p>
-                  )}
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="genero">Género</Label>
-                  <Select
-                    value={form.watch("genero") || undefined}
-                    onValueChange={(v) =>
-                      form.setValue(
-                        "genero",
-                        v as PerfilInstructorForm["genero"],
-                        { shouldValidate: true },
-                      )
-                    }
-                  >
-                    <SelectTrigger id="genero">
-                      <SelectValue placeholder="No especificado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="masculino">Masculino</SelectItem>
-                      <SelectItem value="femenino">Femenino</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
               <div className="grid gap-2">
-                <Label htmlFor="fecha_nacimiento">Fecha de nacimiento</Label>
-                <Input
-                  id="fecha_nacimiento"
-                  type="date"
-                  {...form.register("fecha_nacimiento")}
-                />
-              </div>
-            </div>
-
-            {/* Información profesional */}
-            <div className="border-t border-outline-variant my-6" />
-            <div className="flex items-center gap-2 mb-5">
-              <Briefcase className="w-3.5 h-3.5 text-primary/80" />
-              <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
-                Información profesional
-              </h3>
-            </div>
-            <div className="grid gap-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="titulo">Título académico</Label>
-                  <Select
-                    value={form.watch("titulo_id")?.toString() || undefined}
-                    onValueChange={(v) =>
-                      form.setValue("titulo_id", v ? parseInt(v) : undefined, {
-                        shouldValidate: true,
-                      })
-                    }
-                  >
-                    <SelectTrigger id="titulo">
-                      <SelectValue placeholder="No especificado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {titulos.map((t) => (
-                        <SelectItem key={t.id} value={t.id.toString()}>
-                          {t.nombre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="departamento">Departamento</Label>
-                  <Select
-                    value={
-                      form.watch("departamento_id")?.toString() || undefined
-                    }
-                    onValueChange={(v) =>
-                      form.setValue(
-                        "departamento_id",
-                        v ? parseInt(v) : undefined,
-                        { shouldValidate: true },
-                      )
-                    }
-                  >
-                    <SelectTrigger id="departamento">
-                      <SelectValue placeholder="No especificado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {departamentos.map((d) => (
-                        <SelectItem key={d.id} value={d.id.toString()}>
-                          {d.nombre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="especialidad">Especialidad</Label>
+                <Label htmlFor="genero">Género</Label>
                 <Select
-                  value={form.watch("especialidad_id")?.toString() || undefined}
+                  value={form.watch("genero") || undefined}
                   onValueChange={(v) =>
                     form.setValue(
-                      "especialidad_id",
+                      "genero",
+                      v as PerfilInstructorForm["genero"],
+                      { shouldValidate: true },
+                    )
+                  }
+                >
+                  <SelectTrigger id="genero">
+                    <SelectValue placeholder="No especificado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="masculino">Masculino</SelectItem>
+                    <SelectItem value="femenino">Femenino</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="fecha_nacimiento">Fecha de nacimiento</Label>
+              <Input
+                id="fecha_nacimiento"
+                type="date"
+                {...form.register("fecha_nacimiento")}
+              />
+            </div>
+          </div>
+
+          {/* Información profesional */}
+          <div className="border-t border-outline-variant my-6" />
+          <div className="flex items-center gap-2 mb-5">
+            <Briefcase className="w-3.5 h-3.5 text-primary/80" />
+            <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+              Información profesional
+            </h3>
+          </div>
+          <div className="grid gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="titulo">Título académico</Label>
+                <Select
+                  value={form.watch("titulo_id")?.toString() || undefined}
+                  onValueChange={(v) =>
+                    form.setValue("titulo_id", v ? parseInt(v) : undefined, {
+                      shouldValidate: true,
+                    })
+                  }
+                >
+                  <SelectTrigger id="titulo">
+                    <SelectValue placeholder="No especificado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {titulos.map((t) => (
+                      <SelectItem key={t.id} value={t.id.toString()}>
+                        {t.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="departamento">Departamento</Label>
+                <Select
+                  value={form.watch("departamento_id")?.toString() || undefined}
+                  onValueChange={(v) =>
+                    form.setValue(
+                      "departamento_id",
                       v ? parseInt(v) : undefined,
                       { shouldValidate: true },
                     )
                   }
                 >
-                  <SelectTrigger id="especialidad">
+                  <SelectTrigger id="departamento">
                     <SelectValue placeholder="No especificado" />
                   </SelectTrigger>
                   <SelectContent>
-                    {especialidades.map((e) => (
-                      <SelectItem key={e.id} value={e.id.toString()}>
-                        {e.nombre}
+                    {departamentos.map((d) => (
+                      <SelectItem key={d.id} value={d.id.toString()}>
+                        {d.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -575,124 +549,145 @@ export default function PerfilPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 mt-6">
-              <Button
-                variant="outline"
-                onClick={handleCancel}
-                disabled={saving}
-                className="gap-2"
+            <div className="grid gap-2">
+              <Label htmlFor="especialidad">Especialidad</Label>
+              <Select
+                value={form.watch("especialidad_id")?.toString() || undefined}
+                onValueChange={(v) =>
+                  form.setValue(
+                    "especialidad_id",
+                    v ? parseInt(v) : undefined,
+                    { shouldValidate: true },
+                  )
+                }
               >
-                <X className="w-4 h-4" />
-                Cancelar
-              </Button>
-              <Button
-                onClick={() => form.handleSubmit(handleSave)()}
-                disabled={saving}
-                className="gap-2"
-              >
-                {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                Guardar cambios
-              </Button>
+                <SelectTrigger id="especialidad">
+                  <SelectValue placeholder="No especificado" />
+                </SelectTrigger>
+                <SelectContent>
+                  {especialidades.map((e) => (
+                    <SelectItem key={e.id} value={e.id.toString()}>
+                      {e.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        ) : (
-          /* ── View mode ── */
-          <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 md:p-7">
-            {/* Información personal */}
-            <div className="flex items-center gap-2 mb-5">
-              <User className="w-3.5 h-3.5 text-primary/80" />
-              <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
-                Información personal
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-              <InfoRow
-                icon={
-                  <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Cédula"
-                value={p.cedula}
-              />
-              <InfoRow
-                icon={
-                  <Phone className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Teléfono"
-                value={p.telefono}
-              />
-              <InfoRow
-                icon={
-                  <MapPin className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Municipio"
-                value={p.municipio}
-              />
-              <InfoRow
-                icon={
-                  <CalendarDays className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Fecha de nacimiento"
-                value={formatDateLong(p.fecha_nacimiento)}
-              />
-              <InfoRow
-                icon={
-                  <User className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Género"
-                value={
-                  p.genero
-                    ? p.genero.charAt(0).toUpperCase() + p.genero.slice(1)
-                    : null
-                }
-              />
-            </div>
 
-            {/* Información profesional */}
-            <div className="border-t border-outline-variant my-6" />
-            <div className="flex items-center gap-2 mb-5">
-              <Briefcase className="w-3.5 h-3.5 text-primary/80" />
-              <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
-                Información profesional
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-              <InfoRow
-                icon={
-                  <GraduationCap className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Título"
-                value={p.titulo?.nombre ?? null}
-              />
-              <InfoRow
-                icon={
-                  <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Especialidad"
-                value={p.especialidad?.nombre ?? null}
-              />
-              <InfoRow
-                icon={
-                  <Building2 className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Departamento"
-                value={p.departamento?.nombre ?? null}
-              />
-              <InfoRow
-                icon={
-                  <Briefcase className="w-3.5 h-3.5 text-on-primary-container" />
-                }
-                label="Tipo de contrato"
-                value={p.tipo_contrato?.nombre ?? null}
-              />
-            </div>
+          <div className="flex items-center justify-end gap-2 pt-2 mt-6">
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={saving}
+              className="gap-2"
+            >
+              <X className="w-4 h-4" />
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => form.handleSubmit(handleSave)()}
+              disabled={saving}
+              className="gap-2"
+            >
+              {saving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              Guardar cambios
+            </Button>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      ) : (
+        /* ── View mode ── */
+        <div className="bg-surface-container-low rounded-sm ambient-shadow p-6 md:p-7">
+          {/* Información personal */}
+          <div className="flex items-center gap-2 mb-5">
+            <User className="w-3.5 h-3.5 text-primary/80" />
+            <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+              Información personal
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            <InfoRow
+              icon={
+                <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
+              }
+              label="Cédula"
+              value={p.cedula}
+            />
+            <InfoRow
+              icon={<Phone className="w-3.5 h-3.5 text-on-primary-container" />}
+              label="Teléfono"
+              value={p.telefono}
+            />
+            <InfoRow
+              icon={
+                <MapPin className="w-3.5 h-3.5 text-on-primary-container" />
+              }
+              label="Municipio"
+              value={p.municipio}
+            />
+            <InfoRow
+              icon={
+                <CalendarDays className="w-3.5 h-3.5 text-on-primary-container" />
+              }
+              label="Fecha de nacimiento"
+              value={formatDateLong(p.fecha_nacimiento)}
+            />
+            <InfoRow
+              icon={<User className="w-3.5 h-3.5 text-on-primary-container" />}
+              label="Género"
+              value={
+                p.genero
+                  ? p.genero.charAt(0).toUpperCase() + p.genero.slice(1)
+                  : null
+              }
+            />
+          </div>
+
+          {/* Información profesional */}
+          <div className="border-t border-outline-variant my-6" />
+          <div className="flex items-center gap-2 mb-5">
+            <Briefcase className="w-3.5 h-3.5 text-primary/80" />
+            <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+              Información profesional
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            <InfoRow
+              icon={
+                <GraduationCap className="w-3.5 h-3.5 text-on-primary-container" />
+              }
+              label="Título"
+              value={p.titulo?.nombre ?? null}
+            />
+            <InfoRow
+              icon={
+                <BadgeCheck className="w-3.5 h-3.5 text-on-primary-container" />
+              }
+              label="Especialidad"
+              value={p.especialidad?.nombre ?? null}
+            />
+            <InfoRow
+              icon={
+                <Building2 className="w-3.5 h-3.5 text-on-primary-container" />
+              }
+              label="Departamento"
+              value={p.departamento?.nombre ?? null}
+            />
+            <InfoRow
+              icon={
+                <Briefcase className="w-3.5 h-3.5 text-on-primary-container" />
+              }
+              label="Tipo de contrato"
+              value={p.tipo_contrato?.nombre ?? null}
+            />
+          </div>
+        </div>
+      )}
+    </PageShell>
   );
 }
 
