@@ -25,14 +25,18 @@ import {
 import { registroSchema, type RegistroForm } from "@/lib/schemas";
 import { CedulaInput } from "@/components/cedula-input";
 import logoImaf from "@/public/logo-imaf.webp";
+import logoImafDark from "@/public/logo-imaf-dark.webp";
 import municipios from "@/data/municipios.json";
 import { dashboardPath, setSession } from "@/lib/session";
+import { useTheme } from "@/hooks/use-theme";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { dark } = useTheme();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const logo = dark ? logoImafDark : logoImaf;
 
   const form = useForm<RegistroForm>({
     resolver: zodResolver(registroSchema),
@@ -105,7 +109,7 @@ export default function RegisterPage() {
         <div className="max-w-2xl mx-auto flex items-center justify-between relative z-10">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 flex items-center justify-center ambient-shadow shrink-0">
-              <Image src={logoImaf} alt="IMAF" width={32} height={32} />
+              <Image src={logo} alt="IMAF" width={32} height={32} />
             </div>
           </div>
           <p className="font-sans text-xs text-muted-foreground hidden sm:block">
