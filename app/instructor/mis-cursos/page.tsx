@@ -239,26 +239,39 @@ export default function MisCursosPage() {
                 curso.limite_cupo > 0
                   ? Math.round((inscritos / curso.limite_cupo) * 100)
                   : 0;
+              const estado = estadoVisualCurso(curso);
+              const estilo = ESTILO_CURSO[estado.clave];
               return (
                 <button
                   key={curso.id}
+                  data-estado={estado.clave}
                   onClick={() => router.push(`/instructor/cursos/${curso.id}`)}
-                  className="w-full text-left bg-surface-container-low rounded-sm ambient-shadow p-5 hover:bg-surface-container transition-colors"
+                  className={cn(
+                    "relative w-full overflow-hidden text-left bg-surface-container-low rounded-sm ambient-shadow p-5 pl-6 hover:bg-surface-container transition-colors",
+                    estilo.tarjeta,
+                  )}
                 >
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "absolute inset-y-0 left-0 w-1",
+                      estilo.franja,
+                    )}
+                  />
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <Badge
-                          variant={curso.estado as "activo" | "inactivo"}
-                          className="capitalize"
-                        >
-                          {curso.estado}
-                        </Badge>
+                        <Badge variant={estado.clave}>{estado.etiqueta}</Badge>
                         <span className="font-mono text-xs text-muted-foreground">
                           {curso.codigo}
                         </span>
                       </div>
-                      <p className="font-sans text-base font-semibold text-on-surface truncate">
+                      <p
+                        className={cn(
+                          "font-sans text-base font-semibold truncate",
+                          estilo.titulo,
+                        )}
+                      >
                         {curso.nombre}
                       </p>
                       {curso.descripcion && (
@@ -268,7 +281,12 @@ export default function MisCursosPage() {
                       )}
                       <div className="flex items-center gap-4 mt-2 flex-wrap">
                         {curso.fecha_inicio && (
-                          <span className="flex items-center gap-1 font-sans text-xs text-muted-foreground">
+                          <span
+                            className={cn(
+                              "flex items-center gap-1 font-sans text-xs",
+                              estilo.fecha,
+                            )}
+                          >
                             <CalendarDays className="w-3 h-3" />
                             {formatDate(curso.fecha_inicio)}
                             {curso.fecha_fin &&
@@ -283,7 +301,14 @@ export default function MisCursosPage() {
                     </div>
                     <div className="flex items-center gap-3 shrink-0 mt-1">
                       <div className="text-right">
-                        <p className="font-sans text-lg font-light text-primary">
+                        <p
+                          className={cn(
+                            "font-sans text-lg font-light",
+                            estilo.barra
+                              ? "text-muted-foreground"
+                              : "text-primary",
+                          )}
+                        >
                           {pct}%
                         </p>
                         <p className="font-sans text-[10px] text-muted-foreground">
@@ -295,7 +320,10 @@ export default function MisCursosPage() {
                   </div>
                   <div className="mt-3 h-1 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-primary rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300"
+                      className={cn(
+                        "h-full rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300",
+                        estilo.barra ?? "bg-primary",
+                      )}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -318,181 +346,9 @@ export default function MisCursosPage() {
                 itemLabel={["curso", "cursos"]}
               />
             </div>
-<<<<<<< HEAD
           )}
         </>
       )}
     </PageShell>
-=======
-            <div className="flex items-center gap-1">
-              {(["todos", "activo", "inactivo"] as const).map((v) => (
-                <button
-                  key={v}
-                  onClick={() => {
-                    setFilterEstado(v);
-                    setPage(1);
-                    loadCursos(1, true);
-                  }}
-                  className={`px-3 py-1.5 rounded-md font-sans text-xs font-medium capitalize transition-colors ${
-                    filterEstado === v
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-surface-container"
-                  }`}
-                >
-                  {v === "todos" ? "Todos" : v}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Lista */}
-        {cursos.length === 0 ? (
-          <div className="bg-surface-container-low rounded-sm ambient-shadow">
-            <EmptyState
-              icon={BookOpen}
-              title="Aún no tienes cursos asignados"
-              description="Cuando la coordinación te asigne un curso, aparecerá aquí junto a su horario y su lista de estudiantes."
-            />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="bg-surface-container-low rounded-sm ambient-shadow">
-            <EmptyState
-              icon={SearchX}
-              title="Sin resultados"
-              description="Ninguno de tus cursos coincide con esa búsqueda."
-              action={
-                <Button variant="outline" onClick={() => setSearch("")}>
-                  Limpiar búsqueda
-                </Button>
-              }
-            />
-          </div>
-        ) : (
-          <>
-            <div className="space-y-3">
-              {filtered.map((curso) => {
-                const inscritos = curso.limite_cupo - curso.cupos_restantes;
-                const pct =
-                  curso.limite_cupo > 0
-                    ? Math.round((inscritos / curso.limite_cupo) * 100)
-                    : 0;
-                const estado = estadoVisualCurso(curso);
-                const estilo = ESTILO_CURSO[estado.clave];
-                return (
-                  <button
-                    key={curso.id}
-                    data-estado={estado.clave}
-                    onClick={() =>
-                      router.push(`/instructor/cursos/${curso.id}`)
-                    }
-                    className={cn(
-                      "relative w-full overflow-hidden text-left bg-surface-container-low rounded-sm ambient-shadow p-5 pl-6 hover:bg-surface-container transition-colors",
-                      estilo.tarjeta,
-                    )}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        "absolute inset-y-0 left-0 w-1",
-                        estilo.franja,
-                      )}
-                    />
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant={estado.clave}>
-                            {estado.etiqueta}
-                          </Badge>
-                          <span className="font-mono text-xs text-muted-foreground">
-                            {curso.codigo}
-                          </span>
-                        </div>
-                        <p
-                          className={cn(
-                            "font-sans text-base font-semibold truncate",
-                            estilo.titulo,
-                          )}
-                        >
-                          {curso.nombre}
-                        </p>
-                        {curso.descripcion && (
-                          <p className="font-sans text-xs text-muted-foreground mt-1 line-clamp-1">
-                            {curso.descripcion}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-4 mt-2 flex-wrap">
-                          {curso.fecha_inicio && (
-                            <span
-                              className={cn(
-                                "flex items-center gap-1 font-sans text-xs",
-                                estilo.fecha,
-                              )}
-                            >
-                              <CalendarDays className="w-3 h-3" />
-                              {formatDate(curso.fecha_inicio)}
-                              {curso.fecha_fin &&
-                                ` → ${formatDate(curso.fecha_fin)}`}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1 font-sans text-xs text-muted-foreground">
-                            <Users className="w-3 h-3" />
-                            {inscritos} / {curso.limite_cupo} estudiantes
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0 mt-1">
-                        <div className="text-right">
-                          <p
-                            className={cn(
-                              "font-sans text-lg font-light",
-                              estilo.barra
-                                ? "text-muted-foreground"
-                                : "text-primary",
-                            )}
-                          >
-                            {pct}%
-                          </p>
-                          <p className="font-sans text-[10px] text-muted-foreground">
-                            ocupado
-                          </p>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                    </div>
-                    <div className="mt-3 h-1 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300",
-                          estilo.barra ?? "bg-primary",
-                        )}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {filtered.length > 0 && totalPages > 1 && (
-              <div className="mt-3 bg-surface-container-low rounded-sm overflow-hidden ambient-shadow">
-                <Pagination
-                  page={safePage}
-                  totalPages={totalPages}
-                  totalItems={totalCursos}
-                  pageSize={PAGE_SIZE}
-                  onPageChange={(p) => {
-                    setPage(p);
-                    loadCursos(p);
-                  }}
-                  itemLabel={["curso", "cursos"]}
-                />
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </div>
->>>>>>> f4f3c4a (feat: update metadata description for IMAF platform)
   );
 }

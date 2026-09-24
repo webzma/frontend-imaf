@@ -248,222 +248,10 @@ export default function CursoDetailPage({
             {curso.estado}
           </Badge>
         </div>
-<<<<<<< HEAD
         {curso.descripcion && (
           <p className="mt-3 font-sans text-sm text-muted-foreground max-w-2xl">
             {curso.descripcion}
           </p>
-=======
-
-        {/* Tabs */}
-        <div className="flex items-center gap-1 mb-5 border-b border-outline-variant">
-          <button
-            onClick={() => setActiveTab("estudiantes")}
-            className={`flex items-center gap-2 px-4 py-2 font-sans text-sm font-medium border-b-2 transition-colors -mb-px ${
-              activeTab === "estudiantes"
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-on-surface"
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            Estudiantes ({curso.estudiantes.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("sesiones")}
-            className={`flex items-center gap-2 px-4 py-2 font-sans text-sm font-medium border-b-2 transition-colors -mb-px ${
-              activeTab === "sesiones"
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-on-surface"
-            }`}
-          >
-            <ClipboardCheck className="w-4 h-4" />
-            Sesiones ({curso.sesiones.length})
-          </button>
-        </div>
-
-        {/* Tab: Estudiantes */}
-        {activeTab === "estudiantes" && (
-          <>
-            {curso.estudiantes.length > 0 && (
-              <div className="relative mb-4 max-w-xs">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Buscar por nombre o cédula..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/60 font-sans text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </div>
-            )}
-
-            {curso.estudiantes.length === 0 ? (
-              <div className="bg-surface-container-low rounded-sm ambient-shadow p-10 flex flex-col items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
-                  <Users className="w-5 h-5 text-on-primary-container" />
-                </div>
-                <p className="font-sans text-sm text-muted-foreground">
-                  No hay estudiantes inscritos aún.
-                </p>
-              </div>
-            ) : filteredEstudiantes.length === 0 ? (
-              <div className="bg-surface-container-low rounded-sm ambient-shadow p-8 text-center">
-                <p className="font-sans text-sm text-muted-foreground">
-                  No se encontraron estudiantes con {search}.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredEstudiantes.map((est) => {
-                  const archivado = !!est.deleted_at;
-                  const puedeAprobar =
-                    est.estado_pago === "aprobado" && !archivado;
-                  const apagado = !puedeAprobar || est.estado === "inactivo";
-                  return (
-                    <div
-                      key={est.id}
-                      data-estado-pago={est.estado_pago}
-                      className={`bg-surface-container-low rounded-sm ambient-shadow ${
-                        apagado ? "opacity-80" : ""
-                      }`}
-                    >
-                      {/* Row principal */}
-                      <div className="flex items-center gap-4 px-5 pt-4 pb-3">
-                        <Avatar
-                          src={est.foto}
-                          name={est.nombre}
-                          size={10}
-                          tone="muted"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`font-sans text-sm font-semibold truncate ${
-                              apagado
-                                ? "text-muted-foreground"
-                                : "text-on-surface"
-                            } ${archivado ? "line-through" : ""}`}
-                          >
-                            {est.nombre}
-                          </p>
-                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                            <span className="font-mono text-xs text-muted-foreground">
-                              {est.cedula}
-                            </span>
-                            <Badge
-                              variant={
-                                est.estado_pago as
-                                  | "pendiente"
-                                  | "aprobado"
-                                  | "reprobado"
-                              }
-                              className="text-[10px]"
-                            >
-                              {PAGO_LABEL[est.estado_pago]}
-                            </Badge>
-                            {est.estado === "inactivo" && (
-                              <Badge variant="inactivo" className="text-[10px]">
-                                Inactivo
-                              </Badge>
-                            )}
-                            {archivado && (
-                              <Badge variant="neutral" className="text-[10px]">
-                                Archivado
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        {/* Estado aprobación actual */}
-                        <Badge
-                          variant={
-                            est.estado_aprobacion_curso as
-                              | "pendiente"
-                              | "aprobado"
-                              | "reprobado"
-                          }
-                          className="capitalize"
-                        >
-                          {est.estado_aprobacion_curso}
-                        </Badge>
-                      </div>
-
-                      {/* Acciones de aprobación */}
-                      {!puedeAprobar ? (
-                        <p className="px-5 pb-3.5 pl-[4.75rem] font-sans text-xs text-muted-foreground">
-                          {archivado
-                            ? "Estudiante archivado: se conserva en el historial del curso."
-                            : "La aprobación del curso se habilita cuando su pago esté al día."}
-                        </p>
-                      ) : (
-                        <div className="px-5 pb-3.5 pl-[4.75rem] flex items-center gap-2">
-                          <span className="font-sans text-xs text-muted-foreground mr-1">
-                            Aprobación del curso:
-                          </span>
-                          <div className="flex rounded-lg overflow-hidden border border-outline-variant text-xs font-semibold font-sans">
-                            <button
-                              disabled={
-                                approving === est.id ||
-                                est.estado_aprobacion_curso === "reprobado"
-                              }
-                              onClick={() =>
-                                handleAprobacion(est.id, "reprobado")
-                              }
-                              className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
-                                est.estado_aprobacion_curso === "reprobado"
-                                  ? "bg-danger text-white"
-                                  : "text-muted-foreground hover:bg-surface-container"
-                              }`}
-                            >
-                              <X className="w-3 h-3" />
-                              Reprobado
-                            </button>
-                            <div className="w-px bg-outline-variant" />
-                            <button
-                              disabled={
-                                approving === est.id ||
-                                est.estado_aprobacion_curso === "pendiente"
-                              }
-                              onClick={() =>
-                                handleAprobacion(est.id, "pendiente")
-                              }
-                              className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
-                                est.estado_aprobacion_curso === "pendiente"
-                                  ? "bg-warning text-white"
-                                  : "text-muted-foreground hover:bg-surface-container"
-                              }`}
-                            >
-                              {approving === est.id ? (
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                              ) : null}
-                              Pendiente
-                            </button>
-                            <div className="w-px bg-outline-variant" />
-                            <button
-                              disabled={
-                                approving === est.id ||
-                                est.estado_aprobacion_curso === "aprobado"
-                              }
-                              onClick={() =>
-                                handleAprobacion(est.id, "aprobado")
-                              }
-                              className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
-                                est.estado_aprobacion_curso === "aprobado"
-                                  ? "bg-success text-white"
-                                  : "text-muted-foreground hover:bg-surface-container"
-                              }`}
-                            >
-                              <Check className="w-3 h-3" />
-                              Aprobado
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </>
->>>>>>> f4f3c4a (feat: update metadata description for IMAF platform)
         )}
       </div>
 
@@ -557,113 +345,150 @@ export default function CursoDetailPage({
             </div>
           ) : (
             <div className="space-y-2">
-              {filteredEstudiantes.map((est) => (
-                <div
-                  key={est.id}
-                  className="bg-surface-container-low rounded-sm ambient-shadow"
-                >
-                  {/* Row principal */}
-                  <div className="flex items-center gap-4 px-5 pt-4 pb-3">
-                    <Avatar
-                      src={est.foto}
-                      name={est.nombre}
-                      size={10}
-                      tone="muted"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-sans text-sm font-semibold text-on-surface truncate">
-                        {est.nombre}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                        <span className="font-mono text-xs text-muted-foreground">
-                          {est.cedula}
-                        </span>
-                        <Badge
-                          variant={
-                            est.estado_pago as
-                              | "pendiente"
-                              | "aprobado"
-                              | "reprobado"
-                          }
-                          className="text-[10px]"
+              {filteredEstudiantes.map((est) => {
+                const archivado = !!est.deleted_at;
+                const puedeAprobar =
+                  est.estado_pago === "aprobado" && !archivado;
+                const apagado = !puedeAprobar || est.estado === "inactivo";
+                return (
+                  <div
+                    key={est.id}
+                    data-estado-pago={est.estado_pago}
+                    className={`bg-surface-container-low rounded-sm ambient-shadow ${
+                      apagado ? "opacity-80" : ""
+                    }`}
+                  >
+                    {/* Row principal */}
+                    <div className="flex items-center gap-4 px-5 pt-4 pb-3">
+                      <Avatar
+                        src={est.foto}
+                        name={est.nombre}
+                        size={10}
+                        tone="muted"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={`font-sans text-sm font-semibold truncate ${
+                            apagado
+                              ? "text-muted-foreground"
+                              : "text-on-surface"
+                          } ${archivado ? "line-through" : ""}`}
                         >
-                          Pago: {est.estado_pago}
-                        </Badge>
+                          {est.nombre}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          <span className="font-mono text-xs text-muted-foreground">
+                            {est.cedula}
+                          </span>
+                          <Badge
+                            variant={
+                              est.estado_pago as
+                                | "pendiente"
+                                | "aprobado"
+                                | "reprobado"
+                            }
+                            className="text-[10px]"
+                          >
+                            {PAGO_LABEL[est.estado_pago]}
+                          </Badge>
+                          {est.estado === "inactivo" && (
+                            <Badge variant="inactivo" className="text-[10px]">
+                              Inactivo
+                            </Badge>
+                          )}
+                          {archivado && (
+                            <Badge variant="neutral" className="text-[10px]">
+                              Archivado
+                            </Badge>
+                          )}
+                        </div>
                       </div>
+                      {/* Estado aprobación actual */}
+                      <Badge
+                        variant={
+                          est.estado_aprobacion_curso as
+                            | "pendiente"
+                            | "aprobado"
+                            | "reprobado"
+                        }
+                        className="capitalize"
+                      >
+                        {est.estado_aprobacion_curso}
+                      </Badge>
                     </div>
-                    {/* Estado aprobación actual */}
-                    <Badge
-                      variant={
-                        est.estado_aprobacion_curso as
-                          | "pendiente"
-                          | "aprobado"
-                          | "reprobado"
-                      }
-                      className="capitalize"
-                    >
-                      {est.estado_aprobacion_curso}
-                    </Badge>
-                  </div>
 
-                  {/* Acciones de aprobación */}
-                  <div className="px-5 pb-3.5 pl-[4.75rem] flex items-center gap-2">
-                    <span className="font-sans text-xs text-muted-foreground mr-1">
-                      Aprobación del curso:
-                    </span>
-                    <div className="flex rounded-lg overflow-hidden border border-outline-variant text-xs font-semibold font-sans">
-                      <button
-                        disabled={
-                          approving === est.id ||
-                          est.estado_aprobacion_curso === "reprobado"
-                        }
-                        onClick={() => handleAprobacion(est.id, "reprobado")}
-                        className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
-                          est.estado_aprobacion_curso === "reprobado"
-                            ? "bg-danger text-white"
-                            : "text-muted-foreground hover:bg-surface-container"
-                        }`}
-                      >
-                        <X className="w-3 h-3" />
-                        Reprobado
-                      </button>
-                      <div className="w-px bg-outline-variant" />
-                      <button
-                        disabled={
-                          approving === est.id ||
-                          est.estado_aprobacion_curso === "pendiente"
-                        }
-                        onClick={() => handleAprobacion(est.id, "pendiente")}
-                        className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
-                          est.estado_aprobacion_curso === "pendiente"
-                            ? "bg-warning text-white"
-                            : "text-muted-foreground hover:bg-surface-container"
-                        }`}
-                      >
-                        {approving === est.id ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : null}
-                        Pendiente
-                      </button>
-                      <div className="w-px bg-outline-variant" />
-                      <button
-                        disabled={
-                          approving === est.id ||
-                          est.estado_aprobacion_curso === "aprobado"
-                        }
-                        onClick={() => handleAprobacion(est.id, "aprobado")}
-                        className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
-                          est.estado_aprobacion_curso === "aprobado"
-                            ? "bg-success text-white"
-                            : "text-muted-foreground hover:bg-surface-container"
-                        }`}
-                      >
-                        <Check className="w-3 h-3" />
-                        Aprobado
-                      </button>
-                    </div>
+                    {/* Acciones de aprobación */}
+                    {!puedeAprobar ? (
+                      <p className="px-5 pb-3.5 pl-[4.75rem] font-sans text-xs text-muted-foreground">
+                        {archivado
+                          ? "Estudiante archivado: se conserva en el historial del curso."
+                          : "La aprobación del curso se habilita cuando su pago esté al día."}
+                      </p>
+                    ) : (
+                      <div className="px-5 pb-3.5 pl-[4.75rem] flex items-center gap-2">
+                        <span className="font-sans text-xs text-muted-foreground mr-1">
+                          Aprobación del curso:
+                        </span>
+                        <div className="flex rounded-lg overflow-hidden border border-outline-variant text-xs font-semibold font-sans">
+                          <button
+                            disabled={
+                              approving === est.id ||
+                              est.estado_aprobacion_curso === "reprobado"
+                            }
+                            onClick={() =>
+                              handleAprobacion(est.id, "reprobado")
+                            }
+                            className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
+                              est.estado_aprobacion_curso === "reprobado"
+                                ? "bg-danger text-white"
+                                : "text-muted-foreground hover:bg-surface-container"
+                            }`}
+                          >
+                            <X className="w-3 h-3" />
+                            Reprobado
+                          </button>
+                          <div className="w-px bg-outline-variant" />
+                          <button
+                            disabled={
+                              approving === est.id ||
+                              est.estado_aprobacion_curso === "pendiente"
+                            }
+                            onClick={() =>
+                              handleAprobacion(est.id, "pendiente")
+                            }
+                            className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
+                              est.estado_aprobacion_curso === "pendiente"
+                                ? "bg-warning text-white"
+                                : "text-muted-foreground hover:bg-surface-container"
+                            }`}
+                          >
+                            {approving === est.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : null}
+                            Pendiente
+                          </button>
+                          <div className="w-px bg-outline-variant" />
+                          <button
+                            disabled={
+                              approving === est.id ||
+                              est.estado_aprobacion_curso === "aprobado"
+                            }
+                            onClick={() => handleAprobacion(est.id, "aprobado")}
+                            className={`flex items-center gap-1 px-3 py-1.5 transition-colors disabled:opacity-50 ${
+                              est.estado_aprobacion_curso === "aprobado"
+                                ? "bg-success text-white"
+                                : "text-muted-foreground hover:bg-surface-container"
+                            }`}
+                          >
+                            <Check className="w-3 h-3" />
+                            Aprobado
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </>
