@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { FechaHabilPicker } from "@/components/fecha-habil-picker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -62,6 +63,7 @@ export function CursoPanel({
 
   const profesorId = useWatch({ control, name: "profesor_id" });
   const estado = useWatch({ control, name: "estado" });
+  const fechaInicio = useWatch({ control, name: "fecha_inicio" });
 
   const crear = useMutation({
     mutationFn: (datos: CursoForm) =>
@@ -202,10 +204,33 @@ export function CursoPanel({
       <FormSection title="Calendario">
         <FormGrid>
           <Field label="Fecha de inicio" error={errores.fecha_inicio?.message}>
-            <Input type="date" {...form.register("fecha_inicio")} />
+            <Controller
+              control={form.control}
+              name="fecha_inicio"
+              render={({ field }) => (
+                <FechaHabilPicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  invalid={!!errores.fecha_inicio}
+                />
+              )}
+            />
           </Field>
           <Field label="Fecha de fin" error={errores.fecha_fin?.message}>
-            <Input type="date" {...form.register("fecha_fin")} />
+            <Controller
+              control={form.control}
+              name="fecha_fin"
+              render={({ field }) => (
+                <FechaHabilPicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  min={fechaInicio}
+                  invalid={!!errores.fecha_fin}
+                />
+              )}
+            />
           </Field>
         </FormGrid>
       </FormSection>

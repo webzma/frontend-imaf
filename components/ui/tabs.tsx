@@ -44,7 +44,9 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "relative -mb-px shrink-0 border-b-2 border-transparent px-4 py-2.5 font-sans text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors outline-none hover:text-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset data-[state=active]:border-primary data-[state=active]:text-on-surface disabled:pointer-events-none disabled:opacity-40 [&_svg]:size-4 [&_svg]:shrink-0",
+        // inline-flex: el preflight deja los SVG en `display: block` y el
+        // icono quedaba en su propia línea, encima del texto.
+        "relative -mb-px inline-flex shrink-0 items-center gap-2 border-b-2 border-transparent px-4 py-2.5 font-sans text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors outline-none hover:text-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset data-[state=active]:border-primary data-[state=active]:text-on-surface disabled:pointer-events-none disabled:opacity-40 [&_svg]:size-4 [&_svg]:shrink-0",
         className,
       )}
       {...props}

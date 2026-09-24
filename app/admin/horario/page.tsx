@@ -63,7 +63,7 @@ export default function HorarioPage() {
     d.setHours(0, 0, 0, 0);
     return d;
   });
-  const [showCursoRanges, setShowCursoRanges] = useState(true);
+  const [showCursoRanges, setShowCursoRanges] = useState(false);
 
   const [filterCurso, setFilterCurso] = useState<string>("todos");
   const [filterInstructor, setFilterInstructor] = useState<string>("todos");

@@ -5,6 +5,8 @@ import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate, formatPrice } from "@/lib/format";
+import { ESTILO_CURSO, estadoVisualCurso } from "@/lib/curso-estado";
+import { cn } from "@/lib/utils";
 import type { Curso } from "../tipos";
 
 /**
@@ -20,6 +22,9 @@ export function CursoCard({ curso }: { curso: Curso }) {
     curso.cupos_restantes ?? curso.limite_cupo - participantes;
   const ocupacion = Math.round((participantes / curso.limite_cupo) * 100);
   const sinCupo = cuposRestantes <= 0;
+  const estado = estadoVisualCurso(curso);
+  const estilo = ESTILO_CURSO[estado.clave];
+  const apagado = estado.clave === "inactivo" || estado.clave === "finalizado";
 
   const tono = sinCupo
     ? { texto: "text-danger", barra: "bg-danger" }
@@ -30,20 +35,34 @@ export function CursoCard({ curso }: { curso: Curso }) {
   return (
     <Link
       href={`/admin/cursos/${curso.id}`}
-      className="group flex flex-col overflow-hidden rounded-sm bg-surface-container-lowest ambient-shadow transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+      data-estado={estado.clave}
+      className={cn(
+        "group flex flex-col overflow-hidden rounded-sm bg-surface-container-lowest ambient-shadow transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
+        estilo.tarjeta,
+      )}
     >
-      <div className="h-1 gradient-primary" />
+      <div className={cn("h-1", estilo.franja)} />
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-4 flex items-center justify-between gap-2">
-          <span className="rounded-sm bg-primary-container px-2.5 py-1 font-mono text-xs font-bold text-on-primary-container">
+          <span
+            className={cn(
+              "rounded-sm px-2.5 py-1 font-mono text-xs font-bold",
+              apagado
+                ? "bg-surface-container-high text-muted-foreground"
+                : "bg-primary-container text-on-primary-container",
+            )}
+          >
             {curso.codigo}
           </span>
-          <Badge variant={curso.estado}>
-            {curso.estado === "activo" ? "Activo" : "Inactivo"}
-          </Badge>
+          <Badge variant={estado.clave}>{estado.etiqueta}</Badge>
         </div>
 
-        <h3 className="mb-1 font-serif text-2xl leading-tight font-light tight-tracking text-on-surface">
+        <h3
+          className={cn(
+            "mb-1 font-serif text-2xl leading-tight font-light tight-tracking",
+            estilo.titulo,
+          )}
+        >
           {curso.nombre}
         </h3>
 
@@ -63,10 +82,18 @@ export function CursoCard({ curso }: { curso: Curso }) {
         </p>
 
         {(curso.fecha_inicio || curso.fecha_fin) && (
-          <p className="mb-3 flex items-center gap-1.5 font-sans text-xs text-muted-foreground">
+          <p
+            className={cn(
+              "mb-3 flex items-center gap-1.5 font-sans text-xs",
+              estilo.fecha,
+            )}
+          >
             <CalendarDays aria-hidden="true" className="size-3 shrink-0" />
-            {formatDate(curso.fecha_inicio)}
-            {curso.fecha_fin && ` → ${formatDate(curso.fecha_fin)}`}
+            {estado.clave === "finalizado" && curso.fecha_fin
+              ? `Finalizó el ${formatDate(curso.fecha_fin)}`
+              : `${formatDate(curso.fecha_inicio)}${
+                  curso.fecha_fin ? ` → ${formatDate(curso.fecha_fin)}` : ""
+                }`}
           </p>
         )}
 
@@ -79,8 +106,17 @@ export function CursoCard({ curso }: { curso: Curso }) {
               </span>
               {` / ${curso.limite_cupo} participantes`}
             </span>
-            <span className={`font-sans text-xs font-semibold ${tono.texto}`}>
-              {sinCupo ? "Sin cupo" : `${cuposRestantes} disponibles`}
+            <span
+              className={cn(
+                "font-sans text-xs font-semibold",
+                apagado ? "text-muted-foreground" : tono.texto,
+              )}
+            >
+              {apagado
+                ? "Inscripciones cerradas"
+                : sinCupo
+                  ? "Sin cupo"
+                  : `${cuposRestantes} disponibles`}
             </span>
           </div>
           <div
@@ -88,7 +124,7 @@ export function CursoCard({ curso }: { curso: Curso }) {
             className="h-1.5 overflow-hidden rounded-full bg-outline-variant"
           >
             <div
-              className={`h-full rounded-full ${tono.barra}`}
+              className={cn("h-full rounded-full", estilo.barra ?? tono.barra)}
               style={{ width: `${Math.min(100, ocupacion)}%` }}
             />
           </div>

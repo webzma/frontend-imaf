@@ -2,8 +2,9 @@
 
 import { useState, useEffect, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { FechaHabilPicker } from "@/components/fecha-habil-picker";
 import { toast } from "sonner";
 import { formatDate, formatPrice, formatTime } from "@/lib/format";
 import {
@@ -84,8 +85,58 @@ interface EstudianteEnCurso {
   foto: string | null;
   fecha_inscripcion: string;
   estado: "activo" | "inactivo" | "graduado";
+  /** Pago de la matrícula de ESTE curso. */
+  estado_pago: EstadoPago;
+  /** Estudiante archivado (borrado lógico): sigue en el historial del curso. */
+  deleted_at: string | null;
   user: EstudianteUser;
 }
+
+type EstadoPago = "pendiente" | "aprobado" | "reprobado";
+
+/**
+ * Filtros del listado interno. Antes solo se veía a los inscritos con el pago
+ * aprobado; quien no pagó, estaba inactivo o fue archivado desaparecía.
+ */
+type FiltroListado =
+  | "todos"
+  | "al_dia"
+  | "pago_pendiente"
+  | "pago_rechazado"
+  | "inactivos"
+  | "archivados";
+
+const FILTROS_LISTADO: { key: FiltroListado; label: string }[] = [
+  { key: "todos", label: "Todos" },
+  { key: "al_dia", label: "Al día" },
+  { key: "pago_pendiente", label: "Pago pendiente" },
+  { key: "pago_rechazado", label: "Pago rechazado" },
+  { key: "inactivos", label: "Inactivos" },
+  { key: "archivados", label: "Archivados" },
+];
+
+function cumpleFiltro(e: EstudianteEnCurso, filtro: FiltroListado): boolean {
+  switch (filtro) {
+    case "todos":
+      return true;
+    case "al_dia":
+      return (
+        !e.deleted_at && e.estado_pago === "aprobado" && e.estado !== "inactivo"
+      );
+    case "pago_pendiente":
+      return e.estado_pago === "pendiente";
+    case "pago_rechazado":
+      return e.estado_pago === "reprobado";
+    case "inactivos":
+      return e.estado === "inactivo";
+    case "archivados":
+      return !!e.deleted_at;
+  }
+}
+
+/** Ocupa cupo: pago aprobado y no archivado (igual que el backend). */
+const ocupaCupo = (e: EstudianteEnCurso) =>
+  e.estado_pago === "aprobado" && !e.deleted_at;
 
 interface InstructorUser {
   id: number;
@@ -242,6 +293,7 @@ export default function CursoDetailPage({
   // Search, sort & pagination
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("nombre");
+  const [filtroListado, setFiltroListado] = useState<FiltroListado>("todos");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
 
@@ -262,6 +314,10 @@ export default function CursoDetailPage({
       estado: "activo",
       profesor_id: "",
     },
+  });
+  const editFechaInicio = useWatch({
+    control: editForm.control,
+    name: "fecha_inicio",
   });
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
@@ -355,10 +411,16 @@ export default function CursoDetailPage({
           const listaEstudiantes = Array.isArray(estudiantesData)
             ? estudiantesData
             : (estudiantesData.data ?? []);
+          // Quien figura sin pagar en este curso también se puede añadir:
+          // así el admin da por pagada su matrícula.
+          const yaInscritos = new Set(
+            (cursoData.estudiantes ?? [])
+              .filter(ocupaCupo)
+              .map((e: EstudianteEnCurso) => e.id),
+          );
           setSinCurso(
             listaEstudiantes.filter(
-              (e: EstudianteSinCurso) =>
-                e.curso === null || e.curso.id !== cursoData.id,
+              (e: EstudianteSinCurso) => !yaInscritos.has(e.id),
             ),
           );
           setInstructores(
@@ -392,16 +454,31 @@ export default function CursoDetailPage({
     );
   }, [curso]);
 
+  const conteoFiltros = useMemo(() => {
+    const conteo = {} as Record<FiltroListado, number>;
+    for (const { key } of FILTROS_LISTADO) {
+      conteo[key] =
+        curso?.estudiantes.filter((e) => cumpleFiltro(e, key)).length ?? 0;
+    }
+    return conteo;
+  }, [curso]);
+
+  const inscritosVigentes = useMemo(
+    () => curso?.estudiantes.filter(ocupaCupo).length ?? 0,
+    [curso],
+  );
+
   const filtered = useMemo(() => {
     if (!curso) return [];
     const q = search.toLowerCase();
     return curso.estudiantes.filter(
       (e) =>
-        e.nombre.toLowerCase().includes(q) ||
-        e.cedula.includes(q) ||
-        e.user.email.toLowerCase().includes(q),
+        cumpleFiltro(e, filtroListado) &&
+        (e.nombre.toLowerCase().includes(q) ||
+          e.cedula.includes(q) ||
+          e.user.email.toLowerCase().includes(q)),
     );
-  }, [curso, search]);
+  }, [curso, search, filtroListado]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -433,12 +510,22 @@ export default function CursoDetailPage({
   const handleExportCSV = () => {
     if (!curso) return;
     const rows = [
-      ["Nombre", "Cédula", "Email", "Estado", "Fecha Inscripción"],
+      [
+        "Nombre",
+        "Cédula",
+        "Email",
+        "Estado",
+        "Pago",
+        "Archivado",
+        "Fecha Inscripción",
+      ],
       ...curso.estudiantes.map((e) => [
         e.nombre,
         e.cedula,
         e.user.email,
         e.estado,
+        e.estado_pago,
+        e.deleted_at ? "sí" : "no",
         e.fecha_inscripcion,
       ]),
     ];
@@ -546,15 +633,20 @@ export default function CursoDetailPage({
   ) => {
     setStatusChanging(estudiante.id);
     try {
+      // `PUT /estudiantes/{id}` exige el registro completo (municipio,
+      // dirección) y devolvía 422 en silencio: el estado no cambiaba.
       const res = await fetch(
-        `${process.env.API_URL}api/admin/estudiantes/${estudiante.id}`,
+        `${process.env.API_URL}api/admin/estudiantes/estado-masivo`,
         {
-          method: "PUT",
+          method: "PATCH",
           headers: getAuthHeaders(),
-          body: JSON.stringify({ estado: newEstado }),
+          body: JSON.stringify({ ids: [estudiante.id], estado: newEstado }),
         },
       );
-      if (!res.ok) return;
+      if (!res.ok) {
+        toast.error("No se pudo cambiar el estado del estudiante.");
+        return;
+      }
       setCurso((prev) =>
         prev
           ? {
@@ -576,11 +668,11 @@ export default function CursoDetailPage({
     setAddError("");
     try {
       const res = await fetch(
-        `${process.env.API_URL}api/admin/estudiantes/${selectedId}`,
+        `${process.env.API_URL}api/admin/cursos/${curso.id}/estudiantes`,
         {
-          method: "PUT",
+          method: "POST",
           headers: getAuthHeaders(),
-          body: JSON.stringify({ curso_id: curso.id }),
+          body: JSON.stringify({ estudiante_id: Number(selectedId) }),
         },
       );
       if (!res.ok) {
@@ -589,8 +681,17 @@ export default function CursoDetailPage({
         return;
       }
       const updated: EstudianteEnCurso = await res.json();
+      // Si ya figuraba sin pagar, se reemplaza su fila en lugar de duplicarla.
       setCurso((prev) =>
-        prev ? { ...prev, estudiantes: [...prev.estudiantes, updated] } : prev,
+        prev
+          ? {
+              ...prev,
+              estudiantes: [
+                ...prev.estudiantes.filter((e) => e.id !== updated.id),
+                updated,
+              ],
+            }
+          : prev,
       );
       setSinCurso((prev) => prev.filter((e) => e.id !== updated.id));
       setSelectedId("");
@@ -603,17 +704,52 @@ export default function CursoDetailPage({
     }
   };
 
+  /** Da por pagada la matrícula de quien figura con el pago pendiente o rechazado. */
+  const handleMarcarPagado = async (estudiante: EstudianteEnCurso) => {
+    if (!curso) return;
+    setStatusChanging(estudiante.id);
+    try {
+      const res = await fetch(
+        `${process.env.API_URL}api/admin/cursos/${curso.id}/estudiantes`,
+        {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ estudiante_id: estudiante.id }),
+        },
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        toast.error(err?.message || "No se pudo registrar el pago.");
+        return;
+      }
+      const updated: EstudianteEnCurso = await res.json();
+      setCurso((prev) =>
+        prev
+          ? {
+              ...prev,
+              estudiantes: prev.estudiantes.map((e) =>
+                e.id === updated.id ? updated : e,
+              ),
+            }
+          : prev,
+      );
+      setSinCurso((prev) => prev.filter((e) => e.id !== updated.id));
+      toast.success(`${estudiante.nombre} queda inscrito con el pago al día.`);
+    } finally {
+      setStatusChanging(null);
+    }
+  };
+
   const handleRemove = async () => {
     if (!removeTarget) return;
     setRemoveSubmitting(true);
     setRemoveError("");
     try {
       const res = await fetch(
-        `${process.env.API_URL}api/admin/estudiantes/${removeTarget.id}`,
+        `${process.env.API_URL}api/admin/cursos/${curso!.id}/estudiantes/${removeTarget.id}`,
         {
-          method: "PUT",
+          method: "DELETE",
           headers: getAuthHeaders(),
-          body: JSON.stringify({ curso_id: null }),
         },
       );
       if (!res.ok) {
@@ -621,7 +757,6 @@ export default function CursoDetailPage({
         setRemoveError(err.message || "Error al desinscribir al estudiante.");
         return;
       }
-      const updated = await res.json();
       setCurso((prev) =>
         prev
           ? {
@@ -632,7 +767,22 @@ export default function CursoDetailPage({
             }
           : prev,
       );
-      setSinCurso((prev) => [...prev, updated]);
+      if (!removeTarget.deleted_at) {
+        setSinCurso((prev) =>
+          prev.some((e) => e.id === removeTarget.id)
+            ? prev
+            : [
+                ...prev,
+                {
+                  id: removeTarget.id,
+                  nombre: removeTarget.nombre,
+                  cedula: removeTarget.cedula,
+                  user: removeTarget.user,
+                  curso: null,
+                },
+              ],
+        );
+      }
       setRemoveTarget(null);
       toast.success("Estudiante desinscrito correctamente");
     } catch {
@@ -1082,6 +1232,39 @@ export default function CursoDetailPage({
                 </div>
               </div>
 
+              {/* Filtros del listado interno */}
+              {curso.estudiantes.length > 0 && (
+                <div
+                  role="group"
+                  aria-label="Filtrar estudiantes"
+                  className="mb-3 flex flex-wrap gap-2"
+                >
+                  {FILTROS_LISTADO.filter(
+                    ({ key }) => key === "todos" || conteoFiltros[key] > 0,
+                  ).map(({ key, label }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={filtroListado === key}
+                      onClick={() => {
+                        setFiltroListado(key);
+                        setPage(1);
+                      }}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-sans text-xs font-medium transition-colors ${
+                        filtroListado === key
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-outline-variant text-muted-foreground hover:bg-surface-container hover:text-on-surface"
+                      }`}
+                    >
+                      {label}
+                      <span className="tabular-nums opacity-80">
+                        {conteoFiltros[key]}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Search */}
               {curso.estudiantes.length > 0 && (
                 <div className="relative mb-4 max-w-sm">
@@ -1100,14 +1283,24 @@ export default function CursoDetailPage({
 
               <div className="bg-surface-container-low rounded-lg overflow-hidden ambient-shadow">
                 {filtered.length === 0 ? (
-                  search ? (
+                  search || filtroListado !== "todos" ? (
                     <EmptyState
                       icon={SearchX}
                       title="Sin resultados"
-                      description={`Ningún estudiante de este curso coincide con "${search}".`}
+                      description={
+                        search
+                          ? `Ningún estudiante de este curso coincide con "${search}".`
+                          : "Ningún estudiante de este curso está en este grupo."
+                      }
                       action={
-                        <Button variant="outline" onClick={() => setSearch("")}>
-                          Limpiar búsqueda
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setSearch("");
+                            setFiltroListado("todos");
+                          }}
+                        >
+                          Ver todos
                         </Button>
                       }
                     />
@@ -1176,90 +1369,156 @@ export default function CursoDetailPage({
                           </tr>
                         </thead>
                         <tbody>
-                          {paginated.map((e, i) => (
-                            <tr
-                              key={e.id}
-                              className={`hover:bg-surface-container transition-colors ${
-                                i < paginated.length - 1
-                                  ? "border-b border-outline-variant"
-                                  : ""
-                              }`}
-                            >
-                              <td className="px-6 py-3.5 whitespace-nowrap">
-                                <div className="flex items-center gap-3">
-                                  <Avatar
-                                    src={e.foto}
-                                    name={e.nombre}
-                                    size={8}
-                                  />
-                                  <div>
-                                    <p className="font-sans font-semibold text-on-surface text-sm">
-                                      {e.nombre}
-                                    </p>
-                                    <p className="font-sans text-xs text-muted-foreground">
-                                      {e.user.email}
-                                    </p>
+                          {paginated.map((e, i) => {
+                            const archivado = !!e.deleted_at;
+                            const sinPagar = e.estado_pago !== "aprobado";
+                            // Siguen en la lista, pero se distinguen de un
+                            // vistazo de quien está al día.
+                            const apagado =
+                              archivado || sinPagar || e.estado === "inactivo";
+                            return (
+                              <tr
+                                key={e.id}
+                                data-estado-pago={e.estado_pago}
+                                className={`hover:bg-surface-container transition-colors ${
+                                  i < paginated.length - 1
+                                    ? "border-b border-outline-variant"
+                                    : ""
+                                } ${apagado ? "bg-surface-container-lowest/60" : ""}`}
+                              >
+                                <td className="px-6 py-3.5 whitespace-nowrap">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar
+                                      src={e.foto}
+                                      name={e.nombre}
+                                      size={8}
+                                      className={
+                                        apagado ? "grayscale opacity-70" : ""
+                                      }
+                                    />
+                                    <div>
+                                      <p
+                                        className={`font-sans font-semibold text-sm ${
+                                          apagado
+                                            ? "text-muted-foreground"
+                                            : "text-on-surface"
+                                        } ${archivado ? "line-through" : ""}`}
+                                      >
+                                        {e.nombre}
+                                      </p>
+                                      <p className="font-sans text-xs text-muted-foreground">
+                                        {e.user.email}
+                                      </p>
+                                      {(sinPagar || archivado) && (
+                                        <div className="mt-1 flex flex-wrap gap-1.5">
+                                          {e.estado_pago === "pendiente" && (
+                                            <Badge
+                                              variant="pendiente"
+                                              className="text-[10px]"
+                                            >
+                                              Pago pendiente
+                                            </Badge>
+                                          )}
+                                          {e.estado_pago === "reprobado" && (
+                                            <Badge
+                                              variant="rechazado"
+                                              className="text-[10px]"
+                                            >
+                                              Pago rechazado
+                                            </Badge>
+                                          )}
+                                          {archivado && (
+                                            <Badge
+                                              variant="neutral"
+                                              className="text-[10px]"
+                                            >
+                                              Archivado
+                                            </Badge>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-3.5 font-mono text-sm text-muted-foreground">
-                                {e.cedula}
-                              </td>
-                              <td className="px-6 py-3.5 font-sans text-sm text-muted-foreground whitespace-nowrap">
-                                {formatDate(e.fecha_inscripcion)}
-                              </td>
-                              <td className="px-6 py-3.5">
-                                {statusChanging === e.id ? (
-                                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                                ) : (
-                                  <Select
-                                    value={e.estado}
-                                    onValueChange={(v) =>
-                                      handleStudentStatus(
-                                        e,
-                                        v as "activo" | "inactivo" | "graduado",
-                                      )
-                                    }
-                                  >
-                                    <SelectTrigger
-                                      className={`w-32 h-7 text-xs font-semibold border-0 px-2.5 rounded-full ${
-                                        e.estado === "activo"
-                                          ? "bg-success-container text-on-success-container dark:bg-success-container dark:text-success"
-                                          : e.estado === "inactivo"
-                                            ? "bg-warning-container text-on-warning-container dark:bg-warning-container dark:text-warning"
-                                            : "bg-primary-container text-on-primary-container"
-                                      }`}
+                                </td>
+                                <td className="px-6 py-3.5 font-mono text-sm text-muted-foreground">
+                                  {e.cedula}
+                                </td>
+                                <td className="px-6 py-3.5 font-sans text-sm text-muted-foreground whitespace-nowrap">
+                                  {formatDate(e.fecha_inscripcion)}
+                                </td>
+                                <td className="px-6 py-3.5">
+                                  {statusChanging === e.id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                                  ) : archivado ? (
+                                    <Badge
+                                      variant="neutral"
+                                      className="capitalize"
                                     >
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="activo">
-                                        Activo
-                                      </SelectItem>
-                                      <SelectItem value="inactivo">
-                                        Inactivo
-                                      </SelectItem>
-                                      <SelectItem value="graduado">
-                                        Graduado
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                )}
-                              </td>
-                              <td className="px-4 py-3.5">
-                                <button
-                                  onClick={() => {
-                                    setRemoveTarget(e);
-                                    setRemoveError("");
-                                  }}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
-                                >
-                                  <UserMinus className="w-3.5 h-3.5" />
-                                  Quitar
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                                      {e.estado}
+                                    </Badge>
+                                  ) : (
+                                    <Select
+                                      value={e.estado}
+                                      onValueChange={(v) =>
+                                        handleStudentStatus(
+                                          e,
+                                          v as
+                                            | "activo"
+                                            | "inactivo"
+                                            | "graduado",
+                                        )
+                                      }
+                                    >
+                                      <SelectTrigger
+                                        className={`w-32 h-7 text-xs font-semibold border-0 px-2.5 rounded-full ${
+                                          e.estado === "activo"
+                                            ? "bg-success-container text-on-success-container dark:bg-success-container dark:text-success"
+                                            : e.estado === "inactivo"
+                                              ? "bg-warning-container text-on-warning-container dark:bg-warning-container dark:text-warning"
+                                              : "bg-primary-container text-on-primary-container"
+                                        }`}
+                                      >
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="activo">
+                                          Activo
+                                        </SelectItem>
+                                        <SelectItem value="inactivo">
+                                          Inactivo
+                                        </SelectItem>
+                                        <SelectItem value="graduado">
+                                          Graduado
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  )}
+                                </td>
+                                <td className="px-4 py-3.5 whitespace-nowrap">
+                                  {sinPagar && !archivado && (
+                                    <button
+                                      onClick={() => handleMarcarPagado(e)}
+                                      disabled={statusChanging === e.id}
+                                      className="mr-1 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-muted-foreground hover:text-success hover:bg-success-container transition-colors disabled:opacity-50"
+                                    >
+                                      <Wallet className="w-3.5 h-3.5" />
+                                      Marcar pagado
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => {
+                                      setRemoveTarget(e);
+                                      setRemoveError("");
+                                    }}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-muted-foreground hover:text-danger hover:bg-danger-container transition-colors"
+                                  >
+                                    <UserMinus className="w-3.5 h-3.5" />
+                                    Quitar
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -1495,14 +1754,12 @@ export default function CursoDetailPage({
               </p>
               <div className="flex items-center gap-4">
                 <OcupacionRing
-                  inscritos={curso.estudiantes.length}
+                  inscritos={inscritosVigentes}
                   limite={curso.limite_cupo}
                 />
                 <div className="min-w-0">
                   <p className="font-sans text-sm text-on-surface">
-                    <strong className="text-lg">
-                      {curso.estudiantes.length}
-                    </strong>
+                    <strong className="text-lg">{inscritosVigentes}</strong>
                     <span className="text-muted-foreground">
                       {" "}
                       de {curso.limite_cupo}
@@ -1535,10 +1792,9 @@ export default function CursoDetailPage({
                       {curso.minimo_estudiantes}
                     </span>
                   </div>
-                  {curso.estudiantes.length < curso.minimo_estudiantes && (
+                  {inscritosVigentes < curso.minimo_estudiantes && (
                     <p className="mt-2 font-sans text-xs text-warning">
-                      Faltan{" "}
-                      {curso.minimo_estudiantes - curso.estudiantes.length} para
+                      Faltan {curso.minimo_estudiantes - inscritosVigentes} para
                       alcanzar el mínimo.
                     </p>
                   )}
@@ -1791,12 +2047,20 @@ export default function CursoDetailPage({
                 <label className="font-sans text-xs font-medium text-on-surface">
                   Fecha de inicio
                 </label>
-                <Input
-                  type="date"
-                  {...editForm.register("fecha_inicio", {
-                    onChange: () => editForm.trigger("fecha_inicio"),
-                  })}
-                  className="font-sans text-sm"
+                <Controller
+                  control={editForm.control}
+                  name="fecha_inicio"
+                  render={({ field }) => (
+                    <FechaHabilPicker
+                      value={field.value}
+                      onChange={(v) => {
+                        field.onChange(v);
+                        editForm.trigger("fecha_inicio");
+                      }}
+                      onBlur={field.onBlur}
+                      invalid={!!editForm.formState.errors.fecha_inicio}
+                    />
+                  )}
                 />
                 {editForm.formState.errors.fecha_inicio && (
                   <p className="text-xs text-danger">
@@ -1808,12 +2072,21 @@ export default function CursoDetailPage({
                 <label className="font-sans text-xs font-medium text-on-surface">
                   Fecha de fin
                 </label>
-                <Input
-                  type="date"
-                  {...editForm.register("fecha_fin", {
-                    onChange: () => editForm.trigger("fecha_fin"),
-                  })}
-                  className="font-sans text-sm"
+                <Controller
+                  control={editForm.control}
+                  name="fecha_fin"
+                  render={({ field }) => (
+                    <FechaHabilPicker
+                      value={field.value}
+                      onChange={(v) => {
+                        field.onChange(v);
+                        editForm.trigger("fecha_fin");
+                      }}
+                      onBlur={field.onBlur}
+                      min={editFechaInicio}
+                      invalid={!!editForm.formState.errors.fecha_fin}
+                    />
+                  )}
                 />
                 {editForm.formState.errors.fecha_fin && (
                   <p className="text-xs text-danger">

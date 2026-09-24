@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import bancosData from "@/data/bancos.json";
 import { Badge } from "@/components/ui/badge";
+import { ModalidadBadge } from "@/components/modalidad-badge";
+import { MODALIDAD, SEDE } from "@/lib/modalidad";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +50,7 @@ import {
   ArrowUpRight,
   Copy,
   Check,
+  MapPin,
 } from "lucide-react";
 
 /* ── Types ── */
@@ -807,6 +810,7 @@ export default function CursoDetallePage({
                       <Hash className="w-2.5 h-2.5" />
                       {curso.codigo}
                     </span>
+                    <ModalidadBadge />
                     {esMiCurso && (
                       <span className="inline-flex items-center gap-1.5 font-sans text-[10px] tracking-[0.22em] uppercase text-primary font-bold">
                         <Sparkles className="w-3 h-3" />
@@ -859,6 +863,23 @@ export default function CursoDetallePage({
                       </div>
                     </div>
                   )}
+                  <div className="flex items-center gap-3 sm:col-span-2 sm:order-last">
+                    <div className="w-9 h-9 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0">
+                      <MapPin className="w-4 h-4 text-on-primary-container" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-semibold">
+                        Modalidad
+                      </p>
+                      <p className="font-sans text-sm text-on-surface">
+                        <span className="font-semibold">{MODALIDAD}</span>
+                        <span className="text-muted-foreground">
+                          {" "}
+                          · Sede IMAF: {SEDE}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-md bg-primary-container/70 flex items-center justify-center shrink-0">
                       <Users className="w-4 h-4 text-on-primary-container" />
@@ -961,7 +982,9 @@ export default function CursoDetallePage({
                     </h3>
                     <p className="font-sans text-xs text-muted-foreground mt-1 max-w-md">
                       Paga por transferencia, pago móvil o efectivo y reporta tu
-                      pago para formalizar tu inscripción.
+                      pago para formalizar tu inscripción. Las clases son
+                      presenciales: deberás asistir a la sede IMAF en los
+                      horarios del curso.
                     </p>
                   </div>
                 </div>

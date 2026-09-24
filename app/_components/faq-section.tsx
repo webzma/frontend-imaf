@@ -9,6 +9,11 @@ import {
 
 const FAQ_ITEMS = [
   {
+    question: "¿Los cursos son presenciales o en línea?",
+    answer:
+      "Toda la oferta de capacitación de IMAF se dicta bajo la modalidad presencial, en nuestra sede: 5ta av. entre calles 29 y 30, antigua sede de la Unidad de Diálisis. La plataforma sirve para inscribirte, pagar, consultar tu horario y descargar tu certificado, pero las clases no se imparten en línea.",
+  },
+  {
     question: "¿Cómo me registro en IMAF?",
     answer:
       "Crea tu cuenta en esta plataforma con tu correo electrónico y una contraseña. Luego, explora los cursos disponibles, selecciona el que se ajuste a tus metas y completa tu inscripción. Si el curso tiene costo, podrás pagar en línea (total o por partes). Recibirás una confirmación con la sede, horario y requisitos para iniciar.",
@@ -21,17 +26,12 @@ const FAQ_ITEMS = [
   {
     question: "¿Los cursos son gratuitos?",
     answer:
-      "IMAF ofrece ambas modalidades: cursos gratuitos para comunidades priorizadas y cursos con costo de tarifa accesible. Cada curso indica claramente su modalidad en la ficha informativa. Los pagos con costo pueden realizarse de contado o por partes.",
+      "IMAF ofrece ambas opciones: cursos gratuitos para comunidades priorizadas y cursos con costo de tarifa accesible. Cada curso indica su precio en la ficha informativa. Los pagos con costo pueden realizarse de contado o por partes. En ambos casos las clases son presenciales.",
   },
   {
-    question: "¿Cómo funciona el sistema de certificados?",
+    question: "¿Dónde queda la sede?",
     answer:
-      "Al completar todas las lecciones y aprobar las evaluaciones de un curso, recibirás automáticamente un certificado digital que puedes descargar y compartir en tus redes profesionales.",
-  },
-  {
-    question: "¿Dónde se imparten los cursos?",
-    answer:
-      "Todos los cursos se dictan de forma presencial en nuestra sede IMAF: 5ta av. entre calles 29 y 30, antigua sede de la Unidad de Diálisis. Contamos con espacios accesibles, equipados y diseñados para el aprendizaje práctico. Te recomendamos llegar 15 minutos antes de tu primera clase.",
+      "Nuestra sede IMAF está en la 5ta av. entre calles 29 y 30, antigua sede de la Unidad de Diálisis. Contamos con espacios accesibles, equipados y diseñados para el aprendizaje práctico. Te recomendamos llegar 15 minutos antes de tu primera clase.",
   },
   {
     question: "¿Los cursos tienen horarios fijos?",
@@ -41,7 +41,7 @@ const FAQ_ITEMS = [
   {
     question: "¿Cómo funciona el sistema de certificados?",
     answer:
-      "Al completar la asistencia requerida y aprobar las evaluaciones prácticas de tu curso presencial, recibirás un certificado oficial emitido por IMAF, con validez institucional. Podrás descargarlo desde tu cuenta o recogerlo en sede, según la modalidad que se indique al finalizar tu formación.",
+      "Al completar la asistencia requerida y aprobar las evaluaciones prácticas de tu curso presencial, recibirás un certificado oficial emitido por IMAF, con validez institucional. Podrás descargarlo desde tu cuenta o recogerlo en sede, según se indique al finalizar tu formación.",
   },
   {
     question: "¿Qué formas de pago aceptan?",

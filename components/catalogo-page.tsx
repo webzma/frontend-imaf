@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Plus, Search, SearchX, Trash2 } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -22,21 +22,29 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { apiFetch, mensajeDeError } from "@/lib/api-client";
+import { claveNombre, validarNombreCatalogo } from "@/lib/catalogo";
 import { adminKeys } from "@/lib/query-keys";
 import type { CatalogoSpec } from "@/lib/admin-nav";
 
 interface CatalogoItem {
   id: number;
   nombre: string;
+  /** Instructores que tienen asignada esta opción. */
+  profesores_count?: number;
 }
+
+/** A partir de cuántos elementos aparece el buscador. */
+const MINIMO_PARA_BUSCAR = 8;
+
+const instructores = (n: number) =>
+  `${n} ${n === 1 ? "instructor" : "instructores"}`;
 
 /**
  * CRUD de un catálogo de instructores.
  *
- * Los cuatro catálogos son la misma pantalla con otro sustantivo. La versión
- * anterior mantenía la lista en `useState` y la sincronizaba a mano tras cada
- * operación; aquí la caché de react-query es la única copia y la lista se
- * invalida al terminar cada mutación.
+ * Los cuatro catálogos son la misma pantalla con otro sustantivo. La caché de
+ * react-query es la única copia de la lista y se invalida al terminar cada
+ * mutación.
  */
 export default function CatalogoPage({
   spec,
@@ -48,9 +56,9 @@ export default function CatalogoPage({
   const { slug, title, singular, plural, articulo, icon: Icon } = spec;
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
-  const editInputRef = useRef<HTMLInputElement>(null);
 
   const [nombre, setNombre] = useState("");
+  const [busqueda, setBusqueda] = useState("");
   const [editando, setEditando] = useState<CatalogoItem | null>(null);
   const [editNombre, setEditNombre] = useState("");
   const [borrando, setBorrando] = useState<CatalogoItem | null>(null);
@@ -67,7 +75,14 @@ export default function CatalogoPage({
     },
   });
 
-  const items = lista.data ?? [];
+  const items = useMemo(() => lista.data ?? [], [lista.data]);
+
+  const visibles = useMemo(() => {
+    const clave = claveNombre(busqueda);
+    return clave
+      ? items.filter((item) => claveNombre(item.nombre).includes(clave))
+      : items;
+  }, [items, busqueda]);
 
   // Concuerda con el género del sustantivo: "tipo de contrato creada" era la
   // clase de detalle que hace que el sistema se sienta ajeno.
@@ -77,6 +92,19 @@ export default function CatalogoPage({
 
   const capitalizar = (texto: string) =>
     texto.charAt(0).toUpperCase() + texto.slice(1);
+
+  const duplicado = `Ya existe ${articulo === "la" ? "una" : "un"} ${singular} con ese nombre.`;
+
+  // Se valida mientras se escribe con la misma regla que el backend: antes el
+  // error solo llegaba al enviar y seguía en pantalla aunque se corrigiera.
+  const errorNombre = validarNombreCatalogo(nombre, items, { duplicado });
+  const errorEdicion = editando
+    ? validarNombreCatalogo(editNombre, items, {
+        excluirId: editando.id,
+        duplicado,
+      })
+    : null;
+  const sinCambios = !!editando && editNombre.trim() === editando.nombre.trim();
 
   const invalidar = () => queryClient.invalidateQueries({ queryKey: listaKey });
 
@@ -125,52 +153,71 @@ export default function CatalogoPage({
     setEditando(item);
     setEditNombre(item.nombre);
     actualizar.reset();
-    setTimeout(() => editInputRef.current?.focus(), 100);
   };
+
+  const errorAlta =
+    errorNombre ??
+    (crear.isError
+      ? mensajeDeError(crear.error, `No se pudo crear ${articulo} ${singular}.`)
+      : null);
+
+  const enUsoAlBorrar = borrando?.profesores_count ?? 0;
 
   return (
     <div className={className}>
       {/* ── Alta ── */}
       <form
+        noValidate
         onSubmit={(e) => {
           e.preventDefault();
-          if (nombre.trim()) crear.mutate(nombre.trim());
+          if (nombre.trim() && !errorNombre) crear.mutate(nombre.trim());
         }}
-        className="mb-6 flex max-w-lg items-end gap-3"
+        className="mb-6 max-w-2xl"
       >
-        <div className="grid flex-1 gap-2">
-          <Label htmlFor={`nuevo-${slug}`}>Nombre</Label>
-          <Input
-            ref={inputRef}
-            id={`nuevo-${slug}`}
-            placeholder={`Nuev${vocal} ${singular}…`}
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            aria-invalid={crear.isError || undefined}
-          />
+        <Label htmlFor={`nuevo-${slug}`} className="mb-2">
+          Nombre
+        </Label>
+        <div className="flex items-start gap-3">
+          <div className="flex-1">
+            <Input
+              ref={inputRef}
+              id={`nuevo-${slug}`}
+              placeholder={`Nuev${vocal} ${singular}…`}
+              value={nombre}
+              maxLength={255}
+              autoComplete="off"
+              onChange={(e) => {
+                setNombre(e.target.value);
+                // El error del servidor era sobre el valor anterior.
+                if (crear.isError) crear.reset();
+              }}
+              aria-invalid={!!errorAlta || undefined}
+              aria-describedby={errorAlta ? `nuevo-${slug}-error` : undefined}
+            />
+            {errorAlta && (
+              <p
+                id={`nuevo-${slug}-error`}
+                role="alert"
+                className="mt-1.5 font-sans text-xs text-danger"
+              >
+                {errorAlta}
+              </p>
+            )}
+          </div>
+          <Button
+            type="submit"
+            disabled={crear.isPending || !nombre.trim() || !!errorNombre}
+            className="h-10 shrink-0 gap-2"
+          >
+            {crear.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Plus className="size-4" />
+            )}
+            Guardar
+          </Button>
         </div>
-        <Button
-          type="submit"
-          disabled={crear.isPending || !nombre.trim()}
-          className="h-10 gap-2"
-        >
-          {crear.isPending ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Plus className="size-4" />
-          )}
-          Guardar
-        </Button>
       </form>
-
-      {crear.isError && (
-        <Alert variant="danger" className="mb-6 max-w-lg">
-          {mensajeDeError(
-            crear.error,
-            `No se pudo crear ${articulo} ${singular}.`,
-          )}
-        </Alert>
-      )}
 
       {/* ── Lista ── */}
       {lista.isLoading ? (
@@ -182,7 +229,7 @@ export default function CatalogoPage({
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between px-6 py-4"
+                className="flex items-center justify-between px-6 py-3"
               >
                 <Skeleton className="h-4 w-48" />
                 <div className="flex gap-2">
@@ -205,48 +252,95 @@ export default function CatalogoPage({
           icon={Icon}
           title={`Aún no hay ${title.toLowerCase()}`}
           description={`Crea ${articulo} primer${articulo === "la" ? "a" : ""} ${singular} para poder usarl${vocal} al registrar instructores.`}
+          className="max-w-2xl"
         />
       ) : (
         <div className="max-w-2xl overflow-hidden rounded-sm bg-surface-container-low ambient-shadow">
-          <div className="border-b border-outline-variant px-6 py-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-6 py-3">
             <p
               aria-live="polite"
               className="font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground"
             >
-              {items.length} {items.length === 1 ? singular : plural}
+              {busqueda
+                ? `${visibles.length} de ${items.length} ${plural}`
+                : `${items.length} ${items.length === 1 ? singular : plural}`}
             </p>
+            {items.length > MINIMO_PARA_BUSCAR && (
+              <div className="relative w-full sm:w-56">
+                <Search
+                  aria-hidden="true"
+                  className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  type="search"
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  placeholder={`Buscar ${plural}…`}
+                  aria-label={`Buscar ${plural}`}
+                  className="h-8 pl-8 text-xs"
+                />
+              </div>
+            )}
           </div>
-          <ul className="divide-y divide-outline-variant">
-            {items.map((item) => (
-              <li
-                key={item.id}
-                className="flex items-center justify-between px-6 py-3.5 transition-colors hover:bg-surface-container"
-              >
-                <span className="font-sans text-sm text-on-surface">
-                  {item.nombre}
-                </span>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => abrirEdicion(item)}
-                    aria-label={`Editar ${item.nombre}`}
+
+          {visibles.length === 0 ? (
+            <EmptyState
+              icon={SearchX}
+              title="Sin resultados"
+              description={`Ningún${articulo === "la" ? "a" : ""} ${singular} coincide con "${busqueda}".`}
+              action={
+                <Button variant="outline" onClick={() => setBusqueda("")}>
+                  Limpiar búsqueda
+                </Button>
+              }
+            />
+          ) : (
+            <ul className="divide-y divide-outline-variant">
+              {visibles.map((item) => {
+                const enUso = item.profesores_count ?? 0;
+                return (
+                  <li
+                    key={item.id}
+                    className="flex items-center justify-between gap-3 px-6 py-3 transition-colors hover:bg-surface-container"
                   >
-                    <Pencil className="size-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => setBorrando(item)}
-                    aria-label={`Eliminar ${item.nombre}`}
-                    className="hover:bg-danger-container hover:text-danger"
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
+                    <div className="min-w-0">
+                      <p className="font-sans text-sm break-words text-on-surface">
+                        {item.nombre}
+                      </p>
+                      {item.profesores_count !== undefined && (
+                        <p className="font-sans text-xs text-muted-foreground">
+                          {enUso > 0
+                            ? `En uso por ${instructores(enUso)}`
+                            : "Sin uso"}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => abrirEdicion(item)}
+                        aria-label={`Editar ${item.nombre}`}
+                        title="Editar"
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setBorrando(item)}
+                        aria-label={`Eliminar ${item.nombre}`}
+                        title="Eliminar"
+                        className="hover:bg-danger-container hover:text-danger"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       )}
 
@@ -261,13 +355,21 @@ export default function CatalogoPage({
               Editar {singular}
             </DialogTitle>
             <DialogDescription className="font-sans text-sm text-muted-foreground">
-              Modifica el nombre y guarda los cambios.
+              {editando?.profesores_count
+                ? `El cambio se verá en ${instructores(editando.profesores_count)} que ya l${vocal} tienen asignad${vocal}.`
+                : "Modifica el nombre y guarda los cambios."}
             </DialogDescription>
           </DialogHeader>
           <form
+            noValidate
             onSubmit={(e) => {
               e.preventDefault();
-              if (editando && editNombre.trim()) {
+              if (
+                editando &&
+                editNombre.trim() &&
+                !errorEdicion &&
+                !sinCambios
+              ) {
                 actualizar.mutate({
                   id: editando.id,
                   valor: editNombre.trim(),
@@ -277,14 +379,30 @@ export default function CatalogoPage({
             className="grid gap-4"
           >
             <div className="grid gap-2">
-              <Label htmlFor="editar-nombre">Nombre</Label>
+              <Label htmlFor={`editar-${slug}`}>Nombre</Label>
               <Input
-                ref={editInputRef}
-                id="editar-nombre"
+                id={`editar-${slug}`}
                 value={editNombre}
-                onChange={(e) => setEditNombre(e.target.value)}
-                aria-invalid={actualizar.isError || undefined}
+                maxLength={255}
+                autoComplete="off"
+                onChange={(e) => {
+                  setEditNombre(e.target.value);
+                  if (actualizar.isError) actualizar.reset();
+                }}
+                aria-invalid={!!errorEdicion || actualizar.isError || undefined}
+                aria-describedby={
+                  errorEdicion ? `editar-${slug}-error` : undefined
+                }
               />
+              {errorEdicion && (
+                <p
+                  id={`editar-${slug}-error`}
+                  role="alert"
+                  className="font-sans text-xs text-danger"
+                >
+                  {errorEdicion}
+                </p>
+              )}
             </div>
             {actualizar.isError && (
               <Alert variant="danger">
@@ -301,7 +419,12 @@ export default function CatalogoPage({
               </Button>
               <Button
                 type="submit"
-                disabled={actualizar.isPending || !editNombre.trim()}
+                disabled={
+                  actualizar.isPending ||
+                  !editNombre.trim() ||
+                  !!errorEdicion ||
+                  sinCambios
+                }
               >
                 {actualizar.isPending && (
                   <Loader2 className="mr-2 size-4 animate-spin" />
@@ -321,6 +444,17 @@ export default function CatalogoPage({
         description={
           <>
             ¿Seguro que quieres eliminar <strong>{borrando?.nombre}</strong>?
+            {enUsoAlBorrar > 0 && (
+              <>
+                {" "}
+                <strong className="text-danger">
+                  {instructores(enUsoAlBorrar)}{" "}
+                  {enUsoAlBorrar === 1 ? "lo tiene" : "lo tienen"} asignad
+                  {vocal} y {enUsoAlBorrar === 1 ? "quedará" : "quedarán"} sin{" "}
+                  {singular}.
+                </strong>
+              </>
+            )}{" "}
             Esta acción no se puede deshacer.
           </>
         }

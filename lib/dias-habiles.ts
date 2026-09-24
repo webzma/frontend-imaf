@@ -48,7 +48,7 @@ function mismaFecha(a: Date, b: Date): boolean {
  * Parsea una fecha "YYYY-MM-DD" como fecha local (evita el corrimiento
  * de día que produce `new Date("YYYY-MM-DD")` al interpretarla en UTC).
  */
-function parsearFechaLocal(fecha: string): Date | null {
+export function parsearFechaLocal(fecha: string): Date | null {
   const match = fecha.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!match) return null;
   const [, anio, mes, dia] = match.map(Number);
@@ -87,6 +87,11 @@ export function motivoDiaNoHabil(fecha: string): string | null {
   const dia = parsearFechaLocal(fecha);
   if (!dia) return null; // formato inválido: lo reporta otra validación
 
+  return motivoDiaNoHabilDate(dia);
+}
+
+/** Motivo por el que un día (fecha local) no es hábil, o null si lo es. */
+export function motivoDiaNoHabilDate(dia: Date): string | null {
   const diaSemana = dia.getDay();
   if (diaSemana === 6) return "No se permiten sábados";
   if (diaSemana === 0) return "No se permiten domingos";

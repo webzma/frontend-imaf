@@ -11,6 +11,10 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { fetchPage, PAGE_SIZE } from "@/lib/api";
+import { ESTILO_CURSO, estadoVisualCurso } from "@/lib/curso-estado";
+import { ModalidadBadge } from "@/components/modalidad-badge";
+import { formatDate } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import {
   BookOpen,
   GraduationCap,
@@ -31,6 +35,7 @@ interface Curso {
   codigo: string;
   descripcion: string | null;
   estado: "activo" | "inactivo";
+  fecha_fin?: string | null;
   instructor?: { id: number; name: string } | null;
   estudiantes?: { id: number }[];
 }
@@ -42,6 +47,7 @@ interface PerfilCurso {
   codigo: string;
   descripcion: string | null;
   estado: string;
+  fecha_fin?: string | null;
   instructor?: {
     id: number;
     user?: { name: string } | null;
@@ -59,13 +65,25 @@ function getCookie(name: string): string {
 /* ── Featured "Mi curso" Card ── */
 
 function FeaturedCursoCard({ curso }: { curso: Curso }) {
+  const estado = estadoVisualCurso(curso);
+  const estilo = ESTILO_CURSO[estado.clave];
+  const apagado = estado.clave === "inactivo" || estado.clave === "finalizado";
+
   return (
     <Link
       href={`/estudiante/cursos/${curso.id}`}
-      className="group relative block bg-surface-container-lowest rounded-md overflow-hidden ambient-shadow hover:-translate-y-0.5 transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300"
+      data-estado={estado.clave}
+      className={cn(
+        "group relative block bg-surface-container-lowest rounded-md overflow-hidden ambient-shadow hover:-translate-y-0.5 transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300",
+        estilo.tarjeta,
+      )}
     >
-      <div className="absolute inset-0 gradient-primary opacity-[0.06] group-hover:opacity-[0.10] transition-opacity" />
-      <div className="absolute top-0 left-0 right-0 h-[2px] gradient-primary" />
+      {!apagado && (
+        <div className="absolute inset-0 gradient-primary opacity-[0.06] group-hover:opacity-[0.10] transition-opacity" />
+      )}
+      <div
+        className={cn("absolute top-0 left-0 right-0 h-[2px]", estilo.franja)}
+      />
       <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
 
       <div className="relative p-7 md:p-9 grid md:grid-cols-[1fr_auto] gap-6 items-center">
@@ -78,9 +96,20 @@ function FeaturedCursoCard({ curso }: { curso: Curso }) {
             <span className="font-mono text-[11px] text-muted-foreground">
               {curso.codigo}
             </span>
+            <ModalidadBadge />
+            {estado.clave !== "activo" && (
+              <Badge variant={estado.clave} className="px-2 py-0.5 text-[10px]">
+                {estado.etiqueta}
+              </Badge>
+            )}
           </div>
 
-          <h2 className="font-serif font-light text-3xl md:text-4xl tight-tracking leading-[1.05] text-on-surface">
+          <h2
+            className={cn(
+              "font-serif font-light text-3xl md:text-4xl tight-tracking leading-[1.05]",
+              estilo.titulo,
+            )}
+          >
             {curso.nombre}
           </h2>
 
@@ -132,15 +161,27 @@ function CursoCard({
 }) {
   const esMiCurso = miCursoId === curso.id;
   const studentCount = curso.estudiantes?.length ?? 0;
+  const estado = estadoVisualCurso(curso);
+  const estilo = ESTILO_CURSO[estado.clave];
 
   return (
     <div
-      className={`group relative bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-1 hover:shadow-xl transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300 flex flex-col h-full ${
-        esMiCurso ? "ring-1 ring-primary/50" : ""
-      }`}
+      data-estado={estado.clave}
+      className={cn(
+        "group relative bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-1 hover:shadow-xl transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300 flex flex-col h-full",
+        estilo.tarjeta,
+        esMiCurso && "ring-1 ring-primary/50",
+      )}
     >
       <div
-        className={`h-[2px] ${esMiCurso ? "gradient-primary" : "bg-outline-variant group-hover:gradient-primary group-hover:bg-transparent transition-colors"}`}
+        className={cn(
+          "h-[2px]",
+          estado.clave !== "activo"
+            ? estilo.franja
+            : esMiCurso
+              ? "gradient-primary"
+              : "bg-outline-variant group-hover:gradient-primary group-hover:bg-transparent transition-colors",
+        )}
       />
 
       {esMiCurso && (
@@ -151,20 +192,38 @@ function CursoCard({
       )}
 
       <div className="p-6 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-5">
-          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-on-primary-container bg-primary-container/70 px-2 py-1 rounded-sm">
-            <Hash className="w-2.5 h-2.5" />
-            {curso.codigo}
-          </span>
-          <Badge variant="activo" className="gap-1 px-2 py-0.5 text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-success dark:bg-success" />
-            Activo
+        <div className="flex items-center justify-between gap-2 mb-5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-on-primary-container bg-primary-container/70 px-2 py-1 rounded-sm">
+              <Hash className="w-2.5 h-2.5" />
+              {curso.codigo}
+            </span>
+            <ModalidadBadge />
+          </div>
+          <Badge
+            variant={estado.clave}
+            className="gap-1 px-2 py-0.5 text-[10px]"
+          >
+            {estado.etiqueta}
           </Badge>
         </div>
 
-        <h3 className="font-serif font-light text-2xl tight-tracking text-on-surface mb-2 leading-[1.15] group-hover:text-primary transition-colors">
+        <h3
+          className={cn(
+            "font-serif font-light text-2xl tight-tracking mb-2 leading-[1.15] group-hover:text-primary transition-colors",
+            estilo.titulo,
+          )}
+        >
           {curso.nombre}
         </h3>
+
+        {curso.fecha_fin && estado.clave !== "activo" && (
+          <p className={cn("font-sans text-xs mb-2", estilo.fecha)}>
+            {estado.clave === "finalizado"
+              ? `Finalizó el ${formatDate(curso.fecha_fin)}`
+              : `Termina el ${formatDate(curso.fecha_fin)}`}
+          </p>
+        )}
 
         {curso.instructor ? (
           <p className="font-sans text-xs text-muted-foreground font-medium mb-3 flex items-center gap-1.5">
@@ -296,6 +355,7 @@ export default function EstudianteCursosPage() {
       codigo: perfilCurso.codigo,
       descripcion: perfilCurso.descripcion,
       estado: perfilCurso.estado as Curso["estado"],
+      fecha_fin: perfilCurso.fecha_fin,
       instructor: perfilCurso.instructor
         ? {
             id: perfilCurso.instructor.id,
@@ -350,7 +410,7 @@ export default function EstudianteCursosPage() {
           icon={BookOpen}
           eyebrow="Plataforma · Cursos"
           title="Cursos disponibles"
-          subtitle="Explora el catálogo completo de cursos de la plataforma IMAF y revisa el contenido del que ya formas parte."
+          subtitle="Explora el catálogo completo de cursos de IMAF y revisa el contenido del que ya formas parte. Todos los cursos se dictan de forma presencial en nuestra sede."
           className="mb-12 md:mb-14"
           actions={
             !loading && cursos.length > 0 ? (

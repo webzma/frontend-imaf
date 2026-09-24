@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Layers } from "lucide-react";
 
 import CatalogoPage from "@/components/catalogo-page";
@@ -22,6 +23,16 @@ export default function CatalogosPage() {
   const { get, set } = useUrlState();
   const activo = get("tipo", CATALOGOS[0].slug);
   const spec = CATALOGOS.find((c) => c.slug === activo) ?? CATALOGOS[0];
+  const listaRef = useRef<HTMLDivElement>(null);
+
+  // En móvil las pestañas se desplazan en horizontal y la activa podía quedar
+  // fuera de la vista (con ?tipo=tipo-contratos no se veía cuál estaba
+  // seleccionada). Se trae a la vista al cambiar.
+  useEffect(() => {
+    listaRef.current
+      ?.querySelector<HTMLElement>('[role="tab"][data-state="active"]')
+      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [spec.slug]);
 
   return (
     <PageShell>
@@ -33,10 +44,10 @@ export default function CatalogosPage() {
       />
 
       <Tabs value={spec.slug} onValueChange={(valor) => set("tipo", valor)}>
-        <TabsList>
+        <TabsList ref={listaRef}>
           {CATALOGOS.map((catalogo) => (
             <TabsTrigger key={catalogo.slug} value={catalogo.slug}>
-              <catalogo.icon aria-hidden="true" className="mr-2" />
+              <catalogo.icon aria-hidden="true" />
               {catalogo.title}
             </TabsTrigger>
           ))}
@@ -44,7 +55,7 @@ export default function CatalogosPage() {
 
         {CATALOGOS.map((catalogo) => (
           <TabsContent key={catalogo.slug} value={catalogo.slug}>
-            <p className="mb-6 max-w-lg font-sans text-sm text-muted-foreground">
+            <p className="mb-6 max-w-2xl font-sans text-sm text-muted-foreground">
               {catalogo.subtitle}
             </p>
             {/* Solo se monta la pestaña visible: montar las cuatro dispararía

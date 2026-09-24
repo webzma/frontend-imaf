@@ -1,7 +1,8 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { formatDateLong } from "@/lib/format";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -9,6 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/avatar";
+import { ModalidadBadge } from "@/components/modalidad-badge";
+import { SEDE } from "@/lib/modalidad";
 import {
   BookOpen,
   Hash,
@@ -78,6 +81,7 @@ interface MiCursoResponse {
   };
   estado_pago: "pendiente" | "aprobado" | "reprobado";
   estado_aprobacion_curso: "pendiente" | "aprobado" | "reprobado";
+  es_actual: boolean;
 }
 
 type EstadoKey = "pendiente" | "aprobado" | "reprobado";
@@ -133,12 +137,25 @@ function StatusRow({ label, estado }: { label: string; estado: EstadoKey }) {
 /* ── Page ── */
 
 export default function CursoPage() {
+  return (
+    <Suspense fallback={null}>
+      <CursoPageContent />
+    </Suspense>
+  );
+}
+
+function CursoPageContent() {
   const [data, setData] = useState<MiCursoResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloadingCertificado, setDownloadingCertificado] = useState(false);
+  // `?id=` abre un curso anterior; sin él, el curso actual.
+  const cursoId = useSearchParams().get("id");
 
   useEffect(() => {
-    fetch(`${process.env.API_URL}api/estudiante/curso`, {
+    setLoading(true);
+    const query = cursoId ? `?curso_id=${encodeURIComponent(cursoId)}` : "";
+
+    fetch(`${process.env.API_URL}api/estudiante/curso${query}`, {
       headers: {
         Authorization: `Bearer ${getCookie("token")}`,
         Accept: "application/json",
@@ -152,7 +169,7 @@ export default function CursoPage() {
       .then((json) => setData(json))
       .catch(() => toast.error("Error al cargar el curso"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [cursoId]);
 
   const curso = data?.curso ?? null;
   const canDownloadCertificate = data?.estado_aprobacion_curso === "aprobado";
@@ -161,7 +178,9 @@ export default function CursoPage() {
     setDownloadingCertificado(true);
     try {
       const response = await fetch(
-        `${process.env.API_URL}api/estudiante/certificado`,
+        `${process.env.API_URL}api/estudiante/certificado${
+          cursoId ? `?curso_id=${encodeURIComponent(cursoId)}` : ""
+        }`,
         {
           headers: {
             Authorization: `Bearer ${getCookie("token")}`,
@@ -211,7 +230,7 @@ export default function CursoPage() {
         <PageHeader
           icon={BookOpen}
           eyebrow="Mi curso"
-          title="Curso inscrito"
+          title={data && !data.es_actual ? "Curso anterior" : "Curso inscrito"}
           subtitle="Revisa los detalles, el temario, las sesiones y el estado de tu inscripción."
         />
 
@@ -252,6 +271,7 @@ export default function CursoPage() {
                       <Hash className="w-2.5 h-2.5" />
                       {curso.codigo}
                     </span>
+                    <ModalidadBadge />
                   </div>
                   <Badge
                     variant={curso.estado as "activo" | "inactivo"}
@@ -335,6 +355,12 @@ export default function CursoPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Modalidad: todas las clases son en la sede */}
+                <p className="mt-5 flex flex-wrap items-center gap-2 font-sans text-xs text-muted-foreground">
+                  <ModalidadBadge />
+                  Asiste a la sede IMAF en los horarios del curso: {SEDE}.
+                </p>
               </div>
             </div>
 

@@ -24,7 +24,8 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: "IMAF",
-  description: "Plataforma educativa — Aprende sin límites.",
+  description:
+    "IMAF — Formación para el trabajo en modalidad presencial. Inscríbete en línea y asiste a clases en nuestra sede.",
 };
 
 export default function RootLayout({

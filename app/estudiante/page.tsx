@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/avatar";
+import { ESTILO_CURSO, estadoVisualCurso } from "@/lib/curso-estado";
+import { cn } from "@/lib/utils";
 import {
   BookOpen,
   User,
@@ -21,6 +23,8 @@ import {
   Mail,
   Phone,
   LayoutDashboard,
+  Library,
+  Clock,
 } from "lucide-react";
 
 interface Curso {
@@ -29,6 +33,7 @@ interface Curso {
   codigo: string;
   descripcion: string | null;
   estado: string;
+  fecha_fin?: string | null;
   instructor?: {
     id: number;
     user?: { name: string } | null;
@@ -49,6 +54,39 @@ interface EstudiantePerfil {
   curso: Curso | null;
 }
 
+type EstadoAprobacion = "pendiente" | "aprobado" | "reprobado";
+
+interface CursoHistorial {
+  id: number;
+  codigo: string;
+  nombre: string;
+  estado: string;
+  fecha_fin: string | null;
+  instructor: string | null;
+  fecha_inscripcion: string | null;
+  estado_aprobacion_curso: EstadoAprobacion;
+  es_actual: boolean;
+}
+
+interface SolicitudPendiente {
+  pago_id: number;
+  curso_id: number;
+  codigo: string | null;
+  nombre: string | null;
+  fecha_solicitud: string | null;
+}
+
+interface MisCursosResponse {
+  cursos: CursoHistorial[];
+  solicitudes_pendientes: SolicitudPendiente[];
+}
+
+const APROBACION_LABEL: Record<EstadoAprobacion, string> = {
+  pendiente: "En curso",
+  aprobado: "Aprobado",
+  reprobado: "Reprobado",
+};
+
 function getCookie(name: string): string {
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
@@ -66,6 +104,19 @@ export default function EstudianteDashboard() {
   const router = useRouter();
   const [perfil, setPerfil] = useState<EstudiantePerfil | null>(null);
   const [loading, setLoading] = useState(true);
+  const [misCursos, setMisCursos] = useState<MisCursosResponse | null>(null);
+
+  useEffect(() => {
+    fetch(`${process.env.API_URL}api/estudiante/mis-cursos`, {
+      headers: {
+        Authorization: `Bearer ${getCookie("token")}`,
+        Accept: "application/json",
+      },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => data && setMisCursos(data))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch(`${process.env.API_URL}api/estudiante/perfil`, {
@@ -91,6 +142,8 @@ export default function EstudianteDashboard() {
   }, []);
 
   const firstName = perfil?.nombre?.split(" ")[0] ?? "";
+  const estadoMiCurso = perfil?.curso ? estadoVisualCurso(perfil.curso) : null;
+  const estiloMiCurso = ESTILO_CURSO[estadoMiCurso?.clave ?? "activo"];
   const today = new Date().toLocaleDateString(LOCALE, {
     weekday: "long",
     day: "numeric",
@@ -202,7 +255,12 @@ export default function EstudianteDashboard() {
             className="lg:col-span-3 group relative block bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-0.5 transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300"
           >
             <div className="absolute inset-0 gradient-primary opacity-[0.04] group-hover:opacity-[0.08] transition-opacity" />
-            <div className="absolute top-0 left-0 right-0 h-[2px] gradient-primary" />
+            <div
+              className={cn(
+                "absolute top-0 left-0 right-0 h-[2px]",
+                estiloMiCurso.franja,
+              )}
+            />
             <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
 
             <div className="relative p-6 md:p-7 h-full flex flex-col">
@@ -230,11 +288,19 @@ export default function EstudianteDashboard() {
                   <h4 className="font-serif font-light text-3xl md:text-4xl tight-tracking text-on-surface mb-3 leading-[1.05]">
                     {perfil.curso.nombre}
                   </h4>
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex flex-wrap items-center gap-2 mb-4">
                     <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-on-primary-container bg-primary-container/70 px-2 py-1 rounded-sm">
                       <Hash className="w-2.5 h-2.5" />
                       {perfil.curso.codigo}
                     </span>
+                    {estadoMiCurso && estadoMiCurso.clave !== "activo" && (
+                      <Badge
+                        variant={estadoMiCurso.clave}
+                        className="px-2 py-0.5"
+                      >
+                        {estadoMiCurso.etiqueta}
+                      </Badge>
+                    )}
                   </div>
                   {perfil.curso.descripcion && (
                     <p className="font-sans text-sm text-muted-foreground line-clamp-2 mb-5">
@@ -371,6 +437,101 @@ export default function EstudianteDashboard() {
             ) : null}
           </Link>
         </div>
+
+        {/* Mis cursos: historial completo + solicitudes en revisión */}
+        {misCursos &&
+          (misCursos.cursos.length > 0 ||
+            misCursos.solicitudes_pendientes.length > 0) && (
+            <section className="mt-6 bg-surface-container-lowest rounded-sm ambient-shadow p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Library className="w-3.5 h-3.5 text-primary/80" />
+                <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                  Mis cursos
+                </h3>
+                <span className="font-sans text-xs text-muted-foreground">
+                  · {misCursos.cursos.length}
+                </span>
+              </div>
+
+              <ul className="divide-y divide-outline-variant">
+                {misCursos.solicitudes_pendientes.map((s) => (
+                  <li
+                    key={`pago-${s.pago_id}`}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-sans text-sm font-semibold text-on-surface truncate">
+                        {s.nombre ?? "Curso"}
+                      </p>
+                      <p className="font-sans text-xs text-muted-foreground">
+                        Solicitud enviada{" "}
+                        {s.fecha_solicitud ? formatDate(s.fecha_solicitud) : ""}
+                        {" · "}esperando la verificación del pago
+                      </p>
+                    </div>
+                    <Badge variant="pendiente" className="gap-1 px-2.5 py-1">
+                      <Clock className="w-3 h-3" />
+                      Pago en revisión
+                    </Badge>
+                  </li>
+                ))}
+
+                {misCursos.cursos.map((c) => (
+                  <li key={c.id}>
+                    <Link
+                      href={
+                        c.es_actual
+                          ? "/estudiante/curso"
+                          : `/estudiante/curso?id=${c.id}`
+                      }
+                      className="group flex flex-wrap items-center justify-between gap-3 py-3 -mx-2 px-2 rounded-sm hover:bg-surface-container-low transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-sans text-sm font-semibold text-on-surface truncate">
+                          {c.nombre}
+                          <span className="ml-2 font-mono text-[11px] font-normal text-muted-foreground">
+                            {c.codigo}
+                          </span>
+                        </p>
+                        <p className="font-sans text-xs text-muted-foreground">
+                          {c.fecha_inscripcion
+                            ? `Inscrito el ${formatDate(c.fecha_inscripcion)}`
+                            : "Inscrito"}
+                          {c.instructor ? ` · ${c.instructor}` : ""}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {(() => {
+                          const e = estadoVisualCurso(c);
+                          return e.clave === "activo" ? null : (
+                            <Badge variant={e.clave} className="px-2.5 py-1">
+                              {e.etiqueta}
+                            </Badge>
+                          );
+                        })()}
+                        {c.es_actual && (
+                          <Badge variant="graduado" className="px-2.5 py-1">
+                            Actual
+                          </Badge>
+                        )}
+                        <Badge
+                          variant={
+                            c.estado_aprobacion_curso === "pendiente"
+                              ? "neutral"
+                              : c.estado_aprobacion_curso
+                          }
+                          className="px-2.5 py-1"
+                        >
+                          {APROBACION_LABEL[c.estado_aprobacion_curso]}
+                        </Badge>
+                        <ArrowUpRight className="w-4 h-4 text-primary/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
         {/* Quick links */}
         {!loading && (

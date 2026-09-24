@@ -4,6 +4,8 @@ import { Slot } from "radix-ui";
 import {
   Ban,
   CalendarClock,
+  CalendarX2,
+  Hourglass,
   CheckCheck,
   CheckCircle2,
   Clock,
@@ -48,6 +50,8 @@ const badgeVariants = cva(
         realizada: "bg-success-container text-on-success-container",
         cancelada: "bg-danger-container text-on-danger-container",
         reprobado: "bg-danger-container text-on-danger-container",
+        finalizado: "bg-danger-container text-on-danger-container",
+        por_finalizar: "bg-warning-container text-on-warning-container",
 
         // ── Titulaciones (una escala, no un estado) ──
         licenciatura: "bg-surface-container-high text-on-surface",
@@ -75,6 +79,8 @@ const statusIcons: Partial<
   realizada: CheckCheck,
   cancelada: Ban,
   reprobado: XCircle,
+  finalizado: CalendarX2,
+  por_finalizar: Hourglass,
 };
 
 function Badge({
