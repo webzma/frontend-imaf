@@ -12,13 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/avatar";
 import { ModalidadBadge } from "@/components/modalidad-badge";
 import { SEDE } from "@/lib/modalidad";
+import { estadoVisualCurso } from "@/lib/curso-estado";
 import {
   BookOpen,
   Hash,
   GraduationCap,
   Info,
   CheckCircle2,
-  XCircle,
   Clock,
   Ban,
   Calendar,
@@ -146,6 +146,11 @@ export default function CursoPage() {
 
 function CursoPageContent() {
   const [data, setData] = useState<MiCursoResponse | null>(null);
+  /** Último curso, ya terminado, cuando no está cursando ninguno. */
+  const [ultimoCurso, setUltimoCurso] = useState<{
+    id: number;
+    nombre: string;
+  } | null>(null);
   /** Solicitud con el pago en revisión, si no hay curso que mostrar. */
   const [solicitud, setSolicitud] = useState<{
     curso_id: number;
@@ -159,6 +164,7 @@ function CursoPageContent() {
   useEffect(() => {
     setLoading(true);
     setSolicitud(null);
+    setUltimoCurso(null);
     const query = cursoId ? `?curso_id=${encodeURIComponent(cursoId)}` : "";
 
     fetch(`${process.env.API_URL}api/estudiante/curso${query}`, {
@@ -169,6 +175,9 @@ function CursoPageContent() {
     })
       .then((r) => {
         if (r.status === 404) {
+          r.json()
+            .then((body) => setUltimoCurso(body?.ultimo_curso ?? null))
+            .catch(() => setUltimoCurso(null));
           // Sin curso pagado: quizá tiene la solicitud en revisión.
           fetch(`${process.env.API_URL}api/estudiante/mis-cursos`, {
             headers: {
@@ -197,6 +206,8 @@ function CursoPageContent() {
   }, [cursoId]);
 
   const curso = data?.curso ?? null;
+  const estadoCurso = curso ? estadoVisualCurso(curso) : null;
+  const finalizado = estadoCurso?.clave === "finalizado";
   const canDownloadCertificate = data?.estado_aprobacion_curso === "aprobado";
 
   const handleDownloadCertificate = async () => {
@@ -255,7 +266,13 @@ function CursoPageContent() {
         <PageHeader
           icon={BookOpen}
           eyebrow="Mi curso"
-          title={data && !data.es_actual ? "Curso anterior" : "Curso inscrito"}
+          title={
+            finalizado
+              ? "Curso finalizado"
+              : data && !data.es_actual
+                ? "Curso anterior"
+                : "Curso inscrito"
+          }
           subtitle="Revisa los detalles, el temario, las sesiones y el estado de tu inscripción."
         />
 
@@ -290,7 +307,7 @@ function CursoPageContent() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="inline-flex items-center gap-1.5 font-sans text-[10px] tracking-[0.22em] uppercase text-primary font-bold">
                       <Sparkles className="w-3 h-3" />
-                      Mi curso
+                      {data?.es_actual ? "Mi curso" : "Historial"}
                     </span>
                     <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-on-primary-container bg-primary-container/70 px-2 py-1 rounded-sm">
                       <Hash className="w-2.5 h-2.5" />
@@ -298,21 +315,14 @@ function CursoPageContent() {
                     </span>
                     <ModalidadBadge />
                   </div>
-                  <Badge
-                    variant={curso.estado as "activo" | "inactivo"}
-                    className="gap-1.5 px-3 py-1 shrink-0"
-                  >
-                    {curso.estado === "activo" ? (
-                      <>
-                        <span className="w-1.5 h-1.5 rounded-full bg-success dark:bg-success" />
-                        Activo
-                      </>
-                    ) : (
-                      <>
-                        <XCircle className="w-3 h-3" /> Inactivo
-                      </>
-                    )}
-                  </Badge>
+                  {estadoCurso && (
+                    <Badge
+                      variant={estadoCurso.clave}
+                      className="gap-1.5 px-3 py-1 shrink-0"
+                    >
+                      {estadoCurso.etiqueta}
+                    </Badge>
+                  )}
                 </div>
 
                 <h2 className="font-serif font-light text-3xl md:text-5xl tight-tracking text-on-surface mb-4 leading-[1.05]">
@@ -663,7 +673,11 @@ function CursoPageContent() {
               </div>
               <div className="text-center max-w-sm">
                 <h3 className="font-serif font-light text-2xl tight-tracking text-on-surface mb-2">
-                  {solicitud ? "Solicitud en revisión" : "Sin curso asignado"}
+                  {solicitud
+                    ? "Solicitud en revisión"
+                    : ultimoCurso
+                      ? "Tu curso finalizó"
+                      : "Sin curso asignado"}
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground">
                   {solicitud ? (
@@ -675,11 +689,27 @@ function CursoPageContent() {
                       está en revisión. Tendrás acceso al curso cuando la
                       administración lo apruebe; te llegará una notificación.
                     </>
+                  ) : ultimoCurso ? (
+                    <>
+                      <span className="font-medium text-on-surface">
+                        {ultimoCurso.nombre}
+                      </span>{" "}
+                      ya terminó. Sigue disponible en tu historial, con su
+                      certificado si lo aprobaste. Explora el catálogo para
+                      inscribirte en otro.
+                    </>
                   ) : (
                     "No estás inscrito en ningún curso actualmente. Explora el catálogo para encontrar uno que te interese."
                   )}
                 </p>
               </div>
+              {ultimoCurso && !solicitud && (
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/estudiante/curso?id=${ultimoCurso.id}`}>
+                    Ver curso y certificado
+                  </Link>
+                </Button>
+              )}
               <Link
                 href="/estudiante/cursos"
                 className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-primary hover:gap-2 transition-[background-color,border-color,color,box-shadow,transform,opacity]"

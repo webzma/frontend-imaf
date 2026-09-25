@@ -143,6 +143,12 @@ export default function EstudianteDashboard() {
 
   const firstName = perfil?.nombre?.split(" ")[0] ?? "";
   const estadoMiCurso = perfil?.curso ? estadoVisualCurso(perfil.curso) : null;
+  // Sin curso en marcha: el último que terminó, para enlazar su historial.
+  const ultimoFinalizado = perfil?.curso
+    ? null
+    : (misCursos?.cursos.find(
+        (c) => estadoVisualCurso(c).clave === "finalizado",
+      ) ?? null);
   const estiloMiCurso = ESTILO_CURSO[estadoMiCurso?.clave ?? "activo"];
   const today = new Date().toLocaleDateString(LOCALE, {
     weekday: "long",
@@ -251,7 +257,11 @@ export default function EstudianteDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           {/* Mi Curso (featured) */}
           <Link
-            href="/estudiante/curso"
+            href={
+              ultimoFinalizado
+                ? `/estudiante/curso?id=${ultimoFinalizado.id}`
+                : "/estudiante/curso"
+            }
             className="lg:col-span-3 group relative block bg-surface-container-lowest rounded-sm overflow-hidden ambient-shadow hover:-translate-y-0.5 transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-300"
           >
             <div className="absolute inset-0 gradient-primary opacity-[0.04] group-hover:opacity-[0.08] transition-opacity" />
@@ -336,6 +346,18 @@ export default function EstudianteDashboard() {
                         </span>{" "}
                         está en revisión. Entrarás al curso cuando la
                         administración lo apruebe.
+                      </p>
+                    </div>
+                  ) : ultimoFinalizado ? (
+                    <div className="text-center max-w-xs">
+                      <p className="font-serif font-light text-xl text-on-surface mb-1">
+                        Tu curso finalizó
+                      </p>
+                      <p className="font-sans text-sm text-muted-foreground">
+                        <span className="font-medium text-on-surface">
+                          {ultimoFinalizado.nombre}
+                        </span>{" "}
+                        ya terminó. Ábrelo para ver su resumen y tu certificado.
                       </p>
                     </div>
                   ) : (
