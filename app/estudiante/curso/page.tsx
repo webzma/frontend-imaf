@@ -146,6 +146,11 @@ export default function CursoPage() {
 
 function CursoPageContent() {
   const [data, setData] = useState<MiCursoResponse | null>(null);
+  /** Solicitud con el pago en revisión, si no hay curso que mostrar. */
+  const [solicitud, setSolicitud] = useState<{
+    curso_id: number;
+    nombre: string | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloadingCertificado, setDownloadingCertificado] = useState(false);
   // `?id=` abre un curso anterior; sin él, el curso actual.
@@ -153,6 +158,7 @@ function CursoPageContent() {
 
   useEffect(() => {
     setLoading(true);
+    setSolicitud(null);
     const query = cursoId ? `?curso_id=${encodeURIComponent(cursoId)}` : "";
 
     fetch(`${process.env.API_URL}api/estudiante/curso${query}`, {
@@ -162,7 +168,26 @@ function CursoPageContent() {
       },
     })
       .then((r) => {
-        if (r.status === 404) return null;
+        if (r.status === 404) {
+          // Sin curso pagado: quizá tiene la solicitud en revisión.
+          fetch(`${process.env.API_URL}api/estudiante/mis-cursos`, {
+            headers: {
+              Authorization: `Bearer ${getCookie("token")}`,
+              Accept: "application/json",
+            },
+          })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((json) => {
+              const pendientes: { curso_id: number; nombre: string | null }[] =
+                json?.solicitudes_pendientes ?? [];
+              setSolicitud(
+                pendientes.find((p) => String(p.curso_id) === cursoId) ??
+                  (cursoId ? null : (pendientes[0] ?? null)),
+              );
+            })
+            .catch(() => setSolicitud(null));
+          return null;
+        }
         if (!r.ok) throw new Error("Error al cargar");
         return r.json();
       })
@@ -638,11 +663,21 @@ function CursoPageContent() {
               </div>
               <div className="text-center max-w-sm">
                 <h3 className="font-serif font-light text-2xl tight-tracking text-on-surface mb-2">
-                  Sin curso asignado
+                  {solicitud ? "Solicitud en revisión" : "Sin curso asignado"}
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground">
-                  No estás inscrito en ningún curso actualmente. Explora el
-                  catálogo para encontrar uno que te interese.
+                  {solicitud ? (
+                    <>
+                      Tu pago para{" "}
+                      <span className="font-medium text-on-surface">
+                        {solicitud.nombre}
+                      </span>{" "}
+                      está en revisión. Tendrás acceso al curso cuando la
+                      administración lo apruebe; te llegará una notificación.
+                    </>
+                  ) : (
+                    "No estás inscrito en ningún curso actualmente. Explora el catálogo para encontrar uno que te interese."
+                  )}
                 </p>
               </div>
               <Link

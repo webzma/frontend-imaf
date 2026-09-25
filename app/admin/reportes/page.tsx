@@ -1,124 +1,183 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  LabelList,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
-import {
+  ArrowRight,
   BarChart2,
   BookOpen,
-  CheckCircle,
-  Clock,
+  CalendarRange,
+  Download,
   GraduationCap,
   Users,
-  XCircle,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ErrorState } from "@/components/error-state";
 import { PageHeader } from "@/components/page-header";
 import { PageShell } from "@/components/page-shell";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatRow } from "@/components/stat-row";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  TableScroll,
-} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { apiFetch } from "@/lib/api-client";
 import { adminKeys } from "@/lib/query-keys";
-import { LOCALE, formatCurrency } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 import { useUrlState } from "@/hooks/use-url-state";
 import { BarraApilada } from "./_components/BarraApilada";
-import { ChartCard } from "./_components/ChartCard";
-import { PERIODOS, type Periodo, type ReporteData } from "./tipos";
+import {
+  GraficaIngresos,
+  GraficaSolicitudes,
+  Sparkline,
+} from "./_components/Graficas";
+import { KpiCard } from "./_components/KpiCard";
+import { Ocupacion } from "./_components/Ocupacion";
+import { Panel } from "./_components/Panel";
+import { TablasDetalle } from "./_components/TablasDetalle";
+import {
+  descargarCsv,
+  ocupacion,
+  rango,
+  tasaAprobacion,
+  variacion,
+} from "./metricas";
+import {
+  PERIODOS,
+  type MetodoPago,
+  type Periodo,
+  type ReporteData,
+} from "./tipos";
 
-function etiquetaPeriodo(label: string, periodo: Periodo) {
-  if (periodo === "mensual") {
-    const [anio, mes] = label.split("-");
-    return new Date(Number(anio), Number(mes) - 1).toLocaleDateString(LOCALE, {
-      month: "short",
-      year: "2-digit",
-    });
-  }
-  if (periodo === "semanal") return label.replace(/(\d{4})-W(\d+)/, "S$2 '$1");
-  return label;
-}
+const METODO_LABEL: Record<MetodoPago["metodo"], string> = {
+  transferencia: "Transferencia",
+  pago_movil: "Pago móvil",
+  efectivo: "Efectivo",
+  sin_especificar: "Sin especificar",
+};
 
-const ESTADO_ESTUDIANTE_LABEL: Record<string, string> = {
-  activo: "Activos",
-  inactivo: "Inactivos",
-  graduado: "Graduados",
+/** Orden fijo de colores por método: el color sigue al método, no al puesto. */
+const METODO_SLOT: Record<MetodoPago["metodo"], 1 | 2 | 3> = {
+  transferencia: 1,
+  pago_movil: 2,
+  efectivo: 3,
+  sin_especificar: 3,
 };
 
 export default function ReportesPage() {
   const { get, set } = useUrlState();
-  const periodo = (get("periodo", "mensual") as Periodo) ?? "mensual";
+  const valor = get("periodo", "mensual");
+  const periodo: Periodo = PERIODOS.some((p) => p.key === valor)
+    ? (valor as Periodo)
+    : "mensual";
+  const spec = PERIODOS.find((p) => p.key === periodo)!;
 
   /**
-   * Todo sale de `/api/admin/reportes`.
-   *
-   * Los totales, la ocupación por curso y el reparto por estado se calculaban
-   * en el navegador sobre la primera página de cada listado — diez registros —
-   * así que esta pantalla publicaba cifras que no eran ciertas. Ahora los
-   * agrega la base de datos.
+   * Todo sale de `/api/admin/reportes`, agregado sobre la base completa. Los
+   * indicadores de arriba son de la ventana elegida y se comparan con la
+   * ventana anterior de igual duración.
    */
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: adminKeys.reportes(periodo),
     queryFn: () =>
       apiFetch<ReporteData>("api/admin/reportes", { params: { periodo } }),
+    placeholderData: (previo) => previo,
   });
 
-  const ingresos = useMemo(
-    () =>
-      (data?.ingresos ?? []).map((fila) => ({
-        ...fila,
-        etiqueta: etiquetaPeriodo(fila.label, periodo),
-      })),
-    [data, periodo],
-  );
+  const actual = data?.periodo.actual;
+  const anterior = data?.periodo.anterior;
+  const comparacion = `vs. ${spec.ventana} anteriores`;
+  const tasa = actual
+    ? tasaAprobacion(actual.aprobados, actual.rechazados)
+    : null;
+  const tasaPrevia = anterior
+    ? tasaAprobacion(anterior.aprobados, anterior.rechazados)
+    : null;
 
-  const ocupacion = useMemo(
-    () =>
-      (data?.cursos ?? [])
-        .filter((curso) => curso.estudiantes > 0)
-        .slice(0, 8)
-        .map((curso) => ({
-          codigo: curso.codigo,
-          nombre: curso.nombre,
-          estudiantes: curso.estudiantes,
-        })),
-    [data],
-  );
+  const ocupacionMedia = useMemo(() => {
+    const activos = (data?.cursos ?? []).filter((c) => c.estado === "activo");
+    if (activos.length === 0) return null;
+    return Math.round(
+      activos.reduce((s, c) => s + ocupacion(c.estudiantes, c.limite_cupo), 0) /
+        activos.length,
+    );
+  }, [data]);
 
-  const configIngresos = {
-    total: { label: "Ingreso", color: "var(--color-chart-1)" },
-  } satisfies ChartConfig;
+  const exportar = (que: "serie" | "cursos" | "estudiantes") => {
+    if (!data) return;
+    if (que === "serie") {
+      descargarCsv(`ingresos-${periodo}.csv`, [
+        [
+          "Período",
+          "Desde",
+          "Ingresos (Bs.)",
+          "Aprobados",
+          "Pendientes",
+          "Rechazados",
+        ],
+        ...data.ingresos.map((f) => [
+          f.label,
+          f.desde,
+          f.total,
+          f.aprobados,
+          f.pendientes,
+          f.rechazados,
+        ]),
+      ]);
+    } else if (que === "cursos") {
+      descargarCsv("pagos-por-curso.csv", [
+        [
+          "Curso",
+          "Código",
+          "Precio",
+          "Aprobados",
+          "Pendientes",
+          "Rechazados",
+          "Ingreso",
+        ],
+        ...data.pagos_por_curso.map((c) => [
+          c.nombre,
+          c.codigo,
+          c.precio,
+          c.aprobados,
+          c.pendientes,
+          c.rechazados,
+          c.total_ingreso,
+        ]),
+      ]);
+    } else {
+      descargarCsv("pagos-por-estudiante.csv", [
+        [
+          "Estudiante",
+          "Pagos",
+          "Aprobados",
+          "Pendientes",
+          "Rechazados",
+          "Ingreso",
+        ],
+        ...data.pagos_por_usuario.map((u) => [
+          u.nombre,
+          u.total_pagos,
+          u.aprobados,
+          u.pendientes,
+          u.rechazados,
+          u.total_ingreso,
+        ]),
+      ]);
+    }
+  };
 
-  const configOcupacion = {
-    estudiantes: { label: "Estudiantes", color: "var(--color-chart-2)" },
-  } satisfies ChartConfig;
-
-  const resumen = data?.resumen;
-  const cursosActivos = data?.estado_cursos?.activo ?? 0;
-  const totalCursos = data?.totales.cursos ?? 0;
+  const cargando = isLoading;
 
   return (
     <PageShell>
@@ -126,7 +185,55 @@ export default function ReportesPage() {
         icon={BarChart2}
         eyebrow="Analítica / Reportes"
         title="Reportes"
-        subtitle="Métricas de toda la plataforma, calculadas sobre la base completa."
+        subtitle="Ingresos, pagos y ocupación de toda la plataforma, calculados sobre la base completa."
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            {/* El período vive en la URL: un reporte anual se puede compartir. */}
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              spacing={0}
+              value={periodo}
+              onValueChange={(v) =>
+                v && set("periodo", v === "mensual" ? null : v)
+              }
+              aria-label="Período del reporte"
+              className="bg-surface-container-lowest"
+            >
+              {PERIODOS.map((p) => (
+                <ToggleGroupItem
+                  key={p.key}
+                  value={p.key}
+                  className="px-3 text-xs font-semibold data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                >
+                  {p.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={!data}>
+                  <Download data-icon="inline-start" />
+                  Exportar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Descargar CSV</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => exportar("serie")}>
+                  Serie de ingresos ({spec.label.toLowerCase()})
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => exportar("cursos")}>
+                  Pagos por curso
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => exportar("estudiantes")}>
+                  Pagos por estudiante
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        }
       />
 
       {error ? (
@@ -136,435 +243,306 @@ export default function ReportesPage() {
           fallback="No se pudieron cargar los reportes."
         />
       ) : (
-        <>
-          <StatRow
-            className="mb-10"
-            columns={3}
-            loading={isLoading}
-            stats={[
-              {
-                label: "Estudiantes",
-                value: data?.totales.estudiantes ?? 0,
-                icon: Users,
-                tone: "primary",
-                href: "/admin/estudiantes",
-              },
-              {
-                label: "Cursos",
-                value: totalCursos,
-                sub: `${cursosActivos} activos`,
-                icon: BookOpen,
-                tone: "info",
-                href: "/admin/cursos",
-              },
-              {
-                label: "Instructores",
-                value: data?.totales.instructores ?? 0,
-                icon: GraduationCap,
-                tone: "secondary",
-                href: "/admin/instructores",
-              },
-            ]}
-          />
-
-          {/* ── Ingresos ── */}
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 className="font-serif text-2xl font-light tight-tracking text-on-surface">
-                Ingresos
-              </h2>
-              <p className="mt-0.5 font-sans text-xs text-muted-foreground">
-                Suma de los pagos aprobados en el período seleccionado.
-              </p>
-            </div>
-
-            {/* El período vive en la URL: un reporte anual se puede compartir. */}
-            <div
-              role="group"
-              aria-label="Período del reporte"
-              className="flex items-center gap-1 rounded-sm bg-surface-container-low p-1 ambient-shadow"
-            >
-              {PERIODOS.map((opcion) => (
-                <button
-                  key={opcion.key}
-                  type="button"
-                  aria-pressed={periodo === opcion.key}
-                  onClick={() =>
-                    set("periodo", opcion.key === "mensual" ? null : opcion.key)
-                  }
-                  className={`rounded-[3px] px-3 py-1.5 font-sans text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                    periodo === opcion.key
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-on-surface"
-                  }`}
-                >
-                  {opcion.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <StatRow
-            className="mb-6"
-            columns={4}
-            loading={isLoading}
-            stats={[
-              {
-                label: "Total ingresos",
-                value: resumen ? formatCurrency(resumen.total_ingresos) : "—",
-                icon: BarChart2,
-                tone: "success",
-              },
-              {
-                label: "Aprobados",
-                value: resumen?.aprobados ?? 0,
-                icon: CheckCircle,
-                tone: "success",
-              },
-              {
-                label: "Pendientes",
-                value: resumen?.pendientes ?? 0,
-                icon: Clock,
-                tone: "warning",
-                href: "/admin/pagos?estado=pendiente",
-              },
-              {
-                label: "Rechazados",
-                value: resumen?.rechazados ?? 0,
-                icon: XCircle,
-                tone: "danger",
-              },
-            ]}
-          />
-
-          <ChartCard
-            className="mb-6"
-            title={`Ingresos por período`}
-            description="Una sola serie, así que el color solo la distingue del fondo; el valor exacto aparece al pasar por encima."
-          >
-            {isLoading ? (
-              <Skeleton className="h-[260px] w-full" />
-            ) : ingresos.length === 0 ? (
-              <p className="py-10 text-center font-sans text-sm text-muted-foreground">
-                Todavía no hay pagos aprobados en este período.
-              </p>
-            ) : (
-              <ChartContainer
-                config={configIngresos}
-                className="h-[260px] w-full"
+        <div
+          className={`flex flex-col gap-6 transition-opacity ${isFetching && !isLoading ? "opacity-70" : ""}`}
+          aria-busy={isFetching}
+        >
+          {/* ── Indicadores del período ── */}
+          <section aria-labelledby="titulo-periodo">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <h2
+                id="titulo-periodo"
+                className="font-serif text-2xl font-light tight-tracking text-on-surface"
               >
-                <BarChart
-                  data={ingresos}
-                  margin={{ top: 4, right: 8, left: 10 }}
-                >
-                  <CartesianGrid
-                    vertical={false}
-                    strokeDasharray="3 3"
-                    stroke="var(--color-outline-variant)"
-                  />
-                  <XAxis
-                    dataKey="etiqueta"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(v) => `Bs. ${v}`}
-                    tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
-                  />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value, _name, props) => (
-                          <div className="flex flex-col gap-0.5">
-                            <span className="font-medium text-on-surface">
-                              {String(props.payload?.etiqueta ?? "")}
-                            </span>
-                            <span className="font-semibold text-on-surface">
-                              {formatCurrency(Number(value))}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {String(props.payload?.cantidad ?? "")} pago
-                              {Number(props.payload?.cantidad) !== 1 ? "s" : ""}
-                            </span>
-                          </div>
-                        )}
-                      />
-                    }
-                  />
-                  <Bar
-                    dataKey="total"
-                    fill="var(--color-chart-1)"
-                    radius={[4, 4, 0, 0]}
-                    maxBarSize={48}
-                  />
-                </BarChart>
-              </ChartContainer>
-            )}
-          </ChartCard>
+                Últimos {spec.ventana}
+              </h2>
+              {data && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-2.5 py-0.5 font-sans text-xs text-muted-foreground">
+                  <CalendarRange aria-hidden="true" className="size-3.5" />
+                  {rango(data.periodo.desde, data.periodo.hasta)}
+                </span>
+              )}
+            </div>
 
-          {/* ── Ocupación y reparto ── */}
-          <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <ChartCard
-              title="Estudiantes por curso"
-              description="Los ocho cursos con más matrícula."
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <KpiCard
+                label="Ingresos"
+                info="Suma del precio del curso de cada pago aprobado, según la fecha en que se reportó el pago."
+                loading={cargando}
+                value={actual ? formatCurrency(actual.ingresos) : "—"}
+                variacion={
+                  actual && anterior
+                    ? variacion(actual.ingresos, anterior.ingresos)
+                    : undefined
+                }
+                comparacion={comparacion}
+              >
+                {data && <Sparkline serie={data.ingresos} />}
+              </KpiCard>
+
+              <KpiCard
+                label="Pagos aprobados"
+                info="Solicitudes de inscripción cuyo pago verificó la administración."
+                loading={cargando}
+                value={actual?.aprobados.toLocaleString("es-VE") ?? "—"}
+                variacion={
+                  actual && anterior
+                    ? variacion(actual.aprobados, anterior.aprobados)
+                    : undefined
+                }
+                comparacion={comparacion}
+              >
+                {actual && (
+                  <p className="font-sans text-xs text-muted-foreground">
+                    de {actual.total_pagos.toLocaleString("es-VE")} solicitudes
+                    recibidas
+                  </p>
+                )}
+              </KpiCard>
+
+              <KpiCard
+                label="Tasa de aprobación"
+                info="Aprobados sobre los pagos ya resueltos (aprobados + rechazados). Los pendientes no cuentan."
+                loading={cargando}
+                value={tasa === null ? "—" : `${tasa}%`}
+                variacion={
+                  tasa !== null && tasaPrevia !== null
+                    ? variacion(tasa, tasaPrevia)
+                    : undefined
+                }
+                comparacion={comparacion}
+              >
+                {actual && (
+                  <div className="flex flex-col gap-1.5">
+                    <Progress
+                      value={tasa ?? 0}
+                      aria-hidden="true"
+                      className="h-2 bg-surface-container-high [&>[data-slot=progress-indicator]]:bg-chart-aprobado"
+                    />
+                    <p className="font-sans text-xs text-muted-foreground">
+                      {actual.rechazados} rechazado
+                      {actual.rechazados === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                )}
+              </KpiCard>
+
+              <KpiCard
+                label="Pendientes de revisar"
+                info="Pagos reportados en la ventana que todavía no se han aprobado ni rechazado."
+                loading={cargando}
+                value={actual?.pendientes.toLocaleString("es-VE") ?? "—"}
+                className={
+                  actual && actual.pendientes > 0
+                    ? "ring-1 ring-inset ring-warning/40"
+                    : undefined
+                }
+              >
+                {actual && actual.pendientes > 0 ? (
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Link href="/admin/pagos?estado=pendiente">
+                      Revisar pagos
+                      <ArrowRight data-icon="inline-end" />
+                    </Link>
+                  </Button>
+                ) : actual ? (
+                  <p className="font-sans text-xs text-muted-foreground">
+                    Todo al día.
+                  </p>
+                ) : null}
+              </KpiCard>
+            </div>
+          </section>
+
+          {/* ── Evolución ── */}
+          <Tabs defaultValue="ingresos" className="gap-0">
+            <Panel
+              title="Evolución"
+              description={`Por ${periodo === "semanal" ? "semana" : periodo === "anual" ? "año" : "mes"}, últimos ${spec.ventana}. Pasa el cursor por una barra para ver el detalle.`}
+              action={
+                <TabsList className="border-b-0">
+                  <TabsTrigger value="ingresos">Ingresos</TabsTrigger>
+                  <TabsTrigger value="solicitudes">Solicitudes</TabsTrigger>
+                </TabsList>
+              }
             >
-              {isLoading ? (
-                <Skeleton className="h-[280px] w-full" />
-              ) : ocupacion.length === 0 ? (
-                <p className="py-10 text-center font-sans text-sm text-muted-foreground">
-                  Ningún curso tiene estudiantes matriculados.
+              {cargando ? (
+                <Skeleton className="h-72 w-full" />
+              ) : !data ||
+                data.ingresos.every(
+                  (f) =>
+                    f.total === 0 &&
+                    f.aprobados + f.pendientes + f.rechazados === 0,
+                ) ? (
+                <p className="py-16 text-center font-sans text-sm text-muted-foreground">
+                  No hubo pagos en los últimos {spec.ventana}.
                 </p>
               ) : (
-                // Barras horizontales: los nombres de curso son largos y en
-                // vertical se recortaban o giraban 45°.
-                <ChartContainer
-                  config={configOcupacion}
-                  className="h-[280px] w-full"
-                >
-                  <ResponsiveContainer>
-                    <BarChart
-                      data={ocupacion}
-                      layout="vertical"
-                      margin={{ top: 4, right: 32, left: 4 }}
-                    >
-                      <CartesianGrid
-                        horizontal={false}
-                        strokeDasharray="3 3"
-                        stroke="var(--color-outline-variant)"
-                      />
-                      <XAxis type="number" hide />
-                      <YAxis
-                        type="category"
-                        dataKey="codigo"
-                        width={80}
-                        tickLine={false}
-                        axisLine={false}
-                        tick={{ fontFamily: "var(--font-sans)", fontSize: 11 }}
-                      />
-                      <ChartTooltip
-                        content={
-                          <ChartTooltipContent
-                            formatter={(value, _name, props) => (
-                              <div className="flex flex-col gap-0.5">
-                                <span className="font-medium text-on-surface">
-                                  {String(props.payload?.nombre ?? "")}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {Number(value)} estudiante
-                                  {Number(value) !== 1 ? "s" : ""}
-                                </span>
-                              </div>
-                            )}
-                          />
-                        }
-                      />
-                      <Bar
-                        dataKey="estudiantes"
-                        fill="var(--color-chart-2)"
-                        radius={[0, 4, 4, 0]}
-                        maxBarSize={22}
-                      >
-                        {/* Etiqueta directa: el valor exacto sin depender del hover. */}
-                        <LabelList
-                          dataKey="estudiantes"
-                          position="right"
-                          className="fill-muted-foreground"
-                          fontSize={11}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                <>
+                  <TabsContent value="ingresos">
+                    <GraficaIngresos serie={data.ingresos} periodo={periodo} />
+                  </TabsContent>
+                  <TabsContent value="solicitudes">
+                    <GraficaSolicitudes
+                      serie={data.ingresos}
+                      periodo={periodo}
+                    />
+                  </TabsContent>
+                </>
               )}
-            </ChartCard>
+            </Panel>
+          </Tabs>
 
-            <ChartCard
-              title="Reparto de estudiantes"
-              description="Estado de la matrícula sobre el total registrado."
+          {/* ── Ocupación y composición ── */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+            <Panel
+              className="lg:col-span-3"
+              title="Ocupación de cursos"
+              description="Inscritos con el pago aprobado sobre el cupo de cada curso."
             >
-              {isLoading ? (
-                <Skeleton className="h-[200px] w-full" />
+              {cargando ? (
+                <div className="flex flex-col gap-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton key={i} className="h-8 w-full" />
+                  ))}
+                </div>
               ) : (
-                <BarraApilada
-                  segmentos={[
-                    {
-                      label: ESTADO_ESTUDIANTE_LABEL.activo,
-                      value: data?.estado_estudiantes?.activo ?? 0,
-                      slot: 1,
-                    },
-                    {
-                      label: ESTADO_ESTUDIANTE_LABEL.graduado,
-                      value: data?.estado_estudiantes?.graduado ?? 0,
-                      slot: 2,
-                    },
-                    {
-                      label: ESTADO_ESTUDIANTE_LABEL.inactivo,
-                      value: data?.estado_estudiantes?.inactivo ?? 0,
-                      slot: 3,
-                    },
-                  ]}
-                />
+                <Ocupacion cursos={data?.cursos ?? []} />
               )}
+            </Panel>
 
-              <div className="mt-8 border-t border-outline-variant pt-6">
-                <h3 className="mb-3 font-sans text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
-                  Cursos
-                </h3>
-                {/* Dos clases no son una gráfica: son un número con contexto. */}
-                <p className="font-sans text-sm text-on-surface">
-                  <span className="font-serif text-3xl font-light tabular-nums">
-                    {cursosActivos}
-                  </span>
-                  <span className="ml-2 text-muted-foreground">
-                    de {totalCursos} {totalCursos === 1 ? "curso" : "cursos"}{" "}
-                    {totalCursos === 1 ? "está activo" : "están activos"}
-                  </span>
-                </p>
-              </div>
-            </ChartCard>
+            <div className="flex flex-col gap-6 lg:col-span-2">
+              <Panel
+                title="Métodos de pago"
+                description={`Ingresos aprobados por método, últimos ${spec.ventana}.`}
+              >
+                {cargando ? (
+                  <Skeleton className="h-32 w-full" />
+                ) : (
+                  <BarraApilada
+                    formato={formatCurrency}
+                    vacio="Sin pagos aprobados en este período."
+                    segmentos={(data?.periodo.metodos_pago ?? []).map((m) => ({
+                      label: METODO_LABEL[m.metodo],
+                      value: m.ingresos,
+                      slot: METODO_SLOT[m.metodo],
+                      detalle: `${m.cantidad} pago${m.cantidad === 1 ? "" : "s"}`,
+                    }))}
+                  />
+                )}
+              </Panel>
+
+              <Panel
+                title="Estudiantes"
+                description="Estado de la matrícula sobre el total registrado."
+              >
+                {cargando ? (
+                  <Skeleton className="h-32 w-full" />
+                ) : (
+                  <BarraApilada
+                    segmentos={[
+                      {
+                        label: "Activos",
+                        value: data?.estado_estudiantes?.activo ?? 0,
+                        slot: 1,
+                      },
+                      {
+                        label: "Graduados",
+                        value: data?.estado_estudiantes?.graduado ?? 0,
+                        slot: 2,
+                      },
+                      {
+                        label: "Inactivos",
+                        value: data?.estado_estudiantes?.inactivo ?? 0,
+                        slot: 3,
+                      },
+                    ]}
+                  />
+                )}
+              </Panel>
+            </div>
           </div>
 
-          {/* ── Tablas: la vista de datos de las gráficas de arriba ── */}
-          <TablaPagosCurso data={data} loading={isLoading} />
-          <TablaPagosUsuario data={data} loading={isLoading} />
-        </>
+          {/* ── Plataforma (histórico) ── */}
+          <section aria-labelledby="titulo-plataforma">
+            <div className="mb-3 flex items-center gap-3">
+              <h2
+                id="titulo-plataforma"
+                className="font-serif text-2xl font-light tight-tracking text-on-surface"
+              >
+                Plataforma
+              </h2>
+              <Separator className="flex-1" />
+              {data && (
+                <p className="font-sans text-xs text-muted-foreground">
+                  Histórico:{" "}
+                  <span className="font-semibold text-on-surface tabular-nums">
+                    {formatCurrency(data.resumen.total_ingresos)}
+                  </span>{" "}
+                  en {data.resumen.aprobados.toLocaleString("es-VE")} pagos
+                </p>
+              )}
+            </div>
+            <StatRow
+              columns={4}
+              loading={cargando}
+              className="max-sm:grid-cols-2"
+              stats={[
+                {
+                  label: "Estudiantes",
+                  value: data?.totales.estudiantes ?? 0,
+                  sub: `${data?.estado_estudiantes?.activo ?? 0} activos`,
+                  icon: Users,
+                  tone: "primary",
+                  href: "/admin/estudiantes",
+                },
+                {
+                  label: "Cursos",
+                  value: data?.totales.cursos ?? 0,
+                  sub: `${data?.estado_cursos?.activo ?? 0} activos`,
+                  icon: BookOpen,
+                  tone: "info",
+                  href: "/admin/cursos",
+                },
+                {
+                  label: "Instructores",
+                  value: data?.totales.instructores ?? 0,
+                  icon: GraduationCap,
+                  tone: "secondary",
+                  href: "/admin/instructores",
+                },
+                {
+                  label: "Ocupación media",
+                  value: ocupacionMedia === null ? "—" : `${ocupacionMedia}%`,
+                  sub: "de los cursos activos",
+                  icon: BarChart2,
+                  tone: "success",
+                },
+              ]}
+            />
+          </section>
+
+          {/* ── Detalle ── */}
+          <Panel
+            title="Detalle de pagos"
+            description="Histórico por curso y por estudiante: la vista en tabla de todo lo anterior."
+          >
+            {cargando ? (
+              <Skeleton className="h-64 w-full" />
+            ) : (
+              <TablasDetalle
+                porCurso={data?.pagos_por_curso ?? []}
+                porUsuario={data?.pagos_por_usuario ?? []}
+              />
+            )}
+          </Panel>
+        </div>
       )}
     </PageShell>
-  );
-}
-
-function TablaPagosCurso({
-  data,
-  loading,
-}: {
-  data?: ReporteData;
-  loading: boolean;
-}) {
-  if (loading) return <Skeleton className="mb-6 h-48 w-full rounded-sm" />;
-  if (!data?.pagos_por_curso?.length) return null;
-
-  return (
-    <ChartCard
-      className="mb-6"
-      title="Pagos por curso"
-      description="Recaudación y estado de los pagos de cada curso."
-    >
-      <TableScroll>
-        <Table className="table-sticky-first [--table-sticky-bg:var(--surface-container-lowest)]">
-          <TableCaption>
-            Cursos con su precio, pagos aprobados, pendientes, rechazados e
-            ingreso total.
-          </TableCaption>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="px-0 py-2 pr-4">Curso</TableHead>
-              <TableHead className="px-0 py-2 pr-4 text-right">
-                Precio
-              </TableHead>
-              <TableHead className="px-0 py-2 pr-4 text-right">
-                Aprobados
-              </TableHead>
-              <TableHead className="px-0 py-2 pr-4 text-right">
-                Pendientes
-              </TableHead>
-              <TableHead className="px-0 py-2 pr-4 text-right">
-                Rechazados
-              </TableHead>
-              <TableHead className="px-0 py-2 text-right">Ingreso</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.pagos_por_curso.map((fila) => (
-              <TableRow key={fila.curso_id}>
-                <TableCell className="px-0 py-2.5 pr-4">
-                  <span className="font-medium">{fila.nombre}</span>
-                  <span className="ml-2 font-mono text-xs text-muted-foreground">
-                    {fila.codigo}
-                  </span>
-                </TableCell>
-                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums text-muted-foreground">
-                  {formatCurrency(fila.precio)}
-                </TableCell>
-                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
-                  {fila.aprobados}
-                </TableCell>
-                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
-                  {fila.pendientes}
-                </TableCell>
-                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
-                  {fila.rechazados}
-                </TableCell>
-                <TableCell className="px-0 py-2.5 text-right font-semibold tabular-nums">
-                  {formatCurrency(fila.total_ingreso)}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableScroll>
-    </ChartCard>
-  );
-}
-
-function TablaPagosUsuario({
-  data,
-  loading,
-}: {
-  data?: ReporteData;
-  loading: boolean;
-}) {
-  if (loading) return <Skeleton className="h-48 w-full rounded-sm" />;
-  if (!data?.pagos_por_usuario?.length) return null;
-
-  return (
-    <ChartCard
-      title="Pagos por estudiante"
-      description="Quién ha pagado, cuánto y en qué estado quedó."
-    >
-      <TableScroll>
-        <Table className="table-sticky-first [--table-sticky-bg:var(--surface-container-lowest)]">
-          <TableCaption>
-            Estudiantes con su número de pagos por estado y el ingreso aportado.
-          </TableCaption>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="px-0 py-2 pr-4">Estudiante</TableHead>
-              <TableHead className="px-0 py-2 pr-4 text-right">Pagos</TableHead>
-              <TableHead className="px-0 py-2 pr-4 text-right">
-                Aprobados
-              </TableHead>
-              <TableHead className="px-0 py-2 pr-4 text-right">
-                Pendientes
-              </TableHead>
-              <TableHead className="px-0 py-2 text-right">Ingreso</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.pagos_por_usuario.slice(0, 20).map((fila) => (
-              <TableRow key={fila.user_id}>
-                <TableCell className="px-0 py-2.5 pr-4 font-medium">
-                  {fila.nombre}
-                </TableCell>
-                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
-                  {fila.total_pagos}
-                </TableCell>
-                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
-                  {fila.aprobados}
-                </TableCell>
-                <TableCell className="px-0 py-2.5 pr-4 text-right tabular-nums">
-                  {fila.pendientes}
-                </TableCell>
-                <TableCell className="px-0 py-2.5 text-right font-semibold tabular-nums">
-                  {formatCurrency(fila.total_ingreso)}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableScroll>
-    </ChartCard>
   );
 }

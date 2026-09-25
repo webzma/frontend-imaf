@@ -322,14 +322,32 @@ export default function EstudianteDashboard() {
                   <div className="w-14 h-14 rounded-full bg-primary-container/60 flex items-center justify-center">
                     <BookOpen className="w-6 h-6 text-on-primary-container" />
                   </div>
-                  <div className="text-center max-w-xs">
-                    <p className="font-serif font-light text-xl text-on-surface mb-1">
-                      Sin curso asignado
-                    </p>
-                    <p className="font-sans text-sm text-muted-foreground">
-                      No estás inscrito en ningún curso actualmente.
-                    </p>
-                  </div>
+                  {/* Con el pago en revisión todavía no forma parte del
+                      curso, pero debe saber que su solicitud va en camino. */}
+                  {misCursos?.solicitudes_pendientes[0] ? (
+                    <div className="text-center max-w-xs">
+                      <p className="font-serif font-light text-xl text-on-surface mb-1">
+                        Solicitud en revisión
+                      </p>
+                      <p className="font-sans text-sm text-muted-foreground">
+                        Tu pago para{" "}
+                        <span className="font-medium text-on-surface">
+                          {misCursos.solicitudes_pendientes[0].nombre}
+                        </span>{" "}
+                        está en revisión. Entrarás al curso cuando la
+                        administración lo apruebe.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center max-w-xs">
+                      <p className="font-serif font-light text-xl text-on-surface mb-1">
+                        Sin curso asignado
+                      </p>
+                      <p className="font-sans text-sm text-muted-foreground">
+                        No estás inscrito en ningún curso actualmente.
+                      </p>
+                    </div>
+                  )}
                   <span
                     role="link"
                     tabIndex={0}

@@ -5,6 +5,8 @@ export interface Segmento {
   value: number;
   /** Token de color de la paleta categórica: 1, 2 o 3. */
   slot: 1 | 2 | 3;
+  /** Texto secundario bajo la etiqueta (p. ej. "4 pagos"). */
+  detalle?: string;
 }
 
 /**
@@ -20,9 +22,14 @@ export interface Segmento {
  */
 export function BarraApilada({
   segmentos,
+  formato = (n) => n.toLocaleString("es-VE"),
+  vacio = "Sin datos todavía.",
   className,
 }: {
   segmentos: Segmento[];
+  /** Cómo se escribe cada valor en la leyenda. */
+  formato?: (valor: number) => string;
+  vacio?: string;
   className?: string;
 }) {
   const total = segmentos.reduce((suma, s) => suma + s.value, 0);
@@ -31,7 +38,7 @@ export function BarraApilada({
   if (total === 0) {
     return (
       <p className="py-10 text-center font-sans text-sm text-muted-foreground">
-        Sin datos todavía.
+        {vacio}
       </p>
     );
   }
@@ -48,7 +55,7 @@ export function BarraApilada({
             className="h-full first:rounded-l-sm last:rounded-r-sm"
             style={{
               width: `${(segmento.value / total) * 100}%`,
-              backgroundColor: `var(--color-chart-${segmento.slot})`,
+              backgroundColor: `var(--chart-${segmento.slot})`,
             }}
           />
         ))}
@@ -64,11 +71,18 @@ export function BarraApilada({
             <span
               aria-hidden="true"
               className="size-2.5 shrink-0 rounded-[2px]"
-              style={{ backgroundColor: `var(--color-chart-${segmento.slot})` }}
+              style={{ backgroundColor: `var(--chart-${segmento.slot})` }}
             />
-            <span className="flex-1 text-on-surface">{segmento.label}</span>
+            <span className="flex-1 text-on-surface">
+              {segmento.label}
+              {segmento.detalle && (
+                <span className="ml-1.5 text-xs text-muted-foreground">
+                  {segmento.detalle}
+                </span>
+              )}
+            </span>
             <span className="tabular-nums text-on-surface">
-              {segmento.value}
+              {formato(segmento.value)}
             </span>
             <span className="w-12 text-right tabular-nums text-muted-foreground">
               {total > 0 ? Math.round((segmento.value / total) * 100) : 0}%

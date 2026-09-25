@@ -24,6 +24,9 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  --color-chart-aprobado: var(--chart-aprobado);
+  --color-chart-pendiente: var(--chart-pendiente);
+  --color-chart-rechazado: var(--chart-rechazado);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -154,6 +157,15 @@
   --chart-4: #0e8a76;
   --chart-5: #6b4bb0;
 
+  /* Estados de pago como relleno contiguo (barras apiladas). Los --success /
+     --warning / --danger de texto no sirven aquí: ámbar y rojo quedaban a
+     ΔE 2,6 bajo deuteranopia y por debajo del suelo de visión normal.
+     Validados con validate_palette.js sobre #ffffff; el ámbar no llega a 3:1,
+     así que estas gráficas siempre llevan leyenda con cifras y tabla. */
+  --chart-aprobado: #1a7f55;
+  --chart-pendiente: #d29b1f;
+  --chart-rechazado: #b42318;
+
   --sidebar: #f3f0ef;
   --sidebar-foreground: #1a1817;
   --sidebar-primary: #b52569;
@@ -228,6 +240,12 @@
   --chart-3: #c07620;
   --chart-4: #00a98c;
   --chart-5: #9878e6;
+
+  /* Validados sobre #0e0e0e. CVD 7,3 (banda 6–8): legal solo con codificación
+     secundaria — huecos de 2px, leyenda con cifras y tabla. */
+  --chart-aprobado: #218f5c;
+  --chart-pendiente: #b8891f;
+  --chart-rechazado: #d13e4a;
 
   --sidebar: #1c1b1b;
   --sidebar-foreground: #e5e2e1;
