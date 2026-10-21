@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import LogoImaf from "@/public/logo-imaf.webp";
 
 const sections = [
+  { href: "#cursos", label: "Cursos" },
   { href: "#beneficios", label: "Beneficios" },
   { href: "#como-funciona", label: "Cómo funciona" },
   { href: "#faq", label: "Preguntas frecuentes" },

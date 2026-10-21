@@ -118,9 +118,11 @@ export type TemarioForm = z.infer<typeof temarioSchema>;
 
 /** Campos base compartidos del formulario de sesión. */
 const camposSesion = {
+  /** Tema del temario: su id, "otro" para un título libre o "" sin elegir. */
+  temario_id: z.string().optional(),
   titulo: z
     .string()
-    .min(1, "El título es obligatorio")
+    .min(1, "Elige un tema del temario o escribe un título")
     .max(255)
     .regex(
       SOLO_TEXTO_SEGURO,

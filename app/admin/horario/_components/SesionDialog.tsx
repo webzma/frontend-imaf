@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Trash2 } from "lucide-react";
@@ -26,6 +27,12 @@ import {
 import { Alert } from "@/components/ui/alert";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { apiFetch, mensajeDeError } from "@/lib/api-client";
+import {
+  TEMA_OTRO,
+  TemaSelect,
+  temaInicial,
+  type TemaOpcion,
+} from "@/components/tema-select";
 import { sesionHorarioSchema, type SesionHorarioForm } from "@/lib/schemas";
 import type { CursoRef, Sesion } from "./types";
 import { normalizeDate, normalizeTime } from "./utils";
@@ -61,6 +68,7 @@ export default function SesionDialog({
     resolver: zodResolver(sesionHorarioSchema),
     defaultValues: {
       curso_id: "",
+      temario_id: "",
       titulo: "",
       descripcion: "",
       fecha: "",
@@ -76,6 +84,8 @@ export default function SesionDialog({
     if (initial) {
       form.reset({
         curso_id: String(initial.curso_id),
+        // Si la sesión no está enlazada, se resuelve al cargar el temario.
+        temario_id: initial.temario_id ? String(initial.temario_id) : "",
         titulo: initial.titulo,
         descripcion: initial.descripcion ?? "",
         fecha: normalizeDate(initial.fecha),
@@ -94,6 +104,7 @@ export default function SesionDialog({
       }
       form.reset({
         curso_id: "",
+        temario_id: "",
         titulo: "",
         descripcion: "",
         fecha: defaultDate ?? "",
@@ -104,12 +115,43 @@ export default function SesionDialog({
     }
   }, [open, initial, defaultDate, defaultHora, form]);
 
+  const cursoId = useWatch({ control: form.control, name: "curso_id" });
+  const temaId = useWatch({ control: form.control, name: "temario_id" });
+  const titulo = useWatch({ control: form.control, name: "titulo" });
+
+  // Temario del curso elegido: cambia al cambiar de curso.
+  const { data: temas = [], isFetching: cargandoTemas } = useQuery({
+    queryKey: ["admin", "temario", cursoId],
+    queryFn: () =>
+      apiFetch<TemaOpcion[]>(`api/admin/cursos/${cursoId}/temario`),
+    enabled: open && !!cursoId,
+    staleTime: 60 * 1000,
+  });
+
+  // Al editar una sesión antigua sin enlace, se busca su tema por el título.
+  useEffect(() => {
+    if (!open || !initial || cargandoTemas) return;
+    if (
+      form.getValues("temario_id") === "" &&
+      cursoId === String(initial.curso_id)
+    ) {
+      form.setValue(
+        "temario_id",
+        temas.length ? temaInicial(initial, temas) : TEMA_OTRO,
+      );
+    }
+  }, [open, initial, temas, cargandoTemas, cursoId, form]);
+
   const onSubmit = async (data: SesionHorarioForm) => {
     setSubmitting(true);
     setSubmitError("");
     try {
       const body = {
         curso_id: Number(data.curso_id),
+        temario_id:
+          data.temario_id && data.temario_id !== TEMA_OTRO
+            ? Number(data.temario_id)
+            : null,
         titulo: data.titulo,
         descripcion: data.descripcion || null,
         fecha: data.fecha,
@@ -174,9 +216,12 @@ export default function SesionDialog({
             <Label>Curso *</Label>
             <Select
               value={form.watch("curso_id")}
-              onValueChange={(v) =>
-                form.setValue("curso_id", v, { shouldValidate: true })
-              }
+              onValueChange={(v) => {
+                form.setValue("curso_id", v, { shouldValidate: true });
+                // El tema elegido era del curso anterior.
+                form.setValue("temario_id", "");
+                form.setValue("titulo", "");
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Seleccionar curso" />
@@ -202,19 +247,31 @@ export default function SesionDialog({
             )}
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="titulo">Título *</Label>
-            <Input
-              id="titulo"
-              placeholder="Ej: Introducción al curso"
-              {...form.register("titulo")}
+          {cursoId ? (
+            <TemaSelect
+              id="tema-horario"
+              temas={temas}
+              cargando={cargandoTemas && temas.length === 0}
+              temarioId={
+                // Curso sin temario: directamente título libre.
+                !cargandoTemas && temas.length === 0
+                  ? TEMA_OTRO
+                  : (temaId ?? "")
+              }
+              titulo={titulo}
+              onChange={({ temario_id, titulo: t }) => {
+                form.setValue("temario_id", temario_id);
+                form.setValue("titulo", t, {
+                  shouldValidate: form.formState.isSubmitted,
+                });
+              }}
+              error={form.formState.errors.titulo?.message}
             />
-            {form.formState.errors.titulo && (
-              <p className="text-sm text-danger">
-                {form.formState.errors.titulo.message}
-              </p>
-            )}
-          </div>
+          ) : (
+            <p className="font-sans text-xs text-muted-foreground">
+              Elige un curso para ver los temas de su temario.
+            </p>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">

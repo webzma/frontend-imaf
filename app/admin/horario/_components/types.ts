@@ -23,6 +23,7 @@ export interface CursoRef {
 export interface Sesion {
   id: number;
   curso_id: number;
+  temario_id?: number | null;
   titulo: string;
   descripcion: string | null;
   fecha: string;

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FechaHabilPicker } from "@/components/fecha-habil-picker";
+import { TEMA_OTRO, TemaSelect, temaInicial } from "@/components/tema-select";
 import { toast } from "sonner";
 import { formatDate, formatPrice, formatTime } from "@/lib/format";
 import {
@@ -207,6 +208,7 @@ interface Temario {
 interface Sesion {
   id: number;
   curso_id: number;
+  temario_id: number | null;
   titulo: string;
   descripcion: string | null;
   fecha: string;
@@ -363,6 +365,7 @@ export default function CursoDetailPage({
   const sesionForm = useForm<SesionForm>({
     resolver: zodResolver(sesionSchema),
     defaultValues: {
+      temario_id: "",
       titulo: "",
       descripcion: "",
       fecha: "",
@@ -370,6 +373,14 @@ export default function CursoDetailPage({
       hora_fin: "",
       estado: "programada",
     },
+  });
+  const sesionTemaId = useWatch({
+    control: sesionForm.control,
+    name: "temario_id",
+  });
+  const sesionTitulo = useWatch({
+    control: sesionForm.control,
+    name: "titulo",
   });
   const [sesionSubmitting, setSesionSubmitting] = useState(false);
   const [sesionError, setSesionError] = useState("");
@@ -840,6 +851,12 @@ export default function CursoDetailPage({
           : [...prev, saved]
         ).sort((a, b) => a.orden - b.orden),
       );
+      // El backend renombra las sesiones de este tema; se refleja aquí.
+      setSesiones((prev) =>
+        prev.map((ses) =>
+          ses.temario_id === saved.id ? { ...ses, titulo: saved.titulo } : ses,
+        ),
+      );
       setTemarioOpen(false);
       toast.success(temarioEdit ? "Tema actualizado" : "Tema agregado");
     } catch {
@@ -861,6 +878,14 @@ export default function CursoDetailPage({
         },
       );
       setTemario((prev) => prev.filter((t) => t.id !== temarioDeleteTarget.id));
+      // Sus sesiones conservan el título pero pierden el enlace al tema.
+      setSesiones((prev) =>
+        prev.map((ses) =>
+          ses.temario_id === temarioDeleteTarget.id
+            ? { ...ses, temario_id: null }
+            : ses,
+        ),
+      );
       setTemarioDeleteTarget(null);
       toast.success("Tema eliminado");
     } finally {
@@ -873,6 +898,8 @@ export default function CursoDetailPage({
   const openSesionCreate = () => {
     setSesionEdit(null);
     sesionForm.reset({
+      // Sin temario no hay nada que elegir: se escribe el título.
+      temario_id: temario.length === 0 ? TEMA_OTRO : "",
       titulo: "",
       descripcion: "",
       fecha: "",
@@ -887,6 +914,7 @@ export default function CursoDetailPage({
   const openSesionEdit = (s: Sesion) => {
     setSesionEdit(s);
     sesionForm.reset({
+      temario_id: temaInicial(s, temario),
       titulo: s.titulo,
       descripcion: s.descripcion ?? "",
       fecha: s.fecha,
@@ -909,6 +937,10 @@ export default function CursoDetailPage({
         method: sesionEdit ? "PUT" : "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({
+          temario_id:
+            data.temario_id && data.temario_id !== TEMA_OTRO
+              ? Number(data.temario_id)
+              : null,
           titulo: data.titulo.trim(),
           descripcion: data.descripcion || null,
           fecha: data.fecha,
@@ -2471,21 +2503,24 @@ export default function CursoDetailPage({
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
-            <div className="flex flex-col gap-1.5">
-              <label className="font-sans text-xs font-medium text-on-surface">
-                Título *
-              </label>
-              <Input
-                placeholder="Ej: Clase 1 – Introducción"
-                {...sesionForm.register("titulo")}
-                className="font-sans text-sm"
-              />
-              {sesionForm.formState.errors.titulo && (
-                <p className="text-xs text-danger">
-                  {sesionForm.formState.errors.titulo.message}
-                </p>
-              )}
-            </div>
+            <TemaSelect
+              temas={temario}
+              temarioId={sesionTemaId ?? ""}
+              titulo={sesionTitulo}
+              usosPorTema={sesiones.reduce<Record<number, number>>((acc, s) => {
+                if (s.temario_id && s.id !== sesionEdit?.id) {
+                  acc[s.temario_id] = (acc[s.temario_id] ?? 0) + 1;
+                }
+                return acc;
+              }, {})}
+              onChange={({ temario_id, titulo }) => {
+                sesionForm.setValue("temario_id", temario_id);
+                sesionForm.setValue("titulo", titulo, {
+                  shouldValidate: sesionForm.formState.isSubmitted,
+                });
+              }}
+              error={sesionForm.formState.errors.titulo?.message}
+            />
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">

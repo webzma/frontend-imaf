@@ -744,9 +744,14 @@ export default function CursoDetallePage({
       fetch(`${process.env.API_URL}api/estudiante/perfil`, { headers }).then(
         (r) => r.json(),
       ),
-      fetch(`${process.env.API_URL}api/estudiante/pagos`, { headers }).then(
-        (r) => r.json(),
-      ),
+      // El endpoint está paginado ({ data: [...] }) y ordenado del más
+      // reciente al más antiguo: basta el primero de este curso. Antes se
+      // trataba la respuesta como un array y el estado del pago nunca se
+      // mostraba.
+      fetch(
+        `${process.env.API_URL}api/estudiante/pagos?curso_id=${encodeURIComponent(id)}`,
+        { headers },
+      ).then((r) => (r.ok ? r.json() : null)),
       fetch(`${process.env.API_URL}api/datos-bancarios`, { headers })
         .then((r) => r.json())
         .catch(() => []),
@@ -755,9 +760,12 @@ export default function CursoDetallePage({
         setCurso(cursoData);
         setMiCursoId(perfil?.curso?.id ?? null);
         const cursoId = Number(id);
-        const pago = Array.isArray(pagos)
-          ? (pagos.find((p: Pago) => p.curso_id === cursoId) ?? null)
-          : null;
+        const lista: Pago[] = Array.isArray(pagos)
+          ? pagos
+          : Array.isArray(pagos?.data)
+            ? pagos.data
+            : [];
+        const pago = lista.find((p) => p.curso_id === cursoId) ?? null;
         setPagoActivo(pago);
         if (Array.isArray(bankData)) {
           setDatosBancarios(bankData);
