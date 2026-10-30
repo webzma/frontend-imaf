@@ -42,6 +42,8 @@ const camposBaseCurso = {
       SOLO_TEXTO_SEGURO,
       "El nombre contiene caracteres no permitidos (evita ( ) [ ] = < > \" ' ; etc.)",
     ),
+  /** Nivel del curso tomado del catálogo. Opcional: hay cursos sin nivel. */
+  nivel_curso_id: z.string().optional().or(z.literal("")),
   descripcion: z
     .string()
     .max(1000)

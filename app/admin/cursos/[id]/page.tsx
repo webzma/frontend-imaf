@@ -68,8 +68,10 @@ import {
   ClipboardCheck,
   SearchX,
   Wallet,
+  TrendingUp,
 } from "lucide-react";
 import { authHeaders as getAuthHeaders } from "@/lib/api-client";
+import { SIN_NIVEL } from "../tipos";
 
 /* ── Types ── */
 
@@ -181,6 +183,7 @@ interface Curso {
   precio: number;
   whatsapp_url: string | null;
   estado: "activo" | "inactivo";
+  nivel_curso: { id: number; nombre: string } | null;
   instructor: CursoInstructor | null;
   estudiantes: EstudianteEnCurso[];
 }
@@ -289,6 +292,7 @@ export default function CursoDetailPage({
   const [curso, setCurso] = useState<Curso | null>(null);
   const [sinCurso, setSinCurso] = useState<EstudianteSinCurso[]>([]);
   const [instructores, setInstructores] = useState<InstructorFull[]>([]);
+  const [niveles, setNiveles] = useState<{ id: number; nombre: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -305,6 +309,7 @@ export default function CursoDetailPage({
     resolver: zodResolver(editCursoSchema),
     defaultValues: {
       nombre: "",
+      nivel_curso_id: "",
       descripcion: "",
       limite_cupo: 30,
       minimo_estudiantes: undefined,
@@ -403,6 +408,9 @@ export default function CursoDetailPage({
       fetch(`${process.env.API_URL}api/admin/profesores`, { headers }).then(
         (r) => r.json(),
       ),
+      fetch(`${process.env.API_URL}api/admin/niveles-cursos`, {
+        headers,
+      }).then((r) => r.json()),
       fetch(`${process.env.API_URL}api/admin/cursos/${id}/temario`, {
         headers,
       }).then((r) => r.json()),
@@ -415,6 +423,7 @@ export default function CursoDetailPage({
           cursoData,
           estudiantesData,
           instructoresData,
+          nivelesData,
           temarioData,
           sesionesData,
         ]) => {
@@ -439,6 +448,7 @@ export default function CursoDetailPage({
               ? instructoresData
               : (instructoresData.data ?? []),
           );
+          setNiveles(Array.isArray(nivelesData) ? nivelesData : []);
           setTemario(Array.isArray(temarioData) ? temarioData : []);
           setSesiones(Array.isArray(sesionesData) ? sesionesData : []);
         },
@@ -554,6 +564,7 @@ export default function CursoDetailPage({
     if (!curso) return;
     editForm.reset({
       nombre: curso.nombre,
+      nivel_curso_id: curso.nivel_curso ? String(curso.nivel_curso.id) : "",
       descripcion: curso.descripcion ?? "",
       limite_cupo: curso.limite_cupo,
       minimo_estudiantes: curso.minimo_estudiantes ?? undefined,
@@ -581,6 +592,9 @@ export default function CursoDetailPage({
           headers: getAuthHeaders(),
           body: JSON.stringify({
             nombre: data.nombre,
+            nivel_curso_id: data.nivel_curso_id
+              ? Number(data.nivel_curso_id)
+              : null,
             descripcion: data.descripcion || null,
             limite_cupo: Number(data.limite_cupo),
             minimo_estudiantes:
@@ -1088,7 +1102,7 @@ export default function CursoDetailPage({
                 título: se leían como pie de foto y el dato no se distinguía de
                 su contexto. Ahora cada uno es un campo con etiqueta propia y
                 valor con peso, sobre una superficie un nivel más alta. */}
-            <dl className="mt-6 grid gap-px overflow-hidden rounded-lg bg-outline-variant sm:grid-cols-3">
+            <dl className="mt-6 grid gap-px overflow-hidden rounded-lg bg-outline-variant sm:grid-cols-2 lg:grid-cols-4">
               <div className="bg-surface-container px-4 py-3.5">
                 <dt className="flex items-center gap-1.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
                   <Hash className="w-3 h-3" />
@@ -1096,6 +1110,22 @@ export default function CursoDetailPage({
                 </dt>
                 <dd className="mt-1.5 font-mono text-lg font-bold tight-tracking text-on-surface">
                   {curso.codigo}
+                </dd>
+              </div>
+
+              <div className="bg-surface-container px-4 py-3.5">
+                <dt className="flex items-center gap-1.5 font-sans text-[10px] tracking-[0.18em] uppercase text-muted-foreground font-semibold">
+                  <TrendingUp className="w-3 h-3" />
+                  Nivel
+                </dt>
+                <dd className="mt-1.5 font-sans text-base font-semibold text-on-surface">
+                  {curso.nivel_curso ? (
+                    curso.nivel_curso.nombre
+                  ) : (
+                    <span className="font-normal text-muted-foreground">
+                      Sin definir
+                    </span>
+                  )}
                 </dd>
               </div>
 
@@ -1961,6 +1991,35 @@ export default function CursoDetailPage({
                   {editForm.formState.errors.nombre.message}
                 </p>
               )}
+            </div>
+
+            {/* Nivel de curso */}
+            <div className="flex flex-col gap-1.5">
+              <label className="font-sans text-xs font-medium text-on-surface">
+                Nivel de curso
+              </label>
+              <Select
+                value={editForm.watch("nivel_curso_id") || SIN_NIVEL}
+                onValueChange={(v) =>
+                  editForm.setValue(
+                    "nivel_curso_id",
+                    v === SIN_NIVEL ? "" : v,
+                    { shouldValidate: true },
+                  )
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sin nivel" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={SIN_NIVEL}>Sin nivel</SelectItem>
+                  {niveles.map((nivel) => (
+                    <SelectItem key={nivel.id} value={String(nivel.id)}>
+                      {nivel.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Instructor + Estado */}

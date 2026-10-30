@@ -31,18 +31,17 @@ interface CatalogoItem {
   nombre: string;
   /** Instructores que tienen asignada esta opción. */
   profesores_count?: number;
+  /** Cursos que tienen asignada esta opción. */
+  cursos_count?: number;
 }
 
 /** A partir de cuántos elementos aparece el buscador. */
 const MINIMO_PARA_BUSCAR = 8;
 
-const instructores = (n: number) =>
-  `${n} ${n === 1 ? "instructor" : "instructores"}`;
-
 /**
- * CRUD de un catálogo de instructores.
+ * CRUD de un catálogo del sistema.
  *
- * Los cuatro catálogos son la misma pantalla con otro sustantivo. La caché de
+ * Todos los catálogos son la misma pantalla con otro sustantivo. La caché de
  * react-query es la única copia de la lista y se invalida al terminar cada
  * mutación.
  */
@@ -56,6 +55,19 @@ export default function CatalogoPage({
   const { slug, title, singular, plural, articulo, icon: Icon } = spec;
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Los catálogos de instructores cuentan `profesores`; el nivel de curso
+  // cuenta `cursos`. El nombre del campo y los textos salen del spec.
+  const relacionUso = spec.relacionUso ?? "profesores";
+  const usoSingular = spec.usoSingular ?? "instructor";
+  const usoPlural = spec.usoPlural ?? "instructores";
+  const usoDe = (item: CatalogoItem) =>
+    (relacionUso === "cursos" ? item.cursos_count : item.profesores_count) ?? 0;
+  const tieneConteo = (item: CatalogoItem) =>
+    relacionUso === "cursos"
+      ? item.cursos_count !== undefined
+      : item.profesores_count !== undefined;
+  const usoTexto = (n: number) => `${n} ${n === 1 ? usoSingular : usoPlural}`;
 
   const [nombre, setNombre] = useState("");
   const [busqueda, setBusqueda] = useState("");
@@ -161,7 +173,7 @@ export default function CatalogoPage({
       ? mensajeDeError(crear.error, `No se pudo crear ${articulo} ${singular}.`)
       : null);
 
-  const enUsoAlBorrar = borrando?.profesores_count ?? 0;
+  const enUsoAlBorrar = borrando ? usoDe(borrando) : 0;
 
   return (
     <div className={className}>
@@ -251,7 +263,7 @@ export default function CatalogoPage({
         <EmptyState
           icon={Icon}
           title={`Aún no hay ${title.toLowerCase()}`}
-          description={`Crea ${articulo} primer${articulo === "la" ? "a" : ""} ${singular} para poder usarl${vocal} al registrar instructores.`}
+          description={`Crea ${articulo} primer${articulo === "la" ? "a" : ""} ${singular} para poder usarl${vocal} en los formularios de instructores y cursos.`}
           className="max-w-2xl"
         />
       ) : (
@@ -297,7 +309,7 @@ export default function CatalogoPage({
           ) : (
             <ul className="divide-y divide-outline-variant">
               {visibles.map((item) => {
-                const enUso = item.profesores_count ?? 0;
+                const enUso = usoDe(item);
                 return (
                   <li
                     key={item.id}
@@ -307,10 +319,10 @@ export default function CatalogoPage({
                       <p className="font-sans text-sm break-words text-on-surface">
                         {item.nombre}
                       </p>
-                      {item.profesores_count !== undefined && (
+                      {tieneConteo(item) && (
                         <p className="font-sans text-xs text-muted-foreground">
                           {enUso > 0
-                            ? `En uso por ${instructores(enUso)}`
+                            ? `En uso por ${usoTexto(enUso)}`
                             : "Sin uso"}
                         </p>
                       )}
@@ -355,8 +367,8 @@ export default function CatalogoPage({
               Editar {singular}
             </DialogTitle>
             <DialogDescription className="font-sans text-sm text-muted-foreground">
-              {editando?.profesores_count
-                ? `El cambio se verá en ${instructores(editando.profesores_count)} que ya l${vocal} tienen asignad${vocal}.`
+              {editando && usoDe(editando) > 0
+                ? `El cambio se verá en ${usoTexto(usoDe(editando))} que ya l${vocal} tienen asignad${vocal}.`
                 : "Modifica el nombre y guarda los cambios."}
             </DialogDescription>
           </DialogHeader>
@@ -448,7 +460,7 @@ export default function CatalogoPage({
               <>
                 {" "}
                 <strong className="text-danger">
-                  {instructores(enUsoAlBorrar)}{" "}
+                  {usoTexto(enUsoAlBorrar)}{" "}
                   {enUsoAlBorrar === 1 ? "lo tiene" : "lo tienen"} asignad
                   {vocal} y {enUsoAlBorrar === 1 ? "quedará" : "quedarán"} sin{" "}
                   {singular}.

@@ -44,16 +44,23 @@ export function CursoCard({ curso }: { curso: Curso }) {
       <div className={cn("h-1", estilo.franja)} />
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-4 flex items-center justify-between gap-2">
-          <span
-            className={cn(
-              "rounded-sm px-2.5 py-1 font-mono text-xs font-bold",
-              apagado
-                ? "bg-surface-container-high text-muted-foreground"
-                : "bg-primary-container text-on-primary-container",
+          <div className="flex min-w-0 items-center gap-2">
+            <span
+              className={cn(
+                "rounded-sm px-2.5 py-1 font-mono text-xs font-bold",
+                apagado
+                  ? "bg-surface-container-high text-muted-foreground"
+                  : "bg-primary-container text-on-primary-container",
+              )}
+            >
+              {curso.codigo}
+            </span>
+            {curso.nivel_curso && (
+              <span className="truncate font-sans text-xs text-muted-foreground">
+                {curso.nivel_curso.nombre}
+              </span>
             )}
-          >
-            {curso.codigo}
-          </span>
+          </div>
           <Badge variant={estado.clave}>{estado.etiqueta}</Badge>
         </div>
 
