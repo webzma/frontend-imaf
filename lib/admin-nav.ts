@@ -11,6 +11,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   Layers,
+  TrendingUp,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -76,7 +77,7 @@ export const ADMIN_NAV: NavGroup[] = [
   },
 ];
 
-/* ── Catálogos de instructores ── */
+/* ── Catálogos del sistema ── */
 
 export interface CatalogoSpec {
   /** Segmento en la URL (`?tipo=especialidades`). */
@@ -92,6 +93,15 @@ export interface CatalogoSpec {
   articulo: "el" | "la";
   subtitle: string;
   icon: LucideIcon;
+  /**
+   * Relación Eloquent que se cuenta para saber cuántos registros usan la
+   * opción. Los catálogos de instructores usan `profesores`; el nivel de
+   * curso lo usan los `cursos`.
+   */
+  relacionUso?: "profesores" | "cursos";
+  /** Cómo se nombra a quien usa la opción (por defecto, instructor). */
+  usoSingular?: string;
+  usoPlural?: string;
 }
 
 export const CATALOGOS: CatalogoSpec[] = [
@@ -131,6 +141,19 @@ export const CATALOGOS: CatalogoSpec[] = [
     subtitle: "Modalidades de contratación disponibles.",
     icon: FileText,
   },
+  {
+    slug: "niveles-cursos",
+    title: "Niveles de curso",
+    singular: "nivel de curso",
+    plural: "niveles de curso",
+    articulo: "el",
+    subtitle:
+      "Niveles en que se organizan los cursos (básico, intermedio, avanzado…).",
+    icon: TrendingUp,
+    relacionUso: "cursos",
+    usoSingular: "curso",
+    usoPlural: "cursos",
+  },
 ];
 
 /* ── Rastro de navegación ── */
@@ -153,6 +176,7 @@ const ETIQUETAS: Record<string, string> = {
   departamentos: "Departamentos",
   titulos: "Títulos",
   "tipo-contratos": "Tipos de contrato",
+  "niveles-cursos": "Niveles de curso",
 };
 
 /**

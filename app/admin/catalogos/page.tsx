@@ -11,13 +11,13 @@ import { CATALOGOS } from "@/lib/admin-nav";
 import { useUrlState } from "@/hooks/use-url-state";
 
 /**
- * Los cuatro catálogos de instructores en una sola pantalla.
+ * Los catálogos del sistema en una sola pantalla.
  *
- * Eran cuatro rutas sueltas a las que solo se llegaba desde cuatro botones al
- * final del panel de inicio: no estaban en la barra lateral, así que desde
- * cualquier otra sección no había forma de alcanzarlas. Como las cuatro son la
- * misma pantalla con otro sustantivo, se agrupan en pestañas y la pestaña
- * activa vive en la URL para que el enlace siga siendo compartible.
+ * Eran rutas sueltas a las que solo se llegaba desde botones al final del panel
+ * de inicio: no estaban en la barra lateral, así que desde cualquier otra
+ * sección no había forma de alcanzarlas. Como todas son la misma pantalla con
+ * otro sustantivo, se agrupan en pestañas y la pestaña activa vive en la URL
+ * para que el enlace siga siendo compartible.
  */
 export default function CatalogosPage() {
   const { get, set } = useUrlState();
@@ -40,7 +40,7 @@ export default function CatalogosPage() {
         icon={Layers}
         eyebrow="Configuración / Catálogos"
         title="Catálogos"
-        subtitle="Las listas que alimentan los desplegables al registrar instructores. Un cambio aquí se ve de inmediato en esos formularios."
+        subtitle="Las listas que alimentan los desplegables de instructores y cursos. Un cambio aquí se ve de inmediato en esos formularios."
       />
 
       <Tabs value={spec.slug} onValueChange={(valor) => set("tipo", valor)}>

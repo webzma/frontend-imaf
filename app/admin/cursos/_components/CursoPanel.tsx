@@ -22,10 +22,16 @@ import {
 import { apiFetch, mensajeDeError } from "@/lib/api-client";
 import { adminKeys } from "@/lib/query-keys";
 import { cursoSchema, type CursoForm } from "@/lib/schemas";
-import type { Curso, InstructorRef } from "../tipos";
+import {
+  SIN_NIVEL,
+  type Curso,
+  type InstructorRef,
+  type NivelCursoRef,
+} from "../tipos";
 
 const VACIO: CursoForm = {
   nombre: "",
+  nivel_curso_id: "",
   descripcion: "",
   profesor_id: "",
   limite_cupo: 30,
@@ -43,10 +49,12 @@ export function CursoPanel({
   open,
   onOpenChange,
   instructores,
+  niveles,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   instructores: InstructorRef[];
+  niveles: NivelCursoRef[];
 }) {
   const queryClient = useQueryClient();
 
@@ -62,6 +70,7 @@ export function CursoPanel({
   }, [open, reset]);
 
   const profesorId = useWatch({ control, name: "profesor_id" });
+  const nivelCursoId = useWatch({ control, name: "nivel_curso_id" });
   const estado = useWatch({ control, name: "estado" });
   const fechaInicio = useWatch({ control, name: "fecha_inicio" });
 
@@ -76,6 +85,9 @@ export function CursoPanel({
           whatsapp_url: datos.whatsapp_url || null,
           fecha_inicio: datos.fecha_inicio || null,
           fecha_fin: datos.fecha_fin || null,
+          nivel_curso_id: datos.nivel_curso_id
+            ? Number(datos.nivel_curso_id)
+            : null,
           profesor_id: Number(datos.profesor_id),
         },
       }),
@@ -106,6 +118,33 @@ export function CursoPanel({
       <FormSection title="Identificación">
         <Field label="Nombre del curso" error={errores.nombre?.message}>
           <Input placeholder="Repostería básica" {...form.register("nombre")} />
+        </Field>
+
+        <Field
+          label="Nivel de curso"
+          hint="Opcional"
+          error={errores.nivel_curso_id?.message}
+        >
+          <Select
+            value={nivelCursoId || SIN_NIVEL}
+            onValueChange={(v) =>
+              form.setValue("nivel_curso_id", v === SIN_NIVEL ? "" : v, {
+                shouldValidate: true,
+              })
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Seleccionar nivel" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={SIN_NIVEL}>Sin nivel</SelectItem>
+              {niveles.map((nivel) => (
+                <SelectItem key={nivel.id} value={String(nivel.id)}>
+                  {nivel.nombre}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </Field>
 
         <FormGrid>

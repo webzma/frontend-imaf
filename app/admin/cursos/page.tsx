@@ -17,7 +17,7 @@ import { TODOS, useResourceList } from "@/hooks/use-resource-list";
 import { useUrlState } from "@/hooks/use-url-state";
 import { CursoCard, CursoCardSkeleton } from "./_components/CursoCard";
 import { CursoPanel } from "./_components/CursoPanel";
-import type { Curso, InstructorRef } from "./tipos";
+import type { Curso, InstructorRef, NivelCursoRef } from "./tipos";
 
 interface Resumen {
   total: number;
@@ -42,6 +42,12 @@ export default function CursosPage() {
   const { data: instructores = [] } = useQuery({
     queryKey: adminKeys.opciones("profesores"),
     queryFn: () => fetchAll<InstructorRef>("api/admin/profesores"),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: niveles = [] } = useQuery({
+    queryKey: adminKeys.opciones("niveles-cursos"),
+    queryFn: () => fetchAll<NivelCursoRef>("api/admin/niveles-cursos"),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -216,6 +222,7 @@ export default function CursosPage() {
         open={creando}
         onOpenChange={(abierto) => set("nuevo", abierto ? "1" : null)}
         instructores={instructores}
+        niveles={niveles}
       />
     </PageShell>
   );
