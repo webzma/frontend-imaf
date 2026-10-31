@@ -46,7 +46,7 @@ export function EstudianteDetalle({
         </DialogHeader>
 
         {estudiante && (
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             <DetailHeader
               foto={estudiante.foto}
               name={estudiante.user.name}
@@ -88,6 +88,34 @@ export function EstudianteDetalle({
                 {estudiante.direccion}
               </DetailField>
             </DetailSection>
+
+            <section className="space-y-3">
+              <h3 className="font-sans text-[10px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                Documento de identidad
+              </h3>
+              {estudiante.foto_cedula ? (
+                <a
+                  href={estudiante.foto_cedula}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={estudiante.foto_cedula}
+                    alt="Cédula de identidad"
+                    className="max-h-64 w-full rounded-sm border border-outline-variant bg-surface-container object-contain"
+                  />
+                  <span className="mt-2 block font-sans text-xs text-primary">
+                    Abrir en una pestaña nueva
+                  </span>
+                </a>
+              ) : (
+                <p className="font-sans text-sm text-muted-foreground">
+                  No adjuntada.
+                </p>
+              )}
+            </section>
 
             <DetailSection title="Formación">
               <DetailField label="Curso" empty="Sin curso asignado">

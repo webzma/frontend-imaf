@@ -25,6 +25,7 @@ export interface Estudiante {
   municipio: string | null;
   direccion: string | null;
   foto: string | null;
+  foto_cedula: string | null;
   fecha_inscripcion: string;
   estado: EstadoEstudiante;
   user: UserRef;
