@@ -53,6 +53,7 @@ interface EstudiantePerfil {
   fecha_inscripcion: string;
   estado: string;
   foto: string | null;
+  foto_cedula: string | null;
   user: { id: number; name: string; email: string };
 }
 
@@ -90,8 +91,10 @@ export default function PerfilPage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [uploadingCedula, setUploadingCedula] = useState(false);
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cedulaInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<PerfilEstudianteForm>({
     resolver: zodResolver(perfilEstudianteSchema),
@@ -166,6 +169,49 @@ export default function PerfilPage() {
       toast.error("Error al conectar con el servidor");
     } finally {
       setUploadingFoto(false);
+    }
+  };
+
+  const handleCedulaChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error("La cédula debe ser una imagen JPG, PNG o WEBP.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("La imagen de la cédula no debe superar los 5 MB.");
+      return;
+    }
+
+    setUploadingCedula(true);
+    try {
+      const formData = new FormData();
+      formData.append("foto_cedula", file);
+      const res = await fetch(
+        `${process.env.API_URL}api/estudiante/perfil/cedula`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${getCookie("token")}`,
+            Accept: "application/json",
+          },
+          body: formData,
+        },
+      );
+      const body = await res.json();
+      if (!res.ok) {
+        toast.error(body?.message ?? "Error al subir la cédula.");
+        return;
+      }
+      setPerfil(body);
+      toast.success("Imagen de la cédula actualizada");
+    } catch {
+      toast.error("Error al conectar con el servidor");
+    } finally {
+      setUploadingCedula(false);
     }
   };
 
@@ -560,6 +606,63 @@ export default function PerfilPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Documento de identidad */}
+            {!loading && perfil && (
+              <div className="bg-surface-container-lowest rounded-sm ambient-shadow p-6 md:p-7">
+                <div className="flex items-center justify-between gap-3 mb-5">
+                  <div className="flex items-center gap-2">
+                    <IdCard className="w-3.5 h-3.5 text-primary/80" />
+                    <h3 className="font-sans text-[11px] tracking-[0.22em] uppercase text-primary/80 font-semibold">
+                      Documento de identidad
+                    </h3>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => cedulaInputRef.current?.click()}
+                    disabled={uploadingCedula}
+                  >
+                    {uploadingCedula ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Camera className="w-3.5 h-3.5" />
+                    )}
+                    {perfil.foto_cedula ? "Reemplazar" : "Adjuntar"}
+                  </Button>
+                  <input
+                    ref={cedulaInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={handleCedulaChange}
+                  />
+                </div>
+                {perfil.foto_cedula ? (
+                  <a
+                    href={perfil.foto_cedula}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={perfil.foto_cedula}
+                      alt="Cédula de identidad"
+                      className="max-h-64 w-full rounded-sm border border-outline-variant bg-surface-container object-contain"
+                    />
+                    <span className="mt-2 block font-sans text-xs text-primary">
+                      Abrir en una pestaña nueva
+                    </span>
+                  </a>
+                ) : (
+                  <p className="font-sans text-sm text-muted-foreground">
+                    Aún no has adjuntado la imagen de tu cédula.
+                  </p>
+                )}
               </div>
             )}
 

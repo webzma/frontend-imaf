@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { IdCard } from "lucide-react";
 
 import { CedulaInput } from "@/components/cedula-input";
 import { Field } from "@/components/field";
 import { FormGrid, FormPanel, FormSection } from "@/components/form-panel";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -73,6 +75,11 @@ export function EstudiantePanel({
 }) {
   const queryClient = useQueryClient();
   const editando = Boolean(estudiante);
+  const [fotoCedula, setFotoCedula] = useState<File | null>(null);
+  const [fotoCedulaPreview, setFotoCedulaPreview] = useState<string | null>(
+    estudiante?.foto_cedula ?? null,
+  );
+  const [fotoCedulaError, setFotoCedulaError] = useState("");
 
   const form = useForm<EstudiantePanelForm>({
     resolver: zodResolver(
@@ -85,6 +92,7 @@ export function EstudiantePanel({
 
   useEffect(() => {
     if (!open) return;
+
     reset(
       estudiante
         ? {
@@ -112,33 +120,70 @@ export function EstudiantePanel({
     );
   }, [open, estudiante, reset]);
 
+  useEffect(() => {
+    return () => {
+      if (fotoCedulaPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(fotoCedulaPreview);
+      }
+    };
+  }, [fotoCedulaPreview]);
+
+  const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setFotoCedulaError("");
+
+    if (!file) {
+      setFotoCedula(null);
+      setFotoCedulaPreview(estudiante?.foto_cedula ?? null);
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setFotoCedulaError("La cédula debe ser una imagen JPG, PNG o WEBP.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setFotoCedulaError("La imagen de la cédula no debe superar los 5 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setFotoCedula(file);
+    setFotoCedulaPreview(URL.createObjectURL(file));
+  };
+
   const guardar = useMutation({
     mutationFn: (datos: EstudiantePanelForm) => {
-      const cuerpo: Record<string, unknown> = {
-        primer_nombre: datos.primer_nombre,
-        segundo_nombre: datos.segundo_nombre || null,
-        primer_apellido: datos.primer_apellido,
-        segundo_apellido: datos.segundo_apellido,
-        email: datos.email,
-        nacionalidad: datos.nacionalidad,
-        cedula: datos.cedula,
-        telefono: datos.telefono || null,
-        fecha_nacimiento: datos.fecha_nacimiento || null,
-        genero: datos.genero || null,
-        municipio: datos.municipio,
-        direccion: datos.direccion,
-        curso_id: datos.curso_id ? Number(datos.curso_id) : null,
-        fecha_inscripcion: datos.fecha_inscripcion,
-        estado: datos.estado,
-      };
+      const cuerpo = new FormData();
+      cuerpo.append("primer_nombre", datos.primer_nombre);
+      cuerpo.append("segundo_nombre", datos.segundo_nombre || "");
+      cuerpo.append("primer_apellido", datos.primer_apellido);
+      cuerpo.append("segundo_apellido", datos.segundo_apellido);
+      cuerpo.append("email", datos.email);
+      cuerpo.append("nacionalidad", datos.nacionalidad);
+      cuerpo.append("cedula", datos.cedula);
+      cuerpo.append("telefono", datos.telefono || "");
+      cuerpo.append("fecha_nacimiento", datos.fecha_nacimiento || "");
+      cuerpo.append("genero", datos.genero || "");
+      cuerpo.append("municipio", datos.municipio);
+      cuerpo.append("direccion", datos.direccion);
+      cuerpo.append("curso_id", datos.curso_id || "");
+      cuerpo.append("fecha_inscripcion", datos.fecha_inscripcion);
+      cuerpo.append("estado", datos.estado);
 
-      if (!editando) cuerpo.password = datos.password;
+      if (!editando) cuerpo.append("password", datos.password ?? "");
+      if (fotoCedula) cuerpo.append("foto_cedula", fotoCedula);
+      // `PUT` no transporta archivos en PHP; el panel envía `POST` con
+      // spoofing de método para poder reemplazar la cédula al editar.
+      if (editando) cuerpo.append("_method", "PUT");
 
       return apiFetch<Estudiante>(
         editando
           ? `api/admin/estudiantes/${estudiante!.id}`
           : "api/admin/estudiantes",
-        { method: editando ? "PUT" : "POST", body: cuerpo },
+        { method: "POST", rawBody: cuerpo },
       );
     },
     onSuccess: () => {
@@ -182,7 +227,13 @@ export function EstudiantePanel({
       }
       submitting={guardar.isPending}
       submitLabel={editando ? "Guardar cambios" : "Crear estudiante"}
-      onSubmit={form.handleSubmit((datos) => guardar.mutate(datos))}
+      onSubmit={form.handleSubmit((datos) => {
+        if (!editando && !fotoCedula) {
+          setFotoCedulaError("Debes adjuntar una imagen de la cédula.");
+          return;
+        }
+        guardar.mutate(datos);
+      })}
     >
       <FormSection title="Identidad">
         <FormGrid>
@@ -308,6 +359,63 @@ export function EstudiantePanel({
             </Select>
           </Field>
         </FormGrid>
+      </FormSection>
+
+      <FormSection
+        title="Documento de identidad"
+        description={
+          editando
+            ? "Adjunta una nueva imagen solo si quieres reemplazar la actual."
+            : "La imagen de la cédula es obligatoria para completar el registro."
+        }
+      >
+        <div className="grid gap-2">
+          <Label htmlFor="foto_cedula_estudiante">
+            Imagen de la cédula
+            {!editando && <span className="ml-1 text-danger">*</span>}
+          </Label>
+          <label
+            htmlFor="foto_cedula_estudiante"
+            className="flex cursor-pointer items-center gap-4 rounded-sm border border-dashed border-outline-variant bg-surface-container-low px-4 py-3 transition-colors hover:border-primary/60"
+          >
+            <input
+              id="foto_cedula_estudiante"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="sr-only"
+              onChange={handleCedulaChange}
+            />
+            <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-surface-container">
+              {fotoCedulaPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={fotoCedulaPreview}
+                  alt="Vista previa de la cédula"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <IdCard className="size-5 text-muted-foreground" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate font-sans text-sm font-medium text-on-surface">
+                {fotoCedula
+                  ? fotoCedula.name
+                  : fotoCedulaPreview
+                    ? "Imagen actual"
+                    : "Adjuntar imagen"}
+              </p>
+              <p className="font-sans text-xs text-muted-foreground">
+                JPG, PNG o WEBP · máx. 5 MB
+              </p>
+            </div>
+          </label>
+          {fotoCedulaError && (
+            <p role="alert" className="font-sans text-xs text-danger">
+              {fotoCedulaError}
+            </p>
+          )}
+        </div>
       </FormSection>
 
       <FormSection title="Contacto">

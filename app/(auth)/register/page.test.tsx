@@ -52,6 +52,15 @@ beforeEach(() => {
   fetchMock.mockReset();
   pushMock.mockReset();
   vi.stubGlobal("fetch", fetchMock);
+  // jsdom no implementa las URLs de objeto que usa la vista previa.
+  Object.defineProperty(URL, "createObjectURL", {
+    writable: true,
+    value: vi.fn(() => "blob:cedula"),
+  });
+  Object.defineProperty(URL, "revokeObjectURL", {
+    writable: true,
+    value: vi.fn(),
+  });
 });
 
 afterEach(() => {
@@ -61,7 +70,10 @@ afterEach(() => {
 
 /* ── Helpers para llenar el formulario ── */
 
-async function llenarDatosValidos(user: ReturnType<typeof userEvent.setup>) {
+async function llenarDatosValidos(
+  user: ReturnType<typeof userEvent.setup>,
+  conCedula = true,
+) {
   await user.type(screen.getByLabelText("Primer nombre"), "Juan");
   await user.type(screen.getByLabelText(/Segundo nombre/), "Pablo");
   await user.type(screen.getByLabelText("Primer apellido"), "Pérez");
@@ -87,6 +99,14 @@ async function llenarDatosValidos(user: ReturnType<typeof userEvent.setup>) {
     screen.getByLabelText("Dirección de habitación"),
     "Av. Principal, casa N° 5",
   );
+
+  if (conCedula) {
+    fireEvent.change(screen.getByLabelText(/Imagen de la cédula/i), {
+      target: {
+        files: [new File(["cedula"], "cedula.jpg", { type: "image/jpeg" })],
+      },
+    });
+  }
 }
 
 /* ── Tests ── */
@@ -151,6 +171,25 @@ describe("Página de registro", () => {
     expect(cedula).toHaveValue("1234");
   });
 
+  it("exige la imagen de la cédula antes de enviar", async () => {
+    const user = userEvent.setup();
+    render(<RegisterPage />);
+
+    await llenarDatosValidos(user, false);
+    await user.type(screen.getByLabelText("Contraseña"), "clave12345");
+    await user.type(
+      screen.getByLabelText("Confirmar contraseña"),
+      "clave12345",
+    );
+
+    await user.click(screen.getByRole("button", { name: /crear cuenta/i }));
+
+    expect(
+      await screen.findByText("Debes adjuntar una imagen de la cédula."),
+    ).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("envía los datos válidos al backend y redirige al rol estudiante", async () => {
     const user = userEvent.setup();
     fetchMock.mockResolvedValue({
@@ -175,8 +214,9 @@ describe("Página de registro", () => {
     expect(String(url)).toContain("/api/register");
     expect((init as RequestInit).method).toBe("POST");
 
-    const body = JSON.parse((init as RequestInit).body as string);
-    expect(body).toMatchObject({
+    const body = (init as RequestInit).body as FormData;
+    expect(body).toBeInstanceOf(FormData);
+    expect(Object.fromEntries(body.entries())).toMatchObject({
       primer_nombre: "Juan",
       segundo_nombre: "Pablo",
       primer_apellido: "Pérez",
@@ -188,6 +228,7 @@ describe("Página de registro", () => {
       municipio: "San Felipe",
       direccion: "Av. Principal, casa N° 5",
     });
+    expect((body.get("foto_cedula") as File).name).toBe("cedula.jpg");
 
     await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/estudiante"));
   });

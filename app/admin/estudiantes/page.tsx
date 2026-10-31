@@ -384,12 +384,14 @@ export default function EstudiantesPage() {
       )}
 
       <EstudiantePanel
+        key={creando ? "alta-abierta" : "alta-cerrada"}
         open={creando}
         onOpenChange={(abierto) => set("nuevo", abierto ? "1" : null)}
         cursos={cursos}
       />
 
       <EstudiantePanel
+        key={editando ? `edicion-${editando.id}` : "edicion-cerrada"}
         open={editando !== null}
         onOpenChange={(abierto) => !abierto && setEditando(null)}
         estudiante={editando}

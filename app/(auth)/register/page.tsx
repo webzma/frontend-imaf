@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, IdCard } from "lucide-react";
 import {
   sanitizarDigitos,
   sanitizarLetras,
@@ -36,7 +36,18 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [fotoCedula, setFotoCedula] = useState<File | null>(null);
+  const [fotoCedulaPreview, setFotoCedulaPreview] = useState<string | null>(
+    null,
+  );
+  const [fotoCedulaError, setFotoCedulaError] = useState("");
   const logo = dark ? logoImafDark : logoImaf;
+
+  useEffect(() => {
+    return () => {
+      if (fotoCedulaPreview) URL.revokeObjectURL(fotoCedulaPreview);
+    };
+  }, [fotoCedulaPreview]);
 
   const form = useForm<RegistroForm>({
     resolver: zodResolver(registroSchema),
@@ -58,22 +69,64 @@ export default function RegisterPage() {
     },
   });
 
+  const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setFotoCedulaError("");
+
+    if (!file) {
+      setFotoCedula(null);
+      setFotoCedulaPreview(null);
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setFotoCedulaError("La cédula debe ser una imagen JPG, PNG o WEBP.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setFotoCedulaError("La imagen de la cédula no debe superar los 5 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setFotoCedula(file);
+    setFotoCedulaPreview(URL.createObjectURL(file));
+  };
+
   const onSubmit = async (data: RegistroForm) => {
     setError("");
+
+    if (!fotoCedula) {
+      setFotoCedulaError("Debes adjuntar una imagen de la cédula.");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append("primer_nombre", data.primer_nombre);
+      formData.append("segundo_nombre", data.segundo_nombre || "");
+      formData.append("primer_apellido", data.primer_apellido);
+      formData.append("segundo_apellido", data.segundo_apellido);
+      formData.append("email", data.email);
+      formData.append("nacionalidad", data.nacionalidad);
+      formData.append("cedula", data.cedula);
+      formData.append("telefono", data.telefono);
+      formData.append("fecha_nacimiento", data.fecha_nacimiento);
+      formData.append("genero", data.genero);
+      formData.append("municipio", data.municipio);
+      formData.append("direccion", data.direccion);
+      formData.append("password", data.password);
+      formData.append("password_confirmation", data.password_confirmation);
+      formData.append("foto_cedula", fotoCedula);
+
       const res = await fetch(`${process.env.API_URL}api/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          ...data,
-          // El backend guarda los 4 campos; vacío se envía como null.
-          segundo_nombre: data.segundo_nombre || null,
-        }),
+        headers: { Accept: "application/json" },
+        body: formData,
       });
 
       const body = await res.json();
@@ -310,6 +363,50 @@ export default function RegisterPage() {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* Imagen de la cédula */}
+          <div className="space-y-2">
+            <Label htmlFor="foto_cedula">
+              {fieldLabel("Imagen de la cédula")}
+            </Label>
+            <label
+              htmlFor="foto_cedula"
+              className="flex cursor-pointer items-center gap-4 rounded-sm border border-dashed border-outline-variant bg-surface-container-low px-4 py-3 transition-colors hover:border-primary/60"
+            >
+              <input
+                id="foto_cedula"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="sr-only"
+                onChange={handleCedulaChange}
+              />
+              <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-surface-container">
+                {fotoCedulaPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={fotoCedulaPreview}
+                    alt="Vista previa de la cédula"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <IdCard className="size-5 text-muted-foreground" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate font-sans text-sm font-medium text-on-surface">
+                  {fotoCedula ? fotoCedula.name : "Adjuntar imagen"}
+                </p>
+                <p className="font-sans text-xs text-muted-foreground">
+                  JPG, PNG o WEBP · máx. 5 MB
+                </p>
+              </div>
+            </label>
+            {fotoCedulaError && (
+              <p role="alert" className="text-sm text-danger">
+                {fotoCedulaError}
+              </p>
+            )}
           </div>
 
           {/* Fila 3 */}
