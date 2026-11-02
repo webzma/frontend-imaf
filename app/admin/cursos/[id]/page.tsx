@@ -85,6 +85,7 @@ interface EstudianteEnCurso {
   id: number;
   nombre: string;
   cedula: string;
+  telefono?: string | null;
   foto: string | null;
   fecha_inscripcion: string;
   estado: "activo" | "inactivo" | "graduado";
@@ -349,6 +350,9 @@ export default function CursoDetailPage({
   // Cambio de estado por estudiante
   const [statusChanging, setStatusChanging] = useState<number | null>(null);
 
+  // Exportación del listado de inscritos
+  const [exportingPdf, setExportingPdf] = useState(false);
+
   // Temario
   const [temario, setTemario] = useState<Temario[]>([]);
   const [temarioOpen, setTemarioOpen] = useState(false);
@@ -528,36 +532,18 @@ export default function CursoDetailPage({
     setPage(1);
   };
 
-  const handleExportCSV = () => {
+  const handleExportPDF = async () => {
     if (!curso) return;
-    const rows = [
-      [
-        "Nombre",
-        "Cédula",
-        "Email",
-        "Estado",
-        "Pago",
-        "Archivado",
-        "Fecha Inscripción",
-      ],
-      ...curso.estudiantes.map((e) => [
-        e.nombre,
-        e.cedula,
-        e.user.email,
-        e.estado,
-        e.estado_pago,
-        e.deleted_at ? "sí" : "no",
-        e.fecha_inscripcion,
-      ]),
-    ];
-    const csv = rows.map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${curso.nombre.replace(/\s+/g, "-").toLowerCase()}-estudiantes.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    setExportingPdf(true);
+    try {
+      const { exportarEstudiantesPdf } =
+        await import("./_lib/exportar-estudiantes-pdf");
+      await exportarEstudiantesPdf(curso);
+    } catch {
+      toast.error("No se pudo generar el PDF.");
+    } finally {
+      setExportingPdf(false);
+    }
   };
 
   const openEdit = () => {
@@ -1272,10 +1258,15 @@ export default function CursoDetailPage({
                       size="sm"
                       variant="outline"
                       className="gap-2"
-                      onClick={handleExportCSV}
+                      onClick={handleExportPDF}
+                      disabled={exportingPdf}
                     >
-                      <Download className="w-4 h-4" />
-                      Exportar CSV
+                      {exportingPdf ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4" />
+                      )}
+                      {exportingPdf ? "Generando…" : "Exportar PDF"}
                     </Button>
                   )}
                   <Button
