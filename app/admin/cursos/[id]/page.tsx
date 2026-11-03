@@ -38,6 +38,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   ArrowLeft,
   GraduationCap,
   Hash,
@@ -70,8 +76,11 @@ import {
   Wallet,
   TrendingUp,
   Receipt,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
 import { authHeaders as getAuthHeaders } from "@/lib/api-client";
+import type { FormatoExportacion } from "./_lib/exportar-estudiantes";
 import { SIN_NIVEL } from "../tipos";
 
 /* ── Types ── */
@@ -363,7 +372,7 @@ export default function CursoDetailPage({
   const [statusChanging, setStatusChanging] = useState<number | null>(null);
 
   // Exportación del listado de inscritos
-  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportando, setExportando] = useState<FormatoExportacion | null>(null);
   // Pagos aprobados del curso y comprobante en generación
   const [pagosCurso, setPagosCurso] = useState<PagoCurso[]>([]);
   const [comprobanteGenerando, setComprobanteGenerando] = useState<
@@ -557,17 +566,17 @@ export default function CursoDetailPage({
     setPage(1);
   };
 
-  const handleExportPDF = async () => {
+  const handleExportar = async (formato: FormatoExportacion) => {
     if (!curso) return;
-    setExportingPdf(true);
+    setExportando(formato);
     try {
-      const { exportarEstudiantesPdf } =
-        await import("./_lib/exportar-estudiantes-pdf");
-      await exportarEstudiantesPdf(curso);
+      const { exportarEstudiantes } =
+        await import("./_lib/exportar-estudiantes");
+      await exportarEstudiantes(curso, formato);
     } catch {
-      toast.error("No se pudo generar el PDF.");
+      toast.error("No se pudo generar la exportación.");
     } finally {
-      setExportingPdf(false);
+      setExportando(null);
     }
   };
 
@@ -1319,20 +1328,44 @@ export default function CursoDetailPage({
                 </div>
                 <div className="flex items-center gap-2">
                   {curso.estudiantes.length > 0 && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-2"
-                      onClick={handleExportPDF}
-                      disabled={exportingPdf}
-                    >
-                      {exportingPdf ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Download className="w-4 h-4" />
-                      )}
-                      {exportingPdf ? "Generando…" : "Exportar PDF"}
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                          disabled={exportando !== null}
+                        >
+                          {exportando ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Download className="w-4 h-4" />
+                          )}
+                          {exportando ? "Generando…" : "Exportar"}
+                          <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuItem
+                          onSelect={() => handleExportar("csv")}
+                        >
+                          <FileText className="mr-2 size-4" />
+                          CSV
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onSelect={() => handleExportar("pdf")}
+                        >
+                          <FileText className="mr-2 size-4" />
+                          PDF
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onSelect={() => handleExportar("excel")}
+                        >
+                          <FileSpreadsheet className="mr-2 size-4" />
+                          Excel
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                   <Button
                     size="sm"
