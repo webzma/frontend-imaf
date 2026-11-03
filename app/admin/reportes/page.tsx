@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -9,9 +9,13 @@ import {
   BookOpen,
   CalendarRange,
   Download,
+  FileSpreadsheet,
+  FileText,
   GraduationCap,
+  Loader2,
   Users,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +24,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ErrorState } from "@/components/error-state";
@@ -45,13 +52,12 @@ import { KpiCard } from "./_components/KpiCard";
 import { Ocupacion } from "./_components/Ocupacion";
 import { Panel } from "./_components/Panel";
 import { TablasDetalle } from "./_components/TablasDetalle";
+import { ocupacion, rango, tasaAprobacion, variacion } from "./metricas";
 import {
-  descargarCsv,
-  ocupacion,
-  rango,
-  tasaAprobacion,
-  variacion,
-} from "./metricas";
+  exportarReporte,
+  type FormatoReporte,
+  type TablaReporte,
+} from "./exportar";
 import {
   PERIODOS,
   type MetodoPago,
@@ -73,6 +79,24 @@ const METODO_SLOT: Record<MetodoPago["metodo"], 1 | 2 | 3> = {
   efectivo: 3,
   sin_especificar: 3,
 };
+
+const FORMATOS: {
+  key: FormatoReporte;
+  label: string;
+  icon: typeof FileText;
+}[] = [
+  { key: "csv", label: "CSV", icon: FileText },
+  { key: "pdf", label: "PDF", icon: FileText },
+  { key: "excel", label: "Excel", icon: FileSpreadsheet },
+];
+
+const INFORMES = [
+  { key: "serie", label: "Serie de ingresos" },
+  { key: "cursos", label: "Pagos por curso" },
+  { key: "estudiantes", label: "Pagos por estudiante" },
+] as const;
+
+type Informe = (typeof INFORMES)[number]["key"];
 
 export default function ReportesPage() {
   const { get, set } = useUrlState();
@@ -113,11 +137,14 @@ export default function ReportesPage() {
     );
   }, [data]);
 
-  const exportar = (que: "serie" | "cursos" | "estudiantes") => {
-    if (!data) return;
+  const [exportando, setExportando] = useState(false);
+
+  const construirTabla = (datos: ReporteData, que: Informe): TablaReporte => {
     if (que === "serie") {
-      descargarCsv(`ingresos-${periodo}.csv`, [
-        [
+      return {
+        titulo: `Serie de ingresos (${spec.label.toLowerCase()})`,
+        nombreArchivo: `ingresos-${periodo}`,
+        columnas: [
           "Período",
           "Desde",
           "Ingresos (Bs.)",
@@ -125,7 +152,7 @@ export default function ReportesPage() {
           "Pendientes",
           "Rechazados",
         ],
-        ...data.ingresos.map((f) => [
+        filas: datos.ingresos.map((f) => [
           f.label,
           f.desde,
           f.total,
@@ -133,10 +160,14 @@ export default function ReportesPage() {
           f.pendientes,
           f.rechazados,
         ]),
-      ]);
-    } else if (que === "cursos") {
-      descargarCsv("pagos-por-curso.csv", [
-        [
+        numericas: [2, 3, 4, 5],
+      };
+    }
+    if (que === "cursos") {
+      return {
+        titulo: "Pagos por curso",
+        nombreArchivo: "pagos-por-curso",
+        columnas: [
           "Curso",
           "Código",
           "Precio",
@@ -145,7 +176,7 @@ export default function ReportesPage() {
           "Rechazados",
           "Ingreso",
         ],
-        ...data.pagos_por_curso.map((c) => [
+        filas: datos.pagos_por_curso.map((c) => [
           c.nombre,
           c.codigo,
           c.precio,
@@ -154,26 +185,41 @@ export default function ReportesPage() {
           c.rechazados,
           c.total_ingreso,
         ]),
-      ]);
-    } else {
-      descargarCsv("pagos-por-estudiante.csv", [
-        [
-          "Estudiante",
-          "Pagos",
-          "Aprobados",
-          "Pendientes",
-          "Rechazados",
-          "Ingreso",
-        ],
-        ...data.pagos_por_usuario.map((u) => [
-          u.nombre,
-          u.total_pagos,
-          u.aprobados,
-          u.pendientes,
-          u.rechazados,
-          u.total_ingreso,
-        ]),
-      ]);
+        numericas: [2, 3, 4, 5, 6],
+      };
+    }
+    return {
+      titulo: "Pagos por estudiante",
+      nombreArchivo: "pagos-por-estudiante",
+      columnas: [
+        "Estudiante",
+        "Pagos",
+        "Aprobados",
+        "Pendientes",
+        "Rechazados",
+        "Ingreso",
+      ],
+      filas: datos.pagos_por_usuario.map((u) => [
+        u.nombre,
+        u.total_pagos,
+        u.aprobados,
+        u.pendientes,
+        u.rechazados,
+        u.total_ingreso,
+      ]),
+      numericas: [1, 2, 3, 4, 5],
+    };
+  };
+
+  const exportar = async (que: Informe, formato: FormatoReporte) => {
+    if (!data) return;
+    setExportando(true);
+    try {
+      await exportarReporte(construirTabla(data, que), formato);
+    } catch {
+      toast.error("No se pudo generar la exportación.");
+    } finally {
+      setExportando(false);
     }
   };
 
@@ -213,23 +259,42 @@ export default function ReportesPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" disabled={!data}>
-                  <Download data-icon="inline-start" />
-                  Exportar
+                <Button variant="outline" disabled={!data || exportando}>
+                  {exportando ? (
+                    <Loader2
+                      data-icon="inline-start"
+                      className="animate-spin"
+                    />
+                  ) : (
+                    <Download data-icon="inline-start" />
+                  )}
+                  {exportando ? "Exportando..." : "Exportar"}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Descargar CSV</DropdownMenuLabel>
+                <DropdownMenuLabel>Formato de descarga</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => exportar("serie")}>
-                  Serie de ingresos ({spec.label.toLowerCase()})
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => exportar("cursos")}>
-                  Pagos por curso
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => exportar("estudiantes")}>
-                  Pagos por estudiante
-                </DropdownMenuItem>
+                {FORMATOS.map(({ key, label, icon: Icon }) => (
+                  <DropdownMenuSub key={key}>
+                    <DropdownMenuSubTrigger>
+                      <Icon className="mr-2 size-4" />
+                      {label}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="w-60">
+                      {INFORMES.map((informe) => (
+                        <DropdownMenuItem
+                          key={informe.key}
+                          onSelect={() => exportar(informe.key, key)}
+                        >
+                          {informe.label}
+                          {informe.key === "serie"
+                            ? ` (${spec.label.toLowerCase()})`
+                            : ""}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
