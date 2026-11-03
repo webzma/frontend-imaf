@@ -86,6 +86,22 @@ interface MiCursoResponse {
 
 type EstadoKey = "pendiente" | "aprobado" | "reprobado";
 
+interface PerfilComprobante {
+  nombre: string;
+  cedula: string;
+  telefono: string | null;
+  user: { email: string };
+}
+
+interface PagoComprobante {
+  id: number;
+  estado: "pendiente" | "aprobado" | "reprobado" | "rechazado";
+  metodo_pago?: "transferencia" | "pago_movil" | "efectivo";
+  referencia: string | null;
+  banco_origen: string | null;
+  created_at: string;
+}
+
 /* ── Helpers ── */
 
 function getCookie(name: string): string {
@@ -158,6 +174,11 @@ function CursoPageContent() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloadingCertificado, setDownloadingCertificado] = useState(false);
+  const [perfil, setPerfil] = useState<PerfilComprobante | null>(null);
+  const [pagoAprobado, setPagoAprobado] = useState<PagoComprobante | null>(
+    null,
+  );
+  const [descargandoComprobante, setDescargandoComprobante] = useState(false);
   // `?id=` abre un curso anterior; sin él, el curso actual.
   const cursoId = useSearchParams().get("id");
 
@@ -204,6 +225,45 @@ function CursoPageContent() {
       .catch(() => toast.error("Error al cargar el curso"))
       .finally(() => setLoading(false));
   }, [cursoId]);
+
+  useEffect(() => {
+    fetch(`${process.env.API_URL}api/estudiante/perfil`, {
+      headers: {
+        Authorization: `Bearer ${getCookie("token")}`,
+        Accept: "application/json",
+      },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => setPerfil(json))
+      .catch(() => setPerfil(null));
+  }, []);
+
+  useEffect(() => {
+    const cursoActual = data?.curso.id;
+    if (!cursoActual || data?.estado_pago !== "aprobado") {
+      setPagoAprobado(null);
+      return;
+    }
+    fetch(
+      `${process.env.API_URL}api/estudiante/pagos?curso_id=${cursoActual}`,
+      {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+          Accept: "application/json",
+        },
+      },
+    )
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        const lista: PagoComprobante[] = Array.isArray(json)
+          ? json
+          : Array.isArray(json?.data)
+            ? json.data
+            : [];
+        setPagoAprobado(lista.find((p) => p.estado === "aprobado") ?? null);
+      })
+      .catch(() => setPagoAprobado(null));
+  }, [data?.curso.id, data?.estado_pago]);
 
   const curso = data?.curso ?? null;
   const estadoCurso = curso ? estadoVisualCurso(curso) : null;
@@ -257,6 +317,46 @@ function CursoPageContent() {
       );
     } finally {
       setDownloadingCertificado(false);
+    }
+  };
+
+  const handleDescargarComprobante = async () => {
+    if (!curso || !perfil) return;
+    setDescargandoComprobante(true);
+    try {
+      const { descargarComprobantePago } =
+        await import("@/lib/comprobante-pago-pdf");
+      const fecha = pagoAprobado?.created_at ?? new Date().toISOString();
+      const anio = new Date(fecha).getFullYear();
+      const monto = parseFloat(curso.precio);
+      await descargarComprobantePago({
+        numero: pagoAprobado
+          ? `IMAF-${anio}-${String(pagoAprobado.id).padStart(6, "0")}`
+          : `IMAF-${curso.codigo}-${perfil.cedula}`,
+        fecha,
+        estudiante: {
+          nombre: perfil.nombre,
+          cedula: perfil.cedula,
+          email: perfil.user.email,
+          telefono: perfil.telefono,
+        },
+        curso: {
+          nombre: curso.nombre,
+          codigo: curso.codigo,
+          instructor: curso.instructor?.nombre ?? null,
+          precio: monto,
+        },
+        pago: {
+          metodo: pagoAprobado?.metodo_pago ?? null,
+          referencia: pagoAprobado?.referencia ?? null,
+          banco: pagoAprobado?.banco_origen ?? null,
+          monto,
+        },
+      });
+    } catch {
+      toast.error("No se pudo generar el comprobante de pago.");
+    } finally {
+      setDescargandoComprobante(false);
     }
   };
 
@@ -415,6 +515,25 @@ function CursoPageContent() {
                     estado={data!.estado_aprobacion_curso}
                   />
                 </div>
+                {data!.estado_pago === "aprobado" && (
+                  <div className="mt-4 border-t border-outline-variant pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={handleDescargarComprobante}
+                      disabled={descargandoComprobante || !perfil}
+                      className="w-full gap-2 font-sans text-sm"
+                    >
+                      {descargandoComprobante ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <FileText className="w-4 h-4" />
+                      )}
+                      {descargandoComprobante
+                        ? "Generando..."
+                        : "Descargar comprobante de pago"}
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Instructor */}
