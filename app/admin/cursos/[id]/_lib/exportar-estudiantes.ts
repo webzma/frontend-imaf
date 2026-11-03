@@ -1,6 +1,10 @@
+import type { SheetData } from "write-excel-file/browser";
+
 import { LOCALE, formatDate } from "@/lib/format";
 
-export interface EstudiantePdf {
+export type FormatoExportacion = "csv" | "pdf" | "excel";
+
+export interface EstudianteExport {
   nombre: string;
   cedula: string;
   telefono?: string | null;
@@ -11,24 +15,34 @@ export interface EstudiantePdf {
   fecha_inscripcion: string;
 }
 
-export interface CursoPdf {
+export interface CursoExport {
   nombre: string;
   codigo: string;
   instructor: { user: { name: string } } | null;
-  estudiantes: EstudiantePdf[];
+  estudiantes: EstudianteExport[];
 }
 
-const ESTADO_LABEL: Record<EstudiantePdf["estado"], string> = {
+const ESTADO_LABEL: Record<EstudianteExport["estado"], string> = {
   activo: "Activo",
   inactivo: "Inactivo",
   graduado: "Graduado",
 };
 
-const PAGO_LABEL: Record<EstudiantePdf["estado_pago"], string> = {
+const PAGO_LABEL: Record<EstudianteExport["estado_pago"], string> = {
   pendiente: "Pendiente",
   aprobado: "Aprobado",
   reprobado: "Rechazado",
 };
+
+const COLUMNAS = [
+  "#",
+  "Nombre",
+  "Cédula",
+  "Teléfono",
+  "Estado",
+  "Pago",
+  "Inscripción",
+];
 
 const PRIMARY: [number, number, number] = [181, 37, 105];
 const TEXTO: [number, number, number] = [40, 40, 40];
@@ -36,21 +50,79 @@ const MUTED: [number, number, number] = [110, 110, 110];
 const FRANJA: [number, number, number] = [250, 240, 245];
 const MARGEN = 14;
 
-function nombreArchivo(nombre: string) {
+function nombreBase(nombre: string) {
   const limpio = nombre
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-zA-Z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .toLowerCase();
-  return `${limpio || "curso"}-estudiantes.pdf`;
+  return `${limpio || "curso"}-estudiantes`;
 }
 
-/**
- * Genera y descarga el listado completo de inscritos de un curso.
- * jsPDF se carga de forma dinámica para no pesar en el bundle inicial.
- */
-export async function exportarEstudiantesPdf(curso: CursoPdf) {
+function filas(curso: CursoExport): (string | number)[][] {
+  return curso.estudiantes.map((e, i) => [
+    i + 1,
+    e.nombre,
+    e.cedula,
+    e.telefono || "—",
+    ESTADO_LABEL[e.estado] ?? e.estado,
+    PAGO_LABEL[e.estado_pago] ?? e.estado_pago,
+    formatDate(e.fecha_inscripcion),
+  ]);
+}
+
+function exportarCsv(curso: CursoExport) {
+  const escapar = (v: string | number) => {
+    const t = String(v);
+    return /[",;\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
+  };
+  const csv = [COLUMNAS, ...filas(curso)]
+    .map((fila) => fila.map(escapar).join(","))
+    .join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${nombreBase(curso.nombre)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function exportarExcel(curso: CursoExport) {
+  const { default: writeXlsxFile } = await import("write-excel-file/browser");
+
+  const encabezado: SheetData[number] = COLUMNAS.map((columna) => ({
+    value: columna,
+    fontWeight: "bold",
+    backgroundColor: "#fbdde8",
+    textColor: "#7a0f43",
+    align: "center",
+    wrap: true,
+  }));
+
+  const cuerpo: SheetData = filas(curso).map((fila) =>
+    fila.map((valor, i) => ({
+      value: valor,
+      align: i === 0 ? "right" : "left",
+    })),
+  );
+
+  const anchos = COLUMNAS.map((columna, i) => {
+    const mayor = Math.max(
+      columna.length,
+      ...filas(curso).map((f) => String(f[i] ?? "").length),
+    );
+    return { width: Math.min(40, Math.max(12, mayor + 2)) };
+  });
+
+  await writeXlsxFile([encabezado, ...cuerpo], {
+    sheet: "Estudiantes",
+    columns: anchos,
+  }).toFile(`${nombreBase(curso.nombre)}.xlsx`);
+}
+
+async function exportarPdf(curso: CursoExport) {
   const [{ jsPDF }, { autoTable }] = await Promise.all([
     import("jspdf"),
     import("jspdf-autotable"),
@@ -96,18 +168,8 @@ export async function exportarEstudiantesPdf(curso: CursoPdf) {
 
   autoTable(doc, {
     startY: 46,
-    head: [
-      ["#", "Nombre", "Cédula", "Teléfono", "Estado", "Pago", "Inscripción"],
-    ],
-    body: curso.estudiantes.map((e, i) => [
-      String(i + 1),
-      e.nombre,
-      e.cedula,
-      e.telefono || "—",
-      ESTADO_LABEL[e.estado] ?? e.estado,
-      PAGO_LABEL[e.estado_pago] ?? e.estado_pago,
-      formatDate(e.fecha_inscripcion),
-    ]),
+    head: [COLUMNAS],
+    body: filas(curso),
     theme: "striped",
     headStyles: {
       fillColor: PRIMARY,
@@ -140,5 +202,21 @@ export async function exportarEstudiantesPdf(curso: CursoPdf) {
     },
   });
 
-  doc.save(nombreArchivo(curso.nombre));
+  doc.save(`${nombreBase(curso.nombre)}.pdf`);
+}
+
+/** Genera y descarga el listado completo de inscritos de un curso. */
+export async function exportarEstudiantes(
+  curso: CursoExport,
+  formato: FormatoExportacion,
+) {
+  if (formato === "csv") {
+    exportarCsv(curso);
+    return;
+  }
+  if (formato === "excel") {
+    await exportarExcel(curso);
+    return;
+  }
+  await exportarPdf(curso);
 }
