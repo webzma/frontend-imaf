@@ -27,6 +27,7 @@ import CalendarMonth from "./_components/CalendarMonth";
 import CalendarWeek from "./_components/CalendarWeek";
 import CalendarDay from "./_components/CalendarDay";
 import CalendarAgenda from "./_components/CalendarAgenda";
+import ExportarHorarioButton from "./_components/ExportarHorarioButton";
 import SesionDialog from "./_components/SesionDialog";
 import type {
   CalendarView,
@@ -403,27 +404,36 @@ export default function HorarioPage() {
             </h2>
           </div>
 
-          {/* View switch */}
-          <div
-            role="group"
-            aria-label="Vista del calendario"
-            className="inline-flex items-center bg-surface-container-low border border-border rounded-md p-1"
-          >
-            {(["mes", "semana", "dia", "agenda"] as CalendarView[]).map((v) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => setView(v)}
-                aria-pressed={view === v}
-                className={`px-3 md:px-4 py-1.5 rounded-sm font-sans text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  view === v
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-on-surface hover:bg-surface-container-high"
-                }`}
-              >
-                {VIEW_LABELS[v]}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* View switch */}
+            <div
+              role="group"
+              aria-label="Vista del calendario"
+              className="inline-flex items-center bg-surface-container-low border border-border rounded-md p-1"
+            >
+              {(["mes", "semana", "dia", "agenda"] as CalendarView[]).map(
+                (v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setView(v)}
+                    aria-pressed={view === v}
+                    className={`px-3 md:px-4 py-1.5 rounded-sm font-sans text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      view === v
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-on-surface hover:bg-surface-container-high"
+                    }`}
+                  >
+                    {VIEW_LABELS[v]}
+                  </button>
+                ),
+              )}
+            </div>
+            <ExportarHorarioButton
+              sesiones={sesionesEnRango}
+              rangoLabel={rangeLabel}
+              disabled={loading}
+            />
           </div>
         </div>
 

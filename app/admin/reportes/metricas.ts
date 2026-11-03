@@ -78,19 +78,3 @@ export function rango(desde: string, hasta: string) {
     });
   return `${f(desde)} – ${f(hasta)}`;
 }
-
-/** Descarga filas como CSV (con BOM para que Excel respete las tildes). */
-export function descargarCsv(nombre: string, filas: (string | number)[][]) {
-  const escapar = (v: string | number) => {
-    const t = String(v);
-    return /[",;\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
-  };
-  const csv = filas.map((f) => f.map(escapar).join(",")).join("\n");
-  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = nombre;
-  a.click();
-  URL.revokeObjectURL(url);
-}
