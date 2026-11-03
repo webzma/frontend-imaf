@@ -69,6 +69,7 @@ import {
   SearchX,
   Wallet,
   TrendingUp,
+  Receipt,
 } from "lucide-react";
 import { authHeaders as getAuthHeaders } from "@/lib/api-client";
 import { SIN_NIVEL } from "../tipos";
@@ -97,6 +98,17 @@ interface EstudianteEnCurso {
 }
 
 type EstadoPago = "pendiente" | "aprobado" | "reprobado";
+
+/** Pago aprobado del curso, para emitir el comprobante de cada estudiante. */
+interface PagoCurso {
+  id: number;
+  estado: string;
+  metodo_pago?: "transferencia" | "pago_movil" | "efectivo";
+  referencia: string | null;
+  banco_origen: string | null;
+  created_at: string;
+  estudiante: { id: number } | null;
+}
 
 /**
  * Filtros del listado interno. Antes solo se veía a los inscritos con el pago
@@ -352,6 +364,11 @@ export default function CursoDetailPage({
 
   // Exportación del listado de inscritos
   const [exportingPdf, setExportingPdf] = useState(false);
+  // Pagos aprobados del curso y comprobante en generación
+  const [pagosCurso, setPagosCurso] = useState<PagoCurso[]>([]);
+  const [comprobanteGenerando, setComprobanteGenerando] = useState<
+    number | null
+  >(null);
 
   // Temario
   const [temario, setTemario] = useState<Temario[]>([]);
@@ -421,6 +438,10 @@ export default function CursoDetailPage({
       fetch(`${process.env.API_URL}api/admin/cursos/${id}/sesiones`, {
         headers,
       }).then((r) => r.json()),
+      fetch(
+        `${process.env.API_URL}api/admin/pagos?curso_id=${id}&estado=aprobado&per_page=1000`,
+        { headers },
+      ).then((r) => (r.ok ? r.json() : null)),
     ])
       .then(
         ([
@@ -430,6 +451,7 @@ export default function CursoDetailPage({
           nivelesData,
           temarioData,
           sesionesData,
+          pagosData,
         ]) => {
           setCurso(cursoData);
           const listaEstudiantes = Array.isArray(estudiantesData)
@@ -455,6 +477,9 @@ export default function CursoDetailPage({
           setNiveles(Array.isArray(nivelesData) ? nivelesData : []);
           setTemario(Array.isArray(temarioData) ? temarioData : []);
           setSesiones(Array.isArray(sesionesData) ? sesionesData : []);
+          setPagosCurso(
+            Array.isArray(pagosData) ? pagosData : (pagosData?.data ?? []),
+          );
         },
       )
       .catch(() => setError("Error al cargar los datos del curso."))
@@ -543,6 +568,46 @@ export default function CursoDetailPage({
       toast.error("No se pudo generar el PDF.");
     } finally {
       setExportingPdf(false);
+    }
+  };
+
+  const handleDescargarComprobante = async (estudiante: EstudianteEnCurso) => {
+    if (!curso) return;
+    setComprobanteGenerando(estudiante.id);
+    try {
+      const pago = pagosCurso.find((p) => p.estudiante?.id === estudiante.id);
+      const { descargarComprobantePago } =
+        await import("@/lib/comprobante-pago-pdf");
+      const fecha = pago?.created_at ?? new Date().toISOString();
+      const anio = new Date(fecha).getFullYear();
+      await descargarComprobantePago({
+        numero: pago
+          ? `IMAF-${anio}-${String(pago.id).padStart(6, "0")}`
+          : `IMAF-${curso.codigo}-${estudiante.id}`,
+        fecha,
+        estudiante: {
+          nombre: estudiante.nombre,
+          cedula: estudiante.cedula,
+          email: estudiante.user.email,
+          telefono: estudiante.telefono,
+        },
+        curso: {
+          nombre: curso.nombre,
+          codigo: curso.codigo,
+          instructor: curso.instructor?.user.name ?? null,
+          precio: curso.precio,
+        },
+        pago: {
+          metodo: pago?.metodo_pago ?? null,
+          referencia: pago?.referencia ?? null,
+          banco: pago?.banco_origen ?? null,
+          monto: curso.precio,
+        },
+      });
+    } catch {
+      toast.error("No se pudo generar el comprobante de pago.");
+    } finally {
+      setComprobanteGenerando(null);
     }
   };
 
@@ -1548,6 +1613,22 @@ export default function CursoDetailPage({
                                   )}
                                 </td>
                                 <td className="px-4 py-3.5 whitespace-nowrap">
+                                  {e.estado_pago === "aprobado" && (
+                                    <button
+                                      onClick={() =>
+                                        handleDescargarComprobante(e)
+                                      }
+                                      disabled={comprobanteGenerando === e.id}
+                                      className="mr-1 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-sans text-xs text-muted-foreground hover:text-primary hover:bg-primary-container transition-colors disabled:opacity-50"
+                                    >
+                                      {comprobanteGenerando === e.id ? (
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                      ) : (
+                                        <Receipt className="w-3.5 h-3.5" />
+                                      )}
+                                      Comprobante
+                                    </button>
+                                  )}
                                   {sinPagar && !archivado && (
                                     <button
                                       onClick={() => handleMarcarPagado(e)}
