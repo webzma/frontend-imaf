@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import Providers from "./providers";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { ThemeHandler } from "@/components/theme-handler";
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
 const cormorantGaramond = Cormorant_Garamond({
   subsets: ["latin"],
@@ -26,6 +27,20 @@ export const metadata: Metadata = {
   title: "IMAF",
   description:
     "IMAF — Formación para el trabajo en modalidad presencial. Inscríbete en línea y asiste a clases en nuestra sede.",
+  applicationName: "IMAF",
+  appleWebApp: {
+    capable: true,
+    title: "IMAF",
+    statusBarStyle: "default",
+  },
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  // Igual que `theme_color` en `app/manifest.ts`.
+  themeColor: "#b52569",
 };
 
 export default function RootLayout({
@@ -52,6 +67,7 @@ export default function RootLayout({
         />
         <Toaster richColors position="bottom-right" />
         <ThemeHandler />
+        <ServiceWorkerRegister />
         <Providers>{children}</Providers>
       </body>
     </html>

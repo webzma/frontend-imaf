@@ -149,8 +149,10 @@ export const config = {
    * - _next/image   (image optimization)
    * - favicon.ico
    * - public files (images, etc.)
+   * - archivos de la PWA: el navegador los pide sin importar si hay sesión, y
+   *   rechaza un service worker que responde con una redirección al login
    */
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sw\\.js$|manifest\\.webmanifest$|offline\\.html$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

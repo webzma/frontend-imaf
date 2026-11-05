@@ -1,4 +1,4 @@
-import { proxy } from "./proxy";
+import { config, proxy } from "./proxy";
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -148,5 +148,26 @@ describe("proxy", () => {
 
       expect(res.headers.get("location")).toContain("/admin");
     });
+  });
+
+  describe("matcher", () => {
+    const pasaPorProxy = (path: string) =>
+      new RegExp(`^${config.matcher[0]}$`).test(path);
+
+    it.each([
+      "/sw.js",
+      "/manifest.webmanifest",
+      "/offline.html",
+      "/icons/icon-192.png",
+    ])("deja %s fuera del proxy para instalar la PWA sin sesión", (path) => {
+      expect(pasaPorProxy(path)).toBe(false);
+    });
+
+    it.each(["/", "/login", "/admin", "/estudiante/cursos"])(
+      "sigue protegiendo %s",
+      (path) => {
+        expect(pasaPorProxy(path)).toBe(true);
+      },
+    );
   });
 });
