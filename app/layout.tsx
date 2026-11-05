@@ -8,6 +8,7 @@ import Providers from "./providers";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { ThemeHandler } from "@/components/theme-handler";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { InstallAppBanner } from "@/components/install-app-banner";
 
 // Es variable, así que no hace falta declarar pesos.
 const georama = Georama({
@@ -27,6 +28,10 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
   },
   icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
     apple: "/icons/apple-touch-icon.png",
   },
 };
@@ -65,6 +70,7 @@ export default function RootLayout({
         />
         <ThemeHandler />
         <ServiceWorkerRegister />
+        <InstallAppBanner />
         <Providers>{children}</Providers>
       </body>
     </html>
