@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Georama } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import NextTopLoader from "nextjs-toploader";
@@ -9,17 +9,10 @@ import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { ThemeHandler } from "@/components/theme-handler";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ["latin"],
-  variable: "--font-serif",
-  weight: ["300", "400", "600", "700"],
-  display: "swap",
-});
-
-const manrope = Manrope({
+// Es variable, así que no hace falta declarar pesos.
+const georama = Georama({
   subsets: ["latin"],
   variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -52,7 +45,7 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      className={cn("font-sans", cormorantGaramond.variable, manrope.variable)}
+      className={cn("font-sans", georama.variable)}
     >
       <head>
         {/* Aplica el tema antes del primer paint: sin flash de tema claro. */}
@@ -65,7 +58,11 @@ export default function RootLayout({
           showSpinner={false}
           height={2}
         />
-        <Toaster richColors position="bottom-right" />
+        <Toaster
+          richColors
+          position="bottom-right"
+          toastOptions={{ className: "font-sans" }}
+        />
         <ThemeHandler />
         <ServiceWorkerRegister />
         <Providers>{children}</Providers>

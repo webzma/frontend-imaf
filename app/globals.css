@@ -10,7 +10,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
+  /* Una sola familia: `font-serif` queda como alias de la misma fuente. */
+  --font-serif: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -266,16 +267,6 @@
   }
   html {
     @apply font-sans;
-  }
-
-  /* Una sola tipografía display en todo el producto. */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-serif), Georgia, serif;
   }
 
   /* Los anclas de sección no deben quedar bajo la nav sticky. */

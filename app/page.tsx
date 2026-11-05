@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Georama } from "next/font/google";
 import {
   ArrowRight,
   BookOpen,
@@ -22,14 +21,6 @@ import { CursosAbiertos } from "./_components/cursos-abiertos";
 import LogoImaf from "@/public/logo-imaf.webp";
 import imgHero from "@/public/image-hero.webp";
 import { SEDE } from "@/lib/modalidad";
-
-// Solo la landing usa Georama: el resto del producto sigue con las familias
-// del layout raíz. Es variable, así que no hace falta declarar pesos.
-const georama = Georama({
-  subsets: ["latin"],
-  variable: "--font-georama",
-  display: "swap",
-});
 
 /**
  * Lo que la institución ofrece, sin cifras.
@@ -105,9 +96,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 export default function LandingPage() {
   return (
-    <div
-      className={`${georama.variable} min-h-screen bg-surface font-sans [--font-sans:var(--font-georama)] [--font-serif:var(--font-georama)]`}
-    >
+    <div className="min-h-screen bg-surface">
       <LandingNav />
 
       {/* ── Hero ── */}
