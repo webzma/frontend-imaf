@@ -114,6 +114,11 @@ Dos familias, ambas por `next/font` (sin `@import` a CDNs externos).
 - **Texto — Manrope** (`font-sans`): cuerpo, etiquetas, UI. Es la fuente por
   defecto de `<html>`.
 
+**Excepción — landing (`app/page.tsx`): Georama** para titulares y texto. Se
+carga solo en esa página y redefine `--font-sans` y `--font-serif` en su
+contenedor, así que `font-sans`, `font-serif` y los `h1`–`h6` la toman sin
+cambiar sus clases.
+
 **Sin itálicas en encabezados.** El énfasis dentro de un titular se carga con
 color (`text-primary`) o peso, nunca con `italic`.
 
