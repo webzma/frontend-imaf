@@ -92,6 +92,11 @@ export function formatCurrency(value: number): string {
   return `Bs. ${formatNumber(value, 2)}`;
 }
 
+/** "75%" / "12,5%" — hasta un decimal; recibe el porcentaje de 0 a 100. */
+export function formatPercent(value: number): string {
+  return `${new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 }).format(value)}%`;
+}
+
 /** Precio de curso: "Gratuito" cuando es 0, si no "1.234" (se antepone "Bs." en la UI) */
 export function formatPrice(precio: number): string {
   if (precio === 0) return "Gratuito";

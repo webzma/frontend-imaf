@@ -57,6 +57,13 @@ export interface MetodoPago {
   ingresos: number;
 }
 
+export const METODO_LABEL: Record<MetodoPago["metodo"], string> = {
+  transferencia: "Transferencia",
+  pago_movil: "Pago móvil",
+  efectivo: "Efectivo",
+  sin_especificar: "Sin especificar",
+};
+
 export interface ReporteData {
   ingresos: IngresoItem[];
   pagos_por_usuario: PagoUsuario[];

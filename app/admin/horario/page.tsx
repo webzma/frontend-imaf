@@ -284,6 +284,20 @@ export default function HorarioPage() {
     filterInstructor !== "todos" ||
     filterEstado !== "todos";
 
+  const filtrosActivos = useMemo(() => {
+    const activos: string[] = [];
+    const curso = cursos.find((c) => String(c.id) === filterCurso);
+    if (curso) activos.push(`Curso: ${curso.codigo} — ${curso.nombre}`);
+    const instructor = instructores.find(
+      (p) => String(p.id) === filterInstructor,
+    );
+    if (instructor) activos.push(`Instructor: ${instructor.user.name}`);
+    if (filterEstado !== "todos") {
+      activos.push(`Estado: ${ESTADO_LABEL[filterEstado] ?? filterEstado}`);
+    }
+    return activos;
+  }, [cursos, instructores, filterCurso, filterInstructor, filterEstado]);
+
   const showDay = (date: string) => {
     setCurrent(parseISODate(date));
     setView("dia");
@@ -432,6 +446,7 @@ export default function HorarioPage() {
             <ExportarHorarioButton
               sesiones={sesionesEnRango}
               rangoLabel={rangeLabel}
+              filtros={filtrosActivos}
               disabled={loading}
             />
           </div>

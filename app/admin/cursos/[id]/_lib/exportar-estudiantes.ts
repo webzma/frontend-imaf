@@ -1,12 +1,24 @@
-import type { SheetData } from "write-excel-file/browser";
+import {
+  exportarDocumento,
+  slugArchivo,
+  type DocumentoExportable,
+  type FormatoTabla,
+} from "@/lib/exportar-tabla";
+import {
+  LOCALE,
+  formatCedula,
+  formatCurrency,
+  formatDate,
+  formatNumber,
+} from "@/lib/format";
 
-import { LOCALE, formatDate } from "@/lib/format";
-
-export type FormatoExportacion = "csv" | "pdf" | "excel";
+export type FormatoExportacion = FormatoTabla;
 
 export interface EstudianteExport {
   nombre: string;
   cedula: string;
+  /** No todas las respuestas la traen; sin ella la cédula va sin prefijo. */
+  nacionalidad?: string | null;
   telefono?: string | null;
   user: { email: string };
   estado: "activo" | "inactivo" | "graduado";
@@ -18,6 +30,11 @@ export interface EstudianteExport {
 export interface CursoExport {
   nombre: string;
   codigo: string;
+  limite_cupo?: number | null;
+  precio?: number | string | null;
+  fecha_inicio?: string | null;
+  fecha_fin?: string | null;
+  nivel_curso?: { nombre: string } | null;
   instructor: { user: { name: string } } | null;
   estudiantes: EstudianteExport[];
 }
@@ -34,175 +51,99 @@ const PAGO_LABEL: Record<EstudianteExport["estado_pago"], string> = {
   reprobado: "Rechazado",
 };
 
-const COLUMNAS = [
-  "#",
-  "Nombre",
-  "Cédula",
-  "Teléfono",
-  "Estado",
-  "Pago",
-  "Inscripción",
-];
-
-const PRIMARY: [number, number, number] = [181, 37, 105];
-const TEXTO: [number, number, number] = [40, 40, 40];
-const MUTED: [number, number, number] = [110, 110, 110];
-const FRANJA: [number, number, number] = [250, 240, 245];
-const MARGEN = 14;
-
-function nombreBase(nombre: string) {
-  const limpio = nombre
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .toLowerCase();
-  return `${limpio || "curso"}-estudiantes`;
-}
-
-function filas(curso: CursoExport): (string | number)[][] {
-  return curso.estudiantes.map((e, i) => [
-    i + 1,
-    e.nombre,
-    e.cedula,
-    e.telefono || "—",
-    ESTADO_LABEL[e.estado] ?? e.estado,
-    PAGO_LABEL[e.estado_pago] ?? e.estado_pago,
-    formatDate(e.fecha_inscripcion),
-  ]);
-}
-
-function exportarCsv(curso: CursoExport) {
-  const escapar = (v: string | number) => {
-    const t = String(v);
-    return /[",;\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
-  };
-  const csv = [COLUMNAS, ...filas(curso)]
-    .map((fila) => fila.map(escapar).join(","))
-    .join("\n");
-  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${nombreBase(curso.nombre)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-async function exportarExcel(curso: CursoExport) {
-  const { default: writeXlsxFile } = await import("write-excel-file/browser");
-
-  const encabezado: SheetData[number] = COLUMNAS.map((columna) => ({
-    value: columna,
-    fontWeight: "bold",
-    backgroundColor: "#fbdde8",
-    textColor: "#7a0f43",
-    align: "center",
-    wrap: true,
-  }));
-
-  const cuerpo: SheetData = filas(curso).map((fila) =>
-    fila.map((valor, i) => ({
-      value: valor,
-      align: i === 0 ? "right" : "left",
-    })),
-  );
-
-  const anchos = COLUMNAS.map((columna, i) => {
-    const mayor = Math.max(
-      columna.length,
-      ...filas(curso).map((f) => String(f[i] ?? "").length),
-    );
-    return { width: Math.min(40, Math.max(12, mayor + 2)) };
-  });
-
-  await writeXlsxFile([encabezado, ...cuerpo], {
-    sheet: "Estudiantes",
-    columns: anchos,
-  }).toFile(`${nombreBase(curso.nombre)}.xlsx`);
-}
-
-async function exportarPdf(curso: CursoExport) {
-  const [{ jsPDF }, { autoTable }] = await Promise.all([
-    import("jspdf"),
-    import("jspdf-autotable"),
-  ]);
-
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const ancho = doc.internal.pageSize.getWidth();
-  const alto = doc.internal.pageSize.getHeight();
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(...TEXTO);
-  doc.text(curso.nombre, MARGEN, 20);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...MUTED);
-  doc.text(`Código: ${curso.codigo}`, MARGEN, 27);
-  doc.text(
+function contexto(curso: CursoExport): string[] {
+  const detalle = [`Código: ${curso.codigo}`];
+  if (curso.nivel_curso) detalle.push(`Nivel: ${curso.nivel_curso.nombre}`);
+  detalle.push(
     `Instructor: ${curso.instructor?.user.name ?? "Sin instructor"}`,
-    MARGEN,
-    32,
-  );
-  doc.text(
-    `Generado el ${new Date().toLocaleDateString(LOCALE, {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    })}`,
-    ancho - MARGEN,
-    27,
-    { align: "right" },
   );
 
-  doc.setDrawColor(...PRIMARY);
-  doc.setLineWidth(0.8);
-  doc.line(MARGEN, 35, ancho - MARGEN, 35);
+  const lineas = [curso.nombre, detalle.join(" · ")];
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...PRIMARY);
-  doc.text(`Estudiantes inscritos: ${curso.estudiantes.length}`, MARGEN, 42);
+  const condiciones: string[] = [];
+  if (curso.fecha_inicio || curso.fecha_fin) {
+    condiciones.push(
+      `Fechas: ${formatDate(curso.fecha_inicio)} – ${formatDate(curso.fecha_fin)}`,
+    );
+  }
+  // La columna `precio` no tiene cast en el backend: puede llegar como "150.00".
+  const precio = Number(curso.precio ?? NaN);
+  if (Number.isFinite(precio)) {
+    condiciones.push(
+      `Precio: ${precio === 0 ? "Gratuito" : formatCurrency(precio)}`,
+    );
+  }
+  if (condiciones.length > 0) lineas.push(condiciones.join(" · "));
+  return lineas;
+}
 
-  autoTable(doc, {
-    startY: 46,
-    head: [COLUMNAS],
-    body: filas(curso),
-    theme: "striped",
-    headStyles: {
-      fillColor: PRIMARY,
-      textColor: 255,
-      fontStyle: "bold",
-      fontSize: 8.5,
-    },
-    styles: {
-      font: "helvetica",
-      fontSize: 8,
-      cellPadding: 2,
-      overflow: "linebreak",
-      textColor: TEXTO,
-    },
-    alternateRowStyles: { fillColor: FRANJA },
-    columnStyles: {
-      0: { cellWidth: 8, halign: "right" },
-      2: { cellWidth: 22 },
-      6: { cellWidth: 24 },
-    },
-    margin: { left: MARGEN, right: MARGEN },
-    didDrawPage: ({ pageNumber }) => {
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(...MUTED);
-      doc.text("IMAF — Gestión de cursos", MARGEN, alto - 8);
-      doc.text(`Página ${pageNumber}`, ancho - MARGEN, alto - 8, {
-        align: "right",
-      });
-    },
-  });
+/** Arma el listado completo de inscritos, incluidos los archivados. */
+export function construirDocumento(curso: CursoExport): DocumentoExportable {
+  const estudiantes = [...curso.estudiantes].sort((a, b) =>
+    a.nombre.localeCompare(b.nombre, LOCALE),
+  );
 
-  doc.save(`${nombreBase(curso.nombre)}.pdf`);
+  const vigentes = estudiantes.filter(
+    (e) => e.estado_pago === "aprobado" && !e.deleted_at,
+  ).length;
+  const contar = (filtro: (e: EstudianteExport) => boolean) =>
+    formatNumber(estudiantes.filter(filtro).length);
+
+  return {
+    titulo: "Estudiantes inscritos",
+    subtitulos: contexto(curso),
+    nombreArchivo: `${slugArchivo(curso.nombre, "curso")}-estudiantes`,
+    pie: "IMAF — Gestión de cursos",
+    indicadores: [
+      {
+        etiqueta: "Registrados",
+        valor: formatNumber(estudiantes.length),
+        detalle: "Todas las inscripciones",
+      },
+      {
+        etiqueta: "Ocupan cupo",
+        valor: curso.limite_cupo
+          ? `${formatNumber(vigentes)} de ${formatNumber(curso.limite_cupo)}`
+          : formatNumber(vigentes),
+        detalle: "Pago aprobado y no archivados",
+      },
+      {
+        etiqueta: "Pago pendiente",
+        valor: contar((e) => e.estado_pago === "pendiente"),
+      },
+      {
+        etiqueta: "Pago rechazado",
+        valor: contar((e) => e.estado_pago === "reprobado"),
+      },
+      { etiqueta: "Archivados", valor: contar((e) => !!e.deleted_at) },
+    ],
+    secciones: [
+      {
+        titulo: "Estudiantes",
+        columnas: [
+          { titulo: "#", tipo: "entero", anchoPdf: 9 },
+          { titulo: "Nombre" },
+          { titulo: "Cédula", anchoPdf: 24 },
+          { titulo: "Correo" },
+          { titulo: "Teléfono", anchoPdf: 26 },
+          { titulo: "Estado", anchoPdf: 20 },
+          { titulo: "Pago", anchoPdf: 20 },
+          { titulo: "Inscripción", tipo: "fecha", anchoPdf: 24 },
+        ],
+        filas: estudiantes.map((e, i) => [
+          i + 1,
+          e.nombre,
+          e.nacionalidad ? formatCedula(e.cedula, e.nacionalidad) : e.cedula,
+          e.user.email,
+          e.telefono || null,
+          e.deleted_at ? "Archivado" : (ESTADO_LABEL[e.estado] ?? e.estado),
+          PAGO_LABEL[e.estado_pago] ?? e.estado_pago,
+          e.fecha_inscripcion,
+        ]),
+        vacio: "Este curso no tiene estudiantes inscritos.",
+      },
+    ],
+  };
 }
 
 /** Genera y descarga el listado completo de inscritos de un curso. */
@@ -210,13 +151,5 @@ export async function exportarEstudiantes(
   curso: CursoExport,
   formato: FormatoExportacion,
 ) {
-  if (formato === "csv") {
-    exportarCsv(curso);
-    return;
-  }
-  if (formato === "excel") {
-    await exportarExcel(curso);
-    return;
-  }
-  await exportarPdf(curso);
+  await exportarDocumento(construirDocumento(curso), formato);
 }

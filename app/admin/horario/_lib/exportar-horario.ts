@@ -1,4 +1,12 @@
-import { exportarTabla, type FormatoTabla } from "@/lib/exportar-tabla";
+import {
+  exportarDocumento,
+  slugArchivo,
+  type Celda,
+  type Columna,
+  type DocumentoExportable,
+  type FormatoTabla,
+} from "@/lib/exportar-tabla";
+import { LOCALE, formatNumber } from "@/lib/format";
 
 import type { Sesion } from "../_components/types";
 import {
@@ -10,72 +18,136 @@ import {
 
 export type FormatoHorario = FormatoTabla;
 
-const COLUMNAS = [
-  "#",
-  "Fecha",
-  "Día",
-  "Hora",
-  "Curso",
-  "Título",
-  "Instructor",
-  "Estado",
+const COLUMNAS: Columna[] = [
+  { titulo: "#", tipo: "entero", anchoPdf: 9 },
+  { titulo: "Fecha", tipo: "fecha", anchoPdf: 23 },
+  { titulo: "Día", anchoPdf: 20 },
+  { titulo: "Hora", anchoPdf: 26 },
+  { titulo: "Duración (h)", tipo: "decimal", anchoPdf: 24 },
+  { titulo: "Código", anchoPdf: 22 },
+  { titulo: "Curso" },
+  { titulo: "Título" },
+  { titulo: "Instructor" },
+  { titulo: "Estado", anchoPdf: 22 },
 ];
 
 function capitalizar(texto: string) {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
-function fechaCorta(iso: string) {
-  return parseISODate(iso).toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 function hora(sesion: Sesion) {
   const inicio = normalizeTime(sesion.hora_inicio);
-  if (!inicio) return "—";
+  if (!inicio) return null;
   const fin = normalizeTime(sesion.hora_fin);
   return fin ? `${inicio} – ${fin}` : inicio;
 }
 
-function slug(texto: string) {
-  return (
-    texto
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-zA-Z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-      .toLowerCase() || "horario"
-  );
+function minutos(hhmm: string) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
 }
 
-export function construirFilas(sesiones: Sesion[]): (string | number)[][] {
-  return [...sesiones]
-    .sort((a, b) => {
-      const fecha = normalizeDate(a.fecha).localeCompare(
-        normalizeDate(b.fecha),
-      );
-      if (fecha !== 0) return fecha;
-      return normalizeTime(a.hora_inicio).localeCompare(
-        normalizeTime(b.hora_inicio),
-      );
-    })
-    .map((s, i) => {
-      const fecha = normalizeDate(s.fecha);
-      const dia = parseISODate(fecha);
-      return [
-        i + 1,
-        fechaCorta(fecha),
-        capitalizar(dia.toLocaleDateString("es-ES", { weekday: "long" })),
-        hora(s),
-        s.curso ? `${s.curso.codigo} · ${s.curso.nombre}` : "—",
-        s.titulo,
-        s.curso?.instructor?.user.name ?? "—",
-        ESTADO_LABEL[s.estado] ?? s.estado,
-      ];
-    });
+/** Horas de la sesión, o null si falta un extremo o el rango no tiene sentido. */
+export function duracionHoras(sesion: Sesion): number | null {
+  const inicio = normalizeTime(sesion.hora_inicio);
+  const fin = normalizeTime(sesion.hora_fin);
+  if (!inicio || !fin) return null;
+  const diferencia = minutos(fin) - minutos(inicio);
+  if (!(diferencia > 0)) return null;
+  return Math.round((diferencia / 60) * 100) / 100;
+}
+
+function ordenadas(sesiones: Sesion[]) {
+  return [...sesiones].sort((a, b) => {
+    const fecha = normalizeDate(a.fecha).localeCompare(normalizeDate(b.fecha));
+    if (fecha !== 0) return fecha;
+    return normalizeTime(a.hora_inicio).localeCompare(
+      normalizeTime(b.hora_inicio),
+    );
+  });
+}
+
+export function construirFilas(sesiones: Sesion[]): Celda[][] {
+  return ordenadas(sesiones).map((s, i) => {
+    const fecha = normalizeDate(s.fecha);
+    return [
+      i + 1,
+      fecha,
+      capitalizar(
+        parseISODate(fecha).toLocaleDateString(LOCALE, { weekday: "long" }),
+      ),
+      hora(s),
+      duracionHoras(s),
+      s.curso?.codigo ?? null,
+      s.curso?.nombre ?? null,
+      s.titulo,
+      s.curso?.instructor?.user.name ?? null,
+      ESTADO_LABEL[s.estado] ?? s.estado,
+    ];
+  });
+}
+
+/** Horas impartidas o por impartir: una sesión cancelada no es tiempo de clase. */
+export function horasDeClase(sesiones: Sesion[]) {
+  return sesiones
+    .filter((s) => s.estado !== "cancelada")
+    .reduce((total, s) => total + (duracionHoras(s) ?? 0), 0);
+}
+
+export function construirDocumento(
+  sesiones: Sesion[],
+  rangoLabel: string,
+  filtros: string[] = [],
+): DocumentoExportable {
+  const contar = (estado: Sesion["estado"]) =>
+    formatNumber(sesiones.filter((s) => s.estado === estado).length);
+  const cursos = new Set(sesiones.map((s) => s.curso_id)).size;
+  const horas = horasDeClase(sesiones);
+
+  return {
+    titulo: "Agenda de cursos",
+    subtitulos: [
+      rangoLabel,
+      ...(filtros.length > 0 ? [`Filtros: ${filtros.join(" · ")}`] : []),
+    ],
+    nombreArchivo: `horario-${slugArchivo(rangoLabel, "horario")}`,
+    pie: "IMAF — Horario",
+    indicadores: [
+      {
+        etiqueta: "Sesiones",
+        valor: formatNumber(sesiones.length),
+        detalle: `En ${formatNumber(cursos)} curso${cursos === 1 ? "" : "s"}`,
+      },
+      { etiqueta: "Programadas", valor: contar("programada") },
+      { etiqueta: "Realizadas", valor: contar("realizada") },
+      { etiqueta: "Canceladas", valor: contar("cancelada") },
+      {
+        etiqueta: "Horas de clase",
+        valor: formatNumber(horas, 2),
+        detalle: "Sin contar las canceladas",
+      },
+    ],
+    secciones: [
+      {
+        titulo: "Agenda",
+        columnas: COLUMNAS,
+        filas: construirFilas(sesiones),
+        totales: [
+          null,
+          null,
+          null,
+          { valor: "Horas de clase", tipo: "texto" },
+          horas,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        vacio: "No hay sesiones en este rango.",
+      },
+    ],
+  };
 }
 
 /**
@@ -86,17 +158,10 @@ export async function exportarHorario(
   sesiones: Sesion[],
   formato: FormatoHorario,
   rangoLabel: string,
+  filtros: string[] = [],
 ) {
-  await exportarTabla(
-    {
-      titulo: "Agenda de cursos",
-      subtitulo: rangoLabel,
-      nombreArchivo: `horario-${slug(rangoLabel)}`,
-      columnas: COLUMNAS,
-      filas: construirFilas(sesiones),
-      numericas: [0],
-      pie: "IMAF — Horario",
-    },
+  await exportarDocumento(
+    construirDocumento(sesiones, rangoLabel, filtros),
     formato,
   );
 }

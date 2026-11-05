@@ -1,5 +1,5 @@
 import { LOCALE } from "@/lib/format";
-import type { Periodo } from "./tipos";
+import type { CursoOcupacion, Periodo } from "./tipos";
 
 export interface Variacion {
   /** Cambio relativo en %, o null si no hay base con la que comparar. */
@@ -30,6 +30,16 @@ export function tasaAprobacion(aprobados: number, rechazados: number) {
 /** Porcentaje de cupo ocupado, sin tope (un curso puede pasarse). */
 export function ocupacion(estudiantes: number, limite: number) {
   return limite > 0 ? Math.round((estudiantes / limite) * 100) : 0;
+}
+
+/** Media de ocupación de los cursos activos, o null si no hay ninguno. */
+export function ocupacionMedia(cursos: CursoOcupacion[]) {
+  const activos = cursos.filter((c) => c.estado === "activo");
+  if (activos.length === 0) return null;
+  return Math.round(
+    activos.reduce((s, c) => s + ocupacion(c.estudiantes, c.limite_cupo), 0) /
+      activos.length,
+  );
 }
 
 export type NivelOcupacion = "baja" | "media" | "alta" | "llena";

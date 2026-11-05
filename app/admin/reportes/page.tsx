@@ -52,25 +52,20 @@ import { KpiCard } from "./_components/KpiCard";
 import { Ocupacion } from "./_components/Ocupacion";
 import { Panel } from "./_components/Panel";
 import { TablasDetalle } from "./_components/TablasDetalle";
-import { ocupacion, rango, tasaAprobacion, variacion } from "./metricas";
+import { ocupacionMedia, rango, tasaAprobacion, variacion } from "./metricas";
 import {
+  INFORMES,
   exportarReporte,
   type FormatoReporte,
-  type TablaReporte,
+  type Informe,
 } from "./exportar";
 import {
+  METODO_LABEL,
   PERIODOS,
   type MetodoPago,
   type Periodo,
   type ReporteData,
 } from "./tipos";
-
-const METODO_LABEL: Record<MetodoPago["metodo"], string> = {
-  transferencia: "Transferencia",
-  pago_movil: "Pago móvil",
-  efectivo: "Efectivo",
-  sin_especificar: "Sin especificar",
-};
 
 /** Orden fijo de colores por método: el color sigue al método, no al puesto. */
 const METODO_SLOT: Record<MetodoPago["metodo"], 1 | 2 | 3> = {
@@ -89,14 +84,6 @@ const FORMATOS: {
   { key: "pdf", label: "PDF", icon: FileText },
   { key: "excel", label: "Excel", icon: FileSpreadsheet },
 ];
-
-const INFORMES = [
-  { key: "serie", label: "Serie de ingresos" },
-  { key: "cursos", label: "Pagos por curso" },
-  { key: "estudiantes", label: "Pagos por estudiante" },
-] as const;
-
-type Informe = (typeof INFORMES)[number]["key"];
 
 export default function ReportesPage() {
   const { get, set } = useUrlState();
@@ -128,94 +115,18 @@ export default function ReportesPage() {
     ? tasaAprobacion(anterior.aprobados, anterior.rechazados)
     : null;
 
-  const ocupacionMedia = useMemo(() => {
-    const activos = (data?.cursos ?? []).filter((c) => c.estado === "activo");
-    if (activos.length === 0) return null;
-    return Math.round(
-      activos.reduce((s, c) => s + ocupacion(c.estudiantes, c.limite_cupo), 0) /
-        activos.length,
-    );
-  }, [data]);
+  const mediaOcupacion = useMemo(
+    () => ocupacionMedia(data?.cursos ?? []),
+    [data],
+  );
 
   const [exportando, setExportando] = useState(false);
-
-  const construirTabla = (datos: ReporteData, que: Informe): TablaReporte => {
-    if (que === "serie") {
-      return {
-        titulo: `Serie de ingresos (${spec.label.toLowerCase()})`,
-        nombreArchivo: `ingresos-${periodo}`,
-        columnas: [
-          "Período",
-          "Desde",
-          "Ingresos (Bs.)",
-          "Aprobados",
-          "Pendientes",
-          "Rechazados",
-        ],
-        filas: datos.ingresos.map((f) => [
-          f.label,
-          f.desde,
-          f.total,
-          f.aprobados,
-          f.pendientes,
-          f.rechazados,
-        ]),
-        numericas: [2, 3, 4, 5],
-      };
-    }
-    if (que === "cursos") {
-      return {
-        titulo: "Pagos por curso",
-        nombreArchivo: "pagos-por-curso",
-        columnas: [
-          "Curso",
-          "Código",
-          "Precio",
-          "Aprobados",
-          "Pendientes",
-          "Rechazados",
-          "Ingreso",
-        ],
-        filas: datos.pagos_por_curso.map((c) => [
-          c.nombre,
-          c.codigo,
-          c.precio,
-          c.aprobados,
-          c.pendientes,
-          c.rechazados,
-          c.total_ingreso,
-        ]),
-        numericas: [2, 3, 4, 5, 6],
-      };
-    }
-    return {
-      titulo: "Pagos por estudiante",
-      nombreArchivo: "pagos-por-estudiante",
-      columnas: [
-        "Estudiante",
-        "Pagos",
-        "Aprobados",
-        "Pendientes",
-        "Rechazados",
-        "Ingreso",
-      ],
-      filas: datos.pagos_por_usuario.map((u) => [
-        u.nombre,
-        u.total_pagos,
-        u.aprobados,
-        u.pendientes,
-        u.rechazados,
-        u.total_ingreso,
-      ]),
-      numericas: [1, 2, 3, 4, 5],
-    };
-  };
 
   const exportar = async (que: Informe, formato: FormatoReporte) => {
     if (!data) return;
     setExportando(true);
     try {
-      await exportarReporte(construirTabla(data, que), formato);
+      await exportarReporte(data, que, periodo, formato);
     } catch {
       toast.error("No se pudo generar la exportación.");
     } finally {
@@ -281,7 +192,11 @@ export default function ReportesPage() {
                       {label}
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="w-60">
-                      {INFORMES.map((informe) => (
+                      {/* El reporte completo son varias tablas; un CSV solo
+                      admite una. */}
+                      {INFORMES.filter(
+                        (informe) => key !== "csv" || !informe.multitabla,
+                      ).map((informe) => (
                         <DropdownMenuItem
                           key={informe.key}
                           onSelect={() => exportar(informe.key, key)}
@@ -583,7 +498,7 @@ export default function ReportesPage() {
                 },
                 {
                   label: "Ocupación media",
-                  value: ocupacionMedia === null ? "—" : `${ocupacionMedia}%`,
+                  value: mediaOcupacion === null ? "—" : `${mediaOcupacion}%`,
                   sub: "de los cursos activos",
                   icon: BarChart2,
                   tone: "success",

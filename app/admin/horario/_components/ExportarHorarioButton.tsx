@@ -19,12 +19,15 @@ import type { FormatoHorario } from "../_lib/exportar-horario";
 interface Props {
   sesiones: Sesion[];
   rangoLabel: string;
+  /** Filtros activos, para que el documento diga qué recorte de la agenda es. */
+  filtros?: string[];
   disabled?: boolean;
 }
 
 export default function ExportarHorarioButton({
   sesiones,
   rangoLabel,
+  filtros,
   disabled,
 }: Props) {
   const [exportando, setExportando] = useState<FormatoHorario | null>(null);
@@ -33,7 +36,7 @@ export default function ExportarHorarioButton({
     setExportando(formato);
     try {
       const { exportarHorario } = await import("../_lib/exportar-horario");
-      await exportarHorario(sesiones, formato, rangoLabel);
+      await exportarHorario(sesiones, formato, rangoLabel, filtros);
     } catch {
       toast.error("No se pudo generar la exportación.");
     } finally {
