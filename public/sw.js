@@ -7,7 +7,7 @@
  *
  * Sube CACHE_VERSION al cambiar PRECACHE o la estrategia de caché.
  */
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_PREFIX = "imaf-static-";
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 

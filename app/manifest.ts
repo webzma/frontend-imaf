@@ -10,7 +10,7 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "IMAF — Instituto de la Mujer, Atención a la Familia y Formación para el Trabajo",
+    name: "Instituto de la Mujer, Atención a la Familia y Formación para el Trabajo",
     short_name: "IMAF",
     description:
       "Formación para el trabajo en modalidad presencial. Inscríbete en línea y asiste a clases en nuestra sede.",
