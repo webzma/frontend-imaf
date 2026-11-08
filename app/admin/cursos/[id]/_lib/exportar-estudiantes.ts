@@ -22,7 +22,7 @@ export interface EstudianteExport {
   telefono?: string | null;
   user: { email: string };
   estado: "activo" | "inactivo" | "graduado";
-  estado_pago: "pendiente" | "aprobado" | "reprobado";
+  estado_pago: "pendiente" | "aprobado" | "rechazado";
   deleted_at: string | null;
   fecha_inscripcion: string;
 }
@@ -48,7 +48,7 @@ const ESTADO_LABEL: Record<EstudianteExport["estado"], string> = {
 const PAGO_LABEL: Record<EstudianteExport["estado_pago"], string> = {
   pendiente: "Pendiente",
   aprobado: "Aprobado",
-  reprobado: "Rechazado",
+  rechazado: "Rechazado",
 };
 
 function contexto(curso: CursoExport): string[] {
@@ -113,7 +113,7 @@ export function construirDocumento(curso: CursoExport): DocumentoExportable {
       },
       {
         etiqueta: "Pago rechazado",
-        valor: contar((e) => e.estado_pago === "reprobado"),
+        valor: contar((e) => e.estado_pago === "rechazado"),
       },
       { etiqueta: "Archivados", valor: contar((e) => !!e.deleted_at) },
     ],

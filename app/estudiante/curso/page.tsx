@@ -79,12 +79,12 @@ interface MiCursoResponse {
     temario: TemarioItem[];
     sesiones: SesionItem[];
   };
-  estado_pago: "pendiente" | "aprobado" | "reprobado";
+  estado_pago: "pendiente" | "aprobado" | "rechazado";
   estado_aprobacion_curso: "pendiente" | "aprobado" | "reprobado";
   es_actual: boolean;
 }
 
-type EstadoKey = "pendiente" | "aprobado" | "reprobado";
+type EstadoKey = "pendiente" | "aprobado" | "reprobado" | "rechazado";
 
 interface PerfilComprobante {
   nombre: string;
@@ -117,7 +117,7 @@ const estadoConfig: Record<
   {
     label: string;
     icon: React.ElementType;
-    variant: "pendiente" | "aprobado" | "reprobado";
+    variant: "pendiente" | "aprobado" | "reprobado" | "rechazado";
   }
 > = {
   pendiente: {
@@ -134,6 +134,11 @@ const estadoConfig: Record<
     label: "Reprobado",
     icon: Ban,
     variant: "reprobado",
+  },
+  rechazado: {
+    label: "Rechazado",
+    icon: Ban,
+    variant: "rechazado",
   },
 };
 

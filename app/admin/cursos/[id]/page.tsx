@@ -106,7 +106,7 @@ interface EstudianteEnCurso {
   user: EstudianteUser;
 }
 
-type EstadoPago = "pendiente" | "aprobado" | "reprobado";
+type EstadoPago = "pendiente" | "aprobado" | "rechazado";
 
 /** Pago aprobado del curso, para emitir el comprobante de cada estudiante. */
 interface PagoCurso {
@@ -151,7 +151,7 @@ function cumpleFiltro(e: EstudianteEnCurso, filtro: FiltroListado): boolean {
     case "pago_pendiente":
       return e.estado_pago === "pendiente";
     case "pago_rechazado":
-      return e.estado_pago === "reprobado";
+      return e.estado_pago === "rechazado";
     case "inactivos":
       return e.estado === "inactivo";
     case "archivados":
@@ -1570,7 +1570,7 @@ export default function CursoDetailPage({
                                               Pago pendiente
                                             </Badge>
                                           )}
-                                          {e.estado_pago === "reprobado" && (
+                                          {e.estado_pago === "rechazado" && (
                                             <Badge
                                               variant="rechazado"
                                               className="text-[10px]"

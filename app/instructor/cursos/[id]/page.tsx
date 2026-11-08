@@ -34,7 +34,7 @@ interface Estudiante {
   cedula: string;
   foto: string | null;
   estado: "activo" | "inactivo" | "graduado";
-  estado_pago: "pendiente" | "aprobado" | "reprobado";
+  estado_pago: "pendiente" | "aprobado" | "rechazado";
   estado_aprobacion_curso: "pendiente" | "aprobado" | "reprobado";
   fecha_inscripcion: string;
   /** Estudiante archivado: sigue en el historial del curso. */
@@ -45,7 +45,7 @@ interface Estudiante {
 const PAGO_LABEL: Record<Estudiante["estado_pago"], string> = {
   aprobado: "Pago al día",
   pendiente: "Pago pendiente",
-  reprobado: "Pago rechazado",
+  rechazado: "Pago rechazado",
 };
 
 interface Sesion {
@@ -381,12 +381,7 @@ export default function CursoDetailPage({
                             {est.cedula}
                           </span>
                           <Badge
-                            variant={
-                              est.estado_pago as
-                                | "pendiente"
-                                | "aprobado"
-                                | "reprobado"
-                            }
+                            variant={est.estado_pago}
                             className="text-[10px]"
                           >
                             {PAGO_LABEL[est.estado_pago]}
