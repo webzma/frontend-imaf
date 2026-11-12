@@ -104,12 +104,6 @@ interface PagoComprobante {
 
 /* ── Helpers ── */
 
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : "";
-}
-
 /* ── Sub-components ── */
 
 const estadoConfig: Record<
@@ -195,7 +189,6 @@ function CursoPageContent() {
 
     fetch(`${process.env.API_URL}api/estudiante/curso${query}`, {
       headers: {
-        Authorization: `Bearer ${getCookie("token")}`,
         Accept: "application/json",
       },
     })
@@ -207,7 +200,6 @@ function CursoPageContent() {
           // Sin curso pagado: quizá tiene la solicitud en revisión.
           fetch(`${process.env.API_URL}api/estudiante/mis-cursos`, {
             headers: {
-              Authorization: `Bearer ${getCookie("token")}`,
               Accept: "application/json",
             },
           })
@@ -234,7 +226,6 @@ function CursoPageContent() {
   useEffect(() => {
     fetch(`${process.env.API_URL}api/estudiante/perfil`, {
       headers: {
-        Authorization: `Bearer ${getCookie("token")}`,
         Accept: "application/json",
       },
     })
@@ -253,7 +244,6 @@ function CursoPageContent() {
       `${process.env.API_URL}api/estudiante/pagos?curso_id=${cursoActual}`,
       {
         headers: {
-          Authorization: `Bearer ${getCookie("token")}`,
           Accept: "application/json",
         },
       },
@@ -284,7 +274,6 @@ function CursoPageContent() {
         }`,
         {
           headers: {
-            Authorization: `Bearer ${getCookie("token")}`,
             Accept: "application/pdf,application/json",
           },
         },

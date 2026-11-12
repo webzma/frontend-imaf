@@ -22,7 +22,6 @@ function respuesta(body: unknown, status = 200) {
 beforeEach(() => {
   fetchMock.mockReset();
   vi.stubGlobal("fetch", fetchMock);
-  document.cookie = "token=abc123; path=/";
 });
 
 afterEach(() => {
@@ -51,13 +50,13 @@ describe("apiUrl", () => {
 });
 
 describe("apiFetch", () => {
-  it("envía el token de sesión en la cabecera", async () => {
+  it("no expone el token al JavaScript: el BFF lo inyecta", async () => {
     fetchMock.mockReturnValue(respuesta({ ok: true }));
     await apiFetch("api/admin/cursos");
 
     const [, init] = fetchMock.mock.calls[0];
     const headers = (init as RequestInit).headers as Record<string, string>;
-    expect(headers.Authorization).toBe("Bearer abc123");
+    expect(headers.Authorization).toBeUndefined();
     expect(headers.Accept).toBe("application/json");
   });
 

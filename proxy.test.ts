@@ -23,7 +23,7 @@ function mockMe(role: string | null, ok = true) {
 
 describe("proxy", () => {
   beforeEach(() => {
-    process.env.API_URL = API;
+    process.env.BACKEND_URL = API;
   });
 
   afterEach(() => {
@@ -159,7 +159,9 @@ describe("proxy", () => {
       "/manifest.webmanifest",
       "/offline.html",
       "/icons/icon-192.png",
-    ])("deja %s fuera del proxy para instalar la PWA sin sesión", (path) => {
+      "/api/login",
+      "/api/admin/cursos",
+    ])("deja %s fuera del proxy: el BFF gestiona su propia sesión", (path) => {
       expect(pasaPorProxy(path)).toBe(false);
     });
 

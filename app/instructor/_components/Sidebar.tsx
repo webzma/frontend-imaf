@@ -80,12 +80,6 @@ const navItems = [
   },
 ];
 
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : "";
-}
-
 const PROFILE_KEY = PERFIL_INSTRUCTOR_KEY;
 const NOTIF_COUNT_KEY = ["instructor", "notificaciones", "count"] as const;
 
@@ -96,7 +90,6 @@ async function fetchProfile(): Promise<{
 }> {
   const res = await fetch(`${process.env.API_URL}api/me`, {
     headers: {
-      Authorization: `Bearer ${getCookie("token")}`,
       Accept: "application/json",
     },
   });
@@ -115,7 +108,6 @@ async function fetchNotificationCount(): Promise<number> {
     `${process.env.API_URL}api/profesor/notificaciones/count`,
     {
       headers: {
-        Authorization: `Bearer ${getCookie("token")}`,
         Accept: "application/json",
       },
     },
@@ -188,7 +180,6 @@ export default function InstructorSidebar() {
       await fetch(`${process.env.API_URL}api/logout`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${getCookie("token")}`,
           Accept: "application/json",
         },
       });

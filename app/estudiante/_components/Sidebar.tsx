@@ -85,18 +85,11 @@ const navItems = [
   },
 ];
 
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : "";
-}
-
 const PROFILE_KEY = PERFIL_ESTUDIANTE_KEY;
 const NOTIF_COUNT_KEY = ["estudiante", "notificaciones", "count"] as const;
 
 function authHeaders() {
   return {
-    Authorization: `Bearer ${getCookie("token")}`,
     Accept: "application/json",
   };
 }
@@ -186,7 +179,6 @@ export default function EstudianteSidebar() {
       await fetch(`${process.env.API_URL}api/logout`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${getCookie("token")}`,
           Accept: "application/json",
         },
       });

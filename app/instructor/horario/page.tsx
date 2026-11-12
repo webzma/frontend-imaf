@@ -52,15 +52,8 @@ import {
   startOfWeek,
 } from "@/app/admin/horario/_components/utils";
 
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : "";
-}
-
 function getAuthHeaders() {
   return {
-    Authorization: `Bearer ${getCookie("token")}`,
     Accept: "application/json",
   };
 }

@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   env: {
-    API_URL: process.env.API_URL,
+    // El navegador siempre habla con el BFF del mismo origen. El BFF reenvía a
+    // BACKEND_URL e inyecta el token HttpOnly; así el token nunca llega al JS.
+    API_URL: "/",
   },
   async headers() {
     return [
