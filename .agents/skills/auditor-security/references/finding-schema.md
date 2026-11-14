@@ -4,24 +4,24 @@
 
 Each finding should contain:
 
-| Field | Meaning |
-|---|---|
-| `id` | Stable identifier, e.g. `AS-AUTHZ-001` |
-| `title` | Concise description |
-| `category` | Catalog category |
-| `status` | Confirmed, probable, potential, misconfiguration, hardening, informational |
-| `confidence` | High, medium, low |
-| `severity` | Critical, high, medium, low, none, or unknown |
-| `priority` | P0-P4 or unassigned |
-| `component` | Affected service/module |
-| `locations` | File paths and line ranges, endpoint, or configuration key |
-| `evidence` | Redacted code/configuration behavior and reasoning |
-| `preconditions` | Attacker access and required conditions |
-| `impact` | Realistic confidentiality, integrity, availability, or business impact |
-| `recommendation` | Specific contextual remediation |
-| `verification` | Reproducible test and current status |
-| `references` | Applicable CWE, OWASP, advisory, or official docs |
-| `limitations` | Missing evidence or assumptions |
+| Field            | Meaning                                                                    |
+| ---------------- | -------------------------------------------------------------------------- |
+| `id`             | Stable identifier, e.g. `AS-AUTHZ-001`                                     |
+| `title`          | Concise description                                                        |
+| `category`       | Catalog category                                                           |
+| `status`         | Confirmed, probable, potential, misconfiguration, hardening, informational |
+| `confidence`     | High, medium, low                                                          |
+| `severity`       | Critical, high, medium, low, none, or unknown                              |
+| `priority`       | P0-P4 or unassigned                                                        |
+| `component`      | Affected service/module                                                    |
+| `locations`      | File paths and line ranges, endpoint, or configuration key                 |
+| `evidence`       | Redacted code/configuration behavior and reasoning                         |
+| `preconditions`  | Attacker access and required conditions                                    |
+| `impact`         | Realistic confidentiality, integrity, availability, or business impact     |
+| `recommendation` | Specific contextual remediation                                            |
+| `verification`   | Reproducible test and current status                                       |
+| `references`     | Applicable CWE, OWASP, advisory, or official docs                          |
+| `limitations`    | Missing evidence or assumptions                                            |
 
 ## Status definitions
 
@@ -53,6 +53,7 @@ Confidence is not severity. A low-confidence issue can still deserve investigati
 ## Identifier convention
 
 Use `AS-<DOMAIN>-<NNN>`, for example:
+
 - `AS-AUTH-001`
 - `AS-AUTHZ-001`
 - `AS-INJ-001`

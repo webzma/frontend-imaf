@@ -55,6 +55,7 @@ Follow the stages in `references/methodology.md`:
 Read `references/methodology.md`, `references/safe-execution.md`, `references/finding-schema.md`, and `references/reporting.md` before conducting a full audit.
 
 Then load only the relevant modules:
+
 - Stack/version identification: `references/stack-detection.md`
 - Tool selection: `references/tooling.md`
 - Risk scoring: `references/severity-and-prioritization.md`
@@ -75,6 +76,7 @@ For framework-specific checks, consult the relevant files under `references/fram
 ## Coverage claims
 
 Use these tiers honestly:
+
 - **Tier 1 — Verified:** framework-specific procedures and rules have been tested against representative fixtures or projects.
 - **Tier 2 — Supported:** framework-specific guidance exists, but automation or validation is partial.
 - **Tier 3 — Best effort:** general security reasoning only; do not promise specialized coverage.
@@ -84,6 +86,7 @@ A technology is not Tier 1 merely because it is familiar or documented. Record t
 ## Finding requirements
 
 Every finding must include:
+
 - Stable ID (for example `AS-AUTHZ-001`)
 - Title and category
 - Status and confidence
@@ -100,6 +103,7 @@ Use the schema in `references/finding-schema.md`. Never expose the secret itself
 ## Reports
 
 Generate:
+
 1. `audit-report.md` for people.
 2. `audit-report.json` conforming to `templates/audit-report.schema.json`.
 
@@ -108,6 +112,7 @@ Do not write reports into the repository unless the user specifies a destination
 ## Remediation gate
 
 For each proposed fix:
+
 1. Explain the finding and the intended change.
 2. Identify files likely to change and possible side effects.
 3. State the verification plan.
@@ -126,6 +131,7 @@ Follow `references/tooling.md` and `references/safe-execution.md`. Prefer availa
 ## Completion criteria
 
 An audit is complete only when:
+
 - Scope, limitations, stack, and coverage tiers are recorded.
 - Relevant attack surfaces have been reviewed or explicitly excluded.
 - Findings are evidence-based and deduplicated.

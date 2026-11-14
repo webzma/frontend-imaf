@@ -3,6 +3,7 @@
 ## 1. Reconnaissance
 
 Build a project profile before testing:
+
 - Repository structure and entry points.
 - Languages, frameworks, runtime versions, package managers, and lockfiles.
 - Frontend/backend boundaries and API routes.
@@ -17,6 +18,7 @@ Use multiple indicators to identify a stack. Record uncertainty and version conf
 ## 2. Scope and planning
 
 Define:
+
 - Components and directories in scope.
 - Excluded components and reasons.
 - Environment: local, staging, or production.
@@ -30,6 +32,7 @@ Prioritize high-risk flows: identity, authorization, sensitive data, file proces
 ## 3. Inspection
 
 Review relevant source and configuration. Trace security-sensitive data from input to use:
+
 - Sources: request parameters, headers, cookies, uploaded files, messages, external APIs, environment/configuration.
 - Transformations: validation, parsing, normalization, encoding, authorization checks.
 - Sinks: SQL/NoSQL queries, shell commands, HTML/DOM, templates, filesystem, network requests, redirects, logs, deserialization, and privileged operations.
@@ -39,6 +42,7 @@ Check both positive controls and bypass paths. Inspect middleware, route groups,
 ## 4. Candidate validation
 
 For each candidate:
+
 1. Confirm the affected code path is reachable.
 2. Identify attacker-controlled inputs and required privileges.
 3. Trace relevant data/control flow.
@@ -58,6 +62,7 @@ Deduplicate findings by root cause. A single missing authorization policy affect
 ## 6. Reporting
 
 Report:
+
 - Scope and exclusions.
 - Project profile and detected versions.
 - Coverage tiers.
@@ -77,6 +82,7 @@ Propose one finding at a time. State the intended code/configuration change, fil
 ## 8. Post-fix verification
 
 Re-run the most relevant tests or scans, add regression tests where appropriate, inspect the diff, and confirm the original attack path is blocked without breaking legitimate behavior. Use statuses:
+
 - `not_run`
 - `passed`
 - `failed`

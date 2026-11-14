@@ -1,6 +1,7 @@
 # Authentication and session security
 
 Review:
+
 - Password hashing algorithms and parameters; avoid plaintext or reversible password storage.
 - Login throttling, credential stuffing controls, and account enumeration.
 - MFA enrollment, recovery, reset, and bypass paths.

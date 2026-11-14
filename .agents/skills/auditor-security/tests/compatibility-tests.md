@@ -3,6 +3,7 @@
 Test the same skill directory without duplicating its content.
 
 For each agent (Codex, Claude Code, OpenCode):
+
 1. Confirm discovery from its documented project-level skill path.
 2. Confirm frontmatter parsing and activation behavior.
 3. Confirm the agent can read referenced Markdown files.

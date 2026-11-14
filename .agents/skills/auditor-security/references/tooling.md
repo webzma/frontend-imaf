@@ -2,13 +2,13 @@
 
 Tools supplement manual review; they do not replace contextual validation. First detect what is installed and supported. Do not install automatically.
 
-| Tool | Typical role | Important limitations |
-|---|---|---|
-| Semgrep | SAST, pattern and taint analysis | Rule quality and language support vary; validate alerts |
-| Trivy | Dependency, image, filesystem, IaC, secret, and SBOM scanning | Confirm which scanners and targets are enabled |
-| Gitleaks | Secret detection in working tree and Git history | Redact output; verify allowlists and false positives |
-| OWASP ZAP | DAST and passive/active web scanning | Active scanning can alter state or affect availability; scope and approval required |
-| CodeQL | Semantic code analysis for supported languages | Check current language support; do not claim PHP/Laravel analysis |
+| Tool      | Typical role                                                  | Important limitations                                                               |
+| --------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Semgrep   | SAST, pattern and taint analysis                              | Rule quality and language support vary; validate alerts                             |
+| Trivy     | Dependency, image, filesystem, IaC, secret, and SBOM scanning | Confirm which scanners and targets are enabled                                      |
+| Gitleaks  | Secret detection in working tree and Git history              | Redact output; verify allowlists and false positives                                |
+| OWASP ZAP | DAST and passive/active web scanning                          | Active scanning can alter state or affect availability; scope and approval required |
+| CodeQL    | Semantic code analysis for supported languages                | Check current language support; do not claim PHP/Laravel analysis                   |
 
 ## Decision sequence
 

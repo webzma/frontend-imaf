@@ -3,6 +3,7 @@
 ## Evidence sources
 
 Use multiple sources where possible:
+
 - Package manifests and lockfiles.
 - Framework configuration files.
 - Runtime/version files and CI definitions.
@@ -24,6 +25,7 @@ Record version confidence and coverage tier per major technology. Unknown or uns
 ## Ecosystem discovery
 
 Potential ecosystems include:
+
 - JavaScript/TypeScript: Node.js, React, Next.js, Vue, Nuxt, Angular, Express, NestJS.
 - PHP: Laravel, Symfony, Composer applications.
 - Python: Django, Flask, FastAPI.
