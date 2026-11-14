@@ -35,9 +35,9 @@ describe("session", () => {
 
   it("marca las cookies como Secure bajo HTTPS", () => {
     enProtocolo("https:");
-    setSession("tok", "admin");
+    setSession("admin");
 
-    expect(escritas).toHaveLength(2);
+    expect(escritas).toHaveLength(1);
     for (const cookie of escritas) {
       expect(cookie).toContain("Secure");
       expect(cookie).toContain("SameSite=Strict");
@@ -47,7 +47,7 @@ describe("session", () => {
 
   it("omite Secure en http para no romper el desarrollo local", () => {
     enProtocolo("http:");
-    setSession("tok", "admin");
+    setSession("admin");
 
     for (const cookie of escritas) {
       expect(cookie).not.toContain("Secure");
@@ -57,7 +57,7 @@ describe("session", () => {
 
   it("le pone caducidad a la sesión en vez de dejarla de sesión de navegador", () => {
     enProtocolo("https:");
-    setSession("tok", "admin");
+    setSession("admin");
 
     for (const cookie of escritas) {
       expect(cookie).toMatch(/max-age=\d+/);
@@ -65,23 +65,21 @@ describe("session", () => {
     }
   });
 
-  it("clearSession vence las dos cookies", () => {
+  it("clearSession vence la cookie de rol", () => {
     enProtocolo("https:");
     clearSession();
 
-    expect(escritas).toHaveLength(2);
-    expect(escritas.some((c) => c.startsWith("token="))).toBe(true);
-    expect(escritas.some((c) => c.startsWith("role="))).toBe(true);
-    for (const cookie of escritas) {
-      expect(cookie).toContain("max-age=0");
-    }
+    expect(escritas).toHaveLength(1);
+    expect(escritas[0].startsWith("role=")).toBe(true);
+    expect(escritas[0]).toContain("max-age=0");
   });
 
-  it("lee de vuelta el token que escribió", () => {
+  it("no expone ningún token al JavaScript del cliente", () => {
     enProtocolo("https:");
-    setSession("abc123", "profesor");
+    setSession("profesor");
 
-    expect(getToken()).toBe("abc123");
+    expect(getToken()).toBe("");
+    expect(escritas.some((c) => c.startsWith("token="))).toBe(false);
   });
 
   it("mapea cada rol a su panel", () => {

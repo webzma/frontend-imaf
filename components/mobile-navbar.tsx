@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getToken } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 export interface MobileNavItem {
@@ -49,7 +48,6 @@ export function MobileNavbar({
     queryFn: async () => {
       const res = await fetch(countUrl!, {
         headers: {
-          Authorization: `Bearer ${getToken()}`,
           Accept: "application/json",
         },
       });

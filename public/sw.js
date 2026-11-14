@@ -80,7 +80,7 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  // La API vive en otro dominio: sus respuestas no pasan por aquí.
+  // Solo se precachean estáticos; las respuestas de /api nunca se guardan.
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === "navigate") {

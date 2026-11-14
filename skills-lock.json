@@ -1,16 +1,22 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
+    "auditor-security": {
+      "source": "Emcahell/auditor-security-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "a71e947a85eb4852faacd20582695e91edebd3606a5f94a54801c41228c9698f"
+    },
     "frontend-anti-tech-debt": {
       "source": "emcahell/frontend-anti-tech-debt-skill",
       "sourceType": "github",
       "skillPath": "skills/frontend-anti-tech-debt/SKILL.md",
-      "computedHash": "bf6903fe99cc5ecaac6e13fc74c9762983293540ea9be9e667442c4ad244b4b8"
+      "computedHash": ""
     },
     "shadcn": {
       "source": "shadcn/ui",
       "sourceType": "github",
-      "computedHash": "507f011a70e8b3ae242bdc0bb5b39fd91a1d4049a0f3c281991ccf84973d591c"
+      "computedHash": ""
     }
   }
 }

@@ -43,3 +43,19 @@ export const sanitizarTexto = (valor: string) => valor.replace(/['"`;\\]/g, "");
 export const esSoloDigitos = (valor: string) => SOLO_DIGITOS.test(valor);
 export const esSoloLetras = (valor: string) => SOLO_LETRAS.test(valor);
 export const esTelefonoValido = (valor: string) => SOLO_TELEFONO_11.test(valor);
+
+/**
+ * URL web segura: solo http/https y con host. Evita esquemas como
+ * javascript:, data: o file:, que new URL() acepta pero no deberían usarse
+ * en un href.
+ */
+export const esUrlWebSegura = (valor: string): boolean => {
+  try {
+    const { protocol, hostname } = new URL(valor);
+    return (
+      (protocol === "http:" || protocol === "https:") && hostname.length > 0
+    );
+  } catch {
+    return false;
+  }
+};

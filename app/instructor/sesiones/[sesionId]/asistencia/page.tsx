@@ -46,15 +46,8 @@ interface RegistroAsistencia {
 
 /* ── Helpers ── */
 
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : "";
-}
-
 function getAuthHeaders() {
   return {
-    Authorization: `Bearer ${getCookie("token")}`,
     Accept: "application/json",
     "Content-Type": "application/json",
   };

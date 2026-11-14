@@ -47,7 +47,7 @@ export default function LoginPage() {
         return;
       }
       const role = body.user.role;
-      setSession(body.token, role);
+      setSession(role);
       router.push(dashboardPath(role));
     } catch {
       setError("Error al conectar con el servidor.");

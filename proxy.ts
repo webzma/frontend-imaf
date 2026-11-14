@@ -1,4 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  HOST_TOKEN_COOKIE,
+  LEGACY_TOKEN_COOKIE,
+  ROLE_COOKIE,
+  isSecureRequest,
+  tokenCookieName,
+} from "@/lib/auth-cookie";
 
 // Routes accessible only when NOT authenticated
 const AUTH_ROUTES = [
@@ -27,7 +34,10 @@ const PROTECTED_ROUTES: Record<string, string[]> = {
  * duda se cierra la sesión en lugar de dejar pasar.
  */
 async function resolveRole(token: string): Promise<string | null> {
-  const base = (process.env.API_URL ?? "").replace(/\/+$/, "");
+  const base = (process.env.BACKEND_URL ?? process.env.API_URL ?? "").replace(
+    /\/+$/,
+    "",
+  );
   if (!base) return null;
 
   try {
@@ -48,11 +58,26 @@ async function resolveRole(token: string): Promise<string | null> {
   }
 }
 
+/** Borra las cookies de sesión respetando los atributos con los que se crearon. */
+function borrarSesion(response: NextResponse, secure: boolean): void {
+  const base = { path: "/", maxAge: 0, sameSite: "strict" as const };
+  response.cookies.set(HOST_TOKEN_COOKIE, "", {
+    ...base,
+    secure: true,
+    httpOnly: true,
+  });
+  response.cookies.set(LEGACY_TOKEN_COOKIE, "", {
+    ...base,
+    secure,
+    httpOnly: true,
+  });
+  response.cookies.set(ROLE_COOKIE, "", { ...base, secure });
+}
+
 /** Manda al login y borra una sesión que ya no sirve. */
 function logout(request: NextRequest): NextResponse {
   const response = NextResponse.redirect(new URL("/login", request.url));
-  response.cookies.delete("token");
-  response.cookies.delete("role");
+  borrarSesion(response, isSecureRequest(request.url, request.headers));
   return response;
 }
 
@@ -66,17 +91,21 @@ function toDashboard(request: NextRequest, role: string): NextResponse {
   const response = NextResponse.redirect(
     new URL(getDashboard(role), request.url),
   );
-  response.cookies.set("role", role, {
+  response.cookies.set(ROLE_COOKIE, role, {
     path: "/",
     sameSite: "strict",
-    secure: request.nextUrl.protocol === "https:",
+    secure: isSecureRequest(request.url, request.headers),
   });
   return response;
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("token")?.value ?? null;
+  const secure = isSecureRequest(request.url, request.headers);
+  const token =
+    request.cookies.get(tokenCookieName(secure))?.value ??
+    request.cookies.get(LEGACY_TOKEN_COOKIE)?.value ??
+    null;
 
   const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
   const matchedBase = Object.keys(PROTECTED_ROUTES).find((base) =>
@@ -100,8 +129,7 @@ export async function proxy(request: NextRequest) {
     // `/login` y su panel.
     if (pathname === "/" || isAuthRoute) {
       const response = NextResponse.next();
-      response.cookies.delete("token");
-      response.cookies.delete("role");
+      borrarSesion(response, secure);
       return response;
     }
     return logout(request);
@@ -118,12 +146,12 @@ export async function proxy(request: NextRequest) {
   }
 
   // Si la cookie `role` quedó desfasada (o la editaron), se corrige.
-  if (request.cookies.get("role")?.value !== role) {
+  if (request.cookies.get(ROLE_COOKIE)?.value !== role) {
     const response = NextResponse.next();
-    response.cookies.set("role", role, {
+    response.cookies.set(ROLE_COOKIE, role, {
       path: "/",
       sameSite: "strict",
-      secure: request.nextUrl.protocol === "https:",
+      secure,
     });
     return response;
   }
@@ -153,6 +181,6 @@ export const config = {
    *   rechaza un service worker que responde con una redirección al login
    */
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sw\\.js$|manifest\\.webmanifest$|offline\\.html$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api/|_next/static|_next/image|favicon.ico|sw\\.js$|manifest\\.webmanifest$|offline\\.html$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

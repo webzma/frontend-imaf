@@ -56,12 +56,6 @@ interface PerfilCurso {
 
 /* ── Helpers ── */
 
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : "";
-}
-
 /* ── Featured "Mi curso" Card ── */
 
 function FeaturedCursoCard({ curso }: { curso: Curso }) {
@@ -308,7 +302,6 @@ export default function EstudianteCursosPage() {
         `${process.env.API_URL}api/estudiante/cursos`,
         pageNum,
         {
-          Authorization: `Bearer ${getCookie("token")}`,
           Accept: "application/json",
         },
       );
@@ -325,7 +318,6 @@ export default function EstudianteCursosPage() {
 
   useEffect(() => {
     const headers = {
-      Authorization: `Bearer ${getCookie("token")}`,
       Accept: "application/json",
     };
 

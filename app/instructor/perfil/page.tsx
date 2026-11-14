@@ -70,15 +70,8 @@ interface MeResponse {
 
 /* ── Helpers ── */
 
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : "";
-}
-
 function getAuthHeaders(contentType = true) {
   const h: Record<string, string> = {
-    Authorization: `Bearer ${getCookie("token")}`,
     Accept: "application/json",
   };
   if (contentType) h["Content-Type"] = "application/json";
@@ -212,7 +205,6 @@ export default function PerfilPage() {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${getCookie("token")}`,
             Accept: "application/json",
           },
           body: formData,

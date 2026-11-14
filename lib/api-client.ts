@@ -8,9 +8,10 @@
  * "Error al conectar con el servidor", que es falso.
  *
  * Aquí viven las tres decisiones que antes estaban dispersas: de dónde sale la
- * URL base, cómo viaja el token y qué significa cada código de error.
+ * URL base, cómo viaja la sesión y qué significa cada código de error. El token
+ * no lo toca el cliente: el BFF lo inyecta desde una cookie HttpOnly.
  */
-import { clearSession, getToken } from "@/lib/session";
+import { clearSession } from "@/lib/session";
 
 /** Error de la API con el detalle suficiente para pintarlo en un formulario. */
 export class ApiError extends Error {
@@ -83,7 +84,6 @@ export function apiUrl(path: string, params?: QueryParams): string {
 
 export function authHeaders(extra?: HeadersInit): HeadersInit {
   return {
-    Authorization: `Bearer ${getToken()}`,
     Accept: "application/json",
     "Content-Type": "application/json",
     ...(extra as Record<string, string> | undefined),
@@ -131,7 +131,6 @@ export async function apiFetch<T>(
       // rompe la subida de archivos.
       headers: esFormData
         ? {
-            Authorization: `Bearer ${getToken()}`,
             Accept: "application/json",
             ...(init.headers as Record<string, string> | undefined),
           }

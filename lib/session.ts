@@ -1,11 +1,10 @@
 /**
- * Manejo de la sesión del lado del cliente.
+ * Sesión del lado del cliente.
  *
- * El backend autentica con tokens Bearer de Sanctum, así que el token tiene que
- * viajar en un header y el cliente necesita poder leerlo. Eso impide marcarlo
- * `HttpOnly` mientras las páginas sigan llamando a la API directamente; lo que
- * sí se hace aquí es fijar en un solo lugar el resto de atributos (`Secure`,
- * `SameSite`, expiración) para que no se escriban a mano en cada pantalla.
+ * El token de Sanctum vive en una cookie `HttpOnly` que escribe el BFF
+ * (`app/api/[...path]/route.ts`). El navegador solo conserva `role`, que no es
+ * sensible y sirve para pintar la interfaz. Por compatibilidad, `getToken()`
+ * sigue existiendo pero siempre devuelve una cadena vacía.
  */
 
 /** Duración de la cookie, alineada con `SANCTUM_TOKEN_EXPIRATION` (7 días). */
@@ -47,24 +46,22 @@ export function getCookie(name: string): string {
 }
 
 export function getToken(): string {
-  return getCookie("token");
+  return "";
 }
 
 export function getRole(): string {
   return getCookie("role");
 }
 
-/** Guarda la sesión tras un login o un registro exitoso. */
-export function setSession(token: string, role: string): void {
+/** Guarda el rol tras un login o un registro exitoso. El token lo guarda el BFF. */
+export function setSession(role: string): void {
   if (typeof document === "undefined") return;
-  document.cookie = serialize("token", token, SESSION_MAX_AGE);
   document.cookie = serialize("role", role, SESSION_MAX_AGE);
 }
 
-/** Borra la sesión local. No revoca el token en el backend; eso lo hace `/logout`. */
+/** Limpia el rol local; el token HttpOnly lo borra el BFF al cerrar sesión. */
 export function clearSession(): void {
   if (typeof document === "undefined") return;
-  document.cookie = serialize("token", "", 0);
   document.cookie = serialize("role", "", 0);
 }
 

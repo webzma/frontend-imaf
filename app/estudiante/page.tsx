@@ -87,12 +87,6 @@ const APROBACION_LABEL: Record<EstadoAprobacion, string> = {
   reprobado: "Reprobado",
 };
 
-function getCookie(name: string): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : "";
-}
-
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return "Buenos días";
@@ -109,7 +103,6 @@ export default function EstudianteDashboard() {
   useEffect(() => {
     fetch(`${process.env.API_URL}api/estudiante/mis-cursos`, {
       headers: {
-        Authorization: `Bearer ${getCookie("token")}`,
         Accept: "application/json",
       },
     })
@@ -121,7 +114,6 @@ export default function EstudianteDashboard() {
   useEffect(() => {
     fetch(`${process.env.API_URL}api/estudiante/perfil`, {
       headers: {
-        Authorization: `Bearer ${getCookie("token")}`,
         Accept: "application/json",
       },
     })

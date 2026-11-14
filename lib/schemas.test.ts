@@ -261,6 +261,36 @@ describe("cursoSchema", () => {
     expect(mensajeDe(r, "whatsapp_url")).toBe("URL inválida");
   });
 
+  it("rechaza esquemas peligrosos en la URL de WhatsApp", () => {
+    const peligrosas = [
+      "javascript:alert(1)",
+      "data:text/html,<script>alert(1)</script>",
+      "file:///etc/passwd",
+    ];
+
+    for (const url of peligrosas) {
+      const r = cursoSchema.safeParse({ ...valido, whatsapp_url: url });
+      expect(mensajeDe(r, "whatsapp_url")).toBe(
+        "Solo se permiten enlaces http o https",
+      );
+    }
+  });
+
+  it("acepta enlaces http y https de WhatsApp", () => {
+    expect(
+      cursoSchema.safeParse({
+        ...valido,
+        whatsapp_url: "https://chat.whatsapp.com/abc123",
+      }).success,
+    ).toBe(true);
+    expect(
+      cursoSchema.safeParse({
+        ...valido,
+        whatsapp_url: "http://wa.me/584121234567",
+      }).success,
+    ).toBe(true);
+  });
+
   it("rechaza descripciones con caracteres de inyección", () => {
     const r = cursoSchema.safeParse({
       ...valido,
