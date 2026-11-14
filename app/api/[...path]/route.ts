@@ -168,6 +168,10 @@ async function manejar(
     const valor = request.headers.get(nombre);
     if (valor) headers.set(nombre, valor);
   }
+  const accept = request.headers.get("accept");
+  if (!accept || accept === "*/*") {
+    headers.set("accept", "application/json");
+  }
   if (token) headers.set("authorization", `Bearer ${token}`);
 
   const method = request.method.toUpperCase();

@@ -126,6 +126,33 @@ describe("BFF", () => {
     expect(headers.get("cookie")).toBeNull();
   });
 
+  it("pide JSON al backend cuando el navegador envía */*", async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ ok: true }));
+    const request = new NextRequest("https://app.test/api/me", {
+      headers: { accept: "*/*" },
+    });
+
+    await GET(request, contexto(["me"]));
+    const [, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
+
+    expect((init.headers as Headers).get("accept")).toBe("application/json");
+  });
+
+  it("conserva un Accept específico para descargas", async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ ok: true }));
+    const request = new NextRequest(
+      "https://app.test/api/estudiante/certificado",
+      {
+        headers: { accept: "application/pdf" },
+      },
+    );
+
+    await GET(request, contexto(["estudiante", "certificado"]));
+    const [, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
+
+    expect((init.headers as Headers).get("accept")).toBe("application/pdf");
+  });
+
   it("no reenvía un Authorization controlado por el navegador", async () => {
     fetchMock.mockResolvedValue(jsonResponse({ ok: true }));
     const request = new NextRequest("https://app.test/api/me", {

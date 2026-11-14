@@ -12,6 +12,7 @@ import {
   SOLO_TEXTO_SEGURO,
   SIN_INYECCION,
   SOLO_TELEFONO_11,
+  esUrlWebSegura,
 } from "@/lib/validators";
 
 /** Fecha "YYYY-MM-DD" opcional que rechaza días no hábiles. */
@@ -61,7 +62,12 @@ const camposBaseCurso = {
     .optional()
     .or(z.literal("")),
   precio: z.number().min(0, "El precio no puede ser negativo"),
-  whatsapp_url: z.string().url("URL inválida").optional().or(z.literal("")),
+  whatsapp_url: z
+    .string()
+    .url("URL inválida")
+    .refine(esUrlWebSegura, "Solo se permiten enlaces http o https")
+    .optional()
+    .or(z.literal("")),
   estado: z.enum(["activo", "inactivo"]),
 };
 
