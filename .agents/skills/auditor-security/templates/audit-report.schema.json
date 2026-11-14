@@ -24,10 +24,7 @@
     },
     "project": {
       "type": "object",
-      "required": [
-        "name",
-        "technologies"
-      ],
+      "required": ["name", "technologies"],
       "properties": {
         "name": {
           "type": "string"
@@ -36,27 +33,16 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "name",
-              "coverage_tier"
-            ],
+            "required": ["name", "coverage_tier"],
             "properties": {
               "name": {
                 "type": "string"
               },
               "version": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "version_confidence": {
-                "enum": [
-                  "high",
-                  "medium",
-                  "low",
-                  "unknown"
-                ]
+                "enum": ["high", "medium", "low", "unknown"]
               },
               "coverage_tier": {
                 "enum": [
@@ -74,11 +60,7 @@
     },
     "audit": {
       "type": "object",
-      "required": [
-        "date",
-        "scope",
-        "execution_level"
-      ],
+      "required": ["date", "scope", "execution_level"],
       "properties": {
         "date": {
           "type": "string",
@@ -97,37 +79,20 @@
           }
         },
         "environment": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         },
         "execution_level": {
-          "enum": [
-            "L0",
-            "L1",
-            "L2",
-            "L3",
-            "L4"
-          ]
+          "enum": ["L0", "L1", "L2", "L3", "L4"]
         },
         "source_review_date": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         }
       },
       "additionalProperties": false
     },
     "summary": {
       "type": "object",
-      "required": [
-        "total_findings",
-        "confirmed",
-        "probable",
-        "potential"
-      ],
+      "required": ["total_findings", "confirmed", "probable", "potential"],
       "properties": {
         "total_findings": {
           "type": "integer",
@@ -206,37 +171,16 @@
             ]
           },
           "confidence": {
-            "enum": [
-              "high",
-              "medium",
-              "low"
-            ]
+            "enum": ["high", "medium", "low"]
           },
           "severity": {
-            "enum": [
-              "critical",
-              "high",
-              "medium",
-              "low",
-              "none",
-              "unknown"
-            ]
+            "enum": ["critical", "high", "medium", "low", "none", "unknown"]
           },
           "priority": {
-            "enum": [
-              "P0",
-              "P1",
-              "P2",
-              "P3",
-              "P4",
-              "unassigned"
-            ]
+            "enum": ["P0", "P1", "P2", "P3", "P4", "unassigned"]
           },
           "cvss": {
-            "type": [
-              "object",
-              "null"
-            ]
+            "type": ["object", "null"]
           },
           "component": {
             "type": "string"
@@ -247,34 +191,19 @@
               "type": "object",
               "properties": {
                 "path": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "start_line": {
-                  "type": [
-                    "integer",
-                    "null"
-                  ]
+                  "type": ["integer", "null"]
                 },
                 "end_line": {
-                  "type": [
-                    "integer",
-                    "null"
-                  ]
+                  "type": ["integer", "null"]
                 },
                 "endpoint": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "detail": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 }
               },
               "additionalProperties": false
@@ -300,10 +229,7 @@
           },
           "verification": {
             "type": "object",
-            "required": [
-              "status",
-              "procedure"
-            ],
+            "required": ["status", "procedure"],
             "properties": {
               "status": {
                 "enum": [
@@ -322,10 +248,7 @@
                 }
               },
               "result": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               }
             },
             "additionalProperties": false
@@ -355,30 +278,16 @@
             "type": "string"
           },
           "version": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "status": {
-            "enum": [
-              "passed",
-              "failed",
-              "skipped",
-              "not_run"
-            ]
+            "enum": ["passed", "failed", "skipped", "not_run"]
           },
           "notes": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           }
         },
-        "required": [
-          "name",
-          "status"
-        ],
+        "required": ["name", "status"],
         "additionalProperties": false
       }
     },
@@ -410,10 +319,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "status",
-          "details"
-        ],
+        "required": ["status", "details"],
         "additionalProperties": false
       }
     }

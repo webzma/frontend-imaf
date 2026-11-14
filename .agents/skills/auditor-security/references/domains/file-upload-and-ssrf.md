@@ -1,6 +1,7 @@
 # File upload, filesystem, and SSRF
 
 ## File handling
+
 - Enforce size and count limits.
 - Validate file type using content inspection where appropriate, not only extension or client MIME.
 - Generate server-side filenames; prevent path traversal and overwrite.
@@ -10,6 +11,7 @@
 - Serve downloads with safe content disposition and content type.
 
 ## SSRF
+
 - Identify user-controlled URLs and server-side fetches.
 - Restrict schemes, hosts, ports, and resolved IP ranges with robust allowlists.
 - Revalidate redirects and DNS resolution; consider rebinding.

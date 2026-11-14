@@ -11,6 +11,7 @@
 Use the official FIRST specification and calculator. Do not invent metrics to obtain a score. If required information is unavailable, report severity as unknown or provide a qualitative assessment with rationale.
 
 Common CVSS v4.0 qualitative bands:
+
 - Critical: 9.0-10.0
 - High: 7.0-8.9
 - Medium: 4.0-6.9

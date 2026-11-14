@@ -51,6 +51,7 @@ An audit request does not authorize code changes. Each remediation requires sepa
 ## Reports
 
 The skill produces:
+
 - `audit-report.md`: readable audit report.
 - `audit-report.json`: machine-readable report using `templates/audit-report.schema.json`.
 

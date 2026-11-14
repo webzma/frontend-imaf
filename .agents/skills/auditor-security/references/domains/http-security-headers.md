@@ -3,6 +3,7 @@
 Inspect effective responses in the relevant environment where authorized. Source configuration alone may not reflect deployed behavior.
 
 Evaluate:
+
 - Content-Security-Policy: directives, nonce/hash strategy, `object-src`, `base-uri`, `frame-ancestors`, and unsafe allowances.
 - Strict-Transport-Security: HTTPS deployment and subdomain implications.
 - X-Content-Type-Options.
