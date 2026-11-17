@@ -3,7 +3,6 @@ import { Georama } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import NextTopLoader from "nextjs-toploader";
-import Script from "next/script";
 import { Toaster } from "sonner";
 import Providers from "./providers";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -53,13 +52,11 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn("font-sans", georama.variable)}
     >
-      <body className="antialiased">
+      <head>
         {/* Aplica el tema antes del primer paint: sin flash de tema claro. */}
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="antialiased">
         <NextTopLoader
           color="var(--primary)"
           shadow={false}
