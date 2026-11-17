@@ -3,10 +3,8 @@ import { Georama } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import NextTopLoader from "nextjs-toploader";
-import Script from "next/script";
 import { Toaster } from "sonner";
 import Providers from "./providers";
-import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { ThemeHandler } from "@/components/theme-handler";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { InstallAppBanner } from "@/components/install-app-banner";
@@ -55,11 +53,7 @@ export default function RootLayout({
     >
       <body className="antialiased">
         {/* Aplica el tema antes del primer paint: sin flash de tema claro. */}
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
-        />
+        <ThemeHandler />
         <NextTopLoader
           color="var(--primary)"
           shadow={false}
@@ -71,7 +65,6 @@ export default function RootLayout({
           position="bottom-right"
           toastOptions={{ className: "font-sans" }}
         />
-        <ThemeHandler />
         <ServiceWorkerRegister />
         <InstallAppBanner />
         <Providers>{children}</Providers>

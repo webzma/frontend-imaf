@@ -1,11 +1,18 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { THEME_STORAGE_KEY } from "@/lib/theme";
+import { usePathname, useServerInsertedHTML } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { THEME_INIT_SCRIPT, THEME_STORAGE_KEY } from "@/lib/theme";
 
 export function ThemeHandler() {
   const pathname = usePathname();
+  const inserted = useRef(false);
+
+  useServerInsertedHTML(() => {
+    if (inserted.current) return null;
+    inserted.current = true;
+    return <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />;
+  });
 
   useEffect(() => {
     if (pathname === "/") {
