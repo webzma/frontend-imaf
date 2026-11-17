@@ -74,14 +74,14 @@ export function CursoCard({ curso }: { curso: Curso }) {
         </h3>
 
         {curso.instructor?.user?.name && (
-          <p className="mb-2 flex items-center gap-1.5 font-sans text-xs font-medium text-muted-foreground">
+          <div className="mb-2 flex items-center gap-1.5 font-sans text-xs font-medium text-muted-foreground">
             <Avatar
               src={curso.instructor.foto}
               name={curso.instructor.user.name}
               size={7}
             />
             {curso.instructor.user.name}
-          </p>
+          </div>
         )}
 
         <p className="mb-4 line-clamp-2 flex-1 font-sans text-sm text-muted-foreground">
