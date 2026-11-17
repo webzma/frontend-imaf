@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "sonner";
 import Providers from "./providers";
-import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { ThemeHandler } from "@/components/theme-handler";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { InstallAppBanner } from "@/components/install-app-banner";
@@ -52,11 +51,9 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn("font-sans", georama.variable)}
     >
-      <head>
-        {/* Aplica el tema antes del primer paint: sin flash de tema claro. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-      </head>
       <body className="antialiased">
+        {/* Aplica el tema antes del primer paint: sin flash de tema claro. */}
+        <ThemeHandler />
         <NextTopLoader
           color="var(--primary)"
           shadow={false}
@@ -68,7 +65,6 @@ export default function RootLayout({
           position="bottom-right"
           toastOptions={{ className: "font-sans" }}
         />
-        <ThemeHandler />
         <ServiceWorkerRegister />
         <InstallAppBanner />
         <Providers>{children}</Providers>
