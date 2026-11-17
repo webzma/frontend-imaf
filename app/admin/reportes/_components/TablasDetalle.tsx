@@ -82,8 +82,8 @@ export function TablasDetalle({
       porCurso.filter(
         (c) =>
           !clave ||
-          normalizar(c.nombre).includes(clave) ||
-          normalizar(c.codigo).includes(clave),
+          normalizar(c.nombre ?? "").includes(clave) ||
+          normalizar(c.codigo ?? "").includes(clave),
       ),
     [porCurso, clave],
   );
@@ -182,18 +182,26 @@ export function TablasDetalle({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recortar(cursos).map((c) => (
-                    <TableRow key={c.curso_id}>
+                  {recortar(cursos).map((c, i) => (
+                    <TableRow key={c.curso_id ?? `sin-curso-${i}`}>
                       <TableCell className="max-w-64">
-                        <Link
-                          href={`/admin/cursos/${c.curso_id}`}
-                          className="font-medium hover:underline"
-                        >
-                          {c.nombre}
-                        </Link>
-                        <span className="ml-2 font-mono text-xs text-muted-foreground">
-                          {c.codigo}
-                        </span>
+                        {c.curso_id === null ? (
+                          <span className="font-medium">
+                            {c.nombre || "Sin curso"}
+                          </span>
+                        ) : (
+                          <Link
+                            href={`/admin/cursos/${c.curso_id}`}
+                            className="font-medium hover:underline"
+                          >
+                            {c.nombre}
+                          </Link>
+                        )}
+                        {c.codigo && (
+                          <span className="ml-2 font-mono text-xs text-muted-foreground">
+                            {c.codigo}
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap tabular-nums text-muted-foreground">
                         {c.precio === 0 ? "Gratuito" : formatCurrency(c.precio)}

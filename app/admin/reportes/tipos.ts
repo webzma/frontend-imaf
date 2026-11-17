@@ -23,7 +23,7 @@ export interface PagoUsuario {
 }
 
 export interface PagoCurso {
-  curso_id: number;
+  curso_id: number | null;
   nombre: string;
   codigo: string;
   precio: number;
