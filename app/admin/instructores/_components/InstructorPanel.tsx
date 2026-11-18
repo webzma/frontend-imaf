@@ -160,10 +160,7 @@ export function InstructorPanel({
   const selectorCatalogo = (
     label: string,
     campo:
-      | "especialidad_id"
-      | "departamento_id"
-      | "titulo_id"
-      | "tipo_contrato_id",
+      "especialidad_id" | "departamento_id" | "titulo_id" | "tipo_contrato_id",
     valor: number | undefined,
     opciones: CatalogoItem[],
   ) => (

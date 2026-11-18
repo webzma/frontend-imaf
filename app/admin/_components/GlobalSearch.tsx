@@ -117,10 +117,7 @@ interface GlobalSearchProps {
  * la persona y navegar hasta su lista. Aquí se busca desde cualquier pantalla
  * y contra la base completa, no contra lo que hubiera cargado en memoria.
  */
-export function GlobalSearch({
-  open,
-  onOpenChange,
-}: GlobalSearchProps) {
+export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const router = useRouter();
   const [termino, setTermino] = useState("");
   const [activo, setActivo] = useState(0);

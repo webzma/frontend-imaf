@@ -16,11 +16,7 @@ export type FormatoTabla = "csv" | "pdf" | "excel";
  * lo deja sin adornos para poder importarlo.
  */
 export type TipoColumna =
-  | "texto"
-  | "entero"
-  | "decimal"
-  | "porcentaje"
-  | "fecha";
+  "texto" | "entero" | "decimal" | "porcentaje" | "fecha";
 
 export type ValorCelda = string | number | null;
 

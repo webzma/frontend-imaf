@@ -18,12 +18,7 @@ interface BulkBarProps {
  * Aparece dentro de la cabecera de la tabla, en lugar del conteo, para que no
  * empuje la lista hacia abajo al aparecer.
  */
-export function BulkBar({
-  count,
-  label,
-  onClear,
-  children,
-}: BulkBarProps) {
+export function BulkBar({ count, label, onClear, children }: BulkBarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <p

@@ -58,10 +58,7 @@ interface PagoDetalleProps {
  * hacían que al cerrar la interior el foco se escapara del diálogo que seguía
  * abierto, y que `Esc` cerrara las dos a la vez.
  */
-export function PagoDetalle({
-  pago,
-  onClose,
-}: PagoDetalleProps) {
+export function PagoDetalle({ pago, onClose }: PagoDetalleProps) {
   const queryClient = useQueryClient();
   const [nota, setNota] = useState("");
   const [decision, setDecision] = useState<EstadoPago | null>(null);

@@ -11,10 +11,7 @@
 import { parsearFechaLocal } from "@/lib/dias-habiles";
 
 export type EstadoVisualCurso =
-  | "activo"
-  | "por_finalizar"
-  | "inactivo"
-  | "finalizado";
+  "activo" | "por_finalizar" | "inactivo" | "finalizado";
 
 /** Días antes de la fecha de fin en que un curso activo pasa a "por finalizar". */
 export const DIAS_AVISO_FIN = 7;
