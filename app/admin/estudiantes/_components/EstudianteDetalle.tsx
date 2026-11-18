@@ -20,16 +20,18 @@ import {
 import { formatCedula, formatDate } from "@/lib/format";
 import { ESTADO_LABEL, GENERO_LABEL, type Estudiante } from "../tipos";
 
+interface EstudianteDetalleProps {
+  estudiante: Estudiante | null;
+  onClose: () => void;
+  onEditar: (estudiante: Estudiante) => void;
+}
+
 /** Ficha de solo lectura. Consultar un dato no debería exigir abrir el editor. */
 export function EstudianteDetalle({
   estudiante,
   onClose,
   onEditar,
-}: {
-  estudiante: Estudiante | null;
-  onClose: () => void;
-  onEditar: (estudiante: Estudiante) => void;
-}) {
+}: EstudianteDetalleProps) {
   return (
     <Dialog
       open={estudiante !== null}

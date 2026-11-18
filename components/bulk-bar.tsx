@@ -4,6 +4,14 @@ import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
+interface BulkBarProps {
+  count: number;
+  /** Singular y plural del elemento seleccionado. */
+  label: [string, string];
+  onClear: () => void;
+  children: React.ReactNode;
+}
+
 /**
  * Barra de acciones sobre la selección.
  *
@@ -15,13 +23,7 @@ export function BulkBar({
   label,
   onClear,
   children,
-}: {
-  count: number;
-  /** Singular y plural del elemento seleccionado. */
-  label: [string, string];
-  onClear: () => void;
-  children: React.ReactNode;
-}) {
+}: BulkBarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <p

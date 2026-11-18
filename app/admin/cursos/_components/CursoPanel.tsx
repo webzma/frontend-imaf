@@ -44,18 +44,20 @@ const VACIO: CursoForm = {
   estado: "inactivo",
 };
 
+interface CursoPanelProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  instructores: InstructorRef[];
+  niveles: NivelCursoRef[];
+}
+
 /** Alta de curso. La edición vive en el detalle, junto al temario y las sesiones. */
 export function CursoPanel({
   open,
   onOpenChange,
   instructores,
   niveles,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  instructores: InstructorRef[];
-  niveles: NivelCursoRef[];
-}) {
+}: CursoPanelProps) {
   const queryClient = useQueryClient();
 
   const form = useForm<CursoForm>({

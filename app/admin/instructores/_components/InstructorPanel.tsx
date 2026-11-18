@@ -48,12 +48,7 @@ const VACIO: InstructorPanelForm = {
   tipo_contrato_id: undefined,
 };
 
-export function InstructorPanel({
-  open,
-  onOpenChange,
-  instructor,
-  catalogos,
-}: {
+interface InstructorPanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   instructor?: Instructor | null;
@@ -63,7 +58,14 @@ export function InstructorPanel({
     titulos: CatalogoItem[];
     tipoContratos: CatalogoItem[];
   };
-}) {
+}
+
+export function InstructorPanel({
+  open,
+  onOpenChange,
+  instructor,
+  catalogos,
+}: InstructorPanelProps) {
   const queryClient = useQueryClient();
   const editando = Boolean(instructor);
 

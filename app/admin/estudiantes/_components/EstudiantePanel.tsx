@@ -53,6 +53,14 @@ const VACIO: EstudiantePanelForm = {
   estado: "activo",
 };
 
+interface EstudiantePanelProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Presente = edición; ausente = alta. */
+  estudiante?: Estudiante | null;
+  cursos: Curso[];
+}
+
 /**
  * Alta y edición de un estudiante en un panel lateral.
  *
@@ -66,13 +74,7 @@ export function EstudiantePanel({
   onOpenChange,
   estudiante,
   cursos,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  /** Presente = edición; ausente = alta. */
-  estudiante?: Estudiante | null;
-  cursos: Curso[];
-}) {
+}: EstudiantePanelProps) {
   const queryClient = useQueryClient();
   const editando = Boolean(estudiante);
   const [fotoCedula, setFotoCedula] = useState<File | null>(null);

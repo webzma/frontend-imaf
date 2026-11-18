@@ -45,6 +45,11 @@ function Dato({
   );
 }
 
+interface PagoDetalleProps {
+  pago: Pago | null;
+  onClose: () => void;
+}
+
 /**
  * Ficha de un pago con la decisión de aprobar o rechazar.
  *
@@ -56,10 +61,7 @@ function Dato({
 export function PagoDetalle({
   pago,
   onClose,
-}: {
-  pago: Pago | null;
-  onClose: () => void;
-}) {
+}: PagoDetalleProps) {
   const queryClient = useQueryClient();
   const [nota, setNota] = useState("");
   const [decision, setDecision] = useState<EstadoPago | null>(null);

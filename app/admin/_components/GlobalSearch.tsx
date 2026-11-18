@@ -105,6 +105,11 @@ const SECCIONES: Resultado[] = ADMIN_NAV.flatMap((grupo) =>
   })),
 );
 
+interface GlobalSearchProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
 /**
  * Búsqueda global del panel.
  *
@@ -115,10 +120,7 @@ const SECCIONES: Resultado[] = ADMIN_NAV.flatMap((grupo) =>
 export function GlobalSearch({
   open,
   onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
+}: GlobalSearchProps) {
   const router = useRouter();
   const [termino, setTermino] = useState("");
   const [activo, setActivo] = useState(0);
