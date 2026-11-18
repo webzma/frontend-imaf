@@ -6,6 +6,13 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { mensajeDeError } from "@/lib/api-client";
 
+interface ErrorStateProps {
+  error: unknown;
+  onRetry?: () => void;
+  fallback?: string;
+  className?: string;
+}
+
 /**
  * Fallo de carga con salida.
  *
@@ -18,12 +25,7 @@ export function ErrorState({
   onRetry,
   fallback = "No se pudieron cargar los datos.",
   className,
-}: {
-  error: unknown;
-  onRetry?: () => void;
-  fallback?: string;
-  className?: string;
-}) {
+}: ErrorStateProps) {
   return (
     <div
       role="alert"

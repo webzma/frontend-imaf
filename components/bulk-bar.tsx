@@ -4,24 +4,21 @@ import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
+interface BulkBarProps {
+  count: number;
+  /** Singular y plural del elemento seleccionado. */
+  label: [string, string];
+  onClear: () => void;
+  children: React.ReactNode;
+}
+
 /**
  * Barra de acciones sobre la selección.
  *
  * Aparece dentro de la cabecera de la tabla, en lugar del conteo, para que no
  * empuje la lista hacia abajo al aparecer.
  */
-export function BulkBar({
-  count,
-  label,
-  onClear,
-  children,
-}: {
-  count: number;
-  /** Singular y plural del elemento seleccionado. */
-  label: [string, string];
-  onClear: () => void;
-  children: React.ReactNode;
-}) {
+export function BulkBar({ count, label, onClear, children }: BulkBarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <p

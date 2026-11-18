@@ -1614,9 +1614,7 @@ export default function CursoDetailPage({
                                         handleStudentStatus(
                                           e,
                                           v as
-                                            | "activo"
-                                            | "inactivo"
-                                            | "graduado",
+                                            "activo" | "inactivo" | "graduado",
                                         )
                                       }
                                     >

@@ -45,6 +45,11 @@ function Dato({
   );
 }
 
+interface PagoDetalleProps {
+  pago: Pago | null;
+  onClose: () => void;
+}
+
 /**
  * Ficha de un pago con la decisión de aprobar o rechazar.
  *
@@ -53,13 +58,7 @@ function Dato({
  * hacían que al cerrar la interior el foco se escapara del diálogo que seguía
  * abierto, y que `Esc` cerrara las dos a la vez.
  */
-export function PagoDetalle({
-  pago,
-  onClose,
-}: {
-  pago: Pago | null;
-  onClose: () => void;
-}) {
+export function PagoDetalle({ pago, onClose }: PagoDetalleProps) {
   const queryClient = useQueryClient();
   const [nota, setNota] = useState("");
   const [decision, setDecision] = useState<EstadoPago | null>(null);

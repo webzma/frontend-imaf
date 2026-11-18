@@ -23,6 +23,19 @@ export interface TemaOpcion {
 /** Valor del selector para "escribir un título libre". */
 export const TEMA_OTRO = "otro";
 
+interface TemaSelectProps {
+  temas: TemaOpcion[];
+  /** Id del tema como texto, `TEMA_OTRO` o "" si no se ha elegido. */
+  temarioId: string;
+  titulo: string;
+  onChange: (valor: { temario_id: string; titulo: string }) => void;
+  error?: string;
+  cargando?: boolean;
+  /** Sesiones ya programadas por tema, para orientar al elegir. */
+  usosPorTema?: Record<number, number>;
+  id?: string;
+}
+
 /**
  * Título de una sesión elegido del temario del curso.
  *
@@ -39,18 +52,7 @@ export function TemaSelect({
   cargando = false,
   usosPorTema,
   id = "tema-sesion",
-}: {
-  temas: TemaOpcion[];
-  /** Id del tema como texto, `TEMA_OTRO` o "" si no se ha elegido. */
-  temarioId: string;
-  titulo: string;
-  onChange: (valor: { temario_id: string; titulo: string }) => void;
-  error?: string;
-  cargando?: boolean;
-  /** Sesiones ya programadas por tema, para orientar al elegir. */
-  usosPorTema?: Record<number, number>;
-  id?: string;
-}) {
+}: TemaSelectProps) {
   const ordenados = [...temas].sort((a, b) => a.orden - b.orden);
   const sinTemario = !cargando && ordenados.length === 0;
   const libre = sinTemario || temarioId === TEMA_OTRO;

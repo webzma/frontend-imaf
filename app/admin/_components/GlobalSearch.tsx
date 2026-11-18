@@ -105,6 +105,11 @@ const SECCIONES: Resultado[] = ADMIN_NAV.flatMap((grupo) =>
   })),
 );
 
+interface GlobalSearchProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
 /**
  * Búsqueda global del panel.
  *
@@ -112,13 +117,7 @@ const SECCIONES: Resultado[] = ADMIN_NAV.flatMap((grupo) =>
  * la persona y navegar hasta su lista. Aquí se busca desde cualquier pantalla
  * y contra la base completa, no contra lo que hubiera cargado en memoria.
  */
-export function GlobalSearch({
-  open,
-  onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
+export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const router = useRouter();
   const [termino, setTermino] = useState("");
   const [activo, setActivo] = useState(0);

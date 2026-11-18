@@ -20,15 +20,17 @@ import {
 import { formatCedula, formatDate } from "@/lib/format";
 import { GENERO_LABEL, type Instructor } from "../tipos";
 
+interface InstructorDetalleProps {
+  instructor: Instructor | null;
+  onClose: () => void;
+  onEditar: (instructor: Instructor) => void;
+}
+
 export function InstructorDetalle({
   instructor,
   onClose,
   onEditar,
-}: {
-  instructor: Instructor | null;
-  onClose: () => void;
-  onEditar: (instructor: Instructor) => void;
-}) {
+}: InstructorDetalleProps) {
   return (
     <Dialog
       open={instructor !== null}

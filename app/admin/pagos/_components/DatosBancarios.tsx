@@ -111,13 +111,15 @@ type Datos = {
   transferencia: TransferenciaBankData | null;
 };
 
+interface DatosBancariosProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
 export function DatosBancariosDialog({
   open,
   onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
+}: DatosBancariosProps) {
   const queryClient = useQueryClient();
   const [tipo, setTipo] = useState<Tipo | null>(null);
   const [valores, setValores] = useState<Record<string, string>>({});

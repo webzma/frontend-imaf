@@ -189,9 +189,7 @@ export default function EstudianteDashboard() {
                 <Badge
                   variant={
                     (perfil?.estado ?? "activo") as
-                      | "activo"
-                      | "inactivo"
-                      | "graduado"
+                      "activo" | "inactivo" | "graduado"
                   }
                   className="px-2.5 py-1"
                 >

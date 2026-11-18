@@ -395,9 +395,7 @@ export default function CursoDetailPage({
                       <Badge
                         variant={
                           est.estado_aprobacion_curso as
-                            | "pendiente"
-                            | "aprobado"
-                            | "reprobado"
+                            "pendiente" | "aprobado" | "reprobado"
                         }
                         className="capitalize"
                       >
@@ -524,9 +522,7 @@ export default function CursoDetailPage({
                     <Badge
                       variant={
                         sesion.estado as
-                          | "programada"
-                          | "realizada"
-                          | "cancelada"
+                          "programada" | "realizada" | "cancelada"
                       }
                       className="capitalize"
                     >
