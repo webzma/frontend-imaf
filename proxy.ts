@@ -181,6 +181,6 @@ export const config = {
    *   rechaza un service worker que responde con una redirección al login
    */
   matcher: [
-    "/((?!api/|_next/static|_next/image|favicon.ico|sw\\.js$|manifest\\.webmanifest$|offline\\.html$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api/|_next/static|_next/image|favicon.ico|sw\\.js$|manifest\\.webmanifest$|offline\\.html$|robots\\.txt$|sitemap\\.xml$|opengraph-image|twitter-image|google.*\\.html$|BingSiteAuth\\.xml$|\\.well-known/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

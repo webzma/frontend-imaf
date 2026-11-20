@@ -8,6 +8,7 @@ import Providers from "./providers";
 import { ThemeHandler } from "@/components/theme-handler";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { InstallAppBanner } from "@/components/install-app-banner";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, siteUrl } from "@/lib/seo";
 
 // Es variable, así que no hace falta declarar pesos.
 const georama = Georama({
@@ -17,13 +18,31 @@ const georama = Georama({
 });
 
 export const metadata: Metadata = {
-  title: "IMAF",
-  description:
-    "IMAF — Formación para el trabajo en modalidad presencial. Inscríbete en línea y asiste a clases en nuestra sede.",
-  applicationName: "IMAF",
+  metadataBase: new URL(siteUrl()),
+  title: {
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "es_VE",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: siteUrl(),
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  robots: { index: false, follow: false },
   appleWebApp: {
     capable: true,
-    title: "IMAF",
+    title: SITE_NAME,
     statusBarStyle: "default",
   },
   icons: {

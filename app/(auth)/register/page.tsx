@@ -160,11 +160,15 @@ export default function RegisterPage() {
       {/* ── Banda superior editorial ── */}
       <div className="bg-surface-container-low px-8 py-6 relative overflow-hidden">
         <div className="max-w-2xl mx-auto flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            aria-label="Ir al inicio de IMAF"
+            className="flex items-center gap-3"
+          >
             <div className="w-8 h-8 flex items-center justify-center ambient-shadow shrink-0">
               <Image src={logo} alt="IMAF" width={32} height={32} />
             </div>
-          </div>
+          </Link>
           <p className="font-sans text-xs text-muted-foreground hidden sm:block">
             ¿Ya tienes cuenta?{" "}
             <Link
