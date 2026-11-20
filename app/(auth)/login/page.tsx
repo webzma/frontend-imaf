@@ -61,11 +61,15 @@ export default function LoginPage() {
       {/* ── Panel izquierdo: editorial branding ── */}
       <div className="hidden lg:flex flex-col justify-between px-14 py-14 bg-surface-container-low relative overflow-hidden">
         {/* Logotipo */}
-        <div className="flex items-center relative z-10">
+        <Link
+          href="/"
+          aria-label="Ir al inicio de IMAF"
+          className="flex items-center relative z-10"
+        >
           <div className="w-9 h-9 rounded-lg flex items-center justify-center ambient-shadow shrink-0">
             <Image src={logo} alt="IMAF" width={40} height={40} />
           </div>
-        </div>
+        </Link>
 
         {/* Headline editorial */}
         <div className="relative z-10">
@@ -95,11 +99,15 @@ export default function LoginPage() {
       {/* ── Panel derecho: formulario ── */}
       <div className="flex flex-col items-center justify-center px-8 py-14 bg-surface relative min-h-screen">
         {/* Logo mobile */}
-        <div className="lg:hidden flex items-center gap-3 mb-14">
+        <Link
+          href="/"
+          aria-label="Ir al inicio de IMAF"
+          className="lg:hidden flex items-center gap-3 mb-14"
+        >
           <div className="w-18 h-18 flex items-center justify-center ambient-shadow">
             <Image src={logo} alt="IMAF" width={88} height={88} />
           </div>
-        </div>
+        </Link>
 
         <div className="w-full max-w-sm">
           {/* Encabezado del form */}

@@ -6,59 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-const FAQ_ITEMS = [
-  {
-    question: "¿Los cursos son presenciales o en línea?",
-    answer:
-      "Toda la oferta de capacitación de IMAF se dicta bajo la modalidad presencial, en nuestra sede: 5ta av. entre calles 29 y 30, antigua sede de la Unidad de Diálisis. La plataforma sirve para inscribirte, pagar, consultar tu horario y descargar tu certificado, pero las clases no se imparten en línea.",
-  },
-  {
-    question: "¿Cómo me registro en IMAF?",
-    answer:
-      "Crea tu cuenta en esta plataforma con tu correo electrónico y una contraseña. Luego, explora los cursos disponibles, selecciona el que se ajuste a tus metas y completa tu inscripción. Si el curso tiene costo, podrás pagar en línea (total o por partes). Recibirás una confirmación con la sede, horario y requisitos para iniciar.",
-  },
-  {
-    question: "¿Puedo gestionar mi inscripción desde el celular?",
-    answer:
-      "Sí. Nuestra plataforma está optimizada para móviles: puedes registrarte, explorar cursos, realizar pagos y descargar tu comprobante desde cualquier dispositivo. La experiencia de aprendizaje, sin embargo, es 100% presencial en nuestra sede.",
-  },
-  {
-    question: "¿Los cursos son gratuitos?",
-    answer:
-      "IMAF ofrece ambas opciones: cursos gratuitos para comunidades priorizadas y cursos con costo de tarifa accesible. Cada curso indica su precio en la ficha informativa. Los pagos con costo pueden realizarse de contado o por partes. En ambos casos las clases son presenciales.",
-  },
-  {
-    question: "¿Dónde queda la sede?",
-    answer:
-      "Nuestra sede IMAF está en la 5ta av. entre calles 29 y 30, antigua sede de la Unidad de Diálisis. Contamos con espacios accesibles, equipados y diseñados para el aprendizaje práctico. Te recomendamos llegar 15 minutos antes de tu primera clase.",
-  },
-  {
-    question: "¿Los cursos tienen horarios fijos?",
-    answer:
-      "Sí. Cada curso tiene un cronograma definido (días y horarios) que se asigna al momento de confirmar tu cupo. Esta información está disponible en la información de los cursos. La asistencia es fundamental para aprovechar la metodología práctica y obtener tu certificación.",
-  },
-  {
-    question: "¿Cómo funciona el sistema de certificados?",
-    answer:
-      "Al completar la asistencia requerida y aprobar las evaluaciones prácticas de tu curso presencial, recibirás un certificado oficial emitido por IMAF, con validez institucional. Podrás descargarlo desde tu cuenta o recogerlo en sede, según se indique al finalizar tu formación.",
-  },
-  {
-    question: "¿Qué formas de pago aceptan?",
-    answer:
-      "Aceptamos pagos en Bolívares (Bs.), tanto en efectivo como en digital (transferencia bancaria o pago móvil). El método disponible se indica durante el proceso de inscripción y todos los pagos generan comprobante oficial.",
-  },
-  {
-    question: "¿Necesito llevar materiales o equipos?",
-    answer:
-      "Depende del curso. Algunos requieren materiales para prácticas. Esta información está detallada en la ficha de cada curso: si se necesita material, se especifica qué llevar; si no se menciona, no es necesario Así evitas gastos innecesarios.",
-  },
-  {
-    question: "¿Ofrecen reembolsos si no puedo tomar el curso?",
-    answer:
-      "Como institución pública, IMAF no realiza devoluciones de dinero por pagos de cursos. Sin embargo, entendemos que pueden surgir imprevistos, por lo que te ofrecemos la opción de trasladar tu pago a otro curso del mismo valor, sujeto a disponibilidad de cupos y previa coordinación con nuestra administración. Contáctanos con tiempo para gestionar el cambio.",
-  },
-];
+import { FAQ_ITEMS } from "@/lib/faq";
 
 export function FAQSection() {
   return (

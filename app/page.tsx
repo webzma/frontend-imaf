@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -21,6 +22,88 @@ import { CursosAbiertos } from "./_components/cursos-abiertos";
 import LogoImaf from "@/public/logo-imaf.webp";
 import imgHero from "@/public/image-hero.webp";
 import { SEDE } from "@/lib/modalidad";
+import { FAQ_ITEMS } from "@/lib/faq";
+import {
+  ORGANIZATION_NAME,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+  siteUrl,
+} from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: { absolute: SITE_TITLE },
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "es_VE",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: siteUrl(),
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  robots: { index: true, follow: true },
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "EducationalOrganization",
+      "@id": `${SITE_URL}/#organization`,
+      name: ORGANIZATION_NAME,
+      alternateName: SITE_NAME,
+      url: SITE_URL,
+      telephone: "+584121512141",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: SEDE,
+        addressLocality: "Independencia",
+        addressRegion: "Yaracuy",
+        addressCountry: "VE",
+      },
+      sameAs: [
+        "https://www.instagram.com/imaf_independencia",
+        "https://wa.me/584121512141",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: SITE_NAME,
+      inLanguage: "es",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/#webpage`,
+      url: siteUrl(),
+      name: SITE_TITLE,
+      description: SITE_DESCRIPTION,
+      inLanguage: "es",
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      about: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${SITE_URL}/#faq`,
+      isPartOf: { "@id": `${SITE_URL}/#webpage` },
+      mainEntity: FAQ_ITEMS.map(({ question, answer }) => ({
+        "@type": "Question",
+        name: question,
+        acceptedAnswer: { "@type": "Answer", text: answer },
+      })),
+    },
+  ],
+};
 
 /**
  * Lo que la institución ofrece, sin cifras.
@@ -97,6 +180,10 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-surface">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <LandingNav />
 
       {/* ── Hero ── */}
