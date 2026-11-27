@@ -1,10 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -16,14 +22,110 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar } from "@/components/avatar";
-import { ADMIN_NAV } from "@/lib/admin-nav";
+import { ADMIN_NAV, type NavItem } from "@/lib/admin-nav";
 import { useAdminProfile } from "@/hooks/use-admin-profile";
 import { useNotifCount } from "@/hooks/use-notif-count";
 import LogoImafV from "@/public/logo-imaf-vertical.webp";
+
+interface NavMenuItemProps {
+  item: NavItem;
+  isActive: (href: string, exact?: boolean) => boolean;
+  unreadCount: number;
+  onNavigate: () => void;
+}
+
+function NavMenuItem({
+  item,
+  isActive,
+  unreadCount,
+  onNavigate,
+}: NavMenuItemProps) {
+  const hijos = item.children ?? [];
+  const [abiertoManual, setAbiertoManual] = useState<boolean | null>(null);
+  const rutaHijaActiva = hijos.some((hijo) => isActive(hijo.href, hijo.exact));
+  const abierto = abiertoManual ?? rutaHijaActiva;
+
+  const contenido = (
+    <>
+      <item.icon />
+      <span>{item.label}</span>
+      {hijos.length > 0 ? (
+        <ChevronRight
+          aria-hidden="true"
+          className={`ml-auto transition-transform duration-200 ${abierto ? "rotate-90" : ""}`}
+        />
+      ) : (
+        item.badge &&
+        unreadCount > 0 && (
+          <>
+            <span className="ml-auto size-2 rounded-full bg-primary" />
+            <span className="sr-only">{unreadCount} sin leer</span>
+          </>
+        )
+      )}
+    </>
+  );
+
+  if (hijos.length === 0) {
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive(item.href, item.exact)}
+          tooltip={item.label}
+        >
+          <Link href={item.href} onClick={onNavigate}>
+            {contenido}
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  }
+
+  return (
+    <Collapsible
+      asChild
+      open={abierto}
+      onOpenChange={(valor) => setAbiertoManual(valor)}
+    >
+      <SidebarMenuItem>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton
+            isActive={isActive(item.href, item.exact)}
+            tooltip={item.label}
+          >
+            {contenido}
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {hijos.map((hijo) => (
+              <SidebarMenuSubItem key={hijo.href}>
+                <SidebarMenuSubButton
+                  asChild
+                  size="sm"
+                  isActive={isActive(hijo.href, hijo.exact)}
+                >
+                  <Link href={hijo.href} onClick={onNavigate}>
+                    <hijo.icon />
+                    <span>{hijo.label}</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  );
+}
 
 export default function AppSidebar() {
   const pathname = usePathname();
@@ -94,26 +196,13 @@ export default function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {grupo.items.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive(item.href, item.exact)}
-                      tooltip={item.label}
-                    >
-                      <Link href={item.href} onClick={handleLinkClick}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                        {item.badge && unreadCount > 0 && (
-                          <>
-                            <span className="ml-auto size-2 rounded-full bg-primary" />
-                            <span className="sr-only">
-                              {unreadCount} sin leer
-                            </span>
-                          </>
-                        )}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <NavMenuItem
+                    key={item.href}
+                    item={item}
+                    isActive={isActive}
+                    unreadCount={unreadCount}
+                    onNavigate={handleLinkClick}
+                  />
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>

@@ -181,9 +181,9 @@ export default function AdminDashboard() {
             Ocupación de cursos activos
           </h2>
           <Button asChild variant="link" className="text-xs">
-            <Link href="/admin/catalogos">
+            <Link href="/admin/configuracion/cursos">
               <Layers className="mr-1.5 size-3.5" />
-              Catálogos
+              Niveles de curso
             </Link>
           </Button>
         </div>
