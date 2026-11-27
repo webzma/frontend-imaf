@@ -214,7 +214,9 @@ export default function LandingPage() {
                 <h1 className="text-5xl leading-[1.05] tight-tracking text-on-surface sm:text-6xl lg:text-[4.5rem]">
                   Inscríbete en línea.
                   <br />
-                  <span className="text-primary">Aprende presencialmente.</span>
+                  <span className="text-primary font-bold">
+                    Aprende presencialmente.
+                  </span>
                 </h1>
                 <p className="max-w-xl text-lg leading-relaxed text-muted-foreground lg:text-xl">
                   Reserva y paga tu curso en esta web, asiste a clases prácticas
@@ -297,7 +299,7 @@ export default function LandingPage() {
               <Eyebrow>Oferta formativa</Eyebrow>
               <h2 className="text-4xl leading-tight tight-tracking text-on-surface lg:text-6xl">
                 Cursos con inscripciones{" "}
-                <span className="text-primary">abiertas</span>
+                <span className="text-primary font-bold">abiertas</span>
               </h2>
               <p className="text-lg leading-relaxed text-muted-foreground">
                 Todos se dictan de forma presencial en nuestra sede. Crea tu
@@ -323,7 +325,8 @@ export default function LandingPage() {
           <div className="mb-14 max-w-2xl space-y-4">
             <Eyebrow>Beneficios</Eyebrow>
             <h2 className="text-4xl leading-tight tight-tracking text-on-surface lg:text-6xl">
-              Por qué formarte en <span className="text-primary">IMAF</span>
+              Por qué formarte en{" "}
+              <span className="text-primary font-bold">IMAF</span>
             </h2>
             <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
               Gestionas todo en línea y vives una experiencia presencial de
@@ -474,9 +477,9 @@ export default function LandingPage() {
           <div className="mb-14 max-w-3xl space-y-4">
             <Eyebrow>Nuestro compromiso institucional</Eyebrow>
             <h2 className="text-4xl leading-tight tight-tracking text-on-surface lg:text-6xl">
-              Formación, derechos y oportunidades{" "}
-              <span className="text-primary">
-                reales para el Municipio Independencia
+              Formación, derechos y oportunidades reales{" "}
+              <span className="text-primary font-bold">
+                para el Municipio Independencia
               </span>
             </h2>
           </div>

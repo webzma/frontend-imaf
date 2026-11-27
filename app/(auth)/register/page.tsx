@@ -199,7 +199,7 @@ export default function RegisterPage() {
             Registro de Estudiante
           </span>
           <h1 className="font-serif font-light text-5xl tight-tracking text-on-surface mb-2">
-            Crea tu <em className="text-primary">cuenta</em>
+            Crea tu cuenta
           </h1>
           <p className="font-sans text-sm text-muted-foreground">
             Únete a IMAF y comienza a aprender hoy mismo
