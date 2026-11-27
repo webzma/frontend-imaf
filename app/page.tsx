@@ -19,7 +19,8 @@ import {
 import { FAQSection } from "./_components/faq-section";
 import { LandingNav } from "./_components/landing-nav";
 import { CursosAbiertos } from "./_components/cursos-abiertos";
-import LogoImaf from "@/public/logo-imaf.webp";
+import LogoImafH from "@/public/logo-imaf-horizontal.webp";
+import LogoImafV from "@/public/logo-imaf-vertical.webp";
 import imgHero from "@/public/image-hero.webp";
 import { SEDE } from "@/lib/modalidad";
 import { FAQ_ITEMS } from "@/lib/faq";
@@ -568,11 +569,21 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-16">
           <div className="mb-12 grid gap-12 md:grid-cols-11">
             <div className="space-y-4 md:col-span-4">
-              <div className="flex items-center gap-2.5">
-                <Image src={LogoImaf} alt="" width={28} height={28} />
-                <span className="text-xl font-semibold text-on-surface">
-                  IMAF
-                </span>
+              <div className="flex items-center">
+                <Image
+                  src={LogoImafH}
+                  alt="IMAF"
+                  width={96}
+                  height={46}
+                  className="hidden h-auto w-26 md:block"
+                />
+                <Image
+                  src={LogoImafV}
+                  alt="IMAF"
+                  width={44}
+                  height={45}
+                  className="h-auto w-11 md:hidden"
+                />
               </div>
               <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
                 Instituto público dedicado a la formación práctica de la mujer,

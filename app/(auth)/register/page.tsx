@@ -24,15 +24,13 @@ import {
 } from "@/lib/validators";
 import { registroSchema, type RegistroForm } from "@/lib/schemas";
 import { CedulaInput } from "@/components/cedula-input";
-import logoImaf from "@/public/logo-imaf.webp";
-import logoImafDark from "@/public/logo-imaf-dark.webp";
+import LogoImafH from "@/public/logo-imaf-horizontal.webp";
+import LogoImafV from "@/public/logo-imaf-vertical.webp";
 import municipios from "@/data/municipios.json";
 import { dashboardPath, setSession } from "@/lib/session";
-import { useTheme } from "@/hooks/use-theme";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { dark } = useTheme();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -41,7 +39,6 @@ export default function RegisterPage() {
     null,
   );
   const [fotoCedulaError, setFotoCedulaError] = useState("");
-  const logo = dark ? logoImafDark : logoImaf;
 
   useEffect(() => {
     return () => {
@@ -165,8 +162,21 @@ export default function RegisterPage() {
             aria-label="Ir al inicio de IMAF"
             className="flex items-center gap-3"
           >
-            <div className="w-8 h-8 flex items-center justify-center ambient-shadow shrink-0">
-              <Image src={logo} alt="IMAF" width={32} height={32} />
+            <div className="flex items-center">
+              <Image
+                src={LogoImafH}
+                alt="IMAF"
+                width={96}
+                height={46}
+                className="hidden h-auto w-24 md:block"
+              />
+              <Image
+                src={LogoImafV}
+                alt="IMAF"
+                width={40}
+                height={41}
+                className="h-auto w-10 md:hidden"
+              />
             </div>
           </Link>
           <p className="font-sans text-xs text-muted-foreground hidden sm:block">

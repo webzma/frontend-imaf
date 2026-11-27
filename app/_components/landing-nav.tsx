@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
-import LogoImaf from "@/public/logo-imaf.webp";
+import LogoImafH from "@/public/logo-imaf-horizontal.webp";
+import LogoImafV from "@/public/logo-imaf-vertical.webp";
 
 const sections = [
   { href: "#cursos", label: "Cursos" },
@@ -20,11 +21,23 @@ export function LandingNav() {
     <nav className="bg-surface-container-lowest/85 glass sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-16 py-5">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-6">
-            <Image src={LogoImaf} alt="" width={30} height={30} />
-            <span className="font-serif text-2xl font-semibold text-on-surface hidden md:inline">
-              IMAF
-            </span>
+          <Link href="/" className="flex items-center" aria-label="IMAF">
+            <Image
+              src={LogoImafH}
+              alt="IMAF"
+              width={112}
+              height={53}
+              className="hidden h-auto w-28 md:block"
+              priority
+            />
+            <Image
+              src={LogoImafV}
+              alt="IMAF"
+              width={48}
+              height={49}
+              className="h-auto w-12 md:hidden"
+              priority
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
