@@ -11,8 +11,8 @@ import { MobileNavbar, type MobileNavItem } from "@/components/mobile-navbar";
 
 /**
  * Las cinco tareas más frecuentes. El resto del panel (Horario, Reportes,
- * Catálogos) sigue accesible desde el menú lateral, que en móvil se abre con
- * el botón de la cabecera.
+ * Configuración) sigue accesible desde el menú lateral, que en móvil se abre
+ * con el botón de la cabecera.
  */
 const items: MobileNavItem[] = [
   { label: "Inicio", href: "/admin", icon: LayoutDashboard, exact: true },

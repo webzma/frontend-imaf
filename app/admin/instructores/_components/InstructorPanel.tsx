@@ -352,7 +352,7 @@ export function InstructorPanel({
 
       <FormSection
         title="Datos profesionales"
-        description="Las opciones salen de los catálogos; si falta alguna, se añade en Configuración › Catálogos."
+        description="Las opciones salen de los catálogos; si falta alguna, se añade en Configuración › Instructor."
       >
         <FormGrid>
           {selectorCatalogo(

@@ -25,6 +25,8 @@ export interface NavItem {
   exact?: boolean;
   /** Muestra el punto de no leídas. */
   badge?: boolean;
+  /** Opciones desplegables bajo este elemento del menú. */
+  children?: NavItem[];
 }
 
 export interface NavGroup {
@@ -36,9 +38,8 @@ export interface NavGroup {
  * Navegación del panel, en un solo sitio.
  *
  * La barra lateral, la navegación móvil, el rastro de navegación y la búsqueda
- * global leen de aquí. Antes cada una llevaba su propia lista y los catálogos
- * no aparecían en ninguna: solo se llegaba a ellos por cuatro botones al final
- * del panel de inicio, sin forma de volver desde otra pantalla.
+ * global leen de aquí. Los catálogos viven bajo "Configuración", desplegados
+ * en "Instructor" y "Cursos" para separar las opciones de cada formulario.
  */
 export const ADMIN_NAV: NavGroup[] = [
   {
@@ -69,7 +70,25 @@ export const ADMIN_NAV: NavGroup[] = [
   },
   {
     section: "Configuración",
-    items: [{ label: "Catálogos", href: "/admin/catalogos", icon: Layers }],
+    items: [
+      {
+        label: "Configuración",
+        href: "/admin/configuracion",
+        icon: Layers,
+        children: [
+          {
+            label: "Instructor",
+            href: "/admin/configuracion/instructor",
+            icon: GraduationCap,
+          },
+          {
+            label: "Cursos",
+            href: "/admin/configuracion/cursos",
+            icon: BookOpen,
+          },
+        ],
+      },
+    ],
   },
   {
     section: "Analítica",
@@ -102,6 +121,8 @@ export interface CatalogoSpec {
   /** Cómo se nombra a quien usa la opción (por defecto, instructor). */
   usoSingular?: string;
   usoPlural?: string;
+  /** Pantalla de configuración a la que pertenece. */
+  grupo: "instructor" | "cursos";
 }
 
 export const CATALOGOS: CatalogoSpec[] = [
@@ -113,6 +134,7 @@ export const CATALOGOS: CatalogoSpec[] = [
     articulo: "la",
     subtitle: "Áreas de conocimiento que se asignan a cada instructor.",
     icon: BookMarked,
+    grupo: "instructor",
   },
   {
     slug: "departamentos",
@@ -122,6 +144,7 @@ export const CATALOGOS: CatalogoSpec[] = [
     articulo: "el",
     subtitle: "Unidades organizativas del instituto.",
     icon: Building2,
+    grupo: "instructor",
   },
   {
     slug: "titulos",
@@ -131,6 +154,7 @@ export const CATALOGOS: CatalogoSpec[] = [
     articulo: "el",
     subtitle: "Grados académicos que puede acreditar un instructor.",
     icon: Award,
+    grupo: "instructor",
   },
   {
     slug: "tipo-contratos",
@@ -140,6 +164,7 @@ export const CATALOGOS: CatalogoSpec[] = [
     articulo: "el",
     subtitle: "Modalidades de contratación disponibles.",
     icon: FileText,
+    grupo: "instructor",
   },
   {
     slug: "niveles-cursos",
@@ -153,8 +178,17 @@ export const CATALOGOS: CatalogoSpec[] = [
     relacionUso: "cursos",
     usoSingular: "curso",
     usoPlural: "cursos",
+    grupo: "cursos",
   },
 ];
+
+export const CATALOGOS_INSTRUCTOR = CATALOGOS.filter(
+  (catalogo) => catalogo.grupo === "instructor",
+);
+
+export const CATALOGOS_CURSOS = CATALOGOS.filter(
+  (catalogo) => catalogo.grupo === "cursos",
+);
 
 /* ── Rastro de navegación ── */
 
@@ -168,6 +202,8 @@ const ETIQUETAS: Record<string, string> = {
   notificaciones: "Notificaciones",
   reportes: "Reportes",
   catalogos: "Catálogos",
+  configuracion: "Configuración",
+  instructor: "Instructor",
   perfil: "Mi cuenta",
   sesiones: "Sesiones",
   asistencia: "Asistencia",

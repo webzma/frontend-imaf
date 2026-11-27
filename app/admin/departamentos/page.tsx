@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 
 /**
- * Ruta heredada. Los cuatro catálogos viven ahora en una sola pantalla con
- * pestañas; se mantiene la redirección para no romper los enlaces guardados.
+ * Ruta heredada. El catálogo vive ahora en Configuración › Instructor; se
+ * mantiene la redirección para no romper los enlaces guardados.
  */
 export default function DepartamentosRedirect() {
-  redirect("/admin/catalogos?tipo=departamentos");
+  redirect("/admin/configuracion/instructor?tipo=departamentos");
 }

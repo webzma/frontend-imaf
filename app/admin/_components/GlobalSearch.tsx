@@ -96,13 +96,22 @@ async function buscar(termino: string): Promise<Resultado[]> {
 }
 
 const SECCIONES: Resultado[] = ADMIN_NAV.flatMap((grupo) =>
-  grupo.items.map((item) => ({
-    id: `seccion-${item.href}`,
-    grupo: "Ir a",
-    titulo: item.label,
-    href: item.href,
-    icon: item.icon,
-  })),
+  grupo.items.flatMap((item) => [
+    {
+      id: `seccion-${item.href}`,
+      grupo: "Ir a",
+      titulo: item.label,
+      href: item.href,
+      icon: item.icon,
+    },
+    ...(item.children ?? []).map((hijo) => ({
+      id: `seccion-${hijo.href}`,
+      grupo: "Ir a",
+      titulo: `${item.label} › ${hijo.label}`,
+      href: hijo.href,
+      icon: hijo.icon,
+    })),
+  ]),
 );
 
 interface GlobalSearchProps {
