@@ -6,15 +6,11 @@ import { Download, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
-import { useTheme } from "@/hooks/use-theme";
-import LogoImaf from "@/public/logo-imaf.webp";
-import LogoImafDark from "@/public/logo-imaf-dark.webp";
+import LogoImafV from "@/public/logo-imaf-vertical.webp";
 
 export function InstallAppBanner() {
   const pathname = usePathname();
-  const { dark } = useTheme();
   const { canInstall, install, dismiss } = useInstallPrompt();
-  const logo = dark ? LogoImafDark : LogoImaf;
 
   if (pathname === "/" || !canInstall) return null;
 
@@ -27,10 +23,10 @@ export function InstallAppBanner() {
         <div className="flex items-start gap-3">
           <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-surface-container-lowest">
             <Image
-              src={logo}
+              src={LogoImafV}
               alt="IMAF"
               width={40}
-              height={67}
+              height={41}
               className="h-11 w-auto object-contain"
             />
           </div>
