@@ -1,0 +1,1 @@
+export const PWA_LOGIN_REDIRECT_SCRIPT = `(function(){try{if(location.pathname!=="/")return;var standalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;if(!standalone)return;var match=document.cookie.match(/(?:^|; )role=([^;]*)/);var role=match?decodeURIComponent(match[1]):"";if(!role)location.replace("/login");}catch(e){}})();`;

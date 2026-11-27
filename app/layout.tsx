@@ -8,6 +8,7 @@ import Providers from "./providers";
 import { ThemeHandler } from "@/components/theme-handler";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { InstallAppBanner } from "@/components/install-app-banner";
+import { PwaLoginRedirect } from "@/components/pwa-login-redirect";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, siteUrl } from "@/lib/seo";
 
 // Es variable, así que no hace falta declarar pesos.
@@ -71,6 +72,7 @@ export default function RootLayout({
       className={cn("font-sans", georama.variable)}
     >
       <body className="antialiased">
+        <PwaLoginRedirect />
         {/* Aplica el tema antes del primer paint: sin flash de tema claro. */}
         <ThemeHandler />
         <NextTopLoader
