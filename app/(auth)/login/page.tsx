@@ -11,18 +11,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { loginSchema, type LoginForm } from "@/lib/schemas";
-import logoImaf from "@/public/logo-imaf.webp";
-import logoImafDark from "@/public/logo-imaf-dark.webp";
+import LogoImafH from "@/public/logo-imaf-horizontal.webp";
+import LogoImafV from "@/public/logo-imaf-vertical.webp";
 import { dashboardPath, setSession } from "@/lib/session";
-import { useTheme } from "@/hooks/use-theme";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { dark } = useTheme();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const logo = dark ? logoImafDark : logoImaf;
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -66,9 +63,14 @@ export default function LoginPage() {
           aria-label="Ir al inicio de IMAF"
           className="flex items-center relative z-10"
         >
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center ambient-shadow shrink-0">
-            <Image src={logo} alt="IMAF" width={40} height={40} />
-          </div>
+          <Image
+            src={LogoImafH}
+            alt="IMAF"
+            width={128}
+            height={61}
+            className="h-auto w-32"
+            priority
+          />
         </Link>
 
         {/* Headline editorial */}
@@ -104,9 +106,14 @@ export default function LoginPage() {
           aria-label="Ir al inicio de IMAF"
           className="lg:hidden flex items-center gap-3 mb-14"
         >
-          <div className="w-18 h-18 flex items-center justify-center ambient-shadow">
-            <Image src={logo} alt="IMAF" width={88} height={88} />
-          </div>
+          <Image
+            src={LogoImafV}
+            alt="IMAF"
+            width={72}
+            height={73}
+            className="h-auto w-18"
+            priority
+          />
         </Link>
 
         <div className="w-full max-w-sm">
